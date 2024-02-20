@@ -1,7 +1,16 @@
+using Services.Implemnetation;
+using Services.Interaces;
+using Web.Extesions;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+builder.Services.ConfigureSQLConnection(builder.Configuration);
+
+builder.Services.AddScoped<IPageRepository,PageRepository>();
+builder.Services.AddScoped<IBannerRepository,BannerRepository>();
 
 var app = builder.Build();
 
@@ -19,6 +28,10 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthorization();
+
+app.MapControllerRoute(
+    name: "SurveyVista",
+    pattern:"Admin/{controller=Home}/{action=Index}/{id?}");
 
 app.MapControllerRoute(
     name: "default",
