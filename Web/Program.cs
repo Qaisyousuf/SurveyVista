@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Mvc.Razor;
+using Microsoft.Extensions.DependencyInjection;
 using Services.Implemnetation;
 using Services.Interaces;
 using Web.Extesions;
@@ -7,10 +9,12 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+
 builder.Services.ConfigureSQLConnection(builder.Configuration);
 
-builder.Services.AddScoped<IPageRepository,PageRepository>();
-builder.Services.AddScoped<IBannerRepository,BannerRepository>();
+builder.Services.ConfigurePageServices();
+builder.Services.ConfigureBannerServices();
+
 
 var app = builder.Build();
 
@@ -29,12 +33,15 @@ app.UseRouting();
 
 app.UseAuthorization();
 
-app.MapControllerRoute(
-    name: "SurveyVista",
-    pattern:"Admin/{controller=Home}/{action=Index}/{id?}");
+
+app.MapAreaControllerRoute(
+    name: "MyAdminArea",
+    areaName:"admin",
+    pattern: "admin/{controller=Home}/{action=Index}/{id?}");
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern:"{controller=Home}/{action=Index}/{id?}");
+
 
 app.Run();

@@ -37,12 +37,17 @@ namespace Services.Implemnetation
 
         }
 
+        public List<Banner> GetAllBanners()
+        {
+            return _context.Banners.AsNoTracking().ToList();
+        }
+
         public Banner GetBannerById(int id)
         {
             return _context.Banners.AsNoTracking().Where(x => x.Id == id).FirstOrDefault();
         }
 
-        public async Task<List<Banner>> GetBanners()
+        public async Task<IEnumerable<Banner>> GetBanners()
         {
            return await _context.Banners.AsNoTracking().ToListAsync();
         }

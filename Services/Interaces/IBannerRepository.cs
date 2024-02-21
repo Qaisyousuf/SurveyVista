@@ -9,7 +9,8 @@ namespace Services.Interaces
 {
     public interface IBannerRepository
     {
-        Task<List<Banner>> GetBanners();
+        Task<IEnumerable<Banner>> GetBanners();
+        List<Banner> GetAllBanners();
 
         Banner GetBannerById(int id);
 
