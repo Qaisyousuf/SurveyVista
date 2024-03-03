@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
-namespace Web.ViewModel
+namespace Web.ViewModel.BannerVM
 {
     public class BannerViewModel
     {

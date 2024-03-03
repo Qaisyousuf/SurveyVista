@@ -12,38 +12,81 @@
 
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="admin" asp-controller="Home" asp-action="Index">Web</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="admin" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="admin" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
+
+    <div class="wrapper d-flex align-items-stretch">
+        <nav id="sidebar" class="active">
+            <h1><a class="logo">OS</a></h1>
+            <ul class="list-unstyled components mb-5">
+                <li class="sidebarCollapse">
+                    <a asp-controller="admin" asp-action="index"><span class="bi bi-speedometer"></span> Admin</a>
+                </li>
+                <li>
+                    <a asp-controller="Page" asp-action="index"><span class="bi bi-file-earmark-fill"></span> Pages</a>
+                </li>
+                <li>
+                    <a asp-controller="banner" asp-action="index"><span class="bi bi-card-image"></span> Banners</a>
+                </li>
+                <li>
+                    <a asp-controller="footer" asp-action="index"><span class="bi bi-c-circle-fill"></span> Footer</a>
+                </li>
+                <li>
+                    <a asp-controller="address" asp-action="index"><span class="bi bi-pin-map"></span> Address</a>
+                </li>
+                <li>
+                    <a asp-controller="SocialMedia" asp-action="index"><span class="bi bi-collection-play-fill"></span> Social Media</a>
+                </li>
+            </ul>
+
+           
         </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
+
+        <!-- Page Content  -->
+        <div id="content" class="p-4 p-md-5">
+
+            <nav class="navbar navbar-expand-lg navbar-light bg-brimary">
+                <div class="container-fluid">
+
+                    <button type="button" id="sidebarCollapse" class="btn btn-primary">
+                        <i class="bi bi-list"></i>
+                        <span class="sr-only">Toggle Menu</span>
+                    </button>
+                    <button class="navbar-toggler btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                            aria-expanded="false" aria-label="Toggle navigation">
+                        <i class="bi bi-list"></i>
+                        <span class="sr-only"></span>
+                    </button>
+               
+
+                    <div class=" collapse navbar-collapse" id="navbarSupportedContent">
+                        <ul class="nav navbar-nav ml-auto">
+                            <li class="nav-item active">
+                                <a class="nav-link" href="#">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#">About</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class=" link-primary nav-link" href="#">Portfolio</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#">Contact</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+           
+
+               <main class="container-fluid mt-5">
+                @RenderBody()
+               </main>
+                         
+ 
+        </div>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2024 - Web - <a asp-area="admin" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
+
+   
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

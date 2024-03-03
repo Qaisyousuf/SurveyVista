@@ -21,6 +21,33 @@ namespace Data
         public DbSet<Address> Addresss { get; set; }
         public DbSet<Footer> Footers { get; set; }
 
+        public DbSet<SocialMedia> SocialMedia { get; set; }
+
+
+        public DbSet<FooterSocialMedia> FooterSocialMedias { get; set; }
+
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<FooterSocialMedia>()
+            .HasKey(fsm => new { fsm.FooterId, fsm.SocialId });
+
+            modelBuilder.Entity<FooterSocialMedia>()
+                .HasOne(fsm => fsm.Footer)
+                .WithMany(f => f.FooterSocialMedias)
+                .HasForeignKey(fsm => fsm.FooterId);
+
+            modelBuilder.Entity<FooterSocialMedia>()
+                .HasOne(fsm => fsm.SocialMedia)
+                .WithMany(s => s.FooterSocialMedias)
+                .HasForeignKey(fsm => fsm.SocialId);
+
+
+
+
+            base.OnModelCreating(modelBuilder);
+        }
+
 
     }
 }

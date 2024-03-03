@@ -23,5 +23,20 @@ namespace Web.Extesions
         {
             services.AddScoped<IBannerRepository, BannerRepository>();
         }
+
+        public static void ConfigureAddress(this IServiceCollection services)
+        {
+            services.AddScoped<IAddressRepository, AddressRepository>();
+        }
+
+        public static void ConfigureSocialMedia(this IServiceCollection services)
+        {
+            services.AddScoped<ISocialMediaRepository,SocialMediaRepository>();
+        }
+
+        public static void ConfigureFooter(this IServiceCollection services)
+        {
+            services.AddScoped<IFooterRepository, FooterRepository>();
+        }
     }
 }

@@ -1,18 +1,18 @@
-﻿@model IEnumerable<BannerViewModel>
+﻿@model IEnumerable<SocialMediaViewModel>
 
 @{
-    ViewData["Title"] = "Banner";
+    ViewData["Title"] = "Index";
 }
 
 
 <div class="container mt-5">
-   
-    <partial name="_Notification"/>
+
+    <partial name="_Notification" />
 
     <div class="card bg-default mb-3 ">
-        <div class="card-header">Banners</div>
+        <div class="card-header">Social Media</div>
         <div class="card-body">
-            <h4 class="card-title">Banner list</h4>
+            <h4 class="card-title">Social Media list</h4>
             <p>
                 <a asp-action="Create" class="btn btn-primary">Create New</a>
             </p>
@@ -22,24 +22,22 @@
                     <tr>
 
                         <th scope="col">Id</th>
-                        <th scope="col">Title</th>
-                        <th scope="col">Description</th>
+                        <th scope="col">Name</th>
                         <th scope="col">Link Url</th>
                         <th scope="col" class="d-flex justify-content-end">Action</th>
                     </tr>
                 </thead>
-                <tbody class="">
+                <tbody class="justify-content-center">
                     @foreach (var item in Model)
                     {
                         <tr class="table-secondary">
 
                             <td>@item.Id</td>
-                            <td> <span class="badge bg-primary">@item.Title</span></td>
-                            <td>@item.Description</td>
-                            <td>@item.LinkUrl</td>
+                            <td> <span class="badge bg-primary">@item.Name</span></td>
+                            <td>@item.Url</td>
                             <td class="d-flex justify-content-end">
-                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-s"><i class="bi bi-trash"></i> Delete</a> |
-                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-s"><i class="bi bi-pencil-square"></i> Edit</a>
+                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-m"><i class="bi bi-trash"></i> Delete</a> |
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-m"><i class="bi bi-pencil-square"></i> Edit</a>
                             </td>
                         </tr>
                     }
@@ -51,18 +49,3 @@
         </div>
     </div>
 </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

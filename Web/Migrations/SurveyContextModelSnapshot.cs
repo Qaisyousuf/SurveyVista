@@ -146,6 +146,21 @@ namespace Web.Migrations
                     b.ToTable("Footers");
                 });
 
+            modelBuilder.Entity("Model.FooterSocialMedia", b =>
+                {
+                    b.Property<int>("FooterId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SocialId")
+                        .HasColumnType("int");
+
+                    b.HasKey("FooterId", "SocialId");
+
+                    b.HasIndex("SocialId");
+
+                    b.ToTable("FooterSocialMedias");
+                });
+
             modelBuilder.Entity("Model.Page", b =>
                 {
                     b.Property<int>("Id")
@@ -175,6 +190,46 @@ namespace Web.Migrations
                     b.ToTable("Pages");
                 });
 
+            modelBuilder.Entity("Model.SocialMedia", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SocialMedia");
+                });
+
+            modelBuilder.Entity("Model.FooterSocialMedia", b =>
+                {
+                    b.HasOne("Model.Footer", "Footer")
+                        .WithMany("FooterSocialMedias")
+                        .HasForeignKey("FooterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Model.SocialMedia", "SocialMedia")
+                        .WithMany("FooterSocialMedias")
+                        .HasForeignKey("SocialId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Footer");
+
+                    b.Navigation("SocialMedia");
+                });
+
             modelBuilder.Entity("Model.Page", b =>
                 {
                     b.HasOne("Model.Banner", "banner")
@@ -184,6 +239,16 @@ namespace Web.Migrations
                         .IsRequired();
 
                     b.Navigation("banner");
+                });
+
+            modelBuilder.Entity("Model.Footer", b =>
+                {
+                    b.Navigation("FooterSocialMedias");
+                });
+
+            modelBuilder.Entity("Model.SocialMedia", b =>
+                {
+                    b.Navigation("FooterSocialMedias");
                 });
 #pragma warning restore 612, 618
         }

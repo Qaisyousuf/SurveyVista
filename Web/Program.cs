@@ -14,6 +14,9 @@ builder.Services.ConfigureSQLConnection(builder.Configuration);
 
 builder.Services.ConfigurePageServices();
 builder.Services.ConfigureBannerServices();
+builder.Services.ConfigureAddress();
+builder.Services.ConfigureSocialMedia();
+builder.Services.ConfigureFooter();
 
 
 var app = builder.Build();

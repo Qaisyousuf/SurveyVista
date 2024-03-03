@@ -1,0 +1,168 @@
+﻿@model IEnumerable<ShowViewModel>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+
+<div class="container mt-5">
+
+    <partial name="_Notification" />
+
+    <div class="card bg-default mb-3 ">
+        <div class="card-header">Address</div>
+        <div class="card-body">
+            <h4 class="card-title">Address list</h4>
+            <p>
+                <a asp-action="Create" class="btn btn-primary">Create New</a>
+            </p>
+
+            <table class="table table-hover table-responsive table-striped ">
+                <thead class="justify-content-center">
+                    <tr>
+
+                        <th scope="col">Id</th>
+                        <th scope="col">Title</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Owner</th>
+                        <th scope="col">Created By</th>
+                        <th scope="col">Social Media</th>
+                       
+                       
+                        <th scope="col" class="d-flex justify-content-end">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="justify-content-center">
+                    @foreach (var item in Model)
+                    {
+                        <tr class=" table-secondary">
+
+                            <td>@item.Id</td>
+                            <td>@item.Title</td>
+                            <td>@item.Name</td>
+                            <td>@item.Owner</td>
+                            <td>@item.CreatedBy</td>
+                            <td>
+
+                            <fieldset>
+                                <legend></legend>
+
+                                        @foreach (var option in item.SocialMediaOptions)
+                                        {
+                                        <input type="checkbox" name="SelectedSocialMediaIds" value="@option.Value" disabled
+                                            @(item.SelectedSocialMediaIds != null && item.SelectedSocialMediaIds.Contains(int.Parse(option.Value)) ? "checked" : "unchecked")>
+                                            @option.Text
+
+                                        <br>
+                                        }
+                            </fieldset>
+
+
+                      
+
+
+                            </td>
+                           
+                            <td class="d-flex justify-content-end">
+                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-m"><i class="bi bi-trash"></i> Delete</a> |
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-m"><i class="bi bi-pencil-square"></i> Edit</a>
+                            </td>
+                        </tr>
+                    }
+
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+</div>
+
+
+
+@* 
+
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Id)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Title)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Owner)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Content)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CreatedBy)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.UpdatedBy)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LastUpdated)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ImageUlr)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Sitecopyright)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Id)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Title)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Owner)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Content)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CreatedBy)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.UpdatedBy)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LastUpdated)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ImageUlr)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Sitecopyright)
+            </td>
+            <td>
+                @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
+                @Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
+                @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+ *@

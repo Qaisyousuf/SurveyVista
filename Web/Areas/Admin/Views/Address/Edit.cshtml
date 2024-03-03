@@ -1,0 +1,84 @@
+﻿@model AddressViewModel
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+
+
+
+
+
+<div class="container mt-4">
+    <div class="card justify-content-center">
+        <div class="card-body">
+            <h5 class="card-title">Update Address</h5>
+
+            <div class="row ">
+                <!-- 12 columns for textboxes -->
+
+                <form asp-action="Edit" asp-controller="address">
+                    <div asp-validation-summary="All" class="text-danger"></div>
+
+                    <div class="mb-3 col-12">
+                        <label asp-for="Street" class="control-label"></label>
+                        <input asp-for="Street" class="form-control" />
+                        <span asp-validation-for="Street" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="mb-3 col-12">
+                        <label asp-for="City" class="control-label"></label>
+                        <input asp-for="City" class="form-control"/>
+                        <span asp-validation-for="City" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3 col-12">
+                        <label asp-for="State" class="control-label"></label>
+                        <input asp-for="State" class="form-control" />
+                        <span asp-validation-for="State" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3 col-12">
+                        <label asp-for="PostalCode" class="control-label"></label>
+                        <input asp-for="PostalCode" class="form-control" />
+                        <span asp-validation-for="PostalCode" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3 col-12">
+                        <label asp-for="Country" class="control-label"></label>
+                        <input asp-for="Country" class="form-control" />
+                        <span asp-validation-for="Country" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3 col-12">
+                        <label asp-for="CVR" class="control-label"></label>
+                        <input asp-for="CVR" class="form-control" />
+                        <span asp-validation-for="CVR" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3 col-12">
+                        <label asp-for="Email" class="control-label"></label>
+                        <input asp-for="Email" class="form-control" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3 col-12">
+                        <label asp-for="Mobile" class="control-label"></label>
+                        <input asp-for="Mobile" class="form-control" />
+                        <span asp-validation-for="Mobile" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <input type="submit" value="Update" class="btn btn-outline-primary" /> |  <a asp-action="Index" class="btn btn-primary">Back to list</a>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+
+   
+    @{
+        <partial name="_ValidationScriptsPartial" />
+    }
+}
+
+
+

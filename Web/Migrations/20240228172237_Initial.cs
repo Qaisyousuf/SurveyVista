@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Web.Migrations
 {
     /// <inheritdoc />
-    public partial class initial : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -70,6 +70,20 @@ namespace Web.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "SocialMedia",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Url = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SocialMedia", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Pages",
                 columns: table => new
                 {
@@ -91,6 +105,35 @@ namespace Web.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "FooterSocialMedias",
+                columns: table => new
+                {
+                    FooterId = table.Column<int>(type: "int", nullable: false),
+                    SocialId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FooterSocialMedias", x => new { x.FooterId, x.SocialId });
+                    table.ForeignKey(
+                        name: "FK_FooterSocialMedias_Footers_FooterId",
+                        column: x => x.FooterId,
+                        principalTable: "Footers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_FooterSocialMedias_SocialMedia_SocialId",
+                        column: x => x.SocialId,
+                        principalTable: "SocialMedia",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_FooterSocialMedias_SocialId",
+                table: "FooterSocialMedias",
+                column: "SocialId");
+
             migrationBuilder.CreateIndex(
                 name: "IX_Pages_BannerId",
                 table: "Pages",
@@ -104,10 +147,16 @@ namespace Web.Migrations
                 name: "Addresss");
 
             migrationBuilder.DropTable(
-                name: "Footers");
+                name: "FooterSocialMedias");
 
             migrationBuilder.DropTable(
                 name: "Pages");
+
+            migrationBuilder.DropTable(
+                name: "Footers");
+
+            migrationBuilder.DropTable(
+                name: "SocialMedia");
 
             migrationBuilder.DropTable(
                 name: "Banners");

@@ -1,0 +1,59 @@
+﻿@model IEnumerable<AddressViewModel>
+
+@{
+    ViewData["Title"] = "Address";
+}
+
+<div class="container mt-5">
+
+    <partial name="_Notification" />
+
+    <div class="card bg-default mb-3 ">
+        <div class="card-header">Address</div>
+        <div class="card-body">
+            <h4 class="card-title">Address list</h4>
+            <p>
+                <a asp-action="Create" class="btn btn-primary">Create New</a>
+            </p>
+
+            <table class="table table-hover table-responsive table-striped ">
+                <thead>
+                    <tr>
+
+                        <th scope="col">Id</th>
+                        <th scope="col">Street</th>
+                        <th scope="col">City</th>
+                        <th scope="col">State</th>
+                        <th scope="col">Country</th>
+                        <th scope="col">CVR</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Mobile</th>
+                        <th scope="col" class="d-flex justify-content-end">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="justify-content-center">
+                    @foreach (var item in Model)
+                    {
+                        <tr class=" table-secondary">
+
+                            <td>@item.Id</td>
+                            <td>@item.Street</td>
+                            <td>@item.City</td>
+                            <td>@item.State</td>
+                            <td>@item.Country</td>
+                            <td>@item.CVR</td>
+                            <td>@item.Email</td>
+                            <td>@item.Mobile</td>
+                            <td class="d-flex justify-content-end">
+                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-m"><i class="bi bi-trash"></i> Delete</a> |
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-m"><i class="bi bi-pencil-square"></i> Edit</a>
+                            </td>
+                        </tr>
+                    }
+
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+</div>

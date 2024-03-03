@@ -2,7 +2,7 @@
 using Model;
 using Services.Interaces;
 using System.Collections.Immutable;
-using Web.ViewModel;
+using Web.ViewModel.BannerVM;
 
 namespace Web.Areas.Admin.Controllers
 {

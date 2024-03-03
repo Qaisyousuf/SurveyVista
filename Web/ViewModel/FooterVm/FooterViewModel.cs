@@ -1,8 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Model;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 
-namespace Model
+namespace Web.ViewModel.FooterVm
 {
-    public class Footer
+    public class FooterViewModel
     {
         public int Id { get; set; }
         [Required]
@@ -19,18 +21,18 @@ namespace Model
         [Required]
         public string? CreatedBy { get; set; }
         [Required]
-        public string? UpdatedBy { get; set;}
+        public string? UpdatedBy { get; set; }
 
         public DateTime LastUpdated { get; set; }
         [Required]
-        public string?  ImageUlr { get; set; }
+        [DataType(DataType.Url)]
+        [DisplayName("Image Url")]
+        public string? ImageUlr { get; set; }
 
         [Required]
-        public string? Sitecopyright { get; set;}
+        public string? Sitecopyright { get; set; }
 
 
-        public List<FooterSocialMedia>? FooterSocialMedias { get; set; }
-
-
+        public List<SocialMedia>? SocialMediaList { get; set; }
     }
 }
