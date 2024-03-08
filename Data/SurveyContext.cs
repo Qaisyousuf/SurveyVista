@@ -26,6 +26,13 @@ namespace Data
 
         public DbSet<FooterSocialMedia> FooterSocialMedias { get; set; }
 
+        public DbSet<Questionnaire> Questionnaires { get; set; }
+
+        public DbSet<Question> Questions { get; set; }
+        public DbSet<Answer> Answers { get; set; }
+
+        public DbSet<QuestionTypeEntities> QuestionTypeEntities { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -43,7 +50,26 @@ namespace Data
                 .HasForeignKey(fsm => fsm.SocialId);
 
 
+            modelBuilder.Entity<Questionnaire>()
+    .HasKey(q => q.Id);
 
+            modelBuilder.Entity<Questionnaire>()
+                .HasMany(q => q.Questions)
+                .WithOne(qn => qn.Questionnaire)
+                .HasForeignKey(qn => qn.QuestionnaireId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Question>()
+          .HasOne(q => q.Questionnaire)
+          .WithMany(qn => qn.Questions)
+          .HasForeignKey(q => q.QuestionnaireId)
+          .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Answer>()
+                .HasKey(a => a.Id);
+
+            modelBuilder.Entity<QuestionTypeEntities>()
+                .HasKey(t => t.Id);
 
             base.OnModelCreating(modelBuilder);
         }

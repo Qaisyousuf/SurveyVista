@@ -1,14 +1,12 @@
-﻿using Model;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Web.ViewModel.SocialMediaVM;
 
 namespace Web.ViewModel.FooterVm
 {
-    public class InserFooterViewModel
+    public class FooterDeleteViewModel
     {
-        public InserFooterViewModel()
+        public FooterDeleteViewModel()
         {
             SocialMediaOptions = new List<SelectListItem>();
         }

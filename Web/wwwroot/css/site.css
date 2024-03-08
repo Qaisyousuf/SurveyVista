@@ -35,6 +35,11 @@
     --font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
+
+.question-group {
+    margin-bottom: 20px; /* Adjust the value to control the spacing */
+}
+
 *,
 *::before,
 *::after {

@@ -12,11 +12,11 @@ namespace Services.Interaces
 
         List<Address> GetAddresses();
 
-        Address GetAddressById(int id);
+        Address GetAddressById(int? id);
 
         Task Add(Address address);
 
-        void Delete(int id);
+        void Delete(int? id);
 
         void Update(Address address);
 

@@ -31,14 +31,14 @@ namespace Services.Implemnetation
             await _context.SaveChangesAsync();
         }
 
-        public void Delete(int id)
+        public void Delete(int? id)
         {
             var addresId = GetAddressById(id);
 
             _context.Addresss.Remove(addresId);
         }
 
-        public Address GetAddressById(int id)
+        public Address GetAddressById(int? id)
         {
             return _context.Addresss.AsNoTracking().Where(x => x.Id == id).FirstOrDefault();
         }

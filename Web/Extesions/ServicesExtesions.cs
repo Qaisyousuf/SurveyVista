@@ -38,5 +38,9 @@ namespace Web.Extesions
         {
             services.AddScoped<IFooterRepository, FooterRepository>();
         }
+        public static void ConfigureQuestionnarie(this IServiceCollection services)
+        {
+            services.AddScoped<IQuestionnaireRepository, QuestionnaireRepository>();
+        }
     }
 }

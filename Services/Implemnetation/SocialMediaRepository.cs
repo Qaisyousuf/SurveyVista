@@ -50,7 +50,7 @@ namespace Services.Implemnetation
 
         public List<SocialMedia> GetSocialMedia()
         {
-            return _context.SocialMedia.ToList();
+            return _context.SocialMedia.AsNoTracking().ToList();
         }
 
         public void Update(SocialMedia socialMedia)

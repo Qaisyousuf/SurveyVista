@@ -1,0 +1,108 @@
+﻿@model Web.ViewModel.QuestionnaireVM.QuestionnaireViewModel
+
+@{
+    ViewData["Title"] = "Create";
+}
+<div class="container mt-4">
+    <div class="card justify-content-center">
+        <div class="card-body">
+            <h5 class="card-title">Create Survey</h5>
+
+            <div class="row ">
+                <!-- 12 columns for textboxes -->
+
+                <form asp-action="Create" asp-controller="Questionnaire">
+                    <div asp-validation-summary="All" class="text-danger"></div>
+
+                    <div class="mb-3 col-12">
+                        <label asp-for="Title" class="control-label"></label>
+                        <input asp-for="Title" class="form-control" />
+                        <span asp-validation-for="Title" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3 col-12">
+                        <label asp-for="Description" class="control-label"></label>
+                        <input asp-for="Description" class="form-control" />
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+                   <div class="container">
+                        <div id="questions-container">
+                            <h3>Create Questions</h3>
+                            <div class="form-group">
+                                @for (int i = 0; i < Model.Questions?.Count; i++)
+                                {
+                                    <div class="question-group">
+                                        <label>Question @(i + 1)</label>
+                                        <textarea name="Questions[@i].Text" class="form-control">@Model.Questions[i].Text</textarea>
+                                        <br />
+                                        <br />
+                                        <div class="mt-5">
+
+                                            <select name="Questions[@i].Type" class="form-control question-type">
+
+                                                <option value="">Select Question Type</option>
+                                                @foreach (var questionType in ViewBag.QuestionTypes)
+                                                {
+                                                    <option value="@questionType.Value">@questionType.Text</option>
+                                                    <option value="">Select Question Type</option>
+                                                }
+                                            </select>
+                                        </div>
+
+
+
+                                    </div>
+                                }
+                            </div>
+
+
+                        </div>
+                        <button type="button" class="btn btn-primary" id="add-question">Add Question</button> |
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                        | <a asp-action="Index" class="btn btn-info">Back to list</a>
+                   </div>
+                  
+                   
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<hr />
+
+
+
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ckeditor/4.11.4/ckeditor.js"></script>
+    <script>
+        CKEDITOR.replace("Questions");
+    </script>
+    @{
+        <partial name="_ValidationScriptsPartial" />
+    }
+    <script>
+        $(document).ready(function () {
+            var questionCounter = @Model.Questions?.Count;
+
+            $("#add-question").on("click", function () {
+                var newQuestionHtml = '<div class="form-group">' +
+                    '<label>Question ' + (++questionCounter) + '</label>' +
+                    '<textarea type="text" name="Questions[' + questionCounter + '].Text" class="form-control"></textarea>' +'<br>' +
+                    '<select name="Questions[' + questionCounter + '].Type" class="form-control">';
+
+                newQuestionHtml += '<option value="">Select Question Type</option>';
+                  
+
+        @foreach (var questionType in ViewBag.QuestionTypes)
+        {
+            @:newQuestionHtml += '<option value="@questionType.Value">@questionType.Text</option>';
+        }
+
+                    newQuestionHtml += '</select></div>';
+
+                $("#questions-container").append(newQuestionHtml);
+            });
+        });
+    </script>
+
+    }

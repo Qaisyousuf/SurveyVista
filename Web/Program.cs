@@ -1,3 +1,4 @@
+using Data;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.Extensions.DependencyInjection;
 using Services.Implemnetation;
@@ -17,7 +18,8 @@ builder.Services.ConfigureBannerServices();
 builder.Services.ConfigureAddress();
 builder.Services.ConfigureSocialMedia();
 builder.Services.ConfigureFooter();
-
+builder.Services.ConfigureQuestionnarie();
+//builder.Services.AddScoped<SurveyContext>();
 
 var app = builder.Build();
 

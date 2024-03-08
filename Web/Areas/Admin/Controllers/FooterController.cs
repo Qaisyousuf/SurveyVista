@@ -1,9 +1,11 @@
 ﻿using Data;
 using Microsoft.AspNetCore.Components.Forms.Mapping;
+using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Model;
+using Services.Implemnetation;
 using Services.Interaces;
 using Web.ViewModel.FooterVm;
 using Web.ViewModel.SocialMediaVM;
@@ -119,6 +121,7 @@ namespace Web.Areas.Admin.Controllers
 
                 await  _footer.Add(footer);
                 await _footer.commitAsync();
+                TempData["Success"] = "Footer created successfully";
                 return RedirectToAction("Index"); // Redirect to appropriate action
             }
 
@@ -136,24 +139,164 @@ namespace Web.Areas.Admin.Controllers
 
         }
 
-        private List<CheckBoxViewModel> GetsocialMdeia()
+        [HttpGet]
+        public IActionResult Edit(int id)
         {
-            var socialMedia = _socialMedia.GetSocialMedia();
-                
 
-            List<CheckBoxViewModel> selectListItems = new List<CheckBoxViewModel>();
+            var footer = _footer.GetFooterByIdWithSocialMedia(id);
 
-            foreach (var item in socialMedia)
+            var socialMediaOptions =_socialMedia.GetSocialMedia()
+              .Select(sm => new SelectListItem
+              {
+                  Value = sm.Id.ToString(),
+                  Text = sm.Name,
+                  Selected = footer.FooterSocialMedias.Any(fsm => fsm.SocialId == sm.Id)
+              })
+              .ToList();
+
+            var footerViewModel = new FooterEditViewModel
             {
-                selectListItems.Add(new CheckBoxViewModel
+                Id = footer.Id,
+                Title = footer.Title,
+                Name = footer.Name,
+                Owner = footer.Owner,
+                Content = footer.Content,
+                CreatedBy = footer.CreatedBy,
+                UpdatedBy = footer.UpdatedBy,
+                LastUpdated = footer.LastUpdated,
+                ImageUlr = footer.ImageUlr,
+                Sitecopyright = footer.Sitecopyright,
+                // Map other properties from Footer to FooterViewModel as needed
+                SocialMediaOptions = socialMediaOptions,
+                
+                
+                // Map other properties from Footer to FooterUpdateViewModel as needed
+               
+            };
+
+
+            return View(footerViewModel);
+
+         
+
+
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Edit([Bind(include: "Id,Title,Name,Owner,Content,CreatedBy,UpdatedBy,LastUpdated,ImageUlr,Sitecopyright,SelectedSocialMediaIds,SocialMediaOptions")] FooterEditViewModel viewmodel)
+        {
+           
+
+
+            if (ModelState.IsValid)
+            {
+                var footer = _footer.GetFooterByIdWithSocialMedia(viewmodel.Id);
+
+                // Update other properties in the Footer model based on viewmodel
+
+                footer.Id = viewmodel.Id;
+                footer.Title = viewmodel.Title;
+                footer.Owner = viewmodel.Owner;
+                footer.Content = viewmodel.Content;
+                footer.Name = viewmodel.Name;
+                footer.LastUpdated = viewmodel.LastUpdated;
+                footer.UpdatedBy = viewmodel.UpdatedBy;
+                footer.CreatedBy = viewmodel.CreatedBy;
+                footer.Sitecopyright = viewmodel.Sitecopyright;
+                footer.ImageUlr = viewmodel.ImageUlr;
+
+                // Clear existing associations and add selected ones
+                //footer.FooterSocialMedias.Clear();
+
+
+
+                var selectedSocialMediaIds = viewmodel.SelectedSocialMediaIds ?? new List<int>();
+
+                var selectedSocialMedias = _socialMedia.GetSocialMedia()
+                    .Where(sm => selectedSocialMediaIds.Contains(sm.Id))
+                    .ToList();
+
+
+
+                foreach (var socialMedia in selectedSocialMedias)
                 {
-                    SocialMediaName=item.Name,
-                    SocialMediaId=item.Id,
-                    IsSelected=false,
-                });
+
+                    footer.FooterSocialMedias.Add(new FooterSocialMedia
+                    {
+                        SocialId = socialMedia.Id
+                        // Add other properties as needed
+                    });
+                }
+
+
+                _footer.Update(footer);
+                await _footer.commitAsync();
+                TempData["Success"] = "Footer updated successfully";
+
+                return RedirectToAction(nameof(Index));
             }
 
-            return selectListItems;
+
+            return View(viewmodel);
+
         }
+
+        [HttpGet]
+        public IActionResult Delete(int id)
+        {
+
+            var footer = _footer.GetFooterByIdWithSocialMedia(id);
+
+            var socialMediaOptions = _socialMedia.GetSocialMedia()
+              .Select(sm => new SelectListItem
+              {
+                  Value = sm.Id.ToString(),
+                  Text = sm.Name,
+                  Selected = footer.FooterSocialMedias.Any(fsm => fsm.SocialId == sm.Id)
+              })
+              .ToList();
+
+            var footerViewModel = new FooterDeleteViewModel
+            {
+                Id = footer.Id,
+                Title = footer.Title,
+                Name = footer.Name,
+                Owner = footer.Owner,
+                Content = footer.Content,
+                CreatedBy = footer.CreatedBy,
+                UpdatedBy = footer.UpdatedBy,
+                LastUpdated = footer.LastUpdated,
+                ImageUlr = footer.ImageUlr,
+                Sitecopyright = footer.Sitecopyright,
+                // Map other properties from Footer to FooterViewModel as needed
+                SocialMediaOptions = socialMediaOptions,
+
+
+                // Map other properties from Footer to FooterUpdateViewModel as needed
+
+            };
+
+
+            return View(footerViewModel);
+
+        }
+
+        [HttpPost]
+        [ActionName("Delete")]
+        public async Task<IActionResult> DeleteConfirm(int id)
+        {
+
+            _footer.Delete(id);
+
+            await _footer.commitAsync();
+            TempData["Success"] = "Footer deleted successfully";
+
+            return RedirectToAction(nameof(Index));
+
+        }
+
+
+
+
     }
 }

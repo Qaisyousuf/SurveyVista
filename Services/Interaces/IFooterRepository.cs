@@ -14,6 +14,8 @@ namespace Services.Interaces
 
         Footer GetFooterById(int id);
 
+        Footer GetFooterByIdWithSocialMedia(int id);
+
         Task Add(Footer footer);
 
         void Delete(int id);

@@ -49,12 +49,35 @@ namespace Services.Implemnetation
 
         public void Update(Footer footer)
         {
+
             _context.Footers.Update(footer);
+            //_context.Entry(footer).State = EntityState.Modified;
+
+
+            //foreach (var fsm in footer.FooterSocialMedias)
+            //{
+            //    var existingEntity = _context.ChangeTracker.Entries<FooterSocialMedia>()
+            //                                   .FirstOrDefault(e => e.Entity.FooterId == fsm.FooterId && e.Entity.SocialId == fsm.SocialId);
+
+            //    if (existingEntity != null)
+            //    {
+            //        _context.Entry(existingEntity.Entity).State = EntityState.Detached;
+            //    }
+
+            //    _context.Entry(fsm).State = EntityState.Modified;
+            //}
         }
 
         public List<Footer> GetFooterWithFooterSocial()
         {
             return _context.Footers.AsNoTracking().Include(x => x.FooterSocialMedias).ThenInclude(x => x.SocialMedia).ToList();
         }
+
+        public Footer GetFooterByIdWithSocialMedia(int id)
+        {
+            return _context.Footers.AsNoTracking().Include(x => x.FooterSocialMedias).ThenInclude(x => x.SocialMedia).SingleOrDefault(x=>x.Id==id);
+        }
+
+      
     }
 }
