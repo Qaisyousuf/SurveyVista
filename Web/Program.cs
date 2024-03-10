@@ -19,6 +19,7 @@ builder.Services.ConfigureAddress();
 builder.Services.ConfigureSocialMedia();
 builder.Services.ConfigureFooter();
 builder.Services.ConfigureQuestionnarie();
+builder.Services.ConfigureQuestion();
 //builder.Services.AddScoped<SurveyContext>();
 
 var app = builder.Build();

@@ -9,16 +9,19 @@ namespace Model
 {
     public class Question
     {
+        public Question()
+        {
+            Answers=new List<Answer>();
+        }
         public int Id { get; set; }
         public string? Text { get; set; }
         public QuestionType Type { get; set; }
 
-        // Foreign key for Questionnaire
-      
-        public int QuestionnaireId { get; set; } // Foreign key for Questionnaire
+
+        public int QuestionnaireId { get; set; }
         [ForeignKey("QuestionnaireId")]
         public Questionnaire? Questionnaire { get; set; }
 
-        public List<Answer>? Answers { get; set; }
+        public List<Answer> Answers { get; set; } 
     }
 }

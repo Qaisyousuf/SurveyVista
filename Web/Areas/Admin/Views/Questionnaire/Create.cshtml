@@ -1,8 +1,10 @@
-﻿@model Web.ViewModel.QuestionnaireVM.QuestionnaireViewModel
+﻿
+@model QuestionnaireViewModel
 
 @{
     ViewData["Title"] = "Create";
 }
+
 <div class="container mt-4">
     <div class="card justify-content-center">
         <div class="card-body">
@@ -24,7 +26,37 @@
                         <input asp-for="Description" class="form-control" />
                         <span asp-validation-for="Description" class="text-danger"></span>
                     </div>
-                   <div class="container">
+                    <div id="questions-container">
+                        <h3>Create Questions</h3>
+                        <div class="form-group">
+                            @for (int i = 0; i < Model.Questions?.Count; i++)
+                            {
+                                <div class="question-group">
+                                    <label>Question @(i + 1)</label>
+                                    <textarea name="Questions[@i].Text" class="form-control">Write a question</textarea>
+                                    <select name="Questions[@i].Type" asp-items="ViewBag.QuestionTypes" class="form-control question-type">
+                                        <option value="">Select Question Type</option>
+                                    </select>
+                                </div>
+                                <div class="answers-container" data-question-index="@i">
+                                    <label>Answers:</label>
+                                    @for (int j = 0; j < Model.Answers?.Count; j++)
+                                    {
+                                        <div class="answer-group">
+                                            <input type="text" name="Questions[@i].Answers[@j].Text" class="form-control" value="@Model.Answers?[j]?.Text" />
+                                            <button type="button" class="btn btn-sm btn-danger remove-answer">Remove Answer</button>
+                                        </div>
+                                    }
+                                    <button type="button" class="btn btn-sm btn-success add-answer">Add Answer</button>
+                                    <!-- Add a hidden field to address the required field validation -->
+                                    <input type="hidden" name="Questions[@i].Answers" />
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <button type="button" id="add-question-btn" class="btn btn-sm btn-primary">Add Question</button>
+                    @* <div class="container">
                         <div id="questions-container">
                             <h3>Create Questions</h3>
                             <div class="form-group">
@@ -32,36 +64,41 @@
                                 {
                                     <div class="question-group">
                                         <label>Question @(i + 1)</label>
-                                        <textarea name="Questions[@i].Text" class="form-control">@Model.Questions[i].Text</textarea>
-                                        <br />
-                                        <br />
-                                        <div class="mt-5">
-
-                                            <select name="Questions[@i].Type" class="form-control question-type">
-
-                                                <option value="">Select Question Type</option>
-                                                @foreach (var questionType in ViewBag.QuestionTypes)
-                                                {
-                                                    <option value="@questionType.Value">@questionType.Text</option>
-                                                    <option value="">Select Question Type</option>
-                                                }
-                                            </select>
-                                        </div>
-
-
-
+                                        <textarea name="Questions[@i].Text" class="form-control">Write a question</textarea>
+                                        <select name="Questions[@i].Type" asp-items="ViewBag.QuestionTypes" class="form-control question-type">
+                                            <option value="">Select Question Type</option>
+                                           
+                                        </select>
                                     </div>
+                                    <div class="answers-container">
+                                        <label>Answers:</label>
+                                        @for (int j = 1; j < Model.Questions?[i].Answers?.Count; j++)
+                                        {
+                                            <div class="answer-group">
+                                                <input type="text" name="Questions[@i].Answers[@j].Text" class="form-control" value="@Model.Questions?[i]?.Answers?[j]?.Text" />
+                                                <button type="button" class="btn btn-sm btn-danger remove-answer">Remove Answer</button>
+                                            </div>
+                                        }
+                                        <button type="button" class="btn btn-sm btn-success add-answer">Add Answer</button>
+                                        <!-- Add a hidden field to address the required field validation -->
+                                        <input type="hidden" name="Questions[@i].Answers" />
+                                    </div>
+                                   
+
+                                  
                                 }
                             </div>
+                            
 
 
                         </div>
-                        <button type="button" class="btn btn-primary" id="add-question">Add Question</button> |
-                        <button type="submit" class="btn btn-primary">Submit</button>
-                        | <a asp-action="Index" class="btn btn-info">Back to list</a>
-                   </div>
+                        <button type="button" id="add-question-btn" class="btn btn-success">Add Question</button>
+                       
+                    </div> *@
                   
-                   
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                    | <a asp-action="Index" class="btn btn-info">Back to list</a>
+
                 </form>
             </div>
         </div>
@@ -73,36 +110,263 @@
 
 
 @section Scripts {
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ckeditor/4.11.4/ckeditor.js"></script>
-    <script>
-        CKEDITOR.replace("Questions");
-    </script>
+
     @{
         <partial name="_ValidationScriptsPartial" />
     }
+
+     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script>
         $(document).ready(function () {
-            var questionCounter = @Model.Questions?.Count;
+            var questionIndex = @Model.Questions?.Count;
 
-            $("#add-question").on("click", function () {
-                var newQuestionHtml = '<div class="form-group">' +
-                    '<label>Question ' + (++questionCounter) + '</label>' +
-                    '<textarea type="text" name="Questions[' + questionCounter + '].Text" class="form-control"></textarea>' +'<br>' +
-                    '<select name="Questions[' + questionCounter + '].Type" class="form-control">';
+            $("#add-question-btn").click(function () {
+                var newQuestionHtml = `
+                            <div class="question-group">
+                                <label>Question ${questionIndex + 1}</label>
+                                <textarea name="Questions[${questionIndex}].Text" class="form-control"></textarea>
+                                <select name="Questions[${questionIndex}].Type" class="form-control question-type">
+                                    <option value="">Select Question Type</option>`;
 
-                newQuestionHtml += '<option value="">Select Question Type</option>';
-                  
+                var questionTypes = @Html.Raw(Json.Serialize(Enum.GetNames(typeof(QuestionType))));
 
-        @foreach (var questionType in ViewBag.QuestionTypes)
-        {
-            @:newQuestionHtml += '<option value="@questionType.Value">@questionType.Text</option>';
-        }
+                for (var i = 0; i < questionTypes.length; i++) {
+                    newQuestionHtml += `<option value="${questionTypes[i]}">${questionTypes[i]}</option>`;
+                }
 
-                    newQuestionHtml += '</select></div>';
+                newQuestionHtml += `</select>`;
 
-                $("#questions-container").append(newQuestionHtml);
+                // Add answers input fields
+                newQuestionHtml += `<div class="answers-container" data-question-index="${questionIndex}">`;
+                newQuestionHtml += `<label>Answers:</label>`;
+                newQuestionHtml += `<div class="answer-group" data-answer-index="0">`;
+                newQuestionHtml += `<input type="text" name="Questions[${questionIndex}].Answers[0].Text" class="form-control" placeholder="Answer 1" />`;
+                newQuestionHtml += `<button type="button" class="btn btn-sm btn-success add-answer">Add Answer</button>`;
+                newQuestionHtml += `<button type="button" class="btn btn-sm btn-danger remove-answer" style="display:none">Remove Answer</button>`;
+                newQuestionHtml += `</div>`;
+                newQuestionHtml += `</div>`;
+
+                newQuestionHtml += `</div>`;
+
+                $("#questions-container .form-group").append(newQuestionHtml);
+                questionIndex++;
+            });
+
+            // Add answer dynamically without "Add Answer" button
+            $("#questions-container").on("click", ".add-answer", function () {
+                var questionIndex = $(this).closest('.answers-container').data('question-index');
+                var answerIndex = $(this).closest('.answers-container').find('.answer-group').length;
+                var answerGroup = $(this).closest('.answers-container').find('.answer-group:first').clone();
+                answerGroup.find('input').val(''); // Clear input values
+                answerGroup.find('.add-answer').hide(); // Hide the "Add Answer" button
+                answerGroup.find('.remove-answer').show(); // Show the "Remove Answer" button
+                answerGroup.data('answer-index', answerIndex);
+                answerGroup.find('input').attr('name', `Questions[${questionIndex}].Answers[${answerIndex}].Text`);
+                $(this).closest('.answers-container').append(answerGroup);
+            });
+
+            // Remove answer dynamically
+            $("#questions-container").on("click", ".remove-answer", function () {
+                $(this).closest('.answer-group').remove();
             });
         });
     </script>
+    @* <script>
+        $(document).ready(function () {
+            var questionIndex = @Model.Questions?.Count;
 
-    }
+            $("#add-question-btn").click(function () {
+                var newQuestionHtml = `
+                            <div class="question-group">
+                                <label>Question ${questionIndex + 1}</label>
+                                <textarea name="Questions[${questionIndex}].Text" class="form-control"></textarea>
+                                <select name="Questions[${questionIndex}].Type" class="form-control question-type">
+                                    <option value="">Select Question Type</option>`;
+
+                var questionTypes = @Html.Raw(Json.Serialize(Enum.GetNames(typeof(QuestionType))));
+
+                for (var i = 0; i < questionTypes.length; i++) {
+                    newQuestionHtml += `<option value="${questionTypes[i]}">${questionTypes[i]}</option>`;
+                }
+
+                newQuestionHtml += `</select>`;
+
+                // Add answers input fields
+                newQuestionHtml += `<div class="answers-container" data-question-index="${questionIndex}">`;
+                newQuestionHtml += `<label>Answers:</label>`;
+                newQuestionHtml += `<div class="answer-group" data-answer-index="0">`;
+                newQuestionHtml += `<input type="text" name="Questions[${questionIndex}].Answers[0].Text" class="form-control" placeholder="Answer 1" />`;
+                newQuestionHtml += `<button type="button" class="btn btn-sm btn-success add-answer">Add Answer</button>`;
+                newQuestionHtml += `<button type="button" class="btn btn-sm btn-danger remove-answer" style="display:none">Remove Answer</button>`;
+                newQuestionHtml += `</div>`;
+                newQuestionHtml += `</div>`;
+
+                newQuestionHtml += `</div>`;
+
+                $("#questions-container .form-group").append(newQuestionHtml);
+                questionIndex++;
+            });
+
+            // Add answer dynamically without "Add Answer" button
+            $("#questions-container").on("click", ".add-answer", function () {
+                var questionIndex = $(this).closest('.answers-container').data('question-index');
+                var answerIndex = $(this).closest('.answer-group').data('answer-index') + 1;
+                var answerGroup = $(this).closest('.answers-container').find('.answer-group:first').clone();
+                answerGroup.find('input').val(''); // Clear input values
+                answerGroup.find('.add-answer').hide(); // Hide the "Add Answer" button
+                answerGroup.find('.remove-answer').show(); // Show the "Remove Answer" button
+                answerGroup.data('answer-index', answerIndex);
+                answerGroup.find('input').attr('name', `Questions[${questionIndex}].Answers[${answerIndex}].Text`);
+                $(this).closest('.answers-container').append(answerGroup);
+            });
+
+            // Remove answer dynamically
+            $("#questions-container").on("click", ".remove-answer", function () {
+                $(this).closest('.answer-group').remove();
+            });
+        });
+    </script> *@
+
+
+
+
+
+
+
+
+    @* <script>
+        $(document).ready(function () {
+            var questionIndex = @Model.Questions?.Count ?? 0;
+
+            function addQuestion() {
+                var newQuestionHtml = `
+                            <div class="question-group">
+                                <label>Question ${questionIndex + 1}</label>
+                                <textarea name="Questions[${questionIndex}].Text" class="form-control"></textarea>
+                                <br>
+                                <br>
+                                <select name="Questions[${questionIndex}].Type" class="form-control question-type">
+                                    <option value="">Select Question Type</option>`;
+
+                var questionTypes = @Html.Raw(Json.Serialize(Enum.GetNames(typeof(QuestionType))));
+
+                for (var i = 0; i < questionTypes.length; i++) {
+                    newQuestionHtml += `<option value="${questionTypes[i]}">${questionTypes[i]}</option>`;
+                }
+
+                newQuestionHtml += `</select>`;
+
+                // Add answers input fields
+                newQuestionHtml += `<div class="answers-container">`;
+                newQuestionHtml += `<label>Answers:</label>`;
+                newQuestionHtml += `<div class="answer-group">`;
+                newQuestionHtml += `<input type="text" name="Questions[${questionIndex}].Answers[0].Text" class="form-control" placeholder="Answer 1" />`;
+                newQuestionHtml += `<button type="button" class="btn btn-sm btn-success add-answer">Add Answer</button>`;
+                newQuestionHtml += `</div>`;
+                newQuestionHtml += `</div>`;
+
+                newQuestionHtml += `</div>`;
+
+                $("#questions-container .form-group").append(newQuestionHtml);
+                questionIndex++;
+            }
+
+            function addAnswer(answerGroup) {
+                var newAnswerGroup = answerGroup.clone();
+                newAnswerGroup.find('input').val(''); // Clear input values
+                newAnswerGroup.find('.add-answer').remove(); // Remove the "Add Answer" button
+                answerGroup.closest('.answers-container').append(newAnswerGroup);
+            }
+
+            // Add question dynamically
+            $("#add-question-btn").click(function () {
+                addQuestion();
+            });
+
+            // Add answer dynamically
+            $("#questions-container").on("click", ".add-answer", function () {
+                var answerGroup = $(this).closest('.question-group').find('.answer-group:first');
+                addAnswer(answerGroup);
+            });
+        });
+    </script> *@
+
+    @* <script>
+        $(document).ready(function () {
+            var questionIndex = @Model.Questions?.Count ?? 0;
+
+            $("#add-question-btn").click(function () {
+                var newQuestionHtml = `
+                        <div class="question-group">
+                            <label>Question ${questionIndex + 1}</label>
+                            <textarea name="Questions[${questionIndex}].Text" class="form-control"></textarea>
+                            <br>
+                            <br>
+                            <select name="Questions[${questionIndex}].Type" class="form-control question-type">
+                                <option value="">Select Question Type</option>`;
+
+                var questionTypes = @Html.Raw(Json.Serialize(Enum.GetNames(typeof(QuestionType))));
+
+                for (var i = 0; i < questionTypes.length; i++) {
+                    newQuestionHtml += `<option value="${questionTypes[i]}">${questionTypes[i]}</option>`;
+                }
+
+                newQuestionHtml += `</select>`;
+
+                // Add answers input fields
+                newQuestionHtml += `<div class="answers-container">`;
+                newQuestionHtml += `<label>Answers:</label>`;
+                newQuestionHtml += `<div class="answer-group">`;
+                newQuestionHtml += `<input type="text" name="Questions[${questionIndex}].Answers[0].Text" class="form-control" placeholder="Answer 1" />`;
+                newQuestionHtml += `<button type="button" class="btn btn-sm btn-success add-answer">Add Answer</button>`;
+                newQuestionHtml += `</div>`;
+                newQuestionHtml += `</div>`;
+
+                newQuestionHtml += `</div>`;
+
+                $("#questions-container .form-group").append(newQuestionHtml);
+                questionIndex++;
+            });
+
+            // Add answer dynamically without "Add Answer" button
+            $("#questions-container").on("click", ".add-answer", function () {
+                var answerGroup = $(this).closest('.question-group').find('.answer-group:first').clone();
+                answerGroup.find('input').val(''); // Clear input values
+                $(this).closest('.answers-container').append(answerGroup);
+            });
+        });
+    </script> *@
+
+
+  
+
+
+
+   
+  @*   <script>
+        $(document).ready(function () {
+            var questionIndex = @Model.Questions.Count;
+
+            $("#add-question-btn").click(function () {
+                var newQuestionHtml = `
+                            <div class="question-group">
+                                <label>Question ${questionIndex + 1}</label>
+                                <textarea name="Questions[${questionIndex}].Text" class="form-control"></textarea>
+                                <select name="Questions[${questionIndex}].Type" class="form-control question-type">
+                                    <option value="">Select Question Type</option>`;
+
+                var questionTypes = @Html.Raw(Json.Serialize(Enum.GetNames(typeof(QuestionType))));
+
+                for (var i = 0; i < questionTypes.length; i++) {
+                    newQuestionHtml += `<option value="${questionTypes[i]}">${questionTypes[i]}</option>`;
+                }
+
+                newQuestionHtml += `</select></div>`;
+
+                $("#questions-container .form-group").append(newQuestionHtml);
+                questionIndex++;
+            });
+        });
+    </script> *@
+
+} 
