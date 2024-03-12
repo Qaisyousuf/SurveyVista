@@ -2,8 +2,10 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Model;
+using Services.Implemnetation;
 using Services.Interaces;
 using Web.ViewModel.QuestionnaireVM;
+using Web.ViewModel.QuestionVM;
 
 namespace Web.Areas.Admin.Controllers
 {
@@ -24,6 +26,10 @@ namespace Web.Areas.Admin.Controllers
 
             var questionnaire = _questionnaire.GetQuestionnairesWithQuestion();
 
+            var question = _question.GetQuestionsWithAnswers();
+
+            
+
             List<QuestionnaireViewModel> viewmodel = new List<QuestionnaireViewModel>();
 
 
@@ -34,7 +40,10 @@ namespace Web.Areas.Admin.Controllers
                     Id = item.Id,
                     Description = item.Description,
                     Title = item.Title,
-                    Questions = item.Questions
+                    Questions = item.Questions,
+                    
+
+
                 });
             }
             
@@ -91,7 +100,7 @@ namespace Web.Areas.Admin.Controllers
                         QuestionnaireId=questionViewModel.QuestionnaireId,
                         Text = questionViewModel.Text,
                         Type = questionViewModel.Type,
-                        Answers = new List<Answer>() // Initialize the list of answers for each question
+                        Answers = new List<Answer>() 
                     };
 
                     foreach (var answerViewModel in questionViewModel.Answers)
@@ -103,41 +112,16 @@ namespace Web.Areas.Admin.Controllers
                             
                         };
 
-                        // Add the answer to the list of answers for the current question
+                       
                         question.Answers.Add(answer);
                     }
 
-                    // Add the question to the list of questions for the questionnaire
+                
                     questionnaire.Questions.Add(question);
                 }
 
 
-                //var answers = questions.Where(x => x.Answers == viewmodel.Answers);
-
-
-                //foreach (var question in questions)
-                //{
-
-                //    questionnaire.Questions.Add(new Question
-                //    {
-                //        Id = question.Id,
-                //        Text=question.Text,
-                //        Type=question.Type,
-                //        QuestionnaireId=questionnaire.Id,
-
-
-                //    });
-
-                //    //foreach(var answer in answers)
-                //    //{
-                //    //    question.Answers.Add(new Answer
-                //    //    {
-                //    //        Id=answer
-                //    //    });
-                //    //}
-
-
-                //}
+              
 
                 _questionnaire.Add(questionnaire);
               await _questionnaire.commitAsync();
@@ -149,6 +133,193 @@ namespace Web.Areas.Admin.Controllers
             }
             return View(viewmodel);
         }
-        
+
+        [HttpGet]
+        public IActionResult Edit(int id)
+        {
+            var questionTypes = Enum.GetValues(typeof(QuestionType)).Cast<QuestionType>();
+
+            ViewBag.QuestionTypes = new SelectList(questionTypes);
+            var questionnaire = _questionnaire.GetQuestionnaireWithQuestionAndAnswer(id);
+
+            if (questionnaire == null)
+            {
+                return NotFound(); // Or handle not found case appropriately
+            }
+
+            var viewModel = new QuestionnaireViewModel
+            {
+                Id = questionnaire.Id,
+                Title = questionnaire.Title,
+                Description = questionnaire.Description,
+                Questions = questionnaire.Questions
+                    .Select(q => new Question
+                    {
+                        Id = q.Id,
+                        Text = q.Text,
+                        Type = q.Type,
+                        Answers = q.Answers.Select(a => new Answer
+                        {
+                            Id = a.Id,
+                            Text = a.Text
+                        }).ToList()
+                    }).ToList()
+            };
+
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Edit(QuestionnaireViewModel viewModel)
+        {
+
+            var questionTypes = Enum.GetValues(typeof(QuestionType)).Cast<QuestionType>();
+
+            ViewBag.QuestionTypes = new SelectList(questionTypes);
+            if (ModelState.IsValid)
+            {
+                // Retrieve the existing questionnaire from the database
+                var existingQuestionnaire = _questionnaire.GetQuestionnaireWithQuestionAndAnswer(viewModel.Id);
+
+                if (existingQuestionnaire == null)
+                {
+                    return NotFound(); // Or handle not found case appropriately
+                }
+
+                // Update the existing questionnaire with the data from the view model
+                existingQuestionnaire.Title = viewModel.Title;
+                existingQuestionnaire.Description = viewModel.Description;
+
+                var Question = viewModel.Questions.ToList();
+
+                if(Question.Count()!=0)
+                {
+                    foreach (var questionViewModel in viewModel.Questions)
+                    {
+
+                        var existingQuestion = existingQuestionnaire.Questions.FirstOrDefault(q => q.Id == questionViewModel.Id);
+
+                        if (existingQuestion != null)
+                        {
+                            existingQuestion.Text = questionViewModel.Text;
+                            existingQuestion.Type = questionViewModel.Type;
+
+                            // Update answers
+                            foreach (var answerViewModel in questionViewModel.Answers)
+                            {
+                                var existingAnswer = existingQuestion.Answers.FirstOrDefault(a => a.Id == answerViewModel.Id);
+
+                                if (existingAnswer != null)
+                                {
+                                    existingAnswer.Text = answerViewModel.Text;
+                                    existingAnswer.QuestionId = answerViewModel.QuestionId;
+                                }
+                                else
+                                {
+                                    // Handle adding new answers if necessary
+                                    existingQuestion.Answers.Add(new Answer { Text = answerViewModel.Text });
+                                }
+                            }
+                        }
+
+                    }
+                }
+                else
+                {
+                    foreach (var questionViewModel in viewModel.Questions)
+                    {
+
+                        var existingQuestion = existingQuestionnaire.Questions.FirstOrDefault(q => q.Id == questionViewModel.Id);
+
+                        if (existingQuestion != null)
+                        {
+                            existingQuestion.Text = questionViewModel.Text;
+                            existingQuestion.Type = questionViewModel.Type;
+
+                            // Update answers
+                            foreach (var answerViewModel in questionViewModel.Answers)
+                            {
+                                var existingAnswer = existingQuestion.Answers.FirstOrDefault(a => a.Id == answerViewModel.Id);
+
+                                if (existingAnswer != null)
+                                {
+                                    existingAnswer.Text = answerViewModel.Text;
+                                    existingAnswer.QuestionId = answerViewModel.QuestionId;
+                                }
+                                else
+                                {
+                                    // Handle adding new answers if necessary
+                                    existingQuestion.Answers.Add(new Answer { Text = answerViewModel.Text });
+                                }
+                            }
+                        }
+
+                    }
+                }
+
+                // Update questions
+
+               
+                
+
+                // Save changes to the database
+                _questionnaire.Update(existingQuestionnaire);
+                TempData["Success"] = "Questionnaire updated successfully";
+                await _questionnaire.commitAsync();
+
+                return RedirectToAction("Index");
+            }
+
+            // If the model state is not valid, return to the edit view with the existing model
+            return View(viewModel);
+        }
+
+        [HttpGet]
+        public IActionResult Delete(int id)
+        {
+
+            var questionTypes = Enum.GetValues(typeof(QuestionType)).Cast<QuestionType>();
+
+            ViewBag.QuestionTypes = new SelectList(questionTypes);
+            var questionnaire = _questionnaire.GetQuestionnaireWithQuestionAndAnswer(id);
+
+            if (questionnaire == null)
+            {
+                return NotFound(); // Or handle not found case appropriately
+            }
+
+            var viewModel = new QuestionnaireViewModel
+            {
+                Id = questionnaire.Id,
+                Title = questionnaire.Title,
+                Description = questionnaire.Description,
+                Questions = questionnaire.Questions
+                    .Select(q => new Question
+                    {
+                        Id = q.Id,
+                        Text = q.Text,
+                        Type = q.Type,
+                        Answers = q.Answers.Select(a => new Answer
+                        {
+                            Id = a.Id,
+                            Text = a.Text
+                        }).ToList()
+                    }).ToList()
+            };
+
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        [ActionName("Delete")]
+        public IActionResult DeleteConfirm(int id)
+        {
+            _questionnaire.Delete(id);
+            _questionnaire.commitAsync();
+            
+            return Json(new { success = true, message = "Item deleted successfully" });
+            TempData["Success"] = "Questionnaire deleted successfully";
+        }
+
     }
 }

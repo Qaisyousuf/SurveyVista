@@ -12,6 +12,7 @@ namespace Services.Interaces
         List<Questionnaire> GetAllQuestions();
         List<Questionnaire> GetQuestionnairesWithQuestion();
         Questionnaire GetQuesById(int? id);
+        Questionnaire GetQuestionnaireWithQuestionAndAnswer(int? id);
 
         void Add(Questionnaire questionnaire);
         void Update(Questionnaire questionnaire);

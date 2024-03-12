@@ -47,7 +47,12 @@ namespace Services.Implemnetation
 
         public List<Questionnaire> GetQuestionnairesWithQuestion()
         {
-           return _context.Questionnaires.AsNoTracking().Include(x=>x.Questions).ToList();
+           return _context.Questionnaires.AsNoTracking().Include(x=>x.Questions).ThenInclude(x=>x.Answers).ToList();
+        }
+
+        public Questionnaire GetQuestionnaireWithQuestionAndAnswer(int? id)
+        {
+            return _context.Questionnaires.AsNoTracking().Include(x => x.Questions).ThenInclude(x => x.Answers).FirstOrDefault(x=>x.Id==id);
         }
 
         public void Update(Questionnaire questionnaire)

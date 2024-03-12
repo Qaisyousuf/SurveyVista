@@ -1,4 +1,5 @@
 ﻿using Data;
+using Microsoft.EntityFrameworkCore;
 using Model;
 using Services.Interaces;
 using System;
@@ -35,6 +36,11 @@ namespace Services.Implemnetation
         public Question GetQuestionById(int id)
         {
             throw new NotImplementedException();
+        }
+
+        public List<Question> GetQuestionsWithAnswers()
+        {
+           return _context.Questions.AsNoTracking().Include(x=>x.Answers).ToList();
         }
     }
 }

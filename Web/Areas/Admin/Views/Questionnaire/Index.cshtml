@@ -3,26 +3,26 @@
 @{
     ViewData["Title"] = "Questionnaire";
 }
-<div class="container-fluid mt-5">
+<div class="container-fluid ">
 
     <partial name="_Notification" />
 
-    <div class="card bg-default mb-3 ">
+    <div class="card bg-default mb-3 p-4 shadow ">
         <div class="card-header">Questionnaire</div>
         <div class="card-body">
             <h4 class="card-title">Questionnaire list</h4>
             <p>
                 <a asp-action="Create" class="btn btn-primary">Create New</a>
             </p>
-
-            <table class="table table-responsive w-100 d-block d-md-table">
+            <table class="table table-responsive d-block">
                 <thead class="w-auto">
                     <tr>
 
                         <th scope="col">Id</th>
                         <th scope="col">Title</th>
                         <th scope="col">Description</th>
-                        <th scope="col">Qaustion & Questions Type</th>
+                        <th scope="col">Number of questions</th>
+                        <th scope="col">Total Question</th>
                         <th scope="col" class="d-flex justify-content-end">Action</th>
                     </tr>
                 </thead>
@@ -34,14 +34,23 @@
                             <td>@item.Id</td>
                             <td> @item.Title</td>
                             <td>@item.Description</td>
-                          
+
+                            <td>
+                                <span class="badge p-1 m-1 bg-primary shadow-sm"> Total Questions:@item.Questions?.Count()</span>
+                               
+                            </td>
                             <td class="h5">
                                 
                                 @foreach (var question in item.Questions)
                                 {
 
-                                        <span class="badge bg-primary"> Question:@question.Text</span>
-                                        <span class="badge bg-info">Type: @question.Type</span>
+                                    <span class="badge p-1 m-1 bg-primary shadow-sm"> Question:@question.Text</span>
+                                    <span class="badge p-1 m-1 bg-info shadow-sm">Type: @question.Type</span>
+                                    foreach (var answer in question.Answers)
+                                    {
+                                        <span class="badge p-1 m-1 bg-success shadow-sm"> Asnwer:@answer.Text</span>
+                                    }
+                                   
                                 }
                               
                             </td>
@@ -61,5 +70,6 @@
         </div>
     </div>
 </div>
+
 
 

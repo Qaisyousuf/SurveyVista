@@ -1,0 +1,270 @@
+﻿@model QuestionnaireViewModel
+
+@{
+    ViewData["Title"] = "Delete";
+}
+<div class="container mt-4">
+    <div class="card justify-content-center p-4 shadow rounded">
+        <div class="card-body">
+            <h5 class="card-title">Delete questionnaire</h5>
+            <h6 class="text-danger">Are you sure you want to delete this questionnaire: <span class="badge bg-danger p-2 shadow rounded">@Model.Title</span></h6>
+
+            <div class="row">
+                <!-- 12 columns for textboxes -->
+
+                <form asp-action="Delete" asp-controller="Questionnaire">
+                    <div asp-validation-summary="All" class="text-danger"></div>
+
+                    <div class="mb-3 col-12">
+                        <label asp-for="Title" class="control-label"></label>
+                        <input asp-for="Title" class="form-control" disabled />
+                        <span asp-validation-for="Title" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3 col-12">
+                        <label asp-for="Description" class="control-label"></label>
+                        <textarea asp-for="Description" class="form-control" disabled></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3 col-12">
+                        <span class="h5">Total Number of questions:<span class="badge-info p-2 shadow rounded"> @Model.Questions.Count</span></span><br />
+                        @*  <span class="h5">Total Number of answer: @Model.Questions.Select(x=>x.Answers.Select(x=>x.Id)).Count()</span> *@
+                    </div>
+
+                    <!-- Add the delete confirmation modal trigger button -->
+                   
+
+                    <div class="mb-3 container">
+                        <hr class="border border-primary border-2 opacity-50">
+                        <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteModal">Delete</button>
+
+                        <button asp-action="Index" class="btn btn-info">Back to list <i class="bi bi-arrow-return-left"></i></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+  
+    
+    <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Delete Confirmation</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p id="deleteMessage">Are you sure you want to delete this item?</p>
+                    <p class="text-danger">If you delete, you can't recover it.</p>
+                    <input type="text" class="form-control" id="deleteConfirmation" placeholder="Type the questionnaire name to confirm">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-danger" id="deleteButton" disabled>Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    @* <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Delete Confirmation</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete this item?</p>
+                    <p class="text-danger">if you delete, you can't recover back</p>
+                    <input type="text" class="form-control" id="deleteConfirmation" placeholder="Type the questionnaire name to confirm">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-danger" id="deleteButton" disabled>Delete</button>
+                </div>
+            </div>
+        </div>
+    </div> *@
+
+    <!-- Delete Confirmation Modal -->
+    
+
+@section Scripts {
+    
+
+      
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ckeditor/4.11.4/ckeditor.js"></script>
+        <!-- Add these links in the <head> section of your HTML file -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js" integrity="sha512-aVKKRRi/Q/YV+4mjoKBsE4x3H+BkegoM/em46NNlCqNTmUYADjBbeNefNxYV7giUp0VxICtqdrbqU7iVaeZNXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+    <script>
+        CKEDITOR.replace("Description");
+    </script>
+    @{
+        <partial name="_ValidationScriptsPartial" />
+    }
+    <script>
+            // $(document).ready(function () {
+            //     var itemId = @Model.Id; // Assuming you can get the item ID from the model
+
+            //     // Enable delete button when the input matches the item name
+            //     $('#deleteConfirmation').on('input', function () {
+            //         var itemName = '@Model.Title'; // Item name from the model
+            //         var inputText = $(this).val().trim().toLowerCase();
+            //         var isMatch = inputText === itemName.toLowerCase();
+            //         $('#deleteButton').prop('disabled', !isMatch);
+            //     });
+
+            //     // Clear input and disable button when modal is hidden
+            //     $('#deleteModal').on('hidden.bs.modal', function () {
+            //         $('#deleteConfirmation').val('');
+            //         $('#deleteButton').prop('disabled', true);
+            //     });
+
+            //     // Delete button click event
+            //     $('#deleteButton').on('click', function () {
+            //         // Make an AJAX request to delete the item
+            //         $.ajax({
+            //             url: '/admin/Questionnaire/Delete/' + itemId,
+            //             type: 'POST', // or 'DELETE' if you have a dedicated delete action
+            //             success: function (result) {
+            //                 // Hide the confirmation details
+            //                 $('#deleteConfirmation').hide();
+            //                 $('#deleteButton').hide();
+            //                 // Show the success message
+            //                 $('#deleteMessage').text('the questionnaire deleted successfully.').show();
+            //                 // Show the modal
+            //                 $('#deleteModal').modal('show');
+            //                 // Automatically close the modal after 4 seconds
+            //                 setTimeout(function () {
+            //                     $('#deleteModal').modal('hide');
+            //                     // Redirect to the index action method after closing the modal
+            //                     window.location.href = '/admin/Questionnaire/Index';
+            //                 }, 3000);
+            //             },
+            //             error: function (error) {
+            //                 // Handle error
+            //                 $('#deleteMessage').text('Failed to delete item.').show();
+            //                 // Show the modal
+            //                 $('#deleteModal').modal('show');
+            //                 // Automatically close the modal after 4 seconds
+            //                 setTimeout(function () {
+            //                     $('#deleteModal').modal('hide');
+            //                 }, 4000);
+            //             }
+            //         });
+            //     });
+            // });
+            $(document).ready(function () {
+                var itemId = @Model.Id; // Assuming you can get the item ID from the model
+
+                // Enable delete button when the input matches the item name
+                $('#deleteConfirmation').on('input', function () {
+                    var itemName = '@Model.Title'; // Item name from the model
+                    var inputText = $(this).val().trim().toLowerCase();
+                    var isMatch = inputText === itemName.toLowerCase();
+                    $('#deleteButton').prop('disabled', !isMatch);
+                });
+
+                // Clear input and disable button when modal is hidden
+                $('#deleteModal').on('hidden.bs.modal', function () {
+                    $('#deleteConfirmation').val('');
+                    $('#deleteButton').prop('disabled', true);
+                });
+
+                // Delete button click event
+                $('#deleteButton').on('click', function () {
+                    // Make an AJAX request to delete the item
+                    $.ajax({
+                        url: '/admin/Questionnaire/Delete/' + itemId,
+                        type: 'POST', // or 'DELETE' if you have a dedicated delete action
+                        success: function (result) {
+                            // Hide the confirmation details
+                            $('#deleteConfirmation, .text-danger').hide();
+                            $('#deleteButton').hide();
+                            // Show the success message
+                            $('#deleteMessage').text('Questionnaire deleted successfully.').addClass('text-success h4').show();
+                            // Show the modal
+                            $('#deleteModal').modal('show');
+                            // Automatically close the modal after 4 seconds
+                            setTimeout(function () {
+                                $('#deleteModal').modal('hide');
+                                // Redirect to the index action method after closing the modal
+                                window.location.href = '/admin/Questionnaire/Index';
+                            }, 3000);
+                        },
+                        error: function (error) {
+                            // Handle error
+                            $('#deleteMessage').text('Failed to delete item.').show();
+                            // Show the modal
+                            $('#deleteModal').modal('show');
+                            // Automatically close the modal after 4 seconds
+                            setTimeout(function () {
+                                $('#deleteModal').modal('hide');
+                            }, 3000);
+                        }
+                    });
+                });
+            });
+
+
+    </script> 
+
+         @* <script>
+            $(document).ready(function () {
+                var itemId = @Model.Id; // Assuming you can get the item ID from the model
+
+                // Enable delete button when the input matches the item name
+                $('#deleteConfirmation').on('input', function () {
+                    var itemName = '@Model.Title'; // Item name from the model
+                    var inputText = $(this).val().trim().toLowerCase();
+                    var isMatch = inputText === itemName.toLowerCase();
+                    $('#deleteButton').prop('disabled', !isMatch);
+                });
+
+                // Clear input and disable button when modal is hidden
+                $('#deleteModal').on('hidden.bs.modal', function () {
+                    $('#deleteConfirmation').val('');
+                    $('#deleteButton').prop('disabled', true);
+                });
+
+                // Delete button click event
+                $('#deleteButton').on('click', function () {
+                    // Make an AJAX request to delete the item
+                    $.ajax({
+                        url: '/admin/Questionnaire/Delete/' + itemId,
+                        type: 'POST', // or 'DELETE' if you have a dedicated delete action
+                        success: function (result) {
+                            // Handle success
+                            $('#deleteMessage').text('Item deleted successfully.');
+                            $('#deleteModal').modal('show');
+                            setTimeout(function () {
+                                $('#deleteModal').modal('hide');
+                                // Redirect to the index action method after closing the modal
+                                window.location.href = '/admin/Questionnaire/Index';
+                            }, 3000);
+                        },
+                        error: function (error) {
+                            // Handle error
+                            $('#deleteMessage').text('Failed to delete item.');
+                            $('#deleteModal').modal('show');
+                            setTimeout(function () {
+                                $('#deleteModal').modal('hide');
+                            }, 3000);
+                        }
+                    });
+                });
+            });
+
+
+        </script> *@
+ 
+
+}  

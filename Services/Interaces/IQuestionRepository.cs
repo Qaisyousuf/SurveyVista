@@ -11,6 +11,8 @@ namespace Services.Interaces
     {
         List<Question> GetAllQuestions();
 
+        List<Question> GetQuestionsWithAnswers();
+
         Question GetQuestionById(int id);
 
         void Add(Question question);
