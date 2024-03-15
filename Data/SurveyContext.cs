@@ -51,7 +51,7 @@ namespace Data
 
 
             modelBuilder.Entity<Questionnaire>()
-    .HasKey(q => q.Id);
+                 .HasKey(q => q.Id);
 
             modelBuilder.Entity<Questionnaire>()
                 .HasMany(q => q.Questions)
