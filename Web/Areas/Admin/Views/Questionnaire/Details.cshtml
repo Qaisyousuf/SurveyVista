@@ -1,0 +1,103 @@
+﻿@model QuestionnaireViewModel
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+
+
+<div class="container-fluid d-flex justify-content-center">
+
+
+
+    <div class="card ">
+        <div class="card-header">
+            Details
+        </div>
+       
+        <div class="card-body shadow rounded ">
+            <div class="card-title">
+
+                <h5 class="font-weight-bold">Details of questionnaire <span class="badge bg-light p-2  rounded">@Model.Title</span></h5>
+              
+              
+            </div>
+            <table class="table table-bordered  table-responsive  table-hover   ">
+                <thead>
+                    <tr >
+                        <th scope="col" class="text-primary h5">Id</th>
+                        <th scope="col" class="text-primary h5">Questionnaire</th>
+                        <th scope="col" class="text-primary h5">Description</th>
+                        <th scope="col" class="text-success h5 ">Questions</th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th scope="row"><span class="badge p-2 m-1 bg-primary shadow-sm rounded">@Model.Id</span></th>
+                        <th scope="row"><span class="badge p-2 m-1 bg-primary shadow-sm">@Model.Title</span></th>
+                        <th scope="row"><span class="badge p-2 m-1 bg-primary shadow-sm">@Html.Raw(@Model.Description)</span></th>
+                       
+                        <td class="h6">
+                            <table>
+                                <tr >
+                                    <th class="text-success">Id</th>
+                                    <th class="text-success">Question</th>
+                                    <th class="text-success">Question Type</th>
+                                    <th class="text-info">Answers</th>
+                                </tr>
+
+                                @foreach (var question in Model.Questions)
+                                {
+                                    <tr>
+                                        <td> <span class="badge p-2 m-1 bg-success ">@question.Id</span></td>
+                                        <td>
+                                            <span class="badge p-2 m-1 bg-success ">@question.Text</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge p-2 m-1 bg-success ">@question.Type</span>
+                                        </td>
+                                        <td>
+                                            <table class="table-borderless">
+                                               <tr>
+                                                    <th class="text-info">Id</th>
+                                                    <th class="text-info">Answer</th>
+                                               </tr>
+                                                @foreach (var answer in question.Answers)
+                                                {
+                                                   <tr>
+                                                        <td>
+                                                            <span class="badge p-2 m-1 bg-info shadow-sm">@answer.Id</span>
+                                                        </td>
+                                                        <td>
+                                                            <span class="badge p-2 m-1 bg-info shadow-sm">@answer.Text</span>
+                                                        </td>
+                                                   </tr>
+                                                       
+                                                  
+                                                }
+                                            </table>
+                                        </td>
+                                    </tr>
+                                }
+                            </table>
+
+                           
+                        </td>
+
+                    </tr>
+                  
+                </tbody>
+              
+            </table>
+            <footer>
+              
+                <a class="btn btn-primary" asp-action="Index">Back to List</a>
+            </footer>
+        </div>
+      
+    </div>
+   
+   
+</div>
+

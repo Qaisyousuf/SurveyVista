@@ -69,6 +69,7 @@ namespace Data
                 .HasKey(a => a.Id);
 
             modelBuilder.Entity<QuestionTypeEntities>()
+                 
                 .HasKey(t => t.Id);
 
             base.OnModelCreating(modelBuilder);

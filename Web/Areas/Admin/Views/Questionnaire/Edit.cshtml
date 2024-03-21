@@ -10,58 +10,62 @@
             <h5 class="card-title">Edit Survey</h5>
 
             <div class="row">
-              <form asp-action="Edit">
-    <input type="hidden" asp-for="Id" />
-    <div class="form-group">
-        <label asp-for="Title" class="control-label"></label>
-        <input asp-for="Title" class="form-control" />
-        <span asp-validation-for="Title" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="Description" class="control-label"></label>
-        <textarea asp-for="Description" class="form-control"></textarea>
-        <span asp-validation-for="Description" class="text-danger"></span>
-    </div>
-
-    <div id="questionsContainer">
-    @for (int i = 0; i < Model.Questions.Count; i++)
-{
-    <div class="question">
-        <input type="hidden" asp-for="Questions[i].Id" />
-        <div class="form-group">
-            <label asp-for="Questions[i].Text" class="control-label"></label>
-            <input asp-for="Questions[i].Text" class="form-control" />
-            <span asp-validation-for="Questions[i].Text" class="text-danger"></span>
-        </div>
-        <div class="form-group">
-            <label asp-for="Questions[i].Type" class="control-label"></label>
-            <select asp-for="Questions[i].Type" asp-items="@ViewBag.QuestionTypes" class="form-control"></select>
-            <span asp-validation-for="Questions[i].Type" class="text-danger"></span>
-        </div>
-        <div class="answers">
-            @for (int j = 0; j < Model.Questions[i].Answers.Count; j++)
-            {
-                <div class="answer">
-                    <input type="hidden" asp-for="Questions[i].Answers[j].Id" />
+                <form asp-action="Edit">
+                    <input type="hidden" asp-for="Id" />
                     <div class="form-group">
-                        <label asp-for="Questions[i].Answers[j].Text" class="control-label"></label>
-                        <input asp-for="Questions[i].Answers[j].Text" class="form-control" />
-                        <span asp-validation-for="Questions[i].Answers[j].Text" class="text-danger"></span>
+                        <label asp-for="Title" class="control-label"></label>
+                        <input asp-for="Title" class="form-control" />
+                        <span asp-validation-for="Title" class="text-danger"></span>
                     </div>
-                    <button type="button" class="btn btn-danger removeAnswer">Remove Answer</button>
-                </div>
-            }
-        </div>
-        <button type="button" class="btn btn-primary addAnswer">Add Answer</button>
-        <button type="button" class="btn btn-danger removeQuestion">Remove Question</button>
-    </div>
-}
+                    <div class="form-group">
+                        <label asp-for="Description" class="control-label"></label>
+                        <textarea asp-for="Description" class="form-control"></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+                    <div class="card shadow rounded">
+                        <div id="questionsContainer">
+                            @for (int i = 0; i < Model.Questions.Count; i++)
+                            {
+                                <div class="question">
+                                    <input type="hidden" asp-for="Questions[i].Id" />
+                                    <div class="form-group">
+                                        <label asp-for="Questions[i].Text" class="control-label"></label>
+                                        <input asp-for="Questions[i].Text" class="form-control" />
+                                        <span asp-validation-for="Questions[i].Text" class="text-danger"></span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label asp-for="Questions[i].Type" class="control-label"></label>
+                                        <select asp-for="Questions[i].Type" asp-items="@ViewBag.QuestionTypes" class="form-control"></select>
+                                        <span asp-validation-for="Questions[i].Type" class="text-danger"></span>
+                                    </div>
+                                    <div class="answers">
+                                        @for (int j = 0; j < Model.Questions[i].Answers.Count; j++)
+                                        {
+                                            <div class="answer">
+                                                <input type="hidden" asp-for="Questions[i].Answers[j].Id" />
+                                                <div class="form-group">
+                                                    <label asp-for="Questions[i].Answers[j].Text" class="control-label"></label>
+                                                    <input asp-for="Questions[i].Answers[j].Text" class="form-control" />
+                                                    <span asp-validation-for="Questions[i].Answers[j].Text" class="text-danger"></span>
+                                                    <button type="button" class="btn btn-danger removeAnswer">Remove Answer</button>
+                                                </div>
 
-    </div>
+                                            </div>
+                                        }
+                                    </div>
+                                    <button type="button" class="btn btn-primary addAnswer">Add Answer</button>
 
-    <button type="button" class="btn btn-primary" id="addQuestion">Add Question</button>
-    <button type="submit" class="btn btn-primary">Update</button>
-            </form>
+                                </div>
+                            }
+
+                        </div>
+                    </div>
+                    
+
+
+                    <button type="submit" class="btn btn-primary">Update</button>
+                    | <a asp-action="Index" class="btn btn-info">Back to list</a>
+                </form>
 
             </div>
         </div>
@@ -72,36 +76,48 @@
 
 
 @section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ckeditor/4.11.4/ckeditor.js"></script>
     <script>
-    $(document).ready(function () {
-        // Function to add a new answer
-        $(document).on('click', '.addAnswer', function () {
-            var questionContainer = $(this).closest('.question');
-            var newQuestionIndex = questionContainer.index();
+        CKEDITOR.replace("Description");
+    </script>
+    @{
+        <partial name="_ValidationScriptsPartial" />
+    }
 
-            // Correctly find the length of answers for the specific question
-            var newAnswerIndex = questionContainer.find('.answers .form-group').length;
+    <script>
+        $(document).ready(function () {
+            // Function to add a new answer
+            $(document).on('click', '.addAnswer', function () {
+                var questionContainer = $(this).closest('.question');
+                var newQuestionIndex = questionContainer.index();
 
-            var answerHtml = `
-                <div class="form-group">
-                    <label class="control-label">Answer Text</label>
-                    <input type="text" name="Questions[${newQuestionIndex}].Answers[${newAnswerIndex}].Text" class="form-control" />
-                </div>`;
+                // Correctly find the length of answers for the specific question
+                var newAnswerIndex = questionContainer.find('.answers .form-group').length;
 
-            // Append the new answer to the specific question
-            questionContainer.find('.answers').append(answerHtml);
+                var answerHtml = `
+                        <div class="form-group">
+                            <label class="control-label">Answer</label>
+                            <input type="text" name="Questions[${newQuestionIndex}].Answers[${newAnswerIndex}].Text" class="form-control" />
+                            <button type="button" class="btn btn-danger removeAnswer">Remove Answer</button>
+                        </div>`;
+
+                // Append the new answer to the specific question
+                questionContainer.find('.answers').append(answerHtml);
+            });
+
+            // Function to remove an answer (including dynamically added answers)
+            $(document).on('click', '.removeAnswer', function () {
+                $(this).closest('.form-group').remove();
+            });
         });
+    </script>
 
-        // Function to remove an answer
-        $(document).on('click', '.removeAnswer', function () {
-            $(this).closest('.form-group').remove();
-        });
-    });
-</script>
 
-         @* this script is working for adding mutiple answers for a question *@
-   
-     
+
+
+    @* this script is working for adding mutiple answers for a question *@
+
+
     @*    <script>
         $(document).ready(function () {
             // Function to add a new answer
@@ -124,9 +140,9 @@
                 $(this).closest('.form-group').remove();
             });
         });
-    </script> 
+    </script>
      *@
 }
-   
+
 
 
