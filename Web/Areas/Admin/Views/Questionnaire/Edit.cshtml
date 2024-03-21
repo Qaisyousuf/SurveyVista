@@ -3,7 +3,27 @@
 @{
     ViewData["Title"] = "Edit";
 }
+<style>
+    .question-separator {
+        display: flex;
+        align-items: center;
+    }
 
+    .line-container {
+        flex-grow: 1;
+    }
+
+    .next-question-container {
+        margin: 0 10px; /* Adjust margin as needed */
+        text-align: center;
+    }
+
+    .next-question {
+        margin: 0;
+    }
+
+
+</style>
 <div class="container mt-4">
     <div class="card justify-content-center p-4 shadow rounded">
         <div class="card-body">
@@ -22,55 +42,61 @@
                         <textarea asp-for="Description" class="form-control"></textarea>
                         <span asp-validation-for="Description" class="text-danger"></span>
                     </div>
-                    <div class="card shadow rounded">
+                    <div class="card shadow rounded p-4">
                         <div id="questionsContainer">
                             @for (int i = 0; i < Model.Questions.Count; i++)
                             {
+                                <hr />
                                 <div class="question">
                                     <input type="hidden" asp-for="Questions[i].Id" />
-                                    <div class="form-group">
-                                        <label asp-for="Questions[i].Text" class="control-label"></label>
-                                        <input asp-for="Questions[i].Text" class="form-control" />
-                                        <span asp-validation-for="Questions[i].Text" class="text-danger"></span>
+                                    <div class="question-title">
+                                        @Model.Questions[i].Text
+                                        <button type="button" class="btn btn-primary editQuestion">Edit</button>
                                     </div>
-                                    <div class="form-group">
-                                        <label asp-for="Questions[i].Type" class="control-label"></label>
-                                        <select asp-for="Questions[i].Type" asp-items="@ViewBag.QuestionTypes" class="form-control"></select>
-                                        <span asp-validation-for="Questions[i].Type" class="text-danger"></span>
-                                    </div>
-                                    <div class="answers">
-                                        @for (int j = 0; j < Model.Questions[i].Answers.Count; j++)
-                                        {
-                                            <div class="answer">
-                                                <input type="hidden" asp-for="Questions[i].Answers[j].Id" />
-                                                <div class="form-group">
-                                                    <label asp-for="Questions[i].Answers[j].Text" class="control-label"></label>
-                                                    <input asp-for="Questions[i].Answers[j].Text" class="form-control" />
-                                                    <span asp-validation-for="Questions[i].Answers[j].Text" class="text-danger"></span>
-                                                    <button type="button" class="btn btn-danger removeAnswer">Remove Answer</button>
+                                    <div class="question-details" style="display: none;">
+                                        <div class="form-group">
+                                            <label asp-for="Questions[i].Text" class="control-label"></label>
+                                            <input asp-for="Questions[i].Text" class="form-control" />
+                                            <span asp-validation-for="Questions[i].Text" class="text-danger"></span>
+                                        </div>
+                                        <div class="form-group">
+                                            <label asp-for="Questions[i].Type" class="control-label"></label>
+                                            <select asp-for="Questions[i].Type" asp-items="@ViewBag.QuestionTypes" class="form-control"></select>
+                                            <span asp-validation-for="Questions[i].Type" class="text-danger"></span>
+                                        </div>
+                                        <div class="answers">
+                                            @for (int j = 0; j < Model.Questions[i].Answers.Count; j++)
+                                            {
+                                                <div class="answer">
+                                                    <input type="hidden" asp-for="Questions[i].Answers[j].Id" />
+                                                    <div class="form-group">
+                                                        <label asp-for="Questions[i].Answers[j].Text" class="control-label"></label>
+                                                        <input asp-for="Questions[i].Answers[j].Text" class="form-control" />
+                                                        <span asp-validation-for="Questions[i].Answers[j].Text" class="text-danger"></span>
+                                                        <button type="button" class="btn btn-danger removeAnswer">Remove Answer</button>
+                                                    </div>
                                                 </div>
-
-                                            </div>
-                                        }
+                                            }
+                                        </div>
+                                        <button type="button" class="btn btn-primary addAnswer">Add Answer</button>
                                     </div>
-                                    <button type="button" class="btn btn-primary addAnswer">Add Answer</button>
-
+                                    <button type="button" class="btn btn-success saveQuestion" style="display: none;">Save</button>
                                 </div>
                             }
-
                         </div>
                     </div>
-                    
-
 
                     <button type="submit" class="btn btn-primary">Update</button>
                     | <a asp-action="Index" class="btn btn-info">Back to list</a>
                 </form>
-
             </div>
         </div>
     </div>
 </div>
+
+
+
+
 
 
 
@@ -109,7 +135,27 @@
             $(document).on('click', '.removeAnswer', function () {
                 $(this).closest('.form-group').remove();
             });
+
+            // Function to toggle question edit mode
+            $(document).on('click', '.editQuestion', function () {
+                var questionContainer = $(this).closest('.question');
+                questionContainer.find('.question-title').hide();
+                questionContainer.find('.question-details').show();
+                questionContainer.find('.editQuestion').hide();
+                questionContainer.find('.saveQuestion').show();
+            });
+
+            // Function to save question details
+            $(document).on('click', '.saveQuestion', function () {
+                var questionContainer = $(this).closest('.question');
+                questionContainer.find('.question-title').show();
+                questionContainer.find('.question-details').hide();
+                questionContainer.find('.editQuestion').show();
+                questionContainer.find('.saveQuestion').hide();
+            });
         });
+
+
     </script>
 
 
@@ -118,7 +164,7 @@
     @* this script is working for adding mutiple answers for a question *@
 
 
-    @*    <script>
+       @* <script>
         $(document).ready(function () {
             // Function to add a new answer
             $(document).on('click', '.addAnswer', function () {
@@ -141,8 +187,8 @@
             });
         });
     </script>
-     *@
+    
+} *@
 }
-
 
 
