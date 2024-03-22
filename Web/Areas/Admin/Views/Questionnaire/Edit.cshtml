@@ -42,7 +42,7 @@
                         <textarea asp-for="Description" class="form-control"></textarea>
                         <span asp-validation-for="Description" class="text-danger"></span>
                     </div>
-                    <div class="card shadow rounded p-4">
+                    <div class="card shadow rounded" id="customCard">
                         <div id="questionsContainer">
                           
 
@@ -56,8 +56,8 @@
                                             <hr class="border border-primary border-4 opacity-75 line-start">
                                         </div>
                                         <!-- Container for the next question text -->
-                                        <div class="next-question-container">
-                                            <p class="next-question">Next Question</p>
+                                        <div class="next-question-container mt-2">
+                                           <p> <span class="badge badge-primary">NEXT QUESTION</span></p> 
                                         </div>
                                         <!-- Container for the second half of the line -->
                                         <div class="line-container">
@@ -89,14 +89,14 @@
                                                         <label asp-for="Questions[i].Answers[j].Text" class="control-label"></label>
                                                         <input asp-for="Questions[i].Answers[j].Text" class="form-control" />
                                                         <span asp-validation-for="Questions[i].Answers[j].Text" class="text-danger"></span>
-                                                        <button type="button" class="btn btn-danger removeAnswer">Remove Answer</button>
+                                                        <button type="button" class="btn btn-danger btn-sm mt-1 removeAnswer"><i class="bi bi-trash3"></i></button>
                                                     </div>
                                                 </div>
                                             }
                                         </div>
-                                        <button type="button" class="btn btn-primary btn-sm addAnswer">Add new Answer</button>
+                                        <button type="button" class="btn btn-primary btn-sm mb-2 addAnswer"><i class="bi bi-plus-square"></i> Add new Answer</button>
                                     </div>
-                                    <button type="button" class="btn btn-success btn-sm m-5 saveQuestion" style="display: none;"><i class="bi bi-floppy"></i> Save question</button>
+                                    <button type="button" class="btn btn-success btn-md  ml-5 mt-2 saveQuestion" style="display: none;"><i class="bi bi-floppy"></i> Save question</button>
                                 </div>
                             }
                         </div>
@@ -217,7 +217,7 @@
                     <div class="form-group">
                         <label class="control-label">Answer</label>
                         <input type="text" name="Questions[${newQuestionIndex}].Answers[${newAnswerIndex}].Text" class="form-control" />
-                        <button type="button" class="btn btn-danger removeAnswer">Remove Answer</button>
+                                <button type="button" class="btn btn-danger btn-sm mt-1 removeAnswer"><i class="bi bi-trash3"></i></button>
                     </div>`;
 
                 // Append the new answer to the specific question

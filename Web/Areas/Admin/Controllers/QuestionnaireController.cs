@@ -250,18 +250,18 @@ namespace Web.Areas.Admin.Controllers
 
                        
                     }
-                    else
-                    {
+                    //else
+                    //{
                        
-                        var newQuestion = new Question
-                        {
-                            Text = questionViewModel.Text,
-                            Type = questionViewModel.Type,
-                            Answers = questionViewModel.Answers?.Select(a => new Answer { Text = a.Text }).ToList() ?? new List<Answer>()
-                        };
+                    //    var newQuestion = new Question
+                    //    {
+                    //        Text = questionViewModel.Text,
+                    //        Type = questionViewModel.Type,
+                    //        Answers = questionViewModel.Answers?.Select(a => new Answer { Text = a.Text }).ToList() ?? new List<Answer>()
+                    //    };
 
-                        existingQuestionnaire.Questions.Add(newQuestion);
-                    }
+                    //    existingQuestionnaire.Questions.Add(newQuestion);
+                    //}
 
                     //if (existingQuestion != null)
                     //{

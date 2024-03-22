@@ -35,9 +35,46 @@
     --font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
+.question {
+    margin:1rem 2rem 0rem 2rem;
+}
+.question-details{
+   padding:0 4rem 0 4rem;
+}
+.answers {
+    margin: 3rem !important;
+}
 
+#customCard {
+    background-color: #f2f2f2 !important;
+    margin: 3rem;
+    padding: 3rem 0 2rem 0;
+}
+.question-title {
+    color: #007bff;
+    font-weight: bold;
+}
 .question-group {
     margin-bottom: 20px; /* Adjust the value to control the spacing */
+}
+
+
+.question-separator {
+    display: flex;
+    align-items: center;
+}
+
+.line-container {
+    flex-grow: 1;
+}
+
+.next-question-container {
+    margin: 0 10px; /* Adjust margin as needed */
+    text-align: center;
+}
+
+.next-question {
+    margin: 0;
 }
 
 *,
