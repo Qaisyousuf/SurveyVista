@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.IdentityModel.Tokens;
 using Model;
 
 using Services.Interaces;
@@ -17,7 +18,7 @@ namespace Web.Areas.Admin.Controllers
         private readonly SurveyContext _context;
         private readonly IQuestionRepository _question;
 
-        public QuestionnaireController(IQuestionnaireRepository Questionnaire,SurveyContext Context, IQuestionRepository Question)
+        public QuestionnaireController(IQuestionnaireRepository Questionnaire, SurveyContext Context, IQuestionRepository Question)
         {
             _questionnaire = Questionnaire;
             _context = Context;
@@ -30,7 +31,7 @@ namespace Web.Areas.Admin.Controllers
 
             var question = _question.GetQuestionsWithAnswers();
 
-            
+
 
             List<QuestionnaireViewModel> viewmodel = new List<QuestionnaireViewModel>();
 
@@ -43,22 +44,22 @@ namespace Web.Areas.Admin.Controllers
                     Description = item.Description,
                     Title = item.Title,
                     Questions = item.Questions,
-                    
+
 
 
                 });
             }
-            
+
             return View(viewmodel);
         }
         [HttpGet]
         public IActionResult Create()
-        
-        
+
+
         {
-            
+
             var questionTypes = Enum.GetValues(typeof(QuestionType)).Cast<QuestionType>();
-            
+
             ViewBag.QuestionTypes = new SelectList(questionTypes);
 
             var questionnaire = new QuestionnaireViewModel
@@ -85,22 +86,22 @@ namespace Web.Areas.Admin.Controllers
 
                 var questionnaire = new Questionnaire
                 {
-                    Id=viewmodel.Id,
-                    Title=viewmodel.Title,
-                    Description=viewmodel.Description,
+                    Id = viewmodel.Id,
+                    Title = viewmodel.Title,
+                    Description = viewmodel.Description,
                 };
 
-                
+
                 var questions = viewmodel.Questions;
 
                 foreach (var questionViewModel in viewmodel.Questions)
                 {
                     var question = new Question
                     {
-                        QuestionnaireId=questionViewModel.QuestionnaireId,
+                        QuestionnaireId = questionViewModel.QuestionnaireId,
                         Text = questionViewModel.Text,
                         Type = questionViewModel.Type,
-                        Answers = new List<Answer>() 
+                        Answers = new List<Answer>()
                     };
 
                     foreach (var answerViewModel in questionViewModel.Answers)
@@ -108,28 +109,28 @@ namespace Web.Areas.Admin.Controllers
                         var answer = new Answer
                         {
                             Text = answerViewModel.Text,
-                            QuestionId=answerViewModel.QuestionId,
-                            
+                            QuestionId = answerViewModel.QuestionId,
+
                         };
 
-                       
+
                         question.Answers.Add(answer);
                     }
 
-                
+
                     questionnaire.Questions.Add(question);
                 }
 
 
-              
+
 
                 _questionnaire.Add(questionnaire);
-              await _questionnaire.commitAsync();
+                await _questionnaire.commitAsync();
                 TempData["Success"] = "Questionnaire created successfully";
 
 
 
-                return RedirectToAction("Index"); 
+                return RedirectToAction("Index");
             }
             return View(viewmodel);
         }
@@ -141,7 +142,7 @@ namespace Web.Areas.Admin.Controllers
                            .Cast<QuestionType>()
                            .Select(e => new SelectListItem { Value = e.ToString(), Text = e.ToString() });
             ViewBag.QuestionTypes = questionTypes;
-         
+
             var questionnaire = _questionnaire.GetQuestionnaireWithQuestionAndAnswer(id);
 
             if (questionnaire == null)
@@ -154,27 +155,27 @@ namespace Web.Areas.Admin.Controllers
                 Id = questionnaire.Id,
                 Title = questionnaire.Title,
                 Description = questionnaire.Description,
-               
-                
+
+
                 Questions = questionnaire.Questions
                     .Select(q => new Question
                     {
                         Id = q.Id,
                         Text = q.Text,
                         Type = q.Type,
-                        QuestionnaireId=q.QuestionnaireId,
-                        
-                        
+                        QuestionnaireId = q.QuestionnaireId,
+
+
                         Answers = q.Answers.Select(a => new Answer
                         {
                             Id = a.Id,
                             Text = a.Text,
-                            Question=a.Question,
-                            QuestionId=a.QuestionId
+                            Question = a.Question,
+                            QuestionId = a.QuestionId
 
-                            
-                            
-                            
+
+
+
                         }).ToList()
                     }).ToList()
             };
@@ -187,8 +188,8 @@ namespace Web.Areas.Admin.Controllers
         {
 
             var questionTypes = Enum.GetValues(typeof(QuestionType))
-     .Cast<QuestionType>()
-     .Select(e => new SelectListItem { Value = e.ToString(), Text = e.ToString() });
+           .Cast<QuestionType>()
+           .Select(e => new SelectListItem { Value = e.ToString(), Text = e.ToString() });
             ViewBag.QuestionTypes = questionTypes;
 
             if (ModelState.IsValid)
@@ -205,6 +206,28 @@ namespace Web.Areas.Admin.Controllers
                 existingQuestionnaire.Title = viewModel.Title;
                 existingQuestionnaire.Description = viewModel.Description;
 
+                var existingQuestionIds = existingQuestionnaire.Questions.Select(q => q.Id).ToList();
+
+                // Iterate through existing questions and remove those not found in the view model
+                foreach (var existingQuestion in existingQuestionnaire.Questions.ToList())
+                {
+                    // If the ID of the existing question is not found in the view model, remove it
+                    if (!viewModel.Questions.Any(q => q.Id == existingQuestion.Id))
+                    {
+                        existingQuestionnaire.Questions.Remove(existingQuestion);
+                       
+                    }
+                    await _questionnaire.Update(existingQuestionnaire);
+                }
+
+                // Update the questionnaire with the modified list of questions
+              
+
+
+
+
+
+
                 // Update or add new questions
                 foreach (var questionViewModel in viewModel.Questions)
                 {
@@ -213,140 +236,49 @@ namespace Web.Areas.Admin.Controllers
 
                     if (existingQuestion != null)
                     {
+                        var answersToRemove = new List<Answer>();
                         existingQuestion.Text = questionViewModel.Text;
                         existingQuestion.Type = questionViewModel.Type;
 
-                      
-                       
-                            foreach (var answerViewModel in questionViewModel.Answers)
+
+                        foreach (var answerViewModel in questionViewModel.Answers)
+                        {
+                            // Check if the answer already exists
+                            var existingAnswer = existingQuestion.Answers.FirstOrDefault(a => a.Id == answerViewModel.Id);
+
+                            if (answerViewModel.Id == 0)
                             {
-                                // Check if the answer already exists
-                                var existingAnswer = existingQuestion.Answers.FirstOrDefault(a => a.Id == answerViewModel.Id);
-                                
-                                if (answerViewModel.Id==0)
-                                {
 
-                                    existingQuestion.Answers.Add(new Answer { Text = answerViewModel.Text });
-
-                               
-                                }
-                                else if (string.IsNullOrEmpty(answerViewModel.Text))
-                                {
-
-                                 existingQuestion.Answers.Remove(existingAnswer);
-                                _context.SaveChanges();
-
-                                 }
-                                else if(existingAnswer !=null)
-                                {
-
-                                     existingAnswer.Text = answerViewModel.Text;
-                                }
-
-                             }
-
-                            
+                                existingQuestion.Answers.Add(new Answer { Text = answerViewModel.Text });
 
 
-                       
+                            }
+                            else if (answerViewModel.Text == null)
+                            {
+                                existingQuestion.Answers.Remove(existingAnswer);
+                                await _questionnaire.Update(existingQuestionnaire);
+                            }
+
+
+                            else if (existingAnswer != null)
+                            {
+
+                                existingAnswer.Text = answerViewModel.Text;
+                            }
+
+                        }
+
+
+
                     }
-                    //else
-                    //{
-                       
-                    //    var newQuestion = new Question
-                    //    {
-                    //        Text = questionViewModel.Text,
-                    //        Type = questionViewModel.Type,
-                    //        Answers = questionViewModel.Answers?.Select(a => new Answer { Text = a.Text }).ToList() ?? new List<Answer>()
-                    //    };
 
-                    //    existingQuestionnaire.Questions.Add(newQuestion);
-                    //}
-
-                    //if (existingQuestion != null)
-                    //{
-                    //    existingQuestion.Text = questionViewModel.Text;
-                    //    existingQuestion.Type = questionViewModel.Type;
-
-                    //    //var answerId = existingQuestion.Answers.Select(x => x.Id).ToList();
-                    //    // Update or add new answers
-                    //    //foreach (var answerViewModel in questionViewModel.Answers)
-                    //    //{
-                    //    //    var existingAnswer = existingQuestion.Answers.FirstOrDefault(a => a.Id == answerViewModel.Id);
-
-                    //    //    if (existingAnswer != null)
-                    //    //    {
-                    //    //        existingAnswer.Text = answerViewModel.Text;
-                    //    //    }
-                    //    //    else
-                    //    //    {
-                    //    //        // Handle adding new answers if necessary
-                    //    //        existingQuestion.Answers.Add(new Answer { Text = answerViewModel.Text });
-                    //    //    }
-                    //    //}
-                    //    if (questionViewModel.Answers != null)
-                    //    {
-                    //        // Update or add new answers
-                    //        foreach (var answerViewModel in questionViewModel.Answers)
-                    //        {
-                    //            var existingAnswer = existingQuestion.Answers.FirstOrDefault(a => a.Id == answerViewModel.Id);
-
-                    //            if (existingAnswer != null)
-                    //            {
-                    //                // Update existing answer
-                    //                existingAnswer.Text = answerViewModel.Text;
-                    //            }
-                    //            else
-                    //            {
-                    //                foreach (var newanswers in questionViewModel.Answers)
-                    //                {
-                    //                    existingQuestion.Answers.Add(new Answer { Text = newanswers.Text });
-                    //                }
-                    //                // Check if the answer with the same text already exists
-                    //                //var answerWithSameText = existingQuestion.Answers.FirstOrDefault(a => a.Text == answerViewModel.Text);
-
-                    //                //if (answerWithSameText == null)
-                    //                //{
-                    //                //    // Add new answer only if it doesn't exist with the same text
-
-                    //                //}
-                    //                //else
-                    //                //{
-                    //                //    // Optionally handle the case where an answer with the same text already exists
-                    //                //    // You can choose to do nothing, show a message, or take any other action
-                    //                //}
-                    //            }
-                    //        }
-                    //    }
-
-                    //}
-                    //else
-                    //{
-                    //    // Add new question with its answers
-                    //    var newQuestion = new Question
-                    //    {
-                    //        Text = questionViewModel.Text,
-                    //        Type = questionViewModel.Type,
-                    //        Answers = questionViewModel.Answers.Select(a => new Answer { Text = a.Text }).ToList()
-                    //    };
-
-                    //    existingQuestionnaire.Questions.Add(newQuestion);
-                    //}
                 }
 
-                // Remove any questions that are not in the view model
-                //var questionIdsInViewModel = viewModel.Questions.Select(q => q.Id);
-                //var questionsToRemove = existingQuestionnaire.Questions.Where(q => !questionIdsInViewModel.Contains(q.Id)).ToList();
-                //foreach (var questionToRemove in questionsToRemove)
-                //{
-                //    existingQuestionnaire.Questions.Remove(questionToRemove);
-                //}
+             
+                await _questionnaire.Update(existingQuestionnaire);
 
-                // Save changes to the database
-                _questionnaire.Update(existingQuestionnaire);
-                await _questionnaire.commitAsync();
                 TempData["Success"] = "Questionnaire updated successfully";
-                return RedirectToAction("Index");
+                return RedirectToAction(nameof(Index));
             }
 
             // If ModelState is not valid, re-display the form with validation errors
@@ -391,13 +323,35 @@ namespace Web.Areas.Admin.Controllers
 
         [HttpPost]
         [ActionName("Delete")]
-        public IActionResult DeleteConfirm(int id)
+        public async Task<IActionResult> DeleteConfirm(int id)
         {
-            _questionnaire.Delete(id);
-            _questionnaire.commitAsync();
-            
-            return Json(new { success = true, message = "Item deleted successfully" });
-            
+
+
+
+            try
+            {
+                var deletedQuestionnaire = _questionnaire.Delete(id);
+
+
+                if (deletedQuestionnaire == null)
+                {
+                    return NotFound(); // Or handle not found case appropriately
+                }
+
+                // If deletion is successful, you can redirect to a success page or return a success message
+                return Json(new { success = true, message = "Item deleted successfully" });
+            }
+            catch (Exception ex)
+            {
+                // Log the exception or handle it appropriately
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
+
+
+
+            //return StatusCode(500, "An error occurred while processing your request");
+
+
         }
 
         [HttpGet]

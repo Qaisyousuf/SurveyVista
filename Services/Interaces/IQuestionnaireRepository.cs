@@ -15,8 +15,8 @@ namespace Services.Interaces
         Questionnaire GetQuestionnaireWithQuestionAndAnswer(int? id);
 
         void Add(Questionnaire questionnaire);
-        void Update(Questionnaire questionnaire);
-        void Delete(int? id);
+        Task Update(Questionnaire questionnaire);
+        Task Delete(int? id);
 
         Task commitAsync();
     }

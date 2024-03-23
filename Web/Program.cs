@@ -1,5 +1,6 @@
 using Data;
 using Microsoft.AspNetCore.Mvc.Razor;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Services.Implemnetation;
 using Services.Interaces;
@@ -11,7 +12,15 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 
-builder.Services.ConfigureSQLConnection(builder.Configuration);
+var config = builder.Configuration;
+
+builder.Services.AddDbContext<SurveyContext>(options =>
+{
+    options.UseSqlServer(config.GetConnectionString("SurveyVista"), cfg => cfg.MigrationsAssembly("Web"));
+});
+
+
+//builder.Services.ConfigureSQLConnection(builder.Configuration);
 
 builder.Services.ConfigurePageServices();
 builder.Services.ConfigureBannerServices();
@@ -20,7 +29,7 @@ builder.Services.ConfigureSocialMedia();
 builder.Services.ConfigureFooter();
 builder.Services.ConfigureQuestionnarie();
 builder.Services.ConfigureQuestion();
-//builder.Services.AddScoped<SurveyContext>();
+builder.Services.AddScoped<SurveyContext>();
 
 var app = builder.Build();
 

@@ -14,6 +14,7 @@ namespace Data
         {
             
         }
+       
 
         public DbSet<Page> Pages { get; set; }
         public DbSet<Banner> Banners { get; set; }
@@ -31,7 +32,7 @@ namespace Data
         public DbSet<Question> Questions { get; set; }
         public DbSet<Answer> Answers { get; set; }
 
-        public DbSet<QuestionTypeEntities> QuestionTypeEntities { get; set; }
+      
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -68,9 +69,6 @@ namespace Data
             modelBuilder.Entity<Answer>()
                 .HasKey(a => a.Id);
 
-            modelBuilder.Entity<QuestionTypeEntities>()
-                 
-                .HasKey(t => t.Id);
 
             base.OnModelCreating(modelBuilder);
         }

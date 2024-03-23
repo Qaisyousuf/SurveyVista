@@ -28,12 +28,12 @@ namespace Services.Implemnetation
             await _context.SaveChangesAsync();
         }
 
-        public void Delete(int? id)
-        {
-            var questionnairId = GetQuesById(id);
+        //public void Delete(int? id)
+        //{
+        //    var questionnairId = GetQuesById(id);
 
-            _context.Questionnaires.Remove(questionnairId);
-        }
+        //    _context.Questionnaires.Remove(questionnairId);
+        //}
 
         public List<Questionnaire> GetAllQuestions()
         {
@@ -55,11 +55,21 @@ namespace Services.Implemnetation
             return _context.Questionnaires.AsNoTracking().Include(x => x.Questions).ThenInclude(x => x.Answers).FirstOrDefault(x=>x.Id==id);
         }
 
-        public void Update(Questionnaire questionnaire)
+        public async Task Update(Questionnaire questionnaire)
         {
 
             _context.Questionnaires.Update(questionnaire);
 
+             await _context.SaveChangesAsync();
+
+        }
+
+        public async Task Delete(int? id)
+        {
+            var questionnairId = GetQuesById(id);
+
+          _context.Questionnaires.Remove(questionnairId);
+             await _context.SaveChangesAsync();
         }
     }
 }
