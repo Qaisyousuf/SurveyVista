@@ -271,6 +271,25 @@ namespace Web.Areas.Admin.Controllers
 
 
                     }
+                    else
+                    {
+                        // Add new question
+                        var newQuestion = new Question
+                        {
+                            Text = questionViewModel.Text, // Make sure question text is not null
+                            Type = questionViewModel.Type, // Make sure question type is not null
+                            Answers = new List<Answer>() // Initialize answers list
+                        };
+
+                        foreach (var answerViewModel in questionViewModel.Answers)
+                        {
+                            // Add new answer
+                            newQuestion.Answers.Add(new Answer { Text = answerViewModel.Text });
+                        }
+
+                        // Add new question to questionnaire
+                        existingQuestionnaire.Questions.Add(newQuestion);
+                    }
 
                 }
 
@@ -349,8 +368,7 @@ namespace Web.Areas.Admin.Controllers
 
 
 
-            //return StatusCode(500, "An error occurred while processing your request");
-
+          
 
         }
 

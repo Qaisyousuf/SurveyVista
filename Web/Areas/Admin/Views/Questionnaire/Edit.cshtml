@@ -4,26 +4,7 @@
     ViewData["Title"] = "Edit";
 }
 
-@* <style>
-    .question-separator {
-        display: flex;
-        align-items: center;
-    }
 
-    .line-container {
-        flex-grow: 1;
-    }
-
-    .next-question-container {
-        margin: 0 10px; /* Adjust margin as needed */
-        text-align: center;
-    }
-
-    .next-question {
-        margin: 0;
-    }
-
-</style> *@
 
 <div class="container mt-4">
     <div class="card justify-content-center p-4 shadow rounded">
@@ -93,18 +74,24 @@
                                                 </div>
                                             }
                                         </div>
-                                        <button type="button" class="btn btn-primary btn-sm mb-2 addAnswer"><i class="bi bi-plus-square"></i> Add new Answer</button>
+                                        <button type="button" class="btn btn-success btn-sm mb-1 addAnswer"><i class="bi bi-plus-square"></i> Add new Answer</button>
                                     </div>
-                                    <button type="button" class="btn btn-success btn-ms ml-5 mt-2 saveQuestion" style="display: none;"><i class="bi bi-floppy"></i> Save question</button>
+                                    <button type="button" class="btn btn-primary btn-ms ml-5 mt-3 saveQuestion" style="display: none;"><i class="bi bi-floppy"></i> Save question</button>
                                     <!-- Remove Question Button -->
                                   <div class="d-block">
                                         @Model.Questions[i].Text
-                                        <button type="button" class="btn btn-danger btn-sm removeQuestion"><i class="bi bi-trash"></i> Remove question</button>
+                                        <button type="button" class="btn btn-danger btn-sm mt-2 removeQuestion"><i class="bi bi-trash"></i> Remove question</button>
                                   </div>
+                                   
+
                                 </div>
+                               
+
                             }
                         </div>
+                       
                     </div>
+                    <button type="button" class="btn btn-success mt-3" id="addNewQuestion"><i class="bi bi-plus"></i> Add New Question</button>
                     <div class="m-4">
                         <button type="submit" class="btn btn-primary">Update questionnaire</button>
                         | <a asp-action="Index" class="btn btn-info">Back to list</a>
@@ -114,108 +101,6 @@
         </div>
     </div>
 </div>
-
-<!-- Modal -->
-
-
-
-@* <div class="container mt-4">
-    <div class="card justify-content-center p-4 shadow rounded">
-        <div class="card-body">
-            <h5 class="card-title">Edit Survey</h5>
-
-            <div class="row">
-                <form asp-action="Edit">
-                    <input type="hidden" asp-for="Id" />
-                    <div class="form-group">
-                        <label asp-for="Title" class="control-label"></label>
-                        <input asp-for="Title" class="form-control" />
-                        <span asp-validation-for="Title" class="text-danger"></span>
-                    </div>
-                    <div class="form-group">
-                        <label asp-for="Description" class="control-label"></label>
-                        <textarea asp-for="Description" class="form-control"></textarea>
-                        <span asp-validation-for="Description" class="text-danger"></span>
-                    </div>
-                    <div class="card shadow rounded" id="customCard">
-                        <div id="questionsContainer">
-                          
-
-                            @for (int i = 0; i < Model.Questions.Count; i++)
-                            {
-                                 
-                                <div class="question">
-                                    <div class="question-separator">
-                                        <!-- Container for the first half of the line -->
-                                        <div class="line-container">
-                                            <hr class="border border-primary border-4 opacity-75 line-start">
-                                        </div>
-                                        <!-- Container for the next question text -->
-                                        <div class="next-question-container mt-2">
-                                           <p> <span class="badge badge-primary">NEXT QUESTION</span></p> 
-                                        </div>
-                                        <!-- Container for the second half of the line -->
-                                        <div class="line-container">
-                                            <hr class="border border-primary border-4 opacity-75 line-end">
-                                        </div>
-                                    </div>
-                                    <input type="hidden" asp-for="Questions[i].Id" />
-                                    <div class="question-title">
-                                        @Model.Questions[i].Text
-                                        <button type="button" class="btn btn-primary m-4 btn-sm editQuestion"><i class="bi bi-pencil-square"></i> Edit question</button>
-                                      
-                                    </div>
-                                    <div class="question-details" style="display: none;">
-                                        <div class="form-group">
-                                            <label asp-for="Questions[i].Text" class="control-label"></label>
-                                            <input asp-for="Questions[i].Text" class="form-control" />
-                                            <span asp-validation-for="Questions[i].Text" class="text-danger"></span>
-                                        </div>
-                                        <div class="form-group">
-                                            <label asp-for="Questions[i].Type" class="control-label"></label>
-                                            <select asp-for="Questions[i].Type" asp-items="@ViewBag.QuestionTypes" class="form-control"></select>
-                                            <span asp-validation-for="Questions[i].Type" class="text-danger"></span>
-                                        </div>
-                                        <div class="answers">
-                                            @for (int j = 0; j < Model.Questions[i].Answers.Count; j++)
-                                            {
-                                                <div class="answer">
-                                                    <input type="hidden" asp-for="Questions[i].Answers[j].Id" />
-                                                    <div class="form-group">
-                                                        <label asp-for="Questions[i].Answers[j].Text" class="control-label"></label>
-                                                        <input asp-for="Questions[i].Answers[j].Text" class="form-control" />
-                                                        <span asp-validation-for="Questions[i].Answers[j].Text" class="text-danger"></span>
-                                                        <button type="button" class="btn btn-danger btn-sm mt-1 removeAnswer"><i class="bi bi-trash3"></i></button>
-                                                    </div>
-                                                </div>
-                                            }
-                                        </div>
-                                        <button type="button" class="btn btn-primary btn-sm mb-2 addAnswer"><i class="bi bi-plus-square"></i> Add new Answer</button>
-                                    </div>
-                                    <button type="button" class="btn btn-success btn-ms  ml-5 mt-2 saveQuestion" style="display: none;"><i class="bi bi-floppy"></i> Save question</button>
-                                   
-                                </div>
-                            }
-                        </div>
-                    </div>
-                    <div class="m-4">
-                        <button type="submit" class="btn btn-primary">Update questionnaire</button>
-                        | <a asp-action="Index" class="btn btn-info">Back to list</a>
-                    </div>
-                   
-                </form>
-            </div>
-        </div>
-    </div>
-</div> *@
-
-
-
-
-
-
-
-
 
 
 
@@ -229,8 +114,133 @@
         <partial name="_ValidationScriptsPartial" />
     }
 
-    
-        <script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            // Function to add a new answer
+            $(document).on('click', '.addAnswer', function () {
+                var questionContainer = $(this).closest('.question');
+                var newQuestionIndex = questionContainer.index();
+
+                // Correctly find the length of answers for the specific question
+                var newAnswerIndex = questionContainer.find('.answers .form-group').length;
+
+                var answerHtml = `
+                        <div class="form-group">
+                            <label class="control-label">Answer</label>
+                            <input type="text" name="Questions[${newQuestionIndex}].Answers[${newAnswerIndex}].Text" class="form-control" />
+                            <button type="button" class="btn btn-danger btn-sm mt-1 removeAnswer"><i class="bi bi-trash3"></i></button>
+                        </div>`;
+
+                // Append the new answer to the specific question
+                questionContainer.find('.answers').append(answerHtml);
+            });
+
+            // Function to remove an answer (including dynamically added answers)
+            $(document).on('click', '.removeAnswer', function () {
+                $(this).closest('.form-group').remove();
+            });
+
+            // Function to toggle question edit mode
+            $(document).on('click', '.editQuestion', function () {
+                var questionContainer = $(this).closest('.question');
+                questionContainer.find('.question-title').hide();
+                questionContainer.find('.question-details').show();
+                questionContainer.find('.editQuestion').hide();
+                questionContainer.find('.saveQuestion').show();
+            });
+
+            // Function to save question details
+            $(document).on('click', '.saveQuestion', function () {
+                var questionContainer = $(this).closest('.question');
+                var titleTextElement = questionContainer.find('.question-title');
+
+                var questionText = questionContainer.find('.question-details input[name^="Questions"]').val();
+
+                // Apply styles for success (green text color)
+                titleTextElement.css('color', '#28a745'); // Set the success text color
+
+                // Add checkmark icon before the text
+                titleTextElement.prepend('<span class="check-icon">&#x2714; </span>');
+
+                // Show the original question title
+                titleTextElement.show();
+
+                // Hide the question details
+                questionContainer.find('.question-details').hide();
+
+                // Show the edit button and hide the save button
+                questionContainer.find('.editQuestion').show();
+                questionContainer.find('.saveQuestion').hide();
+            });
+
+            // Function to remove a question
+            $(document).on('click', '.removeQuestion', function () {
+                $(this).closest('.question').remove();
+            });
+
+            // Function to add a new question
+            $('#addNewQuestion').click(function () {
+                var newQuestionIndex = $('.question').length;
+
+                var questionHtml = `
+                        <div class="question">
+                            <div class="question-separator">
+                                <!-- Container for the first half of the line -->
+                                <div class="line-container">
+                                    <hr class="border border-primary border-4 opacity-75 line-start">
+                                </div>
+                                <!-- Container for the next question text -->
+                                <div class="next-question-container mt-2">
+                                    <p><span class="badge badge-primary">NEXT QUESTION</span></p>
+                                </div>
+                                <!-- Container for the second half of the line -->
+                                <div class="line-container">
+                                    <hr class="border border-primary border-4 opacity-75 line-end">
+                                </div>
+                            </div>
+                            <div class="question-title" style="display:none;">
+                                <input type="text" name="NewQuestions[${newQuestionIndex}].Text" class="form-control" placeholder="Enter question text">
+                                <select name="NewQuestions[${newQuestionIndex}].Type" class="form-control">
+                                    <option value="0">Multiple Choice</option>
+                                    <option value="1">Text</option>
+                                </select>
+                            </div>
+                            <div class="question-details">
+                                <div class="form-group">
+                                    <label class="control-label">Question</label>
+                                    <input type="text" class="form-control" name="Questions[${newQuestionIndex}].Text" placeholder="Enter question text"/>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label">Question Type</label>
+                                    <select class="form-control">
+                                        <option value="0">Multiple Choice</option>
+                                        <option value="1">Text</option>
+                                    </select>
+                                </div>
+                                <div class="answers">
+                                    <div class="form-group">
+                                        <label class="control-label">Answer</label>
+                                        <input type="text" class="form-control" name="Questions[${newQuestionIndex}].Answers[0].Text" placeholder="Enter answer"/>
+                                        <button type="button" class="btn btn-danger btn-sm mt-1 removeAnswer"><i class="bi bi-trash3"></i></button>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-success btn-sm mb-1 addAnswer"><i class="bi bi-plus-square"></i> Add new Answer</button>
+                            </div>
+                            <button type="button" class="btn btn-primary btn-ms ml-5 mt-3 saveQuestion" style="display: none;"><i class="bi bi-floppy"></i> Save question</button>
+                            <div class="d-block">
+                                <button type="button" class="btn btn-danger btn-sm mt-2 removeQuestion"><i class="bi bi-trash"></i> Remove question</button>
+                            </div>
+                        </div>`;
+
+                $('#questionsContainer').append(questionHtml);
+            });
+        });
+    </script>
+
+
+  @*       <script>
         $(document).ready(function () {
             // Function to add a new answer
             $(document).on('click', '.addAnswer', function () {
@@ -294,16 +304,15 @@
             $(document).on('click', '.removeQuestion', function () {
                 $(this).closest('.question').remove();
             });
+           
         });
             
        
 
-    </script>
+    </script> *@
 
    
-   @*  //  $(document).on('click', '.removeQuestion', function () {
-            // $(this).closest('.question').remove();
-        }); *@
+ 
 
 }
 

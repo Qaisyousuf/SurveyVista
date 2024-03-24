@@ -66,10 +66,21 @@ namespace Services.Implemnetation
 
         public async Task Delete(int? id)
         {
-            var questionnairId = GetQuesById(id);
+            if (id == null)
+            {
+                throw new ArgumentNullException(nameof(id), "ID cannot be null");
+            }
 
-          _context.Questionnaires.Remove(questionnairId);
-             await _context.SaveChangesAsync();
+            var questionnaire = GetQuesById(id);
+
+            if (questionnaire == null)
+            {
+                throw new ArgumentException("Questionnaire not found", nameof(id));
+            }
+
+            _context.Questionnaires.Remove(questionnaire);
+            await _context.SaveChangesAsync();
         }
+
     }
 }
