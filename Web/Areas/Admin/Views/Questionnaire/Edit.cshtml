@@ -46,7 +46,7 @@
                                     <input type="hidden" asp-for="Questions[i].Id" />
                                     <div class="question-title">
                                         @Model.Questions[i].Text
-                                        <button type="button" class="btn btn-primary m-4 btn-sm editQuestion"><i class="bi bi-pencil-square"></i> Edit question</button>|
+                                        <button type="button" class="btn btn-primary m-4 btn-sm shadow editQuestion"><i class="bi bi-pencil-square"></i> Edit question</button>|
                                      
                                     </div>
                                     <div class="question-details" style="display: none;">
@@ -74,13 +74,13 @@
                                                 </div>
                                             }
                                         </div>
-                                        <button type="button" class="btn btn-success btn-sm mb-1 addAnswer"><i class="bi bi-plus-square"></i> Add new Answer</button>
+                                        <button type="button" class="btn btn-success btn-sm mb-1 shadow addAnswer"><i class="bi bi-plus-square"></i> Add new Answer</button>
                                     </div>
-                                    <button type="button" class="btn btn-primary btn-ms ml-5 mt-3 saveQuestion" style="display: none;"><i class="bi bi-floppy"></i> Save question</button>
+                                    <button type="button" class="btn btn-primary btn-ms ml-5 mt-3 shadow saveQuestion" style="display: none;"><i class="bi bi-floppy"></i> Save question</button>
                                     <!-- Remove Question Button -->
                                   <div class="d-block">
                                         @Model.Questions[i].Text
-                                        <button type="button" class="btn btn-danger btn-sm mt-2 removeQuestion"><i class="bi bi-trash"></i> Remove question</button>
+                                        <button type="button" class="btn btn-danger btn-sm mt-2 shadow removeQuestion"><i class="bi bi-trash"></i> Remove question</button>
                                   </div>
                                    
 
@@ -91,10 +91,10 @@
                         </div>
                        
                     </div>
-                    <button type="button" class="btn btn-success mt-3" id="addNewQuestion"><i class="bi bi-plus"></i> Add New Question</button>
+                    <button type="button" class="btn btn-success btn-sm ml-4 mt-3 shadow" id="addNewQuestion"><i class="bi bi-plus"></i> Add New Question</button>
                     <div class="m-4">
-                        <button type="submit" class="btn btn-primary">Update questionnaire</button>
-                        | <a asp-action="Index" class="btn btn-info">Back to list</a>
+                        <button type="submit" class="btn btn-primary btn-sm shadow">Update questionnaire</button>
+                        | <a asp-action="Index" class="btn btn-info btn-sm shadow">Back to list</a>
                     </div>
                 </form>
             </div>
@@ -201,11 +201,8 @@
                                 </div>
                             </div>
                             <div class="question-title" style="display:none;">
-                                <input type="text" name="NewQuestions[${newQuestionIndex}].Text" class="form-control" placeholder="Enter question text">
-                                <select name="NewQuestions[${newQuestionIndex}].Type" class="form-control">
-                                    <option value="0">Multiple Choice</option>
-                                    <option value="1">Text</option>
-                                </select>
+                            <h6 class="text-success">Question created</h6>
+                             <button type="button" class="btn btn-primary btn-ms ml-5 mt-3 editQuestion"><i class="bi bi-floppy"></i> Edit question</button>
                             </div>
                             <div class="question-details">
                                 <div class="form-group">
@@ -228,7 +225,7 @@
                                 </div>
                                 <button type="button" class="btn btn-success btn-sm mb-1 addAnswer"><i class="bi bi-plus-square"></i> Add new Answer</button>
                             </div>
-                            <button type="button" class="btn btn-primary btn-ms ml-5 mt-3 saveQuestion" style="display: none;"><i class="bi bi-floppy"></i> Save question</button>
+                            <button type="button" class="btn btn-primary btn-ms ml-5 mt-3 saveQuestion"><i class="bi bi-floppy"></i> Save question</button>
                             <div class="d-block">
                                 <button type="button" class="btn btn-danger btn-sm mt-2 removeQuestion"><i class="bi bi-trash"></i> Remove question</button>
                             </div>
