@@ -85,13 +85,13 @@
                                                 </div>
                                             }
                                         </div>
-                                        <button type="button" class="btn btn-success btn-sm mb-1 shadow addAnswer"><i class="bi bi-plus-square"></i> Add new Answer</button>
+                                        <button type="button" class="btn btn-success ml-4 btn-sm mb-1 shadow addAnswer" id="AddnewAnswerForEdit"><i class="bi bi-plus-square"></i> Add new Answer</button>
                                     </div>
-                                    <button type="button" class="btn btn-primary btn-sm ml-5 shadow saveQuestion" style="display: none;"><i class="bi bi-floppy"></i> Save question</button>
+                                    <button type="button" class="btn btn-primary btn-sm shadow saveQuestion" id="SaveQuestionForEdit" style="display: none;"><i class="bi bi-floppy"></i> Save question</button>
                                     <!-- Remove Question Button -->
                                     <div class="d-block">
 
-                                        <button type="button" class="btn btn-danger btn-sm mt-2 shadow removeQuestion1" style="display:none;"><i class="bi bi-trash"></i> Remove question</button>
+                                        <button type="button" class="btn btn-danger btn-sm mt-3 shadow removeQuestion1" id="RemoveQuestion1ForEdit" style="display:none;"><i class="bi bi-trash"></i> Remove question</button>
                                         <button type="button" class="btn btn-danger btn-sm mt-2 shadow removeQuestion3" style="display:none;"><i class="bi bi-trash"></i> Remove question</button>
 
                                     </div>
@@ -205,10 +205,10 @@
                 questionContainer.find('.editQuestion').show();
                 questionContainer.find('.saveQuestion').hide();
                 questionContainer.find('.removeQuestion1').hide();
-                // // questionContainer.find('.removeQuestion3').show();
-                // var successMessage = $('<div class="alert alert-success" role="alert">Question updated successfully!</div>');
-                // $(this).closest('.question').find('.question-title').prepend(successMessage);
-                // successMessage.fadeIn();
+                // questionContainer.find('.removeQuestion3').show();
+                var successMessage = $('<div class="alert alert-success" role="alert">Question updated successfully!</div>');
+                $(this).closest('.question').find('.question-title').prepend(successMessage);
+                successMessage.fadeIn();
 
 
             });
@@ -309,15 +309,15 @@
                                             <button type="button" class="btn btn-danger btn-sm mt-1 removeAnswer"><i class="bi bi-trash3"></i></button>
                                         </div>
                                     </div>
-                                    <button type="button" class="btn btn-success btn-sm ml-5 mt-0 addAnswer"><i class="bi bi-plus-square"></i> Add new Answer</button>
+                                    <button type="button" class="btn btn-success btn-sm ml-5 shadow  addAnswer" id="AddnewAsnwerForCreatr"><i class="bi bi-plus-square"></i> Add new Answer</button>
                                 </div>
                                 <!-- Save and remove buttons -->
-                                <div class="d-flex mt-4">
-                                    <button type="button" class="btn btn-primary btn-sm ml-5 mt-2 saveQuestion"><i class="bi bi-floppy"></i> Save question</button>
+                                
+                                    <button type="button" class="btn btn-primary btn-sm ml-5 mt-2 shadow saveQuestion"><i class="bi bi-floppy"></i> Save question</button>
                                     <div class="d-block">
-                                        <button type="button" class="btn btn-danger ml-5 btn-sm mt-2 shadow removeQuestion1"><i class="bi bi-trash"></i> Remove question</button>
+                                        <button type="button" class="btn btn-danger ml-5 btn-sm mt-3 shadow removeQuestion1"><i class="bi bi-trash"></i> Remove question</button>
                                     </div>
-                                </div>
+                               
                             </div>`;
 
                 // Append the new question HTML to the container

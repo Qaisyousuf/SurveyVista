@@ -77,6 +77,22 @@
     margin: 0;
 }
 
+#AddnewAnswerForEdit{
+    margin-top:-3rem !important;
+    margin-left:3rem !important;
+}
+#SaveQuestionForEdit{
+    margin-left:2rem;
+    margin-top:0rem;
+}
+#RemoveQuestion1ForEdit{
+    margin-left:2rem;
+    margin-top:2rem;
+}
+
+#AddnewAsnwerForCreatr{
+    margin-top:-3rem;
+}
 /*.description-container {
     display: flex;
     align-items: center;
@@ -94,9 +110,6 @@
     text-overflow: ellipsis;
     
 }*/
-
-
-
 /* Add your custom CSS styles here */
 /*.question-container {
     display: flex;
@@ -116,15 +129,13 @@
 }
 
 .more-question {*/
-    /* Add your more question styles here */
-    /*display: none;
+/* Add your more question styles here */
+/*display: none;
 }*/
-
-#ReadMore{
-    margin-top:-13px;
-    margin-left:10px;
-    text-decoration:underline;
-    
+#ReadMore {
+    margin-top: -13px;
+    margin-left: 10px;
+    text-decoration: underline;
 }
 
 #add-question-btn{
