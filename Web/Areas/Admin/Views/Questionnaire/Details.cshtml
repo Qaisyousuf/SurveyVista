@@ -9,7 +9,6 @@
 <div class="container-fluid d-flex justify-content-center">
 
 
-
     <div class="card ">
         <div class="card-header">
             Details
@@ -18,8 +17,19 @@
         <div class="card-body shadow rounded ">
             <div class="card-title">
 
-                <h5 class="font-weight-bold">Details of questionnaire <span class="badge bg-light p-2  rounded">@Model.Title</span></h5>
-              
+               
+              <h4>Questionnaire details</h4>
+              <br />
+
+              <div>
+                 <span class="badge badge-primary shadow m-1 p-2">Questionnaire</span>
+              </div>
+                <div>
+                    <span class="badge badge-success shadow m-1 p-2">Question</span>
+                </div>
+                <div>
+                    <span class="badge badge-info shadow m-1 p-2">Answer</span>
+                </div>
               
             </div>
             <table class="table table-bordered  table-responsive  table-hover   ">
@@ -35,8 +45,29 @@
                 <tbody>
                     <tr>
                         <th scope="row"><span class="badge p-2 m-1 bg-primary shadow-sm rounded">@Model.Id</span></th>
-                        <th scope="row"><span class="badge p-2 m-1 bg-primary shadow-sm">@Model.Title</span></th>
-                        <th scope="row"><span class="badge p-2 m-1 bg-primary shadow-sm">@Html.Raw(@Model.Description)</span></th>
+                        <th scope="row">
+                            <div class="title-container">
+                                <div class="title-text">
+                                   
+                                        <span class="item-title ">@Html.Raw(Model.Title.Length >= 30 ? Model.Title.Substring(0, 30) : Model.Title)</span>
+                                        <span class="more-title " style="display:none;">@(Model.Title.Length > 30 ? Model.Title.Substring(20) : "")</span>
+                                        <a href="#" id="ReadMore" class="read-more-title-btn ">Read More</a>
+                                   
+                                  
+                                </div>
+                            </div>
+                        </th>
+                        <th scope="row">
+                            <div class="description-container">
+                                <div class="description-text">
+                                
+                                        <span class="item-description">@Html.Raw(Model.Description.Length >= 30 ? Model.Description.Substring(0, 30) : Model.Title)</span>
+                                        <span class="more-text " style="display:none;">@(Model.Description.Length > 30 ? Model.Description.Substring(30) : "")</span>
+                              
+                                    <a href="#" id="ReadMore" class="read-more-btn ">Read More</a>
+                                </div>
+                            </div>
+                        </th>
                        
                         <td class="h6">
                             <table>
@@ -52,7 +83,18 @@
                                     <tr>
                                         <td> <span class="badge p-2 m-1 bg-success ">@question.Id</span></td>
                                         <td>
-                                            <span class="badge p-2 m-1 bg-success ">@question.Text</span>
+                                            <div class="question-container">
+                                                <div class="question-text">
+                                                    <span class="badge badge-success p-2">
+                                                        <span class="item-question">@Html.Raw(question.Text.Length >= 30 ? question.Text.Substring(0, 30) : question.Text)</span>
+                                                        <span class="more-question" style="display:none;">@(question.Text.Length > 30 ? question.Text.Substring(30) : "")</span>
+                                                        <a href="#" id="ReadMore" class="read-more-btn-question mt-1 text-white ">Read More</a>
+                                                    </span>
+                                                   
+
+                                                   
+                                                </div>
+                                            </div>
                                         </td>
                                         <td>
                                             <span class="badge p-2 m-1 bg-success ">@question.Type</span>
@@ -91,13 +133,76 @@
               
             </table>
             <footer>
-              
                 <a class="btn btn-primary" asp-action="Index">Back to List</a>
+               
             </footer>
         </div>
       
     </div>
-   
-   
+    
+    
 </div>
 
+
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('.read-more-btn').click(function () {
+                var $descriptionText = $(this).closest('.description-container').find('.description-text');
+                var $moreText = $descriptionText.find('.more-text');
+                var $toggleMore = $descriptionText.find('.toggle-more');
+
+                if ($moreText.is(':visible')) {
+                    $moreText.slideUp();
+                    $toggleMore.fadeIn();
+                } else {
+                    $moreText.slideDown();
+                    $toggleMore.fadeOut();
+                }
+
+                $(this).text(function (i, text) {
+                    return text === "Read More" ? "Read Less" : "Read More";
+                });
+            });
+            $('.read-more-title-btn').click(function () {
+                var $titleText = $(this).closest('.title-container').find('.title-text');
+                var $moreTitle = $titleText.find('.more-title');
+                var $toggleMore = $titleText.find('.toggle-more');
+
+                if ($moreTitle.is(':visible')) {
+                    $moreTitle.slideUp();
+                    $toggleMore.fadeIn();
+                } else {
+                    $moreTitle.slideDown();
+                    $toggleMore.fadeOut();
+                }
+
+                $(this).text(function (i, text) {
+                    return text === "Read More" ? "Read Less" : "Read More";
+                });
+
+            });
+            $('.read-more-btn-question').click(function () {
+                var $titleText = $(this).closest('.question-container').find('.question-text');
+                var $moreTitle = $titleText.find('.more-question');
+                var $toggleMore = $titleText.find('.toggle-more');
+
+                if ($moreTitle.is(':visible')) {
+                    $moreTitle.slideUp();
+                    $toggleMore.fadeIn();
+                } else {
+                    $moreTitle.slideDown();
+                    $toggleMore.fadeOut();
+                }
+
+                $(this).text(function (i, text) {
+                    return text === "Read More" ? "Read Less" : "Read More";
+                });
+
+            });
+
+        });
+    </script>
+
+}

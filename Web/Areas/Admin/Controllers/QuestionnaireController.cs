@@ -221,75 +221,103 @@ namespace Web.Areas.Admin.Controllers
                 }
 
                 // Update the questionnaire with the modified list of questions
-              
 
 
 
 
 
+
+                var newQuestions = new List<Question>();
 
                 // Update or add new questions
                 foreach (var questionViewModel in viewModel.Questions)
                 {
                     var existingQuestion = existingQuestionnaire.Questions.FirstOrDefault(q => q.Id == questionViewModel.Id);
 
-
-                    if (existingQuestion != null)
+                    if(questionViewModel.Id !=0)
                     {
-                        var answersToRemove = new List<Answer>();
-                        existingQuestion.Text = questionViewModel.Text;
-                        existingQuestion.Type = questionViewModel.Type;
-
-
-                        foreach (var answerViewModel in questionViewModel.Answers)
+                        if (existingQuestion != null)
                         {
-                            // Check if the answer already exists
-                            var existingAnswer = existingQuestion.Answers.FirstOrDefault(a => a.Id == answerViewModel.Id);
+                            var answersToRemove = new List<Answer>();
+                            existingQuestion.Text = questionViewModel.Text;
+                            existingQuestion.Type = questionViewModel.Type;
 
-                            if (answerViewModel.Id == 0)
+
+                            foreach (var answerViewModel in questionViewModel.Answers)
                             {
+                                // Check if the answer already exists
+                                var existingAnswer = existingQuestion.Answers.FirstOrDefault(a => a.Id == answerViewModel.Id);
 
-                                existingQuestion.Answers.Add(new Answer { Text = answerViewModel.Text });
+                                if (answerViewModel.Id == 0)
+                                {
 
+                                    existingQuestion.Answers.Add(new Answer { Text = answerViewModel.Text });
+
+
+                                }
+                                else if (answerViewModel.Text == null)
+                                {
+                                    existingQuestion.Answers.Remove(existingAnswer);
+                                    await _questionnaire.Update(existingQuestionnaire);
+                                }
+
+
+                                else if (existingAnswer != null)
+                                {
+
+                                    existingAnswer.Text = answerViewModel.Text;
+                                }
 
                             }
-                            else if (answerViewModel.Text == null)
-                            {
-                                existingQuestion.Answers.Remove(existingAnswer);
-                                await _questionnaire.Update(existingQuestionnaire);
-                            }
 
 
-                            else if (existingAnswer != null)
-                            {
-
-                                existingAnswer.Text = answerViewModel.Text;
-                            }
 
                         }
-
-
-
                     }
+
+               
                     else
                     {
-                        // Add new question
+                        // Create a new question
                         var newQuestion = new Question
                         {
-                            Text = questionViewModel.Text, // Make sure question text is not null
-                            Type = questionViewModel.Type, // Make sure question type is not null
-                            Answers = new List<Answer>() // Initialize answers list
+                            Text = questionViewModel.Text,
+                            Type = questionViewModel.Type,
+                            Answers = new List<Answer>()
                         };
 
                         foreach (var answerViewModel in questionViewModel.Answers)
                         {
-                            // Add new answer
-                            newQuestion.Answers.Add(new Answer { Text = answerViewModel.Text });
+                            if (!string.IsNullOrEmpty(answerViewModel.Text))
+                            {
+                                // Add new answer if text is not null or empty
+                                newQuestion.Answers.Add(new Answer { Text = answerViewModel.Text });
+                            }
                         }
 
-                        // Add new question to questionnaire
-                        existingQuestionnaire.Questions.Add(newQuestion);
+                        // Add new question to the list of new questions
+                        newQuestions.Add(newQuestion);
                     }
+                    existingQuestionnaire.Questions.AddRange(newQuestions);
+                    //else
+                    //{
+                    //    // Add new question
+                    //    var newQuestion = new Question
+                    //    {
+                    //        Text = questionViewModel.Text, // Make sure question text is not null
+                    //        Type = questionViewModel.Type, // Make sure question type is not null
+                    //        Answers = new List<Answer>() // Initialize answers list
+                    //    };
+
+                    //    foreach (var answerViewModel in questionViewModel.Answers)
+                    //    {
+                    //        // Add new answer
+                    //        newQuestion.Answers.Add(new Answer { Text = answerViewModel.Text });
+                    //    }
+
+                    //    // Add new question to questionnaire
+                    //    existingQuestionnaire.Questions.Add(newQuestion);
+                    //}
 
                 }
 
