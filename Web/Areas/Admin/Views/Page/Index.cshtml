@@ -1,0 +1,57 @@
+﻿@model IEnumerable<PageViewModel>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+
+
+
+<div class="container mt-5">
+
+    <partial name="_Notification" />
+
+    <div class="card bg-default mb-3 ">
+        <div class="card-header">Pages</div>
+        <div class="card-body">
+            <h4 class="card-title">Page list</h4>
+            <p>
+                <a asp-action="Create" class="btn btn-primary">Create New page</a>
+            </p>
+
+            <table class="table table-responsive w-100 d-block d-md-table">
+                <thead class="w-auto">
+                    <tr>
+
+                        <th scope="col">Id</th>
+                        <th scope="col">Title</th>
+                        <th scope="col">Slug</th>
+                        <th scope="col">Banner</th>
+                        <th scope="col" class="d-flex justify-content-end">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="w-auto">
+                    @foreach (var item in Model)
+                    {
+                        <tr class="table-secondary">
+
+                            <td>@item.Id</td>
+                            <td> <span class="badge bg-primary">@item.Title</span></td>
+                            <td>@item.Slug</td>
+                            <td>@item.banner?.Title</td>
+                            <td class="d-flex justify-content-end">
+                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-s"><i class="bi bi-trash"></i> Delete</a> |
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-s"><i class="bi bi-pencil-square"></i> Edit</a>
+                            </td>
+                        </tr>
+                    }
+
+
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+</div>
+
+

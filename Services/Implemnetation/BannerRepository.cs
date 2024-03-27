@@ -52,6 +52,11 @@ namespace Services.Implemnetation
            return await _context.Banners.AsNoTracking().ToListAsync();
         }
 
+        public List<Banner> GetBannersForPage()
+        {
+            return _context.Banners.AsNoTracking().ToList();
+        }
+
         public void Update(Banner banner)
         {
              _context.Banners.Update(banner);
