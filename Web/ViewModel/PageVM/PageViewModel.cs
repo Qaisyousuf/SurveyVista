@@ -15,6 +15,13 @@ namespace Web.ViewModel.PageVM
         public string? Content { get; set; }
 
 
+        [DisplayName("Footer")]
+        public int FooterId { get; set; }
+
+        [ForeignKey("FooterId")]
+        public Footer? Footer { get; set; }
+
+
         [DisplayName("Banner")]
         public int BannerId { get; set; }
 

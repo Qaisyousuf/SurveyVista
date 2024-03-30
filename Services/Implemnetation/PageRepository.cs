@@ -45,9 +45,21 @@ namespace Services.Implemnetation
             return _context.Pages.Where(x => x.Slug == slug).AsNoTracking().FirstOrDefault();
         }
 
+        public List<Page> GetPageWithAll()
+        {
+
+            return _context.Pages.Include(x => x.banner).Include(x => x.footer).AsNoTracking().ToList();
+        }
+
         public List<Page> GetPageWithBanner()
         {
             return _context.Pages.Include(x => x.banner).AsNoTracking().ToList();
+        }
+
+        public List<Page> GetPageWithFooter()
+        {
+
+            return _context.Pages.Include(x => x.footer).AsNoTracking().ToList();
         }
 
         public bool SlugExists(string slug, int? pageIdExclude = null)

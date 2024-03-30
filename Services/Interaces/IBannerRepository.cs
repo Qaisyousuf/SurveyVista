@@ -15,6 +15,7 @@ namespace Services.Interaces
         List<Banner> GetAllBanners();
 
         Banner GetBannerById(int id);
+        Task<Banner> GetBannerByIdAsync(int id);
 
         Task Add(Banner banner);
 

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Services.Interaces;
 using System.Diagnostics;
 using Web.Models;
 
@@ -6,27 +7,36 @@ namespace Web.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly IPageRepository _pageRepository;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(IPageRepository pageRepository)
         {
-            _logger = logger;
+            _pageRepository = pageRepository;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(string slug)
         {
-            return View();
+            if (string.IsNullOrEmpty(slug))
+                slug = "home";
+
+            if (!_pageRepository.SlugExists(slug))
+                return RedirectToAction(nameof(Error));
+
+            var pageFromdb = _pageRepository.GetPageSlug(slug);
+
+            TempData["bannerId"] = pageFromdb.BannerId;
+            TempData["Footer"] = pageFromdb.FooterId;
+            
+
+            return View(pageFromdb);
         }
 
-        public IActionResult Privacy()
-        {
-            return View();
-        }
+     
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            return View();
         }
     }
 }

@@ -47,6 +47,11 @@ namespace Services.Implemnetation
             return _context.Banners.AsNoTracking().Where(x => x.Id == id).FirstOrDefault();
         }
 
+        public async Task<Banner> GetBannerByIdAsync(int id)
+        {
+            return await _context.Banners.AsNoTracking().Where(x => x.Id == id).FirstOrDefaultAsync();
+        }
+
         public async Task<IEnumerable<Banner>> GetBanners()
         {
            return await _context.Banners.AsNoTracking().ToListAsync();

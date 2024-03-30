@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Web.Migrations
 {
     [DbContext(typeof(SurveyContext))]
-    [Migration("20240326164756_requiredRevmoedFromQuestionAndAnswer")]
-    partial class requiredRevmoedFromQuestionAndAnswer
+    [Migration("20240327153248_DataBaseCreated")]
+    partial class DataBaseCreated
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -200,6 +200,9 @@ namespace Web.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("FooterId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Slug")
                         .HasColumnType("nvarchar(max)");
 
@@ -210,6 +213,8 @@ namespace Web.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("BannerId");
+
+                    b.HasIndex("FooterId");
 
                     b.ToTable("Pages");
                 });
@@ -316,7 +321,15 @@ namespace Web.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Model.Footer", "footer")
+                        .WithMany()
+                        .HasForeignKey("FooterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("banner");
+
+                    b.Navigation("footer");
                 });
 
             modelBuilder.Entity("Model.Question", b =>

@@ -13,7 +13,7 @@ namespace Web.ViewModel.QuestionnaireVM
         [Required]
 
         [Display(Name ="Questionnaire title")]
-        [StringLength(100, ErrorMessage = "Title must be between 1 and 40 characters.", MinimumLength = 1)]
+        [StringLength(40, ErrorMessage = "Title must be between 1 and 40 characters.", MinimumLength = 1)]
         public string? Title { get; set; }
         [Required]
         public string? Description { get; set; }

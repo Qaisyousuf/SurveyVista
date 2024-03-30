@@ -36,6 +36,12 @@
                             <span asp-validation-for="BannerId" class="text-danger"></span>
                        
                     </div>
+                        <div class="mb-3 col-12">
+                            <label asp-for="FooterId" class="control-label"></label>
+                            <select asp-for="FooterId" asp-items="ViewBag.DropDownData" class="form-control" disabled></select>
+                            <span asp-validation-for="FooterId" class="text-danger"></span>
+
+                        </div>
                    
                     <div class="mb-3">
                         <input type="submit" value="Delete" class="btn btn-outline-primary" /> |  <a asp-action="Index" class="btn btn-primary">Back to list</a>

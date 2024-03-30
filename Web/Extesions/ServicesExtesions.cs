@@ -15,6 +15,8 @@ namespace Web.Extesions
             });
         }
 
+
+
         public static void ConfigurePageServices(this IServiceCollection services)
         {
             services.AddScoped<IPageRepository,PageRepository>();

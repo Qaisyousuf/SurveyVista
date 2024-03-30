@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Web.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial : Migration
+    public partial class DataBaseCreated : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -70,6 +70,20 @@ namespace Web.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Questionnaires",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Questionnaires", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "SocialMedia",
                 columns: table => new
                 {
@@ -92,6 +106,7 @@ namespace Web.Migrations
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Slug = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FooterId = table.Column<int>(type: "int", nullable: false),
                     BannerId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -101,6 +116,33 @@ namespace Web.Migrations
                         name: "FK_Pages_Banners_BannerId",
                         column: x => x.BannerId,
                         principalTable: "Banners",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Pages_Footers_FooterId",
+                        column: x => x.FooterId,
+                        principalTable: "Footers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Questions",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Text = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Type = table.Column<int>(type: "int", nullable: false),
+                    QuestionnaireId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Questions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Questions_Questionnaires_QuestionnaireId",
+                        column: x => x.QuestionnaireId,
+                        principalTable: "Questionnaires",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -129,6 +171,31 @@ namespace Web.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Answers",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Text = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    QuestionId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Answers", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Answers_Questions_QuestionId",
+                        column: x => x.QuestionId,
+                        principalTable: "Questions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Answers_QuestionId",
+                table: "Answers",
+                column: "QuestionId");
+
             migrationBuilder.CreateIndex(
                 name: "IX_FooterSocialMedias_SocialId",
                 table: "FooterSocialMedias",
@@ -138,6 +205,16 @@ namespace Web.Migrations
                 name: "IX_Pages_BannerId",
                 table: "Pages",
                 column: "BannerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Pages_FooterId",
+                table: "Pages",
+                column: "FooterId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Questions_QuestionnaireId",
+                table: "Questions",
+                column: "QuestionnaireId");
         }
 
         /// <inheritdoc />
@@ -147,19 +224,28 @@ namespace Web.Migrations
                 name: "Addresss");
 
             migrationBuilder.DropTable(
+                name: "Answers");
+
+            migrationBuilder.DropTable(
                 name: "FooterSocialMedias");
 
             migrationBuilder.DropTable(
                 name: "Pages");
 
             migrationBuilder.DropTable(
-                name: "Footers");
+                name: "Questions");
 
             migrationBuilder.DropTable(
                 name: "SocialMedia");
 
             migrationBuilder.DropTable(
                 name: "Banners");
+
+            migrationBuilder.DropTable(
+                name: "Footers");
+
+            migrationBuilder.DropTable(
+                name: "Questionnaires");
         }
     }
 }

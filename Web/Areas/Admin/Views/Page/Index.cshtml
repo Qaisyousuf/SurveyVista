@@ -27,6 +27,7 @@
                         <th scope="col">Title</th>
                         <th scope="col">Slug</th>
                         <th scope="col">Banner</th>
+                        <th scope="col">Footer</th>
                         <th scope="col" class="d-flex justify-content-end">Action</th>
                     </tr>
                 </thead>
@@ -39,6 +40,7 @@
                             <td> <span class="badge bg-primary">@item.Title</span></td>
                             <td>@item.Slug</td>
                             <td>@item.banner?.Title</td>
+                            <td>@item.Footer?.Title</td>
                             <td class="d-flex justify-content-end">
                                 <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-s"><i class="bi bi-trash"></i> Delete</a> |
                                 <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-s"><i class="bi bi-pencil-square"></i> Edit</a>

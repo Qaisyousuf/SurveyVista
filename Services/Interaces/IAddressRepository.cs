@@ -12,6 +12,8 @@ namespace Services.Interaces
 
         List<Address> GetAddresses();
 
+        Task<List<Address>> GetAddressesAsync();
+
         Address GetAddressById(int? id);
 
         Task Add(Address address);

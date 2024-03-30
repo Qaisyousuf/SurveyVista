@@ -197,6 +197,9 @@ namespace Web.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("FooterId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Slug")
                         .HasColumnType("nvarchar(max)");
 
@@ -207,6 +210,8 @@ namespace Web.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("BannerId");
+
+                    b.HasIndex("FooterId");
 
                     b.ToTable("Pages");
                 });
@@ -313,7 +318,15 @@ namespace Web.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Model.Footer", "footer")
+                        .WithMany()
+                        .HasForeignKey("FooterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("banner");
+
+                    b.Navigation("footer");
                 });
 
             modelBuilder.Entity("Model.Question", b =>

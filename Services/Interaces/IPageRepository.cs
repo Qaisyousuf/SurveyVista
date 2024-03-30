@@ -19,7 +19,11 @@ namespace Services.Interaces
 
         void Update(Page page);
 
+        List<Page> GetPageWithAll();
+
         List<Page> GetPageWithBanner();
+        List<Page> GetPageWithFooter();
+
 
         Page GetPageSlug(string slug);
 

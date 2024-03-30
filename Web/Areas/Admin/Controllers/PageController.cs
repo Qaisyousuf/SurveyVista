@@ -11,21 +11,24 @@ namespace Web.Areas.Admin.Controllers
     {
         private readonly IPageRepository _pageRepository;
         private readonly IBannerRepository _bannerRepository;
+        private readonly IFooterRepository _footerRepository;
 
-        public PageController(IPageRepository pageRepository,IBannerRepository bannerRepository)
+        public PageController(IPageRepository pageRepository,IBannerRepository bannerRepository, IFooterRepository footerRepository)
         {
          _pageRepository = pageRepository;
          _bannerRepository = bannerRepository;
+          _footerRepository = footerRepository;
         }
         public IActionResult Index()
         {
-            var pages = _pageRepository.GetPageWithBanner();
+            var pages = _pageRepository.GetPageWithAll();
+
 
             List<PageViewModel> result = new List<PageViewModel>();
 
             foreach (var page in pages)
             {
-                result.Add(new PageViewModel { Id = page.Id, Title = page.Title, Slug = page.Slug, banner = page.banner });
+                result.Add(new PageViewModel { Id = page.Id, Title = page.Title, Slug = page.Slug, banner = page.banner,Footer=page.footer });
             }
 
             return View(result);
@@ -35,6 +38,7 @@ namespace Web.Areas.Admin.Controllers
         public IActionResult Create()
         {
             ViewBag.DropDownData=GetSidebarsForDropDownList();
+            ViewBag.FooterDropDown = GetFooterForDropDownList();
 
             return View();
         }
@@ -48,6 +52,7 @@ namespace Web.Areas.Admin.Controllers
             if(!ModelState.IsValid)
             {
                 ViewBag.DropDownData = GetSidebarsForDropDownList();
+                ViewBag.FooterDropDown = GetFooterForDropDownList();
                 return View(viewmodel);
             }
 
@@ -64,6 +69,7 @@ namespace Web.Areas.Admin.Controllers
             {
                 ModelState.AddModelError("", "Title or slug exists");
                 ViewBag.DropDownData = GetSidebarsForDropDownList();
+                ViewBag.FooterDropDown = GetFooterForDropDownList();
                 return View(viewmodel);
             }
 
@@ -74,6 +80,8 @@ namespace Web.Areas.Admin.Controllers
             page.Content = viewmodel.Content;
             page.banner = viewmodel.banner;
             page.BannerId = viewmodel.BannerId;
+            page.footer = viewmodel.Footer;
+            page.FooterId = viewmodel.FooterId;
 
 
             _pageRepository.Add(page);
@@ -96,10 +104,12 @@ namespace Web.Areas.Admin.Controllers
                 Content=pageFromdb.Content,
                 banner=pageFromdb.banner,
                 BannerId=pageFromdb.BannerId,
-
+                Footer = pageFromdb.footer,
+                FooterId = pageFromdb.FooterId,
 
             };
             ViewBag.DropDownData = GetSidebarsForDropDownList();
+            ViewBag.FooterDropDown = GetFooterForDropDownList();
 
 
             return View(viewmodel);
@@ -112,6 +122,7 @@ namespace Web.Areas.Admin.Controllers
             {
 
                 ViewBag.DropDownData = GetSidebarsForDropDownList();
+                ViewBag.FooterDropDown = GetFooterForDropDownList();
                 return View(viewmodel);
 
             }
@@ -128,6 +139,7 @@ namespace Web.Areas.Admin.Controllers
 
                 ModelState.AddModelError("", "Title or slug exists");
                 ViewBag.DropDownData = GetSidebarsForDropDownList();
+                ViewBag.FooterDropDown = GetFooterForDropDownList();
                 return View(viewmodel);
             }
 
@@ -138,6 +150,8 @@ namespace Web.Areas.Admin.Controllers
             page.Content = viewmodel.Content;
             page.banner = viewmodel.banner;
             page.BannerId = viewmodel.BannerId;
+            page.footer = viewmodel.Footer;
+            page.FooterId = viewmodel.FooterId;
 
 
             _pageRepository.Update(page);
@@ -165,10 +179,13 @@ namespace Web.Areas.Admin.Controllers
                 Content = pageFromdb.Content,
                 banner = pageFromdb.banner,
                 BannerId = pageFromdb.BannerId,
+                Footer = pageFromdb.footer,
+                FooterId = pageFromdb.FooterId,
 
 
             };
             ViewBag.DropDownData = GetSidebarsForDropDownList();
+            ViewBag.FooterDropDown = GetFooterForDropDownList();
 
 
             return View(viewmodel);
@@ -191,6 +208,20 @@ namespace Web.Areas.Admin.Controllers
         private List<SelectListItem> GetSidebarsForDropDownList()
         {
              var banners = _bannerRepository.GetBannersForPage();
+
+            List<SelectListItem> dropDown = new List<SelectListItem>();
+
+            foreach (var item in banners)
+            {
+                dropDown.Add(new SelectListItem { Text = item.Title, Value = item.Id.ToString() });
+            }
+
+            return dropDown;
+        }
+
+        private List<SelectListItem> GetFooterForDropDownList()
+        {
+            var banners = _footerRepository.GetFooter();
 
             List<SelectListItem> dropDown = new List<SelectListItem>();
 

@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Services.Implemnetation;
 using Services.Interaces;
 using Web.Extesions;
+using Web.ViewComponents;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,7 +21,7 @@ builder.Services.AddDbContext<SurveyContext>(options =>
 });
 
 
-//builder.Services.ConfigureSQLConnection(builder.Configuration);
+
 
 builder.Services.ConfigurePageServices();
 builder.Services.ConfigureBannerServices();
@@ -30,6 +31,7 @@ builder.Services.ConfigureFooter();
 builder.Services.ConfigureQuestionnarie();
 builder.Services.ConfigureQuestion();
 builder.Services.AddScoped<SurveyContext>();
+builder.Services.AddTransient<NavigationViewComponent>();
 
 var app = builder.Build();
 
@@ -47,6 +49,11 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthorization();
+
+
+app.MapControllerRoute(
+    name: "page",
+    pattern: "{slug}", defaults: new { Controller = "Home", Action = "Index" });
 
 
 app.MapAreaControllerRoute(

@@ -70,6 +70,18 @@ namespace Data
                 .HasKey(a => a.Id);
 
 
+            //modelBuilder.Entity<Page>()
+            //    .HasOne(p => p.footer)
+            //    .WithMany()
+            //    .HasForeignKey(p => p.FooterId)
+            //    .IsRequired(false)
+            //    .OnDelete(DeleteBehavior.Cascade);
+                
+            
+
+            
+
+
             base.OnModelCreating(modelBuilder);
         }
 

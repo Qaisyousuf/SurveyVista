@@ -10,11 +10,13 @@
             @* <h6 class="text-danger">Are you sure you want to delete this questionnaire: <span class="badge bg-danger p-2 shadow rounded">@Model.Title</span></h6> *@
             <h6 class="text-danger">
                 Are you sure you want to delete:
+
                 <span class="badge bg-danger p-2 shadow rounded">
                     <span class="item-title ">@Html.Raw(Model.Title.Length >= 30 ? Model.Title.Substring(0, 30) : Model.Title)</span>
-                    <span class="more-title " style="display:none;">@(Model.Title.Length > 30 ? Model.Title.Substring(20) : "")</span>
+                    <span class="more-title " style="display:none;">@(Model.Title.Length > 30 ? Model.Title.Substring(30) : "")</span>
                 </span>
-                <button id="readMoreBtn" type="button" class="btn btn-link">Read More</button>
+                <button type="button" class="btn btn-link readMoreBtn">Read More</button>
+
             </h6>
       
 
@@ -152,19 +154,24 @@
                         }
                     });
                 });
-                $(document).ready(function () {
-                    $("#readMoreBtn").click(function () {
-                        $("#readMore").toggle();
-                        $(this).text(function (_, text) {
-                            return text === "Read More" ? "Read Less" : "Read More";
-                        });
-                    });
-                });
+               
+
             });
 
 
     </script> 
 
-        
+    <script>
+            $(document).ready(function () {
+                $(".readMoreBtn").click(function () {
+                    $(this).closest('.text-danger').find('.more-title').toggle();
+                    $(this).text(function (_, text) {
+                        return text === "Read More" ? "Read Less" : "Read More";
+                    });
+                });
+            });
+
+
+    </script>
 
 }  

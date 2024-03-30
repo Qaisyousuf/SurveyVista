@@ -1,0 +1,94 @@
+﻿@model Footer
+
+
+
+
+<div class="d-flex flex-column" id="Background">
+
+    <!-- FOR DEMO PURPOSE -->
+    <section class="hero text-white  flex-grow-1">
+        <div class="container py-4">
+            <div id="rowSection">
+                <div class="col-lg-6" id="box">
+                    <h1 class="display-6 text-white font-weight-bold">@Model.Title.ToUpper()</h1>
+                  @*   <p class="fst-italic text-muted">@Html.Raw(Model.Content) <a class="text-primary" href="@Model.Sitecopyright" target="_blank">SeoSoft</a></p> *@
+                 but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+               
+                </div>
+                <div class="col-lg-6" id="box">
+                    <script src="https://unpkg.com/@@dotlottie/player-component@latest/dist/dotlottie-player.mjs" type="module"></script>
+                    <dotlottie-player src="https://lottie.host/f2df0cd6-fbde-4071-ab90-d9e74a075d5a/ygq5zJ9mzx.json" class="img-fluid" speed="1" style="width: auto; height: auto;" direction="1" playMode="normal" loop autoplay></dotlottie-player>
+                </div>
+            </div>
+        </div>
+    </section>
+
+   
+
+    <!-- FOOTER -->
+    <footer class="w-100 py-4 flex-shrink-0">
+        <div class="container py-4">
+            <div class="row justify-content-around">
+             <vc:address></vc:address>
+                <div class="col-lg-2 col-md-6">
+                   <vc:navigation-footer></vc:navigation-footer>
+                </div>
+               
+                <div class="col-lg-4 col-md-6">
+                    <h5 class="text-white mb-3">Newsletter</h5>
+                   
+                    <form action="#">
+                        <div class="input-group mb-3">
+                            <input class="form-control" type="text" placeholder="Recipient's username" aria-label="Email" aria-describedby="button-addon2">
+                            <button class="btn" id="BannerButon" type="button">Subscribe</button>
+                        </div>
+                    </form>
+
+                        <ul class="list-unstyled text-muted">
+                        @foreach (var footerSocialMedia in Model.FooterSocialMedias)
+                        {
+                            <li class="nav-item">
+                                <a id="LinkColor" href="@footerSocialMedia.SocialMedia.Url" target="_blank">@footerSocialMedia.SocialMedia.Name</a>
+                            </li>
+                        }
+                       
+                        </ul>
+
+                </div>
+            </div>
+        </div>
+       
+        <div class="container">
+            <hr class="border border-primary border-start-0 border-1 opacity-35">
+            <div class="row d-flex justify-content-around">
+                
+                <div class="col-lg-2 col-md-3">
+                    <span class=" muted">Designed by @Model.CreatedBy</span>
+                
+                </div>
+                <div class="col-lg-2 col-md-3">
+                    <span class=" muted">Update by @Model.UpdatedBy</span>
+                
+                </div>
+                <div class="col-lg-2 col-md-3">
+                    <span class=" muted">Updated @Model.LastUpdated.ToShortDateString()</span>
+                 
+                </div>
+                <div class="col-lg-2 col-md-3">
+                    <span class=" muted">Owner @Model.Owner</span>
+                 
+                </div>
+            </div>
+        </div>
+    </footer>
+</div>
+
+
+
+
+
+
+
+
+
+   

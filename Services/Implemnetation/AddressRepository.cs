@@ -48,6 +48,11 @@ namespace Services.Implemnetation
            return _context.Addresss.ToList();
         }
 
+        public async Task<List<Address>> GetAddressesAsync()
+        {
+           return await _context.Addresss.AsNoTracking().ToListAsync();
+        }
+
         public void Update(Address address)
         {
             _context.Addresss.Update(address);

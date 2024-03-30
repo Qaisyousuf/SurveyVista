@@ -18,6 +18,11 @@ namespace Model
         public string? Content { get; set; }
 
 
+        public int FooterId { get; set; }
+
+        [ForeignKey("FooterId")]
+        public Footer? footer { get; set; }
+
         public int BannerId { get; set; }
 
         [ForeignKey("BannerId")]
