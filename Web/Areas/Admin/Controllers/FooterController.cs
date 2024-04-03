@@ -216,17 +216,57 @@ namespace Web.Areas.Admin.Controllers
                     .Where(sm => selectedSocialMediaIds.Contains(sm.Id))
                     .ToList();
 
+                var existingSocialMediaIds = footer.FooterSocialMedias.Select(fsm => fsm.SocialId).ToList();
 
+                // Find the IDs of social media that are no longer selected
+                var removedSocialMediaIds = existingSocialMediaIds.Except(selectedSocialMediaIds).ToList();
+
+                // Remove associations for the removed social media
+                foreach (var removedSocialMediaId in removedSocialMediaIds)
+                {
+                    var removedAssociation = footer.FooterSocialMedias.FirstOrDefault(fsm => fsm.SocialId == removedSocialMediaId);
+                    if (removedAssociation != null)
+                    {
+                        footer.FooterSocialMedias.Remove(removedAssociation);
+
+                      
+                    }
+                    _footer.Update(footer);
+                    await _footer.commitAsync();
+                }
 
                 foreach (var socialMedia in selectedSocialMedias)
                 {
+                    // Check if a FooterSocialMedia with the same key values already exists in the context
+                    var existingFooterSocialMedia = footer.FooterSocialMedias.FirstOrDefault(fsm => fsm.SocialId == socialMedia.Id);
 
-                    footer.FooterSocialMedias.Add(new FooterSocialMedia
+                    if (existingFooterSocialMedia != null)
                     {
-                        SocialId = socialMedia.Id
-                        // Add other properties as needed
-                    });
+                        // Update properties of existing entity
+                        existingFooterSocialMedia.SocialMedia.Name = socialMedia.Name;
+                        // Update other properties as needed
+                    }
+                    else
+                    {
+                        // Add new entity to the context
+                        footer.FooterSocialMedias.Add(new FooterSocialMedia
+                        {
+                            SocialId = socialMedia.Id
+                            // Add other properties as needed
+                        });
+                    }
                 }
+
+
+                //foreach (var socialMedia in selectedSocialMedias)
+                //{
+
+                //    footer.FooterSocialMedias.Add(new FooterSocialMedia
+                //    {
+                //        SocialId = socialMedia.Id
+                //        // Add other properties as needed
+                //    });
+                //}
 
 
                 _footer.Update(footer);

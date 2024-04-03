@@ -7,11 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!--<PackageReference Include="Microsoft.AspNet.Mvc" Version="5.3.0" />-->
-    <!--<PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.2" />-->
-  </ItemGroup>
-
-  <ItemGroup>
+    <PackageReference Include="MailJet.Api" Version="3.0.0" />
     <ProjectReference Include="..\Data\Data.csproj" />
     <ProjectReference Include="..\Model\Model.csproj" />
   </ItemGroup>

@@ -32,6 +32,9 @@ builder.Services.ConfigureQuestionnarie();
 builder.Services.ConfigureQuestion();
 builder.Services.AddScoped<SurveyContext>();
 builder.Services.AddTransient<NavigationViewComponent>();
+builder.Services.MailConfiguration();
+
+
 
 var app = builder.Build();
 

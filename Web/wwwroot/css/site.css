@@ -35,7 +35,9 @@
     --font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 /*_______________________________________________________________________________start of the custom CSS_____________________________________________________________*/
-
+#Background {
+    background-color: #141c27 !important;
+}
 .MainBanner {
     display: flex;
     flex-wrap: wrap;
@@ -53,7 +55,7 @@
    
 }
 
-#MainContent {
+#MainContent{
     background-color: #33b3ae !important;
     display: flex;
     justify-content: center;
@@ -173,18 +175,20 @@
         background-color: #33b3ae !important;
         display: flex;
         justify-content: center;
-        height: 30vh;
+        height: 50vh;
         align-items: center;
     }
  
 }
 
 .hero {
-    background-color: #141a23;
+    background-color: #141c27;
+ /*   background-image: linear-gradient(119deg, rgba(14,12,56,1) 0%, rgba(20,26,35,1) 35%, rgba(24,35,51,1) 66%, rgba(34,49,70,1) 100%);*/
 }
 
+
 footer {
-    background: #141a23;
+    background: #141c27;
 }
 
 #LinkColor {
@@ -285,9 +289,9 @@ body, html {
     background-color: transparent !important;
     color: #33b3ae;
     border: 1px solid #33b3ae !important;
-    box-shadow: 2px 4px 13px -1px rgba(0,0,0,0.75);
-    -webkit-box-shadow: 2px 4px 13px -1px rgba(0,0,0,0.75);
-    -moz-box-shadow: 2px 4px 13px -1px rgba(0,0,0,0.75);
+    box-shadow: 0px 4px 3px -1px rgba(0,0,0,0.58);
+    -webkit-box-shadow: 0px 4px 3px -1px rgba(0,0,0,0.58);
+    -moz-box-shadow: 0px 4px 3px -1px rgba(0,0,0,0.58);
 }
 
 #BannerButon:hover {
@@ -304,9 +308,9 @@ body, html {
     background-color: transparent !important;
     color: #ffffff;
     border: 1px solid #ffffff !important;
-    box-shadow: 2px 4px 13px -1px rgba(0,0,0,0.75);
-    -webkit-box-shadow: 2px 4px 13px -1px rgba(0,0,0,0.75);
-    -moz-box-shadow: 2px 4px 13px -1px rgba(0,0,0,0.75);
+    box-shadow: 0px 5px 22px -6px rgba(0,0,0,0.48);
+    -webkit-box-shadow: 0px 5px 22px -6px rgba(0,0,0,0.48);
+    -moz-box-shadow: 0px 5px 22px -6px rgba(0,0,0,0.48);
 }
 
     #HomeButon:hover {
@@ -320,10 +324,10 @@ body, html {
 
 .navbar {
     margin-bottom: 0px !important;
-    background-color: #161d27 !important;
-    -webkit-box-shadow: 1px 6px 5px -3px rgba(82,81,82,1) !important;
-    -moz-box-shadow: 1px 6px 5px -3px rgba(82,81,82,1) !important;
-    box-shadow: 1px 6px 5px -3px rgba(82,81,82,1) !important;
+    background-color: #16202d !important;
+    box-shadow: 0px 2px 5px 0px rgba(140,140,140,0.79) !important;
+    -webkit-box-shadow: 0px 2px 5px 0px rgba(140,140,140,0.79) !important;
+    -moz-box-shadow: 0px 2px 5px 0px rgba(140,140,140,0.79) !important;
 }
 .navbar-brand {
     color: #33b3ae !important;

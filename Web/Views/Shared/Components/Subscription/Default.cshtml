@@ -1,0 +1,89 @@
+﻿@model Subscription
+
+<style>
+    /* Custom CSS for transparent form-floating */
+    .form-floating .form-control {
+        box-shadow: 0px 4px 3px -1px rgba(0,0,0,0.58);
+        -webkit-box-shadow: 0px 4px 3px -1px rgba(0,0,0,0.58);
+        border: none;
+        width: 20%;
+        border-radius: 3px;
+        border-bottom: 1px solid #33b3ae; /* Bottom underline */
+        border-top: 1px solid #33b3ae;
+        border-left: 1px solid #33b3ae;
+        background-color: transparent; /* Make input transparent */
+        color: white; /* Set text color */
+        height: calc(2.2rem + calc(var(--bs-border-width)* 2)) !important;
+    }
+
+    .form-floating > label {
+        padding-left: 10px !important;
+    }
+
+    .form-floating label {
+        color: white; /* Set label color */
+        padding: 0px !important;
+    }
+
+    /* Remove focus styling */
+    .form-floating .form-control:focus {
+        box-shadow: none !important; /* Remove box shadow */
+        border: none;
+        border-radius: 3px;
+        border-bottom: 1px solid #33b3ae;
+        border-top: 1px solid #33b3ae;
+        border-left: 1px solid #33b3ae;
+    }
+
+    /* Override placeholder color */
+    ::placeholder {
+        color: rgba(255, 255, 255, 0.5); /* Set placeholder color */
+    }
+
+    .input-group-text {
+        background-color: #33b3ae;
+        color: white;
+    }
+</style>
+
+
+<form asp-action="Subscribe" asp-controller="Subscription" method="post">
+    <div class="form-floating">
+        <input type="hidden" asp-for="Id" />
+        <div class="input-group mb-3">
+            <input asp-for="Email" class="form-control" type="text" placeholder="Email..." aria-label="Email" aria-describedby="button-addon2">
+          
+            <button class="btn btn-sm" id="BannerButon" type="submit">Subscribe</button>
+        </div>
+        <span asp-validation-for="Email" class="text-danger"></span>
+      
+    </div>
+   
+</form>
+@* <form asp-action="Subscribe" asp-controller="Subscription" method="post">
+
+
+    <div class="form-floating">
+        <div class="input-group mb-3">
+            <input asp-for="Email" class="form-control" type="text" placeholder="Email..." aria-label="Email" aria-describedby="button-addon2">
+            <span asp-validation-for="Email" class="text-danger"></span>
+           
+        </div>
+    </div>
+
+
+    <button class="btn btn-sm" id="BannerButon" type="submit">Subscribe</button>
+
+
+   
+</form> *@
+
+
+
+@section Scripts {
+
+
+    @{
+        <partial name="_ValidationScriptsPartial" />
+    }
+}

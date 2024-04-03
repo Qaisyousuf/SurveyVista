@@ -1,7 +1,9 @@
 ﻿using Data;
+using Mailjet.Client;
 using Microsoft.EntityFrameworkCore;
 using Services.Implemnetation;
 using Services.Interaces;
+using System.Configuration;
 
 namespace Web.Extesions
 {
@@ -47,6 +49,38 @@ namespace Web.Extesions
         public static void ConfigureQuestion(this IServiceCollection services)
         {
             services.AddScoped<IQuestionRepository, QuestionRepository>();
+        }
+        public static void MailConfiguration(this IServiceCollection services)
+        {
+            services.AddTransient<IEmailServices, EmailServices>();
+        }
+
+        //public static void MailConfiguration(this IServiceCollection services, IConfiguration configuration)
+        //{
+        //    services.AddControllersWithViews();
+
+        //    services.AddScoped<IMailjetClient>(s =>
+        //    {
+        //        var apiKey = configuration.GetSection("Mailjet")["ApiKey"];
+        //        var apiSecret = configuration.GetSection("Mailjet")["SecretKey"];
+        //        return new MailjetClient(apiKey, apiSecret);
+        //    });
+
+        //}
+
+        public static void ConfigureServicesMailJet(this IServiceCollection services, IConfiguration configuration)
+        {
+            // Other configurations...
+
+            // Retrieve Mailjet settings from appsettings.json
+            var mailjetSettings = configuration.GetSection("MailJet");
+            var apiKey = mailjetSettings["ApiKey"];
+            var apiSecret = mailjetSettings["SecretKey"];
+
+            // Register Mailjet service with API key and secret key
+            //services.AddSingleton<IMailjetService>(new MailjetService(apiKey, apiSecret));
+
+            // Other configurations...
         }
     }
 }
