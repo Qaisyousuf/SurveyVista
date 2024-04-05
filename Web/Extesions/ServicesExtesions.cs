@@ -1,9 +1,14 @@
 ﻿using Data;
 using Mailjet.Client;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Services.Implemnetation;
 using Services.Interaces;
 using System.Configuration;
+using OpenAI_API;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Web.AIConfiguration;
 
 namespace Web.Extesions
 {
@@ -50,6 +55,10 @@ namespace Web.Extesions
         {
             services.AddScoped<IQuestionRepository, QuestionRepository>();
         }
+        public static void ConfigureNewsLetter(this IServiceCollection services)
+        {
+            services.AddScoped<INewsLetterRepository, NewsLetterRepository>();
+        }
         public static void MailConfiguration(this IServiceCollection services)
         {
             services.AddTransient<IEmailServices, EmailServices>();
@@ -81,6 +90,16 @@ namespace Web.Extesions
             //services.AddSingleton<IMailjetService>(new MailjetService(apiKey, apiSecret));
 
             // Other configurations...
+        }
+
+        public static void ConfigureOpenAI(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.Configure<OpenAIOptions>(configuration.GetSection("OpenAI"));
+
+            services.AddSingleton<IOpenAIAPI, OpenAIAPI>();
+            
+
+
         }
     }
 }

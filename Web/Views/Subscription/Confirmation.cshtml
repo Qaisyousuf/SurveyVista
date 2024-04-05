@@ -1,0 +1,35 @@
+﻿@model Subscription
+@{
+    ViewData["Title"] = "Confirmation";
+    Layout = "~/Views/Shared/_SubscriptionLayout.cshtml";
+}
+
+    <div class="d-flex flex-column" id="BannerBackground">
+
+        
+        <section class="hero text-white">
+            <div class="container py-1">
+                @*   <div class="col-12" id="boxBanner">
+            <h1 class="display-6 text-white font-weight-bold">@Model.Description.ToUpper()</h1>
+            </div> *@
+                <div id="rowSectionBanner">
+
+                    <div class="col-lg-6" id="boxBanner">
+                        <h1 class="display-6 font-weight-bold" id="BtnColor">Hey @Model?.Name</h1>
+
+                        @*   <p class="fst-italic text-muted">@Html.Raw(Model.Content) <a class="text-primary" href="@Model.Sitecopyright" target="_blank">SeoSoft</a></p> *@
+                    <p class="text-white">@ViewBag.Message</p>
+                        <a href="/home" class="btn btn-sm mt-1" id="BannerButon"><i class="bi bi-arrow-left-square-fill"></i> Back to home </a>
+                    </div>
+                    <div class="col-lg-6" id="boxBanner">
+                        <script src="https://unpkg.com/@@dotlottie/player-component@latest/dist/dotlottie-player.mjs" type="module"></script>
+                        <dotlottie-player src="https://lottie.host/543409f4-933c-456f-923c-f936be0d0da6/UxmKdWjkuD.json" class="img-fluid" speed="1" style="width: auto; height: auto;" direction="1" playMode="normal" autoplay></dotlottie-player>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+
+

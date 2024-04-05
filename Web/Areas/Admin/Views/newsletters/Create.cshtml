@@ -1,0 +1,65 @@
+﻿@model Web.ViewModel.NewsLetterVM.SendNewsLetterViewModel
+
+@{
+    ViewData["Title"] = "NewsLetter";
+}
+
+
+
+<div class="container mt-4">
+    <div class="card justify-content-center">
+       
+        <div class="card-body">
+            <h5 class="card-title ml-2">Send newsletter</h5>
+            <div class="alert alert-info" role="alert">
+                This email will be sent to all users who are subscribed to our newsletter.
+                <br />
+                Total Subscribed Users: <strong>@ViewBag.TotalSubscribedUsers</strong>
+            </div>
+
+            <div class="row ">
+                <!-- 12 columns for textboxes -->
+                <div id>
+
+                </div>
+                <form asp-action="Create">
+                    <div asp-validation-summary="All" class="text-danger"></div>
+
+                    <div class="mb-3 col-12">
+                        <label asp-for="Subject" class="control-label"></label>
+                        <input asp-for="Subject" class="form-control" />
+                        <span asp-validation-for="Subject" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3 col-12">
+                        <label asp-for="Body" class="control-label"></label>
+                        <textarea asp-for="Body" class="form-control"></textarea>
+                        <span asp-validation-for="Body" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3 ml-3">
+                        <input type="submit" value="Send Email" class="btn btn-sm btn-primary @(@ViewBag.TotalSubscribedUsers <= 0 ? "disabled" : "")" /> |
+                        <a asp-action="Index" class="btn btn-primary-outline btn-sm">Back to list</a>
+
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ckeditor/4.11.4/ckeditor.js"></script>
+    <script>
+        CKEDITOR.replace("Body");
+    </script>
+    @{
+        <partial name="_ValidationScriptsPartial" />
+    }
+
+    
+
+
+}

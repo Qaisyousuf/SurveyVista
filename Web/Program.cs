@@ -23,6 +23,8 @@ builder.Services.AddDbContext<SurveyContext>(options =>
 
 
 
+
+
 builder.Services.ConfigurePageServices();
 builder.Services.ConfigureBannerServices();
 builder.Services.ConfigureAddress();
@@ -32,7 +34,10 @@ builder.Services.ConfigureQuestionnarie();
 builder.Services.ConfigureQuestion();
 builder.Services.AddScoped<SurveyContext>();
 builder.Services.AddTransient<NavigationViewComponent>();
+builder.Services.ConfigureNewsLetter();
 builder.Services.MailConfiguration();
+builder.Services.ConfigureOpenAI(config);
+
 
 
 
