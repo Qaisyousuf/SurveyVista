@@ -1,0 +1,148 @@
+﻿@model Questionnaire
+@{
+    ViewData["Title"] = "DisplayQuestionnaire";
+    Layout = "~/Views/Shared/_QuestionnaireResponse.cshtml";
+}
+
+<style>
+    h5,h4{
+        color: #b9b9b9 !important;
+    }
+    .rating {
+        display: inline-flex;
+        flex-direction: row-reverse; /* Set the direction to row-reverse */
+    }
+
+        .rating input {
+            display: none;
+        }
+
+        .rating label {
+            cursor: pointer;
+            font-size: 0; /* Hide the labels */
+        }
+
+            .rating label:before {
+                content: "☆";
+                font-size: 25px; /* Set the font size of the stars */
+            }
+
+        .rating input:checked ~ label:before {
+            content: "★";
+            color: orange;
+        }
+
+    .slider-value {
+        display: block;
+        text-align: center;
+        margin-top: -20px; /* Adjust the margin to position the value */
+    }
+
+
+</style>
+
+<div class="d-flex flex-column" id="BannerBackground">
+
+
+    <section class="hero text-white">
+        <div class="container text-white mt-5">
+            <h4><strong>@Html.Raw(Model.Description)</strong> </h4>
+            @{
+                int questionNumber = 1; // Counter for question numbers, starting from 1
+            }
+
+            <form method="post" action="@Url.Action("Submit", "Questionnaire", new { id = Model.Id })">
+                <div class="container">
+                    @foreach (var question in Model.Questions)
+                    {
+                        <h5>@questionNumber. @question.Text</h5> <!-- Display question number -->
+                        <div>
+                            @if (question.Type == QuestionType.Multiple_choice)
+                            {
+                                @foreach (var answer in question.Answers)
+                                {
+                                    <label>
+                                        <input type="checkbox" name="answers[@question.Id]" value="@answer.Id" class="form-check-input" /> @answer.Text
+                                    </label>
+                                    <br />
+                                }
+                            }
+                            else if (question.Type == QuestionType.Ranking)
+                            {
+                                <select name="answers[@question.Id]" class="form-control">
+                                    <option value="">Select Rank</option>
+                                    @for (int i = 1; i <= question.Answers.Count; i++)
+                                    {
+                                        <option value="@i">@i</option>
+                                    }
+                                </select>
+                            }
+                            else if (question.Type == QuestionType.TrueFalse)
+                            {
+                                <label>
+                                    <input type="radio" name="answers[@question.Id]" value="true" class="form-check-input" /> True
+                                </label>
+                                <br />
+                                <label>
+                                    <input type="radio" name="answers[@question.Id]" value="false" class="form-check-input" /> False
+                                </label>
+                            }
+                            else if (question.Type == QuestionType.Rating)
+                            {
+                                <div class="rating">
+                                    @for (int i = 1; i <= question.Answers.Count; i++)
+                                    {
+                                        <input type="radio" id="star@(i)" name="answers[@question.Id]" value="@i" class="form-check-input" />
+                                        <label for="star@(i)" title="@i">☆</label>
+                                    }
+                                </div>
+                            }
+                            else if (question.Type == QuestionType.Text)
+                            {
+                                <input type="text" name="answers[@question.Id]" class="form-control" />
+                            }
+                            else if (question.Type == QuestionType.Slider)
+                            {
+                                <input type="range" name="answers[@question.Id]" min="0" max="100" value="0" class="slider" oninput="updateSliderValue(this.value, 'sliderValue_@question.Id')" /> <!-- Set initial value to 0 -->
+                                <span id="sliderValue_@question.Id" class="slider-value">0</span> <!-- Display the slider value -->
+                            }
+                            <!-- Add handling for other question types as needed -->
+                        </div>
+                        <hr />
+                        @@questionNumber
+                       ++; // Increment question number after displaying
+                    }
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+
+            </form>
+
+
+
+
+        </div>
+    </section>
+
+</div>
+
+
+
+
+
+@section Scripts {
+
+
+    @{
+        <partial name="_ValidationScriptsPartial" />
+    }
+
+    <script>
+        function updateSliderValue(value, targetId) {
+            // Increase value by 10
+            value = parseInt(value) + 10;
+            document.getElementById(targetId).innerText = value;
+        }
+    </script>
+
+}
+

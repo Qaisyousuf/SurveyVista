@@ -76,8 +76,69 @@ namespace Web.Areas.Admin.Controllers
                         foreach (var user in subscribedUsers)
                         {
                             string confirmationUrl = $"{Request.Scheme}://{Request.Host}/{confirmationPath}?email={user.Email}";
-                            string emailBody = $"<h4>Hey {user.Name}</h4><br>{viewModel.Body}<br><h5>Søren Eggert Lundsteen Olsen<br>Seosoft ApS</h5><hr><h6>Hovedgaden 3<br>Jordrup<br>Kolding 6064<br>Denmark</h6><br/><br/><div style='text-align: center;'><a href='{confirmationUrl}' style='display: inline-block; background-color: #6c757d; color: #fff; padding: 4px 8px; text-decoration: none; border-radius: 4px;'>Unsubscribe</a></div>";
-
+                        //string emailBody = $"<h4>Hey {user.Name}</h4><br>{viewModel.Body}<br><h5>Søren Eggert Lundsteen Olsen<br>Seosoft ApS</h5><hr><h6>Hovedgaden 3<br>Jordrup<br>Kolding 6064<br>Denmark</h6><br/><br/><div style='text-align: center;'><a href='{confirmationUrl}' style='display: inline-block; background-color: #6c757d; color: #fff; padding: 4px 8px; text-decoration: none; border-radius: 4px;'>Unsubscribe</a></div>";
+                        string emailBody = $@"<head>
+                                        <meta charset=""UTF-8"">
+                                        <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">
+                                        <title>Email Confirmation</title>
+                                        <style>
+                                            body {{
+                                                font-family: Arial, sans-serif;
+                                                line-height: 1.6;
+                                                margin: 0;
+                                                padding: 0;
+                                                background-color: #f9f9f9;
+                                            }}
+                                            .container {{
+                                                  max-width: 800px;
+                                                    margin: 0 auto;
+                                                    padding: 20px;
+                                                    border: 0.5px solid #ccc;
+                                                    border-radius: 5px;
+                                                    background-color: #f9f9f9;
+                                            }}
+                                            h4, h5, h6 {{
+                                                margin: 0;
+                                            }}
+                                            hr {{
+                                                border: none;
+                                                border-top: 1px solid #ccc;
+                                                margin: 10px 0;
+                                            }}
+                                            a.button {{
+                                                display: inline-block;
+                                                padding: 5px 10px;
+                                                background-color: #6c757d;
+                                                color: #fff;
+                                                text-decoration: none;
+                                                border-radius: 4px;
+                                            }}
+                                            a.button:hover {{
+                                                background-color: #5a6268;
+                                            }}
+                                                a {{
+                                                    color: #007bff;
+                                                    text-decoration: none;
+                                                }}
+                                                a:hover {{
+                                                    text-decoration: underline;
+                                                }}
+                                        </style>
+                                    </head>
+                                    <body>
+                                        <div class=""container"">
+                                            <h4>Hey {user.Name},</h4>
+                                            <p>{viewModel.Body}</p><br>
+                                         
+                                            <h5>Søren Eggert Lundsteen Olsen</h5>
+                                         <h5><a href=""https://www.seosoft.dk/"" target=""_blank"">SeoSoft ApS</a></h5>
+                                         <hr>
+                                            <h6>Hovedgaden 3<br>Jordrup<br>Kolding 6064<br>Denmark</h6>
+                                            <div style=""text-align: center;"">
+                                                <a href=""{confirmationUrl}"" class=""button"">Unsubscribe</a>
+                                            </div>
+                                        </div>
+                                    </body>";
                             var email = new EmailToSend(user.Email, viewModel.Subject, emailBody);
                             var isSent = await _emailServices.SendConfirmationEmailAsync(email);
 

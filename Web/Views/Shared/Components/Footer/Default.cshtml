@@ -10,7 +10,7 @@
         <div class="container py-4">
             <div id="rowSection">
                 <div class="col-lg-6" id="box">
-                    <p class="display-6 font-weight-bold" id="BtnColor">@Model.Title.ToUpper()</p>
+                    <h3 class=" font-weight-bold" id="BtnColor">@Model.Title.ToUpper()</h3>
                   @*   <p class="fst-italic text-muted">@Html.Raw(Model.Content) <a class="text-primary" href="@Model.Sitecopyright" target="_blank">SeoSoft</a></p> *@
                  but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
                
@@ -22,8 +22,6 @@
             </div>
         </div>
     </section>
-
-   
 
     <!-- FOOTER -->
     <footer class="w-100 py-4 flex-shrink-0">
@@ -64,19 +62,19 @@
             <div class="row d-flex justify-content-around">
                 
                 <div class="col-lg-2 col-md-3">
-                    <span class=" muted">Designed by @Model.CreatedBy</span>
+                    <span class="text-muted">Designed by @Model.CreatedBy</span>
                 
                 </div>
                 <div class="col-lg-2 col-md-3">
-                    <span class=" muted">Update by @Model.UpdatedBy</span>
+                    <span class="text-muted">Update by @Model.UpdatedBy</span>
                 
                 </div>
                 <div class="col-lg-2 col-md-3">
-                    <span class=" muted">Updated @Model.LastUpdated.ToShortDateString()</span>
+                    <span class=" text-muted">Updated @Model.LastUpdated.ToShortDateString()</span>
                  
                 </div>
                 <div class="col-lg-2 col-md-3">
-                    <span class=" muted">Owner @Model.Owner</span>
+                    <span class=" text-muted">Owner @Model.Owner</span>
                  
                 </div>
             </div>

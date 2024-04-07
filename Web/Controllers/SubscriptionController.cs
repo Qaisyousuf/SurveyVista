@@ -57,25 +57,85 @@ namespace Web.Controllers
                     string confirmationPath = _configuration["Email:ConfirmEmailPath"]; // Retrieve the confirmation path from appsettings
 
                     string confirmationUrl = $"{Request.Scheme}://{Request.Host}/{confirmationPath}?email={email}"; // Construct the confirmation URL
-                                                                                                                    // Construct the confirmation URL
-                    string body = $@"Dear {senderName},<br><br>
-                    Thank you for subscribing. We're thrilled to have you on board!<br><br>
-                    To confirm your subscription, please click the following button:<br><br>
-                    <a href=""{confirmationUrl}"" style=""display: inline-block; padding: 10px 20px; background-color: #28a745; color: #fff; text-decoration: none;"">Confirm Subscription</a><br><br>
-                    If you have any questions or need assistance, feel free to contact us at help@seosoft.dk<br><br>
-                   
-                    <h5>
-                        Søren Eggert Lundsteen Olsen<br>
-                        Seosoft ApS
-                    </h5>
-                        <hr>
-                     <h6>
-                        Hovedgaden 3 
-                        Jordrup<br>
-                        Kolding 6064<br>
-                        Denmark
-                    </6>
-                      ";
+
+                    string body = $@"<head>
+                                        <meta charset=""UTF-8"">
+                                        <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">
+                                        <title>Email Confirmation</title>
+                                        <style>
+                                            body {{
+                                                font-family: Arial, sans-serif;
+                                                line-height: 1.6;
+                                                margin: 0;
+                                                padding: 0;
+                                                background-color: #f9f9f9;
+                                            }}
+                                            .container {{
+                                               max-width: 800px;
+                                                    margin: 0 auto;
+                                                    padding: 20px;
+                                                    border: 0.5px solid #ccc;
+                                                    border-radius: 5px;
+                                                    background-color: #f9f9f9;
+                                            }}
+                                            h5, h6 {{
+                                                margin:0;
+                                            }}
+                                            hr {{
+                                                border: none;
+                                                border-top: 1px solid #ccc;
+                                                margin: 10px 0;
+                                            }}
+                                            a.button {{
+                                                display: inline-block;
+                                                padding: 10px 20px;
+                                                background-color: #28a745;
+                                                color: #fff;
+                                                text-decoration: none;
+                                                border-radius: 4px;
+                                            }}
+                                             a {{
+                                          color: #007bff;
+                                          text-decoration: none;
+                                      }}
+                                      a:hover {{
+                                          text-decoration: underline;
+                                      }}
+                                        </style>
+                                    </head>
+                                    <body>
+                                        <div class=""container"">
+                                            <p>Dear {senderName},</p>
+                                            <p>Thank you for subscribing. We're thrilled to have you on board!</p>
+                                            <p>To confirm your subscription, please click the following button:</p>
+                                            <p><a href=""{confirmationUrl}"" class=""button"">Confirm Subscription</a></p>
+                                            <p>If you have any questions or need assistance, feel free to contact us at help@seosoft.dk</p>
+                                           
+                                            <h5>Søren Eggert Lundsteen Olsen</h5>
+                                            <h5><a href=""https://www.seosoft.dk/"" target=""_blank"">SeoSoft ApS</a></h5>
+                                            <hr>
+                                            <h6>Hovedgaden 3 Jordrup<br>Kolding 6064<br>Denmark</h6>
+                                        </div>
+                                    </body>";
+                  
+                    //string body = $@"Dear {senderName},<br><br>
+                    //Thank you for subscribing. We're thrilled to have you on board!<br><br>
+                    //To confirm your subscription, please click the following button:<br><br>
+                    //<a href=""{confirmationUrl}"" style=""display: inline-block; padding: 10px 20px; background-color: #28a745; color: #fff; text-decoration: none;"">Confirm Subscription</a><br><br>
+                    //If you have any questions or need assistance, feel free to contact us at help@seosoft.dk<br><br>
+
+                    //<h5>
+                    //    Søren Eggert Lundsteen Olsen<br>
+                    //    Seosoft ApS
+                    //</h5>
+                    //    <hr>
+                    // <h6>
+                    //    Hovedgaden 3 
+                    //    Jordrup<br>
+                    //    Kolding 6064<br>
+                    //    Denmark
+                    //</6>
+                    //  ";
 
                     var newEmail = new EmailToSend(email, subject, body);
 
@@ -132,13 +192,54 @@ namespace Web.Controllers
 
                         // Send a "thank you" email to the user
                         string subject = "Thank You for Confirming Your Subscription";
-                        string body = $"Dear {subscription.Name},<br><br>" +
-                                    "Thank you for confirming your subscription. " +
-                                    "You are now subscribed to our service.<br><br>" +
-                                    
-                                    "<h5>Søren Eggert Lundsteen Olsen<br>Seosoft ApS</h5>" +
-                                    "<hr>" +
-                                    "<h6>Hovedgaden 3<br>Jordrup<br>Kolding 6064<br>Denmark</h6>";
+                        string body = $@"<head>
+                                <meta charset=""UTF-8"">
+                                <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">
+                                <title>Email Confirmation</title>
+                                <style>
+                                    body {{
+                                        font-family: Arial, sans-serif;
+                                        line-height: 1.6;
+                                        margin: 0;
+                                        padding: 0;
+                                        background-color: #f9f9f9;
+                                    }}
+                                    .container {{
+                                         max-width: 800px;
+                                                    margin: 0 auto;
+                                                    padding: 20px;
+                                                    border: 0.5px solid #ccc;
+                                                    border-radius: 5px;
+                                                    background-color: #f9f9f9;
+                                    }}
+                                    h4, h5, h6 {{
+                                        margin: 0;
+                                    }}
+                                    hr {{
+                                        border: none;
+                                        border-top: 1px solid #ccc;
+                                        margin: 10px 0;
+                                    }}
+                                       a {{
+                                          color: #007bff;
+                                          text-decoration: none;
+                                      }}
+                                      a:hover {{
+                                          text-decoration: underline;
+                                      }}
+                                </style>
+                            </head>
+                            <body>
+                                <div class=""container"">
+                                    <h4>Dear {subscription.Name},</h4>
+                                    <p>Thank you for confirming your subscription. You are now subscribed to our newsletter.</p>
+                                   
+                                    <h5>Søren Eggert Lundsteen Olsen</h5>
+                                    <h5><a href=""https://www.seosoft.dk/"" target=""_blank"">SeoSoft ApS</a></h5>
+                                    <hr>
+                                    <h6>Hovedgaden 3 Jordrup<br>Kolding 6064<br>Denmark</h6>
+                                </div>
+                            </body>";
 
 
                         var thankYouEmail = new EmailToSend(subscription.Email, subject, body);
@@ -152,7 +253,7 @@ namespace Web.Controllers
                 }
                 else
                 {
-                    ViewBag.Message = "You have been unsubscribed from our service. Thank you!";
+                    ViewBag.Message = "You have been unsubscribed from our newsletter. Thank you!";
                    return View(subscription);
                 }
             }
@@ -182,16 +283,60 @@ namespace Web.Controllers
                         await _context.SaveChangesAsync();
 
                         // Inform the user that the email has been unsubscribed
-                        ViewBag.Message = "You have been unsubscribed from our service. Thank you!";
+                        ViewBag.Message = "You have successfully unsubscribed from our newsletter. We're sorry to see you go";
 
                         // Optionally, send an email confirmation to the user
-                        string subject = "Unsubscribe Confirmation";
-                        string body = "You have successfully unsubscribed from our newsletter. We're sorry to see you go <br><br>" +
-                              
-                               
-                               "<h5>Søren Eggert Lundsteen Olsen<br>Seosoft ApS</h5>"+
-                                "<hr>" +
-                               "<h6>Hovedgaden 3<br>Jordrup<br>Kolding 6064<br>Denmark</h6>";
+                        string subject = "Unsubscription Confirmation";
+                        string body = $@"<head>
+                                            <meta charset=""UTF-8"">
+                                            <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">
+                                            <title>Unsubscribe Confirmation</title>
+                                            <style>
+                                                body {{
+                                                    font-family: Arial, sans-serif;
+                                                    line-height: 1.6;
+                                                    margin: 0;
+                                                    padding: 0;
+                                                    background-color: #f9f9f9;
+                                                }}
+                                                .container {{
+                                                     max-width: 800px;
+                                                    margin: 0 auto;
+                                                    padding: 20px;
+                                                    border: 0.5px solid #ccc;
+                                                    border-radius: 5px;
+                                                    background-color: #f9f9f9;
+                                                }}
+                                                h5, h6 {{
+                                                    margin: 0;
+                                                }}
+                                                hr {{
+                                                    border: none;
+                                                    border-top: 1px solid #ccc;
+                                                    margin: 10px 0;
+                                                }}
+                                                a {{
+                                                    color: #007bff;
+                                                    text-decoration: none;
+                                                }}
+                                                a:hover {{
+                                                    text-decoration: underline;
+                                                }}
+                                            </style>
+                                        </head>
+                                        <body>
+                                            <div class=""container"">
+                                                <h3>Unsubscribe Confirmation</h3>
+                                                <p>You have successfully unsubscribed from our newsletter. We're sorry to see you go.</p>
+                                                <br>
+                                                 <h5><strong>Søren Eggert Lundsteen Olsen</strong></h5>
+                                                <h5><a href=""https://www.seosoft.dk/"" target=""_blank"">SeoSoft ApS</a></h5>
+                                                <hr>
+                                                <h6>Hovedgaden 3<br>Jordrup<br>Kolding 6064<br>Denmark</h6>
+                                            </div>
+                                        </body>
+                                        </html>";
+
 
                         var thankYouEmail = new EmailToSend(subscription.Email, subject, body);
                         await _mailSerivces.SendConfirmationEmailAsync(thankYouEmail);
@@ -208,7 +353,7 @@ namespace Web.Controllers
                 else
                 {
                     // Inform the user that the unsubscription process couldn't be completed
-                    ViewBag.Message = "Your email does not exist in our subscription list. Please subscribe first.";
+                    ViewBag.Message = "You have been unsubscribed from our newsletter. subscribe first.";
                     return View(subscription); // You can return a view to show an error message
                 }
             }

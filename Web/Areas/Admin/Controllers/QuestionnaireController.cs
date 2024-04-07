@@ -1,12 +1,15 @@
 ﻿using Data;
+using Mailjet.Client.Resources;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.IdentityModel.Tokens;
 using Model;
-
+using Services.EmailSend;
 using Services.Interaces;
 using System.Security.Cryptography;
+using System.Text;
 using Web.ViewModel.QuestionnaireVM;
 
 
@@ -17,12 +20,16 @@ namespace Web.Areas.Admin.Controllers
         private readonly IQuestionnaireRepository _questionnaire;
         private readonly SurveyContext _context;
         private readonly IQuestionRepository _question;
+        private readonly IConfiguration _configuration;
+        private readonly IEmailServices _emailServices;
 
-        public QuestionnaireController(IQuestionnaireRepository Questionnaire, SurveyContext Context, IQuestionRepository Question)
+        public QuestionnaireController(IQuestionnaireRepository Questionnaire, SurveyContext Context, IQuestionRepository Question,IConfiguration configuration,IEmailServices emailServices)
         {
             _questionnaire = Questionnaire;
             _context = Context;
             _question = Question;
+            _configuration = configuration;
+            _emailServices = emailServices;
         }
         public IActionResult Index()
         {
@@ -432,6 +439,123 @@ namespace Web.Areas.Admin.Controllers
                     }).ToList()
             };
 
+            return View(viewModel);
+        }
+
+        [HttpGet]
+        public IActionResult SendQuestionnaire(int id)
+        {
+            var quesstionnaireFromDb = _questionnaire.GetQuestionnaireWithQuestionAndAnswer(id);
+            var sendquestionviewmodel = new SendQuestionnaireViewModel();
+
+            sendquestionviewmodel.QuestionnaireId = id;
+            ViewBag.questionnaireName = quesstionnaireFromDb.Title;
+
+            return View(sendquestionviewmodel);
+
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> SendQuestionnaire(SendQuestionnaireViewModel viewModel)
+        {
+            if (ModelState.IsValid)
+            {
+                Guid guid = Guid.NewGuid();
+
+                // Convert the GUID to a string
+                string guidString = guid.ToString();
+
+                // Construct the complete URL with the GUID-style ID
+               
+
+                // Build the email body with questionnaire details
+                var questionnairePath = _configuration["Email:Questionnaire"];
+                int surveyId = viewModel.QuestionnaireId;
+
+                var completeUrl = $"{Request.Scheme}://{Request.Host}/{questionnairePath}/{viewModel.QuestionnaireId}";
+
+
+
+                var toEmail = viewModel.Email;
+                var question = _questionnaire.GetQuesById(viewModel.Id);
+
+                var subject = question.Title;
+
+                // Construct the email body with HTML formatting
+                string emailBody = $@"
+                                        <html>
+                                        <head>
+                                            <style>
+                                                /* Inline CSS styles */
+                                                body {{
+                                                    font-family: Arial, sans-serif;
+                                                }}
+                                                .container {{
+                                                    max-width: 600px;
+                                                    margin: 0 auto;
+                                                    padding: 20px;
+                                                    border: 0.5px solid #ccc;
+                                                    border-radius: 5px;
+                                                    background-color: #f9f9f9;
+                                                }}
+                                                .button {{
+                                                    display: inline-block;
+                                                    padding: 10px 20px;
+                                                    background-color: #007bff;
+                                                    color: #ffffff;
+                                                    text-decoration: none;
+                                                    border-radius: 4px;
+                                                }}
+                                                .button:hover {{
+                                                    background-color: #0056b3;
+                                                }}
+                                            </style>
+                                        </head>
+                                        <body>
+                                            <div class='container'>
+                                                <h4>Hey {viewModel.Name},</h4>
+                                                <h5>{subject}</h5>
+                                             <p>Thank you for participating in our survey. Your feedback is valuable to us.</p>
+                                               <p>Please click the button below to start the survey:</p><br>
+                                                     <div style='text-align: center;'>
+                                                    <a href='{completeUrl}' class='button'>Start Survey</a>
+                                                </div><br>
+                                                
+                                                <p><strong>Søren Eggert Lundsteen Olsen</strong><br>
+                                                Seosoft ApS<br>
+                                                <hr>
+                                                Hovedgaden 3
+                                                Jordrup<br>
+                                                Kolding 6064<br>
+                                                Denmark</p>
+
+                                            </div>
+                                        </body>
+                                        </html>";
+
+
+                // Call the SendConfirmationEmailAsync method to send the email
+                var emailSend = new EmailToSend(toEmail, subject, emailBody);
+
+                bool emailSent = await _emailServices.SendConfirmationEmailAsync(emailSend);
+
+                if (emailSent)
+                {
+                    // Email sent successfully
+                    // You can redirect to a success page or return a success message
+                    TempData["Success"] = "Questionnaire sent successfully";
+                    return RedirectToAction(nameof(Index));
+                }
+                else
+                {
+                    // Email failed to send
+                    // You can return an error message or handle it as needed
+                    ModelState.AddModelError(string.Empty, "Failed to send questionnaire via email.");
+                }
+            }
+
+            // If model state is not valid, return the view with validation errors
             return View(viewModel);
         }
 
