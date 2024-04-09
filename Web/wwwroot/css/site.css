@@ -343,6 +343,7 @@ body, html {
         color: #6c757d !important;
         transition: 394ms;
     }
+
 /*_______________________________________________________________________________end of the custom CSS_____________________________________________________________*/
 *,
 *::before,
@@ -370,7 +371,7 @@ body, html {
         line-height: 1.5;
         color: #212529;
         text-align: left;
-        background-color: #dfdfdf !important;
+       
     }
 
     [tabindex="-1"]:focus {

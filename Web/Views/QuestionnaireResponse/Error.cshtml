@@ -1,0 +1,73 @@
+﻿
+@{
+    ViewData["Title"] = "Error";
+    Layout = "~/Views/Shared/_QuestionnaireResponse.cshtml";
+}
+
+<style>
+    body {
+        height:100% !important;
+      
+        background-repeat: no-repeat;
+        background: linear-gradient(119deg, rgba(47,82,131,1) 0%, rgba(29,33,59,1) 34%, rgba(27,54,61,1) 67%, rgba(58,82,116,1) 100%) !important
+    }
+
+    .containerError {
+        
+      margin-top:150px;
+      height:600px;
+      
+    }
+    .card{
+        position: relative;
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-box-orient: vertical;
+        -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+        flex-direction: row;
+        min-width: 0;
+        word-wrap: break-word;
+        box-shadow: 0px 0px 36px -12px rgba(20,101,230,1);
+        -webkit-box-shadow: 0px 0px 36px -12px rgba(20,101,230,1);
+        -moz-box-shadow: 0px 0px 36px -12px rgba(20,101,230,1);
+        border-radius: 10px;
+        background-color: transparent;
+      
+        flex-wrap: nowrap;
+        align-items: center;
+        height: 500px;
+        padding-left: 50px;
+        padding-right: 50px;
+    }
+
+</style>
+<div class="containerError">
+    <div class="container">
+        <div class="row">
+                    <div class="card">
+                        <!-- Stepper -->
+                        <div class="col-md-6">
+                            <h5 class="text-danger">@ViewBag.ErrorMessage</h5>
+                            <a href="#" class="btn btn-sm mt-3" id="BannerButon"> Contact <i class="bi bi-envelope-at-fill"></i></a>
+                        </div>
+                        <!-- Form Content -->
+                        <div class="col-md-6">
+                            <script src="https://unpkg.com/@@dotlottie/player-component@latest/dist/dotlottie-player.mjs" type="module"></script>
+                            <dotlottie-player src="https://lottie.host/e3084d59-5df1-44e9-a0fe-0a015257fba7/LVAJX2PbZo.json" class="img-fluid" speed="1" style="width: auto; height: auto;" direction="1" playMode="normal" loop autoplay></dotlottie-player>
+                        </div>
+                    </div>
+
+                </div>
+               
+            </div>
+
+    
+</div>
+
+
+
+
+  
+

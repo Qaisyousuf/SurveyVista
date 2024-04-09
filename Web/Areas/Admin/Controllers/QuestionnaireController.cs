@@ -4,10 +4,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Elfie.Extensions;
 using Microsoft.IdentityModel.Tokens;
 using Model;
 using Services.EmailSend;
 using Services.Interaces;
+using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 using Web.ViewModel.QuestionnaireVM;
@@ -23,7 +25,7 @@ namespace Web.Areas.Admin.Controllers
         private readonly IConfiguration _configuration;
         private readonly IEmailServices _emailServices;
 
-        public QuestionnaireController(IQuestionnaireRepository Questionnaire, SurveyContext Context, IQuestionRepository Question,IConfiguration configuration,IEmailServices emailServices)
+        public QuestionnaireController(IQuestionnaireRepository Questionnaire, SurveyContext Context, IQuestionRepository Question, IConfiguration configuration, IEmailServices emailServices)
         {
             _questionnaire = Questionnaire;
             _context = Context;
@@ -222,7 +224,7 @@ namespace Web.Areas.Admin.Controllers
                     if (!viewModel.Questions.Any(q => q.Id == existingQuestion.Id))
                     {
                         existingQuestionnaire.Questions.Remove(existingQuestion);
-                       
+
                     }
                     await _questionnaire.Update(existingQuestionnaire);
                 }
@@ -241,7 +243,7 @@ namespace Web.Areas.Admin.Controllers
                 {
                     var existingQuestion = existingQuestionnaire.Questions.FirstOrDefault(q => q.Id == questionViewModel.Id);
 
-                    if(questionViewModel.Id !=0)
+                    if (questionViewModel.Id != 0)
                     {
                         if (existingQuestion != null)
                         {
@@ -282,7 +284,7 @@ namespace Web.Areas.Admin.Controllers
                         }
                     }
 
-               
+
                     else
                     {
                         // Create a new question
@@ -328,7 +330,7 @@ namespace Web.Areas.Admin.Controllers
 
                 }
 
-             
+
                 await _questionnaire.Update(existingQuestionnaire);
 
                 TempData["Success"] = "Questionnaire updated successfully";
@@ -403,7 +405,7 @@ namespace Web.Areas.Admin.Controllers
 
 
 
-          
+
 
         }
 
@@ -461,20 +463,40 @@ namespace Web.Areas.Admin.Controllers
         {
             if (ModelState.IsValid)
             {
-                Guid guid = Guid.NewGuid();
-
-                // Convert the GUID to a string
-                string guidString = guid.ToString();
-
-                // Construct the complete URL with the GUID-style ID
-               
+              
 
                 // Build the email body with questionnaire details
                 var questionnairePath = _configuration["Email:Questionnaire"];
                 int surveyId = viewModel.QuestionnaireId;
 
-                var completeUrl = $"{Request.Scheme}://{Request.Host}/{questionnairePath}/{viewModel.QuestionnaireId}";
+                //DateTime currentDateTime = DateTime.Now;
+                //DateTime currentDateTime = viewModel.ExpirationDateTime;
+                DateTime currentDateTime;
+                if (viewModel.ExpirationDateTime.HasValue)
+                {
+                    currentDateTime = viewModel.ExpirationDateTime.Value;
+                }
+                else
+                {
+                    // Handle the case when ExpirationDateTime is null
+                    // For example, you can assign the current date and time
+                    currentDateTime = DateTime.Now;
+                }
 
+                // Calculate the expiration date and time by adding 5 minutes to the current date and time
+                DateTime expiryDateTime = currentDateTime;
+
+                // Generate a unique token, for example, using a cryptographic library or a GUID
+                string token = Guid.NewGuid().ToString();
+
+                // Append the expiration date and time to the token (you might want to encrypt it for security)
+                string tokenWithExpiry = $"{token}|{expiryDateTime.ToString("yyyy-MM-ddTHH:mm:ssZ")}";
+
+
+
+                var completeUrl = $"{Request.Scheme}://{Request.Host}/{questionnairePath}/{viewModel.QuestionnaireId}?token={tokenWithExpiry}";
+
+                //var completeUrl = $"{Request.Scheme}://{Request.Host}/{questionnairePath}/{viewModel.QuestionnaireId}";
 
 
                 var toEmail = viewModel.Email;
@@ -491,6 +513,9 @@ namespace Web.Areas.Admin.Controllers
                                                 body {{
                                                     font-family: Arial, sans-serif;
                                                 }}
+                                                .text-danger {{
+                                                  color:red;  
+                                                 }}
                                                 .container {{
                                                     max-width: 600px;
                                                     margin: 0 auto;
@@ -517,12 +542,14 @@ namespace Web.Areas.Admin.Controllers
                                                 <h4>Hey {viewModel.Name},</h4>
                                                 <h5>{subject}</h5>
                                              <p>Thank you for participating in our survey. Your feedback is valuable to us.</p>
-                                               <p>Please click the button below to start the survey:</p><br>
+                                               <p>Please click the button below to start the survey:</p>
+                                                    <p class=""text-danger"">The survey will be expire in Date:{expiryDateTime.ToLongDateString()} Time: {expiryDateTime.ToShortTimeString()} </p>
                                                      <div style='text-align: center;'>
                                                     <a href='{completeUrl}' class='button'>Start Survey</a>
+                                                <br>
+                                               
                                                 </div><br>
-                                                
-                                                <p><strong>Søren Eggert Lundsteen Olsen</strong><br>
+                                                <p><strong>Søren Eggert Lundsteen Olsen</strong>
                                                 Seosoft ApS<br>
                                                 <hr>
                                                 Hovedgaden 3
@@ -558,6 +585,18 @@ namespace Web.Areas.Admin.Controllers
             // If model state is not valid, return the view with validation errors
             return View(viewModel);
         }
+        public string GenerateExpiryToken(DateTime expiryDate)
+        {
+            // Generate a unique token, for example, using a cryptographic library or a GUID
+            string token = Guid.NewGuid().ToString();
+
+            // Append the expiration date to the token (you might want to encrypt it for security)
+            string tokenWithExpiry = $"{token}|{expiryDate.ToString("yyyy-MM-ddTHH:mm:ssZ")}";
+
+            return tokenWithExpiry;
+        }
+      
+
 
     }
 }
