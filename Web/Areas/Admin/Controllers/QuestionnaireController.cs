@@ -513,9 +513,7 @@ namespace Web.Areas.Admin.Controllers
                                                 body {{
                                                     font-family: Arial, sans-serif;
                                                 }}
-                                                .text-danger {{
-                                                  color:red;  
-                                                 }}
+                                               
                                                 .container {{
                                                     max-width: 600px;
                                                     margin: 0 auto;
@@ -543,13 +541,13 @@ namespace Web.Areas.Admin.Controllers
                                                 <h5>{subject}</h5>
                                              <p>Thank you for participating in our survey. Your feedback is valuable to us.</p>
                                                <p>Please click the button below to start the survey:</p>
-                                                    <p class=""text-danger"">The survey will be expire in Date:{expiryDateTime.ToLongDateString()} Time: {expiryDateTime.ToShortTimeString()} </p>
+                                                    <p class=""text-danger"">The survey will be expire :{expiryDateTime.ToLongDateString()} Time: {expiryDateTime.ToShortTimeString()} </p>
                                                      <div style='text-align: center;'>
                                                     <a href='{completeUrl}' class='button'>Start Survey</a>
                                                 <br>
                                                
                                                 </div><br>
-                                                <p><strong>Søren Eggert Lundsteen Olsen</strong>
+                                                <p><strong>Søren Eggert Lundsteen Olsen</strong><br>
                                                 Seosoft ApS<br>
                                                 <hr>
                                                 Hovedgaden 3

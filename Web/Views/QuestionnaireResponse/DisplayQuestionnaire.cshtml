@@ -4,22 +4,50 @@
     Layout = "~/Views/Shared/_QuestionnaireResponse.cshtml";
 }
 <style>
-   body{
-      
-      background-repeat:no-repeat;
-        background: linear-gradient(119deg, rgba(47,82,131,1) 0%, rgba(29,33,59,1) 34%, rgba(27,54,61,1) 67%, rgba(58,82,116,1) 100%) !important
-        
+    body {
+        height: 100% !important;
+        background-color:#141c27 !important;
+       
+    }
+
+    #QuestionCard{
+        height:auto;
+        padding:15px;
+
+    }
+    #rowSectionError {
+        display: flex;
+        flex-wrap: nowrap;
+        justify-content: space-around;
+        align-items: center;
+        align-content: center;
+        width: 100%;
+        flex-direction: row;
+    }
+
+
+   output{
+       color:white !important;
+         font-weight:bold; 
    }
+  
+    #boxBanner {
+        display: block;
+        width: auto;
+        margin: 5px;
+    }
 
     .QuestionContainer{
-        background-color:transparent !important;
-        margin-top:100px;
+        padding-top:100px;
+        padding-bottom:100px;
+       
     }
     .stepper {
         display: flex;
         flex-direction: column;
         align-items: center;
     }
+
 
     .step-indicator {
         width: 150px;
@@ -52,19 +80,16 @@
        
     }
 
-    .hero {
-        background-color:transparent !important;
-    }
-    section {
-        margin-top:30px;
-    }
+ 
+  
       .card{
         box-shadow: 0px 0px 36px -12px rgba(20,101,230,1);
         -webkit-box-shadow: 0px 0px 36px -12px rgba(20,101,230,1);
         -moz-box-shadow: 0px 0px 36px -12px rgba(20,101,230,1);
         border-radius:10px;
         background-color:transparent;
-        padding:30px
+        padding:50px;
+
     }
 
    
@@ -73,20 +98,40 @@
         margin: 15px 0px 0px 0px;
     }
 
+  .rating {
+    display: inline-flex;
+    flex-direction: row-reverse; /* Set the direction to row-reverse */
+}
+
+.rating {
+    display: inline-block;
+}
+
+.rating i {
+    font-size: 25px;
+    cursor: pointer;
+  
+}
+.rating i {
+    color: white; /* Set default color to white */
+}
+
+.rating i.selected {
+    color: orange;
+}
+
+
 </style>
 
 
 
 <div class="QuestionContainer">
-        <div class="container card">
-            <div class="container">
+        <section class="hero container card">
 
-            <h3 class="text-danger">@ViewBag.ErrorMessage</h3>
-               
                 <h4>@Model.Title</h4>
                 <p>@Html.Raw(Model.Description) </p>
-            </div>
-            <div class="container mt-5">
+
+            <div class="container">
                 <div class="row align-items-center">
                     <!-- Stepper -->
                     <div class="col-md-3">
@@ -110,7 +155,75 @@
                                 var question = Model.Questions[i];
                                 <div class="step @(i == 0 ? "active" : "")">
                                     <p class="font-weight-normal">@(i + 1). @question.Text</p>
+                                    <div id="QuestionCard">
                                     @switch (question.Type)
+                                    {
+                                        case QuestionType.Text:
+                                            <div class="form-group">
+                                                <input type="text" class="form-control" name="question@(i + 1)" placeholder="Enter answer">
+                                            </div>
+                                            break;
+                                        case QuestionType.CheckBox:
+                                        case QuestionType.Multiple_choice:
+                                        case QuestionType.Likert:
+                                        case QuestionType.Matrix:
+                                        case QuestionType.Demographic:
+                                        case QuestionType.Ranking:
+                                            <div class="form-group">
+                                                @foreach (var answer in question.Answers)
+                                                {
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" id="question@(i + 1)_answer@(answer.Id)" name="question@(i + 1)" value="@answer.Id">
+                                                        <label class="form-check-label" for="question@(i + 1)_answer@(answer.Id)">
+                                                            @answer.Text
+                                                        </label>
+                                                    </div>
+                                                }
+                                            </div>
+                                            break;
+                                        case QuestionType.TrueFalse:
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" id="question@(i + 1)_true" name="question@(i + 1)" value="true">
+                                                <label class="form-check-label" for="question@(i + 1)_true">True</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" id="question@(i + 1)_false" name="question@(i + 1)" value="false">
+                                                <label class="form-check-label" for="question@(i + 1)_false">False</label>
+                                            </div>
+                                            break;
+                                        case QuestionType.Open_ended:
+                                            <textarea class="form-control" id="question@(i + 1)" name="question@(i + 1)" rows="3" placeholder="Enter answer"></textarea>
+                                            break;
+                                        case QuestionType.Image:
+                                            <input type="file" class="form-control-file" id="question@(i + 1)" name="question@(i + 1)">
+                                            break;
+                                        case QuestionType.Slider:
+                                            <input type="range" class="form-range" id="question@(i + 1)" name="question@(i + 1)" min="0" max="100" step="1">
+                                            <output id="question@(i + 1)_output">50</output>
+                                            <script>
+                                                document.getElementById('question@(i + 1)').addEventListener('input', function () {
+                                                    document.getElementById('question@(i + 1)_output').value = this.value;
+                                                });
+                                            </script>
+                                            break;
+                                        case QuestionType.Rating:
+                                         <div class="rating" data-question="@i">
+                                            @foreach (var answer in question.Answers)
+                                            {
+                                                @*  <span class="text-white">@answer.Id</span> *@
+                                                 <i class="bi bi-star ml-3" data-value="@answer.Id"></i>
+                                                  
+                                            }
+                                        </div>
+                                       
+                                            break;
+                                        default:
+                                            <div class="alert alert-danger" role="alert">
+                                                Unsupported question type.
+                                            </div>
+                                            break;
+                                    }
+                                 @*    @switch (question.Type)
                                     {
                                         case QuestionType.Text:
                                             <div class="form-group">
@@ -161,12 +274,16 @@
                                                 });
                                             </script>
                                             break;
+
                                         default:
                                             <div class="alert alert-danger" role="alert">
                                                 Unsupported question type.
                                             </div>
                                             break;
-                                    }
+                                    } *@
+                                    </div>
+                                  
+                                   
                                     <div class="mt-3">
                                         @if (i > 0)
                                         {
@@ -186,9 +303,9 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
 
-    </div>
+    </div> 
 
 
 
@@ -273,64 +390,33 @@
             }
 
             showStep(currentStep);
-            updateStepper();
-            function toggleCheckbox(labelElement) {
-                var checkbox = labelElement.previousElementSibling; // Find the nearest preceding checkbox
-                checkbox.checked = !checkbox.checked;
-                checkbox.focus(); // Focus the checkbox after clicking on the label
-            }
-        });
+                    updateStepper();
+                 $('.rating i').on('click', function() {
+                var value = $(this).data('value');
+                var questionIndex = $(this).closest('.rating').data('question');
+                var selectedStars = $(this).closest('.rating').find('i.selected').length;
+        
+                // Unselect all stars
+                $(this).closest('.rating').find('i').removeClass('selected');
+        
+                // Select the clicked star and all preceding stars
+                $(this).addClass('selected').prevAll().addClass('selected');
+        
+                // Update the hidden input value if needed
+                $('input[name="question' + questionIndex + '_rating"]').val(value);
+        
+                // Update the label with the number of selected stars
+                $(this).closest('.rating').next('.selected-count').text(selectedStars);
+            });
+    
+            // Prevent the default action for the anchor tags within the rating
+            $('.rating a').on('click', function(e) {
+                e.preventDefault();
+            });
+    });
+ 
     </script>
 
-    @* <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const form = document.getElementById('questionnaireForm');
-            const steps = form.querySelectorAll('.step');
-            const submitButton = form.querySelector('.submit');
-            let currentStep = 0;
-
-            function showStep(index) {
-                steps.forEach((step, i) => {
-                    if (i === index) {
-                        step.style.display = 'block';
-                    } else {
-                        step.style.display = 'none';
-                    }
-                });
-
-                if (index === steps.length - 1) {
-                    submitButton.style.display = 'block';
-                } else {
-                    submitButton.style.display = 'none';
-                }
-            }
-
-            function goToNextStep() {
-                if (currentStep < steps.length - 1) {
-                    currentStep++;
-                    showStep(currentStep);
-                }
-            }
-
-            function goToPrevStep() {
-                if (currentStep > 0) {
-                    currentStep--;
-                    showStep(currentStep);
-                }
-            }
-
-            const nextButtons = form.querySelectorAll('.next');
-            nextButtons.forEach(button => {
-                button.addEventListener('click', goToNextStep);
-            });
-
-            const prevButtons = form.querySelectorAll('.prev');
-            prevButtons.forEach(button => {
-                button.addEventListener('click', goToPrevStep);
-            });
-
-            showStep(currentStep);
-        });
-    </script> *@
+  
 }
 
