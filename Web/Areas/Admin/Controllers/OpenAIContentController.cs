@@ -65,7 +65,7 @@ namespace Web.Areas.Admin.Controllers
                     // Prepare request body
                     var requestBody = new
                     {
-                        model = "babbage-002",
+                        model = "gpt-3.5-turbo",
                         prompt = inputText,
                         max_tokens = 100
                         
@@ -77,8 +77,6 @@ namespace Web.Areas.Admin.Controllers
                     // Make HTTP POST request to OpenAI API
                     var response = await httpClient.PostAsync("https://api.openai.com/v1/completions", new StringContent(jsonContent, Encoding.UTF8, "application/json"));
 
-                    // Check if request was successful
-                    //response.EnsureSuccessStatusCode();
 
                     // Read response content
                     string responseBody = await response.Content.ReadAsStringAsync();

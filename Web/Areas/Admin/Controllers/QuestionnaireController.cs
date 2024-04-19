@@ -494,9 +494,9 @@ namespace Web.Areas.Admin.Controllers
 
 
 
-                var completeUrl = $"{Request.Scheme}://{Request.Host}/{questionnairePath}/{viewModel.QuestionnaireId}?token={tokenWithExpiry}";
+                //var completeUrl = $"{Request.Scheme}://{Request.Host}/{questionnairePath}/{viewModel.QuestionnaireId}?token={tokenWithExpiry}";
 
-                //var completeUrl = $"{Request.Scheme}://{Request.Host}/{questionnairePath}/{viewModel.QuestionnaireId}";
+                var completeUrl = $"{Request.Scheme}://{Request.Host}/{questionnairePath}/{viewModel.QuestionnaireId}";
 
 
                 var toEmail = viewModel.Email;
