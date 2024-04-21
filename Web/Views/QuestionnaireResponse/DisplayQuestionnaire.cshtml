@@ -98,31 +98,58 @@
         margin: 15px 0px 0px 0px;
     }
 
-  .rating {
-    display: inline-flex;
-    flex-direction: row-reverse; /* Set the direction to row-reverse */
-}
-
-.rating {
-    display: inline-block;
-}
-
-.rating i {
-    font-size: 25px;
-    cursor: pointer;
-  
-}
-.rating i {
-    color: white; /* Set default color to white */
-}
-
-.rating i.selected {
-    color: orange;
-}
+ 
 
     .hidden-textarea {
         display: none;
     }
+
+    .rating .rating-item {
+        display: inline-block; /* Align items horizontally */
+        text-align: center; /* Center-align the label and star */
+        margin: 5px; /* Spacing between rating items */
+    }
+
+    .rating .rating-label {
+        display: block; /* Ensure the label is on a new line */
+        margin-bottom: 2px; /* Space between label and star */
+        font-size: 14px; /* Smaller font size for the label */
+        color: white;
+    }
+
+    /* Style the stars */
+    .rating .rating-star {
+        font-size: 24px; /* Adjust size as needed */
+        color: #ccc; /* Default color of stars */
+        cursor: pointer; /* Change cursor to pointer on hover */
+        transition: color 0.3s ease; /* Smooth transition for color change */
+    }
+
+        /* Style the stars when they are hovered over */
+        .rating .rating-star:hover,
+        .rating .rating-star:hover ~ .rating-star {
+            color: #ffe350; /* Color when hovered */
+        }
+
+        /* Style the stars when they are selected */
+        .rating .rating-star.selected {
+            color: #df9d01; /* Color of selected stars */
+        }
+
+
+
+    .rank-list {
+        list-style-type: none;
+        padding: 0;
+    }
+
+        .rank-list li {
+            padding: 5px;
+            margin-bottom: 2px;
+            color:white
+           
+        }
+
 
 </style>
 
@@ -190,7 +217,7 @@
                                         case QuestionType.Likert:
                                         case QuestionType.Matrix:
                                         case QuestionType.Demographic:
-                                        case QuestionType.Ranking:
+
                                             <div class="form-group">
                                             
                                                 @foreach (var answer in question.Answers)
@@ -256,12 +283,43 @@
                                           
                                             break;
                                         case QuestionType.Rating:
-                                            <div class="rating" data-question="@i">
-                                                @foreach (var answer in question.Answers)
-                                                {
-                                                    <i class="bi bi-star ml-3"></i>
-                                                }
+                                            <div class="rating" data-question="@i" >
+                                               
+                                                    @foreach (var answer in question.Answers)
+                                                    {
+                                                    <div class="rating-item">
+                                                        <div class="rating-label">@answer.Text</div>
+                                                        <input type="radio" id="question@(i)_rating@(answer.Id)"
+                                                               name="Questions[@i].SelectedAnswerIds"
+                                                               value="@answer.Id" class="rating-input" hidden>
+                                                        <label for="question@(i)_rating@(answer.Id)" class="bi bi-star-fill rating-star"></label>
+                                                    </div> 
+                                                    }
                                             </div>
+
+                                            break;
+                                        case QuestionType.Ranking:
+                                            <div class="ranking" data-question="@i">
+                                                
+                                                <ul class="rank-list">
+                                                    @foreach (var answer in question.Answers)
+                                                    {
+                                                        <li data-answer-id="@answer.Id">
+                                                            @answer.Text
+                                                            <button type="button" class="up-button btn btn-primary btn-sm" onclick="moveUp(this)"><i class="bi bi-arrow-up"></i> Up</button>
+                                                            <button type="button" class="down-button btn btn-info btn-sm" onclick="moveDown(this)"><i class="bi bi-arrow-down"></i> Down</button>
+                                                            <input type="hidden" name="Questions[@i].SelectedAnswerIds" value="@answer.Id">
+                                                        </li>
+                                                    }
+                                                </ul>
+                                            </div>
+                                           <script>
+                                               
+
+                                           </script>
+
+
+
                                             break;
                                         default:
                                             <div class="alert alert-danger" role="alert">
@@ -307,6 +365,69 @@
                 console.error('Form not found!');
                 return;
             }
+            $(document).ready(function () {
+                $('.rating-item').on('click', function () {
+                    // Remove 'selected' class from all stars within the same rating
+                    $(this).siblings().find('.rating-star').removeClass('selected');
+
+                    // Add 'selected' class to the clicked star and all stars before it within the same rating
+                    $(this).find('.rating-star').addClass('selected');
+                    $(this).prevAll().find('.rating-star').addClass('selected');
+
+                    // Toggle 'fill' class on the clicked star
+                    $(this).find('.rating-star').toggleClass('bi-star-fill bi-star');
+
+                    // Check the corresponding radio input
+                    $(this).find('.rating-input').prop('checked', true);
+                });
+            });
+
+
+
+         
+                // Ensure we only add listeners once by checking if they've been added already
+                if (!window.hasEventListenersAdded) {
+                    const upButtons = document.querySelectorAll('.up-button');
+                    const downButtons = document.querySelectorAll('.down-button');
+
+                    upButtons.forEach(button => {
+                        button.addEventListener('click', function () {
+                            moveUp(this);
+                        });
+                    });
+
+                    downButtons.forEach(button => {
+                        button.addEventListener('click', function () {
+                            moveDown(this);
+                        });
+                    });
+
+                    window.hasEventListenersAdded = true; // Set a flag to indicate listeners are added
+                }
+                function moveUp(button) {
+                    var li = button.parentNode;
+                    if (li.previousElementSibling) {
+                        li.parentNode.insertBefore(li, li.previousElementSibling);
+                    }
+                }
+
+                function moveDown(button) {
+                    var li = button.parentNode;
+                    if (li.nextElementSibling) {
+                        li.parentNode.insertBefore(li.nextElementSibling, li);
+                    }
+                }
+            function updateOrder() {
+                document.querySelectorAll('.rank-list').forEach((list, index) => {
+                    list.querySelectorAll('li').forEach((li, idx) => {
+                        // Assuming each li has a hidden input as the last child
+                        li.querySelector('input[type="hidden"]').value = li.getAttribute('data-answer-id');
+                    });
+                });
+            }
+          
+
+
 
             const steps = form.querySelectorAll('.step');
             const stepIndicators = document.querySelectorAll('.step-indicator');
