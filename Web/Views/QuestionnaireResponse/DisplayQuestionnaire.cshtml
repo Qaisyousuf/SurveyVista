@@ -120,6 +120,9 @@
     color: orange;
 }
 
+    .hidden-textarea {
+        display: none;
+    }
 
 </style>
 
@@ -171,12 +174,16 @@
                             <div class="step @(i == 0 ? "active" : "")">
                                 <p class="font-weight-normal">@(i + 1). @question.Text</p>
                                 <div id="QuestionCard">
+
                                     @switch (question.Type)
                                     {
                                         case QuestionType.Text:
-                                            <div class="form-group">
-                                                <input type="text" class="form-control" name="Questions[@i].SelectedAnswerIds" placeholder="Enter answer">
-                                            </div>
+                                            @foreach (var answer in question.Answers)
+                                            {
+
+                                                <input type="Text" class="form-control" id="question@(i + 1)" name="Questions[@i].SelectedText"  rows="3" placeholder="Enter answer"></input>
+                                                <input class="form-control hidden-textarea" id="question@(i + 1)" name="Questions[@i].SelectedAnswerIds" value="@answer.Id" rows="3" placeholder="Enter answer"></input>
+                                            }
                                             break;
                                         case QuestionType.CheckBox:
                                         case QuestionType.Multiple_choice:
@@ -185,49 +192,74 @@
                                         case QuestionType.Demographic:
                                         case QuestionType.Ranking:
                                             <div class="form-group">
+                                            
                                                 @foreach (var answer in question.Answers)
                                                 {
                                                     <div class="form-check">
-                                                        <input class="form-check-input answer-input" type="checkbox" id="question@(i)_answer@(answer.Id)" name="Questions[@i].SelectedAnswerIds" value="@answer.Id">
+                                                        <input class="form-check-input" id="question@(i)_answer@(answer.Id)" type="checkbox" name="Questions[@i].SelectedAnswerIds" value="@answer.Id">
                                                         <label class="form-check-label" for="question@(i)_answer@(answer.Id)">
                                                             @answer.Text
                                                         </label>
                                                     </div>
                                                  
                                                 }
-                                              
+
                                             </div>
                                             break;
                                         case QuestionType.TrueFalse:
                                             <div class="form-check">
-                                                <input class="form-check-input" type="radio" id="question@(i + 1)_true" name="Questions[@i].SelectedAnswerIds" value="true">
-                                                <label class="form-check-label" for="question@(i + 1)_true">True</label>
+
+                                                @foreach (var answer in question.Answers)
+                                                {
+                                                    <div class="form-check">
+                                                        <input class="form-check-input answer-input" type="radio" id="question@(i)_answer@(answer.Id)" name="Questions[@i].SelectedAnswerIds" value="@answer.Id">
+
+                                                        <label class="form-check-label" for="question@(i)_answer@(answer.Id)">
+                                                            @answer.Text
+                                                        </label>
+                                                    </div>
+                                                    
+
+                                                }
+
+                                               
                                             </div>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" id="question@(i + 1)_false" name="Questions[@i].SelectedAnswerIds" value="false">
-                                                <label class="form-check-label" for="question@(i + 1)_false">False</label>
-                                            </div>
+                                          
                                             break;
                                         case QuestionType.Open_ended:
-                                            <textarea class="form-control" id="question@(i + 1)" name="Questions[@i].SelectedAnswerIds" rows="3" placeholder="Enter answer"></textarea>
+
+                                            @foreach (var answer in question.Answers)
+                                            {
+
+                                                <textarea type="Text" class="form-control" id="question@(i + 1)" name="Questions[@i].SelectedText" value="@answer.Text" rows="3" placeholder="Enter answer"></textarea>
+                                                <input type="hidden" class="form-control" id="question@(i + 1)" name="Questions[@i].SelectedAnswerIds" value="@answer.Id" rows="3" placeholder="Enter answer"></input>
+                                            }
+                                         
                                             break;
                                         case QuestionType.Image:
                                             <input type="file" class="form-control-file" id="question@(i + 1)" name="Questions[@i].SelectedAnswerIds">
                                             break;
                                         case QuestionType.Slider:
-                                            <input type="range" class="form-range" id="question@(i + 1)" name="Questions[@i].SelectedAnswerIds" min="0" max="100" step="1">
-                                            <output id="question@(i + 1)_output">50</output>
-                                            <script>
-                                                document.getElementById('question@(i + 1)').addEventListener('input', function () {
-                                                    document.getElementById('question@(i + 1)_output').value = this.value;
-                                                });
-                                            </script>
+                                           
+                                            @foreach(var answer in question.Answers)
+                                            {
+                                                <input type="range" class="form-range " id="question@(i + 1)" name="Questions[@i].SelectedText" min="0" max="100" step="1">
+                                                <input type="hidden" class="form-range " id="question@(i + 1)" name="Questions[@i].SelectedAnswerIds" value="@answer.Id" min="0" max="100" step="1">
+
+                                                <output id="question@(i + 1)_output">50</output>
+                                                <script>
+                                                    document.getElementById('question@(i + 1)').addEventListener('input', function () {
+                                                        document.getElementById('question@(i + 1)_output').value = this.value;
+                                                    });
+                                                </script>
+                                            }
+                                          
                                             break;
                                         case QuestionType.Rating:
                                             <div class="rating" data-question="@i">
                                                 @foreach (var answer in question.Answers)
                                                 {
-                                                    <i class="bi bi-star ml-3" data-value="@answer.Id"></i>
+                                                    <i class="bi bi-star ml-3"></i>
                                                 }
                                             </div>
                                             break;
@@ -266,9 +298,90 @@
 
 
     @{
-        <partial name="_ValidationScriptsPartial" />
+            <partial name="_ValidationScriptsPartial" />
     }
     <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const form = document.getElementById('questionnaireForm');
+            if (!form) {
+                console.error('Form not found!');
+                return;
+            }
+
+            const steps = form.querySelectorAll('.step');
+            const stepIndicators = document.querySelectorAll('.step-indicator');
+            const submitButton = form.querySelector('.submit');
+            let currentStep = 0;
+
+            // Prevent form submission
+            form.addEventListener('submit', function (event) {
+                // event.preventDefault();
+                console.log('Form submission prevented.');
+
+                // Here, you can add logic to handle the form data client-side,
+                // such as validating input or sending it via AJAX.
+                const formData = new FormData(form);
+                formData.forEach((value, key) => {
+                    console.log(`${key}: ${value}`);
+                });
+            });
+            
+            function showStep(index) {
+                steps.forEach((step, i) => {
+                    step.style.display = i === index ? 'block' : 'none';
+                });
+
+                stepIndicators.forEach((indicator, i) => {
+                    if (i === index) {
+                        indicator.classList.add('active');
+                    } else {
+                        indicator.classList.remove('active');
+                    }
+                });
+
+                submitButton.style.display = index === steps.length - 1 ? 'block' : 'none';
+            }
+
+            function goToNextStep() {
+                if (currentStep < steps.length - 1) {
+                    currentStep++;
+                    showStep(currentStep);
+                    updateStepper();
+                }
+            }
+
+            function goToPrevStep() {
+                if (currentStep > 0) {
+                    currentStep--;
+                    showStep(currentStep);
+                    updateStepper();
+                }
+            }
+
+            function updateStepper() {
+                const currentStepIndex = currentStep;
+                stepIndicators.forEach((indicator, i) => {
+                    indicator.style.backgroundColor = i === currentStepIndex ? '#33b3ae' : ''; // Change to your primary color
+                });
+            }
+
+            // Event listeners for next/previous buttons
+            const nextButtons = form.querySelectorAll('.next');
+            nextButtons.forEach(button => {
+                button.addEventListener('click', goToNextStep);
+            });
+
+            const prevButtons = form.querySelectorAll('.prev');
+            prevButtons.forEach(button => {
+                button.addEventListener('click', goToPrevStep);
+            });
+
+            // Initialize the form at the first step
+            showStep(currentStep);
+        });
+    </script>
+
+ @*    <script>
      
     document.addEventListener("DOMContentLoaded", function () {
         const form = document.getElementById('questionnaireForm');
@@ -277,54 +390,78 @@
         const submitButton = form.querySelector('.submit');
         let currentStep = 0;
 
-           
-
             document.addEventListener('DOMContentLoaded', function () {
-                const form = document.getElementById('questionnaireForm'); // Make sure this is your form ID
+                const form = document.getElementById('questionnaireForm');  // Replace 'myForm' with your actual form ID
 
                 form.addEventListener('submit', function (event) {
-                    event.preventDefault(); // Prevent the default form submission action
+                    event.preventDefault();  // Stop the form from submitting
+                    console.log('Form submission prevented.');
 
+                    // Here, you can add any logic to handle the form data client-side,
+                    // such as validating input, organizing data, or sending it via AJAX.
+
+                    // Example of gathering form data:
                     const formData = new FormData(form);
-                    const refinedFormData = new FormData(); // This will hold only the necessary data
-
-                    // Iterate over the original FormData entries
                     formData.forEach((value, key) => {
-                        if (key.includes("SelectedAnswerIds")) {
-                            // Handle checkbox fields specially to ensure only checked boxes are included
-                            let selector = `input[name="${key}"]:checked`;
-                            document.querySelectorAll(selector).forEach(input => {
-                                refinedFormData.append(key, input.value);
-                            });
-                        } else {
-                            // Append other data normally
-                            refinedFormData.append(key, value);
-                        }
-                    });
-
-                    // Log for debugging to see what will be submitted
-                    console.log('Prepared formData for submission:');
-                    refinedFormData.forEach((value, key) => {
                         console.log(`${key}: ${value}`);
                     });
 
-                    // Use Fetch API to submit the refined FormData
-                    fetch(form.action, {
-                        method: 'POST',
-                        body: refinedFormData
-                    }).then(response => response.json()).then(data => {
-                        console.log('Submission successful', data);
-                        // Optional: Redirect or handle post-submission here
-                    }).catch(error => {
-                        console.error('Submission failed', error);
-                    });
+                    // Optionally, you could send the formData using fetch() or another AJAX method
                 });
             });
-            document.getElementById('questionnaireForm').addEventListener('submit', handleSubmit);
 
 
+            function handleSubmit(event) {
+                event.preventDefault(); // Stop the form from submitting normally
 
-         
+                const form = event.target; // Get the form that triggered the event
+                const formData = new FormData(form);
+
+                // Assuming you need to do something special with `SelectedAnswerIds`
+                const refinedFormData = new FormData();
+                formData.forEach((value, key) => {
+                    if (key.includes("SelectedAnswerIds")) {
+                        document.querySelectorAll(`input[name="${key}"]:checked`).forEach(checkbox => {
+                            refinedFormData.append(key, checkbox.value); // Only append checked items
+                        });
+                    } else {
+                        refinedFormData.append(key, value); // Append other data normally
+                    }
+                });
+
+                // Debugging: log formData to ensure it's captured correctly
+                console.log('Prepared formData for submission:');
+                refinedFormData.forEach((value, key) => {
+                    console.log(`${key}: ${value}`);
+                });
+
+                // Fetch API to submit the refined FormData
+                fetch(form.action, {
+                    method: 'POST',
+                    body: refinedFormData,
+                })
+                    .then(response => response.json()) // Assuming JSON response
+                    .then(data => {
+                        console.log('Submission successful', data);
+                        // Handle success (e.g., display a success message, redirect, etc.)
+                    })
+                    .catch(error => {
+                        console.error('Submission failed', error);
+                        // Handle errors (e.g., display error message)
+                    });
+            }
+
+            function updateSelectedText(radio, text, index) {
+                console.log("Radio checked:", radio.checked);  // Check if the radio is indeed checked
+                console.log("Text to set:", text);  // What text is being set
+                console.log("Target hidden input ID:", 'selected_text_question' + index);  // Which input we're targeting
+
+                var hiddenInput = document.getElementById('selected_text_question' + index);
+                if (radio.checked) {
+                    hiddenInput.value = text;
+                    console.log("Updated hidden input value:", hiddenInput.value);  // Verify the value is set
+                }
+            }
          
         function showStep(index) {
             steps.forEach((step, i) => {
@@ -390,7 +527,7 @@
                 }
             });
         }
-
+           
         // Add submit event listener to the form
    
         showStep(currentStep);
@@ -419,8 +556,8 @@
             e.preventDefault();
         });
     });
- 
-</script>
+        event.preventDefault();
+</script> *@
 
 }
 

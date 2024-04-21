@@ -14,5 +14,7 @@ namespace Web.ViewModel.QuestionnaireVM
 
         // IDs of selected answers, used for submitting form data
         public List<int> SelectedAnswerIds { get; set; } = new List<int>();
+
+        public List<string> SelectedText { get; set; } = new List<string>();
     }
 }

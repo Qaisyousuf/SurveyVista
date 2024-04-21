@@ -46,6 +46,27 @@ namespace Web.Controllers
         [HttpPost]
         public IActionResult DisplayQuestionnaire([FromForm] ResponseQuestionnaireViewModel questionnaire)
         {
+            //for (int i = 0; i < questionnaire.Questions.Count; i++)
+            //{
+            //    var question = questionnaire.Questions[i];
+            //    List<string> selectedTexts = new List<string>();
+
+            //    // Assuming SelectedAnswerIds and SelectedTexts are parallel arrays
+            //    for (int j = 0; j < question.SelectedAnswerIds.Count; j++)
+            //    {
+            //        int selectedId = question.SelectedAnswerIds[j];
+            //        if (question.SelectedAnswerIds.Contains(selectedId)) // Ensure the ID was actually selected
+            //        {
+            //            selectedTexts.Add(question.SelectedText[j]);
+            //            Console.WriteLine($"Selected Text{selectedTexts}")
+            //        }
+            //    }
+
+            //    question.SelectedText = selectedTexts; // Now contains only the texts of selected answers
+            //}
+
+            // Process the updated model further as needed
+            /* return Json(questionnaire);*/ // Redirect to a results view, or handle as necessary
 
             foreach (var question in questionnaire.Questions)
             {
@@ -58,16 +79,15 @@ namespace Web.Controllers
                         var selectedAnswer = dbQuestion.Answers.FirstOrDefault(a => a.Id == selectedId);
                         if (selectedAnswer != null)
                         {
-                            Console.WriteLine($"Selected Answer: {selectedAnswer.Text}");
+                            Console.WriteLine($"Selected Answer Text: {selectedAnswer.Text}");
+                            Console.WriteLine($"Selected Answer Id: {selectedAnswer.Id}");
                             // Here you could further process each selected answer, e.g., saving user responses
                         }
                     }
                 }
             }
-            return Ok();
-          
+            return Json(questionnaire);
 
-           
         }
 
 
