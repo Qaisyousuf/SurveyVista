@@ -259,6 +259,83 @@ namespace Web.Migrations
                     b.ToTable("Questionnaires");
                 });
 
+            modelBuilder.Entity("Model.Response", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("QuestionnaireId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("SubmissionDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserEmail")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QuestionnaireId");
+
+                    b.ToTable("Responses");
+                });
+
+            modelBuilder.Entity("Model.ResponseAnswer", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AnswerId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ResponseDetailId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ResponseDetailId");
+
+                    b.ToTable("ResponseAnswers");
+                });
+
+            modelBuilder.Entity("Model.ResponseDetail", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("QuestionId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("QuestionType")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ResponseId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TextResponse")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QuestionId");
+
+                    b.HasIndex("ResponseId");
+
+                    b.ToTable("ResponseDetails");
+                });
+
             modelBuilder.Entity("Model.SocialMedia", b =>
                 {
                     b.Property<int>("Id")
@@ -363,6 +440,47 @@ namespace Web.Migrations
                     b.Navigation("Questionnaire");
                 });
 
+            modelBuilder.Entity("Model.Response", b =>
+                {
+                    b.HasOne("Model.Questionnaire", "Questionnaire")
+                        .WithMany()
+                        .HasForeignKey("QuestionnaireId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Questionnaire");
+                });
+
+            modelBuilder.Entity("Model.ResponseAnswer", b =>
+                {
+                    b.HasOne("Model.ResponseDetail", "ResponseDetail")
+                        .WithMany("ResponseAnswers")
+                        .HasForeignKey("ResponseDetailId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ResponseDetail");
+                });
+
+            modelBuilder.Entity("Model.ResponseDetail", b =>
+                {
+                    b.HasOne("Model.Question", "Question")
+                        .WithMany()
+                        .HasForeignKey("QuestionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Model.Response", "Response")
+                        .WithMany("ResponseDetails")
+                        .HasForeignKey("ResponseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Question");
+
+                    b.Navigation("Response");
+                });
+
             modelBuilder.Entity("Model.Footer", b =>
                 {
                     b.Navigation("FooterSocialMedias");
@@ -376,6 +494,16 @@ namespace Web.Migrations
             modelBuilder.Entity("Model.Questionnaire", b =>
                 {
                     b.Navigation("Questions");
+                });
+
+            modelBuilder.Entity("Model.Response", b =>
+                {
+                    b.Navigation("ResponseDetails");
+                });
+
+            modelBuilder.Entity("Model.ResponseDetail", b =>
+                {
+                    b.Navigation("ResponseAnswers");
                 });
 
             modelBuilder.Entity("Model.SocialMedia", b =>

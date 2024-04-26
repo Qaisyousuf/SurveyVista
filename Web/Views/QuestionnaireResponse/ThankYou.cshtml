@@ -1,13 +1,12 @@
 ﻿
 @{
-    ViewData["Title"] = "Error";
+    ViewData["Title"] = "Thank You";
     Layout = "~/Views/Shared/_QuestionnaireResponse.cshtml";
 }
 
 <style>
     body {
-        height:100% !important;
-      
+        height: 100% !important;
         background-repeat: no-repeat;
         background: linear-gradient(119deg, rgba(47,82,131,1) 0%, rgba(29,33,59,1) 34%, rgba(27,54,61,1) 67%, rgba(58,82,116,1) 100%) !important
     }
@@ -19,11 +18,10 @@
         align-items: center;
         align-content: center;
         width: 100%;
-        
         flex-direction: row;
-       
     }
-    #Errocard{
+
+    #Errocard {
         position: relative;
         display: -webkit-box;
         display: -ms-flexbox;
@@ -32,47 +30,42 @@
         -webkit-box-direction: normal;
         -ms-flex-direction: column;
         flex-direction: row;
-      
         word-wrap: break-word;
         box-shadow: 0px 0px 36px -12px rgba(20,101,230,1);
-        -webkit-box-shadow: 0px 0px 36px -12px rgba(20,101,230,1);
-        -moz-box-shadow: 0px 0px 36px -12px rgba(20,101,230,1);
+        -webkit-box-shadow: 0px 0px 20px 2px rgba(20,101,230,1);
         border-radius: 10px;
         background-color: transparent;
-        height:400px;
+        height: 400px;
         flex-wrap: nowrap;
         align-items: center;
-        padding:0 50px 0 50px;
-        margin:150px 30px 0px 30px;
-      
+        padding: 0 50px 0 50px;
+        margin: 150px 30px 0px 30px;
     }
 
 
-    
+
 
 
     @@media (max-width: 792px) {
 
 
         #Errocard {
-        display: flex;
-        flex-direction:column;
-        flex-wrap: wrap;
-        justify-content: center;
-        align-items: center;
-        align-content: center;
-        
-        height: 70vh;
-        padding: 0 20px 0 20px;
-        
-    }
+            display: flex;
+            flex-direction: column;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            align-content: center;
+            height: 70vh;
+            padding: 0 20px 0 20px;
+        }
 
         #boxError {
-        width: auto;
-        height: 30%;
-        margin: 5px;
+            width: auto;
+            height: 30%;
+            margin: 5px;
+        }
     }
-}
 
     @@media (max-width: 800px) {
 
@@ -110,8 +103,7 @@
             flex-direction: row;
             word-wrap: break-word;
             box-shadow: 0px 0px 36px -12px rgba(20,101,230,1);
-            -webkit-box-shadow: 0px 0px 36px -12px rgba(20,101,230,1);
-            -moz-box-shadow: 0px 0px 36px -12px rgba(20,101,230,1);
+            -webkit-box-shadow: 0px 0px 20px 2px rgba(20,101,230,1);
             border-radius: 10px;
             background-color: transparent;
             height: 400px;
@@ -123,43 +115,40 @@
 
         #boxError {
             width: auto;
-            
             margin: 5px;
         }
-    
 
-    #boxBanner {
-        display: block;
-        width: auto;
-        margin: 5px;
-       
-    }
+
+        #boxBanner {
+            display: block;
+            width: auto;
+            margin: 5px;
+        }
 </style>
 
 <div class="d-flex flex-column" id="BannerBackground">
 
     <!-- FOR DEMO PURPOSE -->
-    <section class=" text-white">
+    <section class="text-white">
         <div class="container py-1">
-       
-          
-                <div class="card" id="Errocard">
-                    <div class="col-lg-6" id="boxError">
-                        <h5 class="text-danger">@ViewBag.ErrorMessage</h5>
 
 
-                        @*   <p class="fst-italic text-muted">@Html.Raw(Model.Content) <a class="text-primary" href="@Model.Sitecopyright" target="_blank">SeoSoft</a></p> *@
+            <div class="card" id="Errocard">
+                <div class="col-lg-7" id="boxError">
+                    <h4 class="text-white">Hey  <span class="text-info font-weight-bold">@ViewBag.UserName</span></h4>
 
-                        <a href="#" class="btn btn-sm mt-3" id="BannerButon"> Contact <i class="bi bi-ui-checks"></i></a>
 
-                    </div>
-                <div class="col-lg-6" id="boxError">
-                        <script src="https://unpkg.com/@@dotlottie/player-component@latest/dist/dotlottie-player.mjs" type="module"></script>
-                        <dotlottie-player src="https://lottie.host/e3084d59-5df1-44e9-a0fe-0a015257fba7/LVAJX2PbZo.json" class="img-fluid" speed="1" style="width: auto; height: auto;" direction="1" playMode="normal" loop autoplay></dotlottie-player>
-                    </div>
+
+                    <h6 class="text-white">Thank you for taking the time to submit the form! Your input is invaluable to us and will help us improve our services.</h6>
+
                 </div>
-               
-            
+                <div class="col-lg-5" id="boxError">
+                    <script src="https://unpkg.com/@@dotlottie/player-component@latest/dist/dotlottie-player.mjs" type="module"></script>
+                    <dotlottie-player src="https://lottie.host/b19b8f6f-debe-408a-99db-1b82713cc8b4/C7LtuHstVr.json" class="img-fluid" speed="1" style="width: 300px; height: 300px;" direction="1" playMode="normal" autoplay></dotlottie-player>
+                </div>
+            </div>
+
+
         </div>
     </section>
 
@@ -170,5 +159,6 @@
 
 
 
-  
+
+
 

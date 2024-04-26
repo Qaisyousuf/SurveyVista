@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Elfie.Extensions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Model;
 using Services.EmailSend;
@@ -465,12 +466,11 @@ namespace Web.Areas.Admin.Controllers
             {
               
 
-                // Build the email body with questionnaire details
+                
                 var questionnairePath = _configuration["Email:Questionnaire"];
                 int surveyId = viewModel.QuestionnaireId;
 
-                //DateTime currentDateTime = DateTime.Now;
-                //DateTime currentDateTime = viewModel.ExpirationDateTime;
+               
                 DateTime currentDateTime;
                 if (viewModel.ExpirationDateTime.HasValue)
                 {
@@ -478,8 +478,7 @@ namespace Web.Areas.Admin.Controllers
                 }
                 else
                 {
-                    // Handle the case when ExpirationDateTime is null
-                    // For example, you can assign the current date and time
+                    
                     currentDateTime = DateTime.Now;
                 }
 
@@ -494,9 +493,9 @@ namespace Web.Areas.Admin.Controllers
 
 
 
-                //var completeUrl = $"{Request.Scheme}://{Request.Host}/{questionnairePath}/{viewModel.QuestionnaireId}?token={tokenWithExpiry}";
+                var completeUrl = $"{Request.Scheme}://{Request.Host}/{questionnairePath}/{viewModel.QuestionnaireId}?t={tokenWithExpiry}";
 
-                var completeUrl = $"{Request.Scheme}://{Request.Host}/{questionnairePath}/{viewModel.QuestionnaireId}";
+                //var completeUrl = $"{Request.Scheme}://{Request.Host}/{questionnairePath}/{viewModel.QuestionnaireId}";
 
 
                 var toEmail = viewModel.Email;
@@ -583,6 +582,32 @@ namespace Web.Areas.Admin.Controllers
             // If model state is not valid, return the view with validation errors
             return View(viewModel);
         }
+
+
+
+
+        [HttpGet]
+        public async Task<IActionResult> ViewResponse(int id) // Pass the response ID
+        {
+            var response = await _context.Responses
+        .Include(r => r.ResponseDetails)
+            .ThenInclude(rd => rd.ResponseAnswers)
+        .Include(r => r.ResponseDetails)
+            .ThenInclude(rd => rd.Question) // Include questions for detailed display
+            .ThenInclude(q => q.Answers) // Include all possible answers for each question
+        .FirstOrDefaultAsync(r => r.Id == id);  // Find the response by ID
+
+
+            if (response == null)
+            {
+                return NotFound(); // If no response is found, return a NotFound result
+            }
+
+            return View(response); // Pass the response to the view
+        }
+
+
+
         public string GenerateExpiryToken(DateTime expiryDate)
         {
             // Generate a unique token, for example, using a cryptographic library or a GUID
@@ -593,7 +618,7 @@ namespace Web.Areas.Admin.Controllers
 
             return tokenWithExpiry;
         }
-      
+
 
 
     }

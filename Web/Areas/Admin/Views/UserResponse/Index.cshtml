@@ -1,0 +1,56 @@
+﻿@model IEnumerable<Model.Response>
+
+@{
+    ViewData["Title"] = "Response";
+}
+
+
+<div class="container mt-5">
+
+    <partial name="_Notification" />
+
+    <div class="card bg-default mb-3 ">
+        <div class="card-header">User Reponse</div>
+        <div class="card-body">
+            <h4 class="card-title">User response list</h4>
+           
+
+            <table class="table table-responsive w-100 d-block d-md-table">
+                <thead class="w-auto">
+                    <tr>
+
+                        <th scope="col">Id</th>
+                       
+                        <th scope="col">Questionnaire</th>
+                        <th scope="col">UserName</th>
+                        <th scope="col">UserEmail</th>
+                        <th scope="col">Submission Date</th>
+                        <th scope="col" class="d-flex justify-content-end">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="w-auto">
+                    @foreach (var item in Model)
+                    {
+                        <tr class="table-secondary">
+
+                            <td>@item.Id</td>
+                            <td> <span class="badge bg-primary">@item.Questionnaire.Title</span></td>
+                            <td>@item.UserName</td>
+                            <td>@item.UserName</td>
+                            <td>@item.SubmissionDate</td>
+                            <td class="d-flex justify-content-end">
+                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i> Delete</a> |
+                                <a asp-action="ViewResponse" asp-route-id="@item.Id" class="btn btn-warning btn-sm"><i class="bi bi-pencil-square"></i> Details</a>
+                            </td>
+                        </tr>
+                    }
+
+
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+</div>
+
+

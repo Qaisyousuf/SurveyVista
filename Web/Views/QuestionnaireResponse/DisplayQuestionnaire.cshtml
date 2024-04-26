@@ -33,7 +33,7 @@
     }
 
     .QuestionContainer {
-        padding-top: 100px;
+        padding-top: 50px;
         padding-bottom: 100px;
     }
 
@@ -320,9 +320,14 @@
 
             <h4>@Model.Title</h4>
             <p>@Html.Raw(Model.Description)</p>
-
-
-
+            <div class="form-group">
+                <label for="userName">Your Name:</label>
+                <input type="text" class="form-control" id="userName" name="UserName" placeholder="Enter your name">
+            </div>
+            <div class="form-group">
+                <label for="Email">Email Address:</label>
+                <input type="email" class="form-control" id="Email" name="Email" placeholder="Enter your email">
+            </div>
             <div class="container">
                 <div class="row align-items-center">
                     <!-- Stepper -->
@@ -341,6 +346,7 @@
                     </div>
                     <!-- Form Content -->
                     <div class="col-md-9">
+                        
                         @for (int i = 0; i < Model.Questions.Count; i++)
                         {
                             var question = Model.Questions[i];
@@ -359,7 +365,7 @@
 
                                 <p class="font-weight-normal">@(i + 1). @question.Text</p>
 
-
+                              
 
                                 @switch (question.Type)
                                 {
@@ -368,7 +374,7 @@
                                         {
 
                                             <input type="Text" class="form-control" id="question@(i + 1)" name="Questions[@i].SelectedText" rows="3" placeholder="Enter answer"></input>
-                                            <input class="form-control hidden-textarea" id="question@(i + 1)" name="Questions[@i].SelectedAnswerIds" value="@answer.Id" rows="3" placeholder="Enter answer"></input>
+                                            <input class="form-control hidden-textarea" id="question@(i + 1)" name="Questions[@i].SelectedAnswerIds" value="@answer.Id" rows="3" placeholder="Enter answer" ></input>
                                         }
                                         break;
                                     case QuestionType.CheckBox:
@@ -380,7 +386,7 @@
                                             @foreach (var answer in question.Answers)
                                             {
                                                 <div class="form-check">
-                                                    <input class="form-check-input" id="question@(i)_answer@(answer.Id)" type="checkbox" name="Questions[@i].SelectedAnswerIds" value="@answer.Id">
+                                                    <input class="form-check-input" id="question@(i)_answer@(answer.Id)" type="checkbox" name="Questions[@i].SelectedAnswerIds" value="@answer.Id" >
                                                     <label class="form-check-label" for="question@(i)_answer@(answer.Id)">
                                                         @answer.Text
                                                     </label>
@@ -625,7 +631,7 @@
                                         </div>
                                         break;
                                 }
-
+                               
                                 <div class="mt-3">
                                     @if (i > 0)
                                     {
@@ -638,7 +644,16 @@
                                 </div>
                             </div>
                         }
-
+                        <div class="User-details" style="display:none;">
+                            <div class="form-group">
+                                <label for="userName">Your Name:</label>
+                                <input type="text" class="form-control" id="userName" name="UserName" placeholder="Enter your name" >
+                            </div>
+                            <div class="form-group">
+                                <label for="userEmail">Email Address:</label>
+                                <input type="email" class="form-control" id="userEmail" name="UserEmail" placeholder="Enter your email" >
+                            </div>
+                        </div>
                         <button type="submit" class="btn btn-primary submit btn-sm mt-4" id="BannerButon">Submit</button>
 
                     </div>
@@ -798,6 +813,11 @@
             // Initialize the form at the first step
             showStep(currentStep);
         });
+
+
+
+       
+
 
         // document.addEventListener("DOMContentLoaded", function () {
         //     const stepper = document.querySelector('.stepper');

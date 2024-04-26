@@ -40,6 +40,10 @@
                     <a asp-controller="Questionnaire" asp-action="index"><span class="bi bi-question-circle"></span> Survey</a>
                 </li>
                 <li>
+
+                    <a asp-controller="UserResponse" asp-action="index"><span class="bi bi-clipboard-data"></span> Response</a>
+                </li>
+                <li>
                     <a asp-controller="newsletters" asp-action="index"><span class="bi bi-newspaper"></span> Subscibers</a>
                 </li>
             </ul>
@@ -84,7 +88,7 @@
             </nav>
            
 
-               <main class=" mt-5">
+               <main>
               
                 @RenderBody()
                </main>

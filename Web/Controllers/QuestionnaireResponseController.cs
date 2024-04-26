@@ -36,9 +36,43 @@ namespace Web.Controllers
             return View();
         }
 
-        public IActionResult DisplayQuestionnaire(int id)
+        public IActionResult DisplayQuestionnaire(int id,string t)
         {
-        
+            // Check if the token is null or empty
+            if (string.IsNullOrEmpty(t))
+            {
+                ViewBag.ErrorMessage = "The URL is invalid. Please provide a valid token.";
+                return View("Error");
+            }
+
+            // Split the token to extract the expiration date and time
+            string[] tokenParts = t.Split('|');
+            if (tokenParts.Length != 2)
+            {
+                ViewBag.ErrorMessage = "The URL is invalid. Please provide a valid token.";
+                return View("Error");
+            }
+
+            string expiryDateTimeString = tokenParts[1];
+
+            // Parse the expiration datetime in UTC format
+            if (!DateTime.TryParseExact(expiryDateTimeString, "yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out DateTime expiryDateTimeUtc))
+            {
+                ViewBag.ErrorMessage = "The URL is invalid. Please provide a valid token.";
+                return View("Error");
+            }
+
+            // Convert the expiration datetime to local time
+            DateTime expiryDateTimeLocal = expiryDateTimeUtc.ToLocalTime();
+
+            // Check if the token is expired (accounting for UTC+2 offset)
+            if (expiryDateTimeLocal < DateTime.Now.AddHours(2))
+            {
+
+                return RedirectToAction(nameof(Error));
+            }
+
+            // Retrieve the questionnaire using the numeric ID
             var questionnaire = _questionnaireRepository.GetQuestionnaireWithQuestionAndAnswer(id);
 
             return View(MapToViewModel(questionnaire));
@@ -46,48 +80,49 @@ namespace Web.Controllers
         [HttpPost]
         public IActionResult DisplayQuestionnaire([FromForm] ResponseQuestionnaireViewModel questionnaire)
         {
-            //for (int i = 0; i < questionnaire.Questions.Count; i++)
+            //bool hasSubmitted = _context.Responses.Any(r => r.QuestionnaireId == questionnaire.Id && r.UserEmail == questionnaire.Email);
+
+            //if (hasSubmitted)
             //{
-            //    var question = questionnaire.Questions[i];
-            //    List<string> selectedTexts = new List<string>();
-
-            //    // Assuming SelectedAnswerIds and SelectedTexts are parallel arrays
-            //    for (int j = 0; j < question.SelectedAnswerIds.Count; j++)
-            //    {
-            //        int selectedId = question.SelectedAnswerIds[j];
-            //        if (question.SelectedAnswerIds.Contains(selectedId)) // Ensure the ID was actually selected
-            //        {
-            //            selectedTexts.Add(question.SelectedText[j]);
-            //            Console.WriteLine($"Selected Text{selectedTexts}")
-            //        }
-            //    }
-
-            //    question.SelectedText = selectedTexts; // Now contains only the texts of selected answers
+            //    TempData["ErrorMessage"] = "You have already completed this survey.";
+            //    return RedirectToAction("ThankYou");
             //}
 
-            // Process the updated model further as needed
-            /* return Json(questionnaire);*/ // Redirect to a results view, or handle as necessary
-
-            foreach (var question in questionnaire.Questions)
+            var response = new Response
             {
-                var dbQuestion = _context.Questions.Include(q => q.Answers).FirstOrDefault(q => q.Id == question.Id);
-
-                if (dbQuestion != null)
+                QuestionnaireId = questionnaire.Id,
+                UserName = questionnaire.UserName,
+                UserEmail = questionnaire.Email,
+                SubmissionDate = DateTime.UtcNow,
+                ResponseDetails = questionnaire.Questions.Select(q => new ResponseDetail
                 {
-                    foreach (var selectedId in question.SelectedAnswerIds)
-                    {
-                        var selectedAnswer = dbQuestion.Answers.FirstOrDefault(a => a.Id == selectedId);
-                        if (selectedAnswer != null)
-                        {
-                            Console.WriteLine($"Selected Answer Text: {selectedAnswer.Text}");
-                            Console.WriteLine($"Selected Answer Id: {selectedAnswer.Id}");
-                            // Here you could further process each selected answer, e.g., saving user responses
-                        }
-                    }
-                }
-            }
-            return Json(questionnaire);
+                    QuestionId = q.Id,
+                    QuestionType=q.Type,
+                    // Handle TextResponse based on question type
+                    TextResponse = (q.Type == QuestionType.Open_ended || q.Type == QuestionType.Text || q.Type==QuestionType.Slider)
+                                   ? string.Join(" ", q.SelectedText)  // Ensure SelectedText is appropriately used based on question type
+                                   : null,
+                    ResponseAnswers = q.SelectedAnswerIds
+                        .Select(aid => new ResponseAnswer { AnswerId = aid })
+                        .ToList() // Ensure that the list is initialized correctly
+                }).ToList()
+            };
 
+
+            _context.Responses.Add(response);
+            _context.SaveChanges();
+
+            TempData["UserName"] = questionnaire.UserName;
+
+            return RedirectToAction(nameof(ThankYou));
+
+        }
+
+        [HttpGet]
+        public IActionResult ThankYou()
+        {
+            ViewBag.UserName = TempData["UserName"];
+            return View();
         }
 
 
@@ -121,41 +156,7 @@ namespace Web.Controllers
 }
 
 
-//// Check if the token is null or empty
-//if (string.IsNullOrEmpty(t))
-//{
-//    ViewBag.ErrorMessage = "The URL is invalid. Please provide a valid token.";
-//    return View("Error");
-//}
 
-//// Split the token to extract the expiration date and time
-//string[] tokenParts = t.Split('|');
-//if (tokenParts.Length != 2)
-//{
-//    ViewBag.ErrorMessage = "The URL is invalid. Please provide a valid token.";
-//    return View("Error");
-//}
-
-//string expiryDateTimeString = tokenParts[1];
-
-//// Parse the expiration datetime in UTC format
-//if (!DateTime.TryParseExact(expiryDateTimeString, "yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out DateTime expiryDateTimeUtc))
-//{
-//    ViewBag.ErrorMessage = "The URL is invalid. Please provide a valid token.";
-//    return View("Error");
-//}
-
-//// Convert the expiration datetime to local time
-//DateTime expiryDateTimeLocal = expiryDateTimeUtc.ToLocalTime();
-
-//// Check if the token is expired (accounting for UTC+2 offset)
-//if (expiryDateTimeLocal < DateTime.Now.AddHours(2))
-//{
-
-//    return RedirectToAction(nameof(Error));
-//}
-
-// Retrieve the questionnaire using the numeric ID
 
 
 

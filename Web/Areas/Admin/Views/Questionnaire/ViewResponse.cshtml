@@ -1,0 +1,41 @@
+﻿
+
+@model Response
+
+@{
+    ViewData["Title"] = "ViewResponses";
+}
+
+<style>
+    .selected {
+        font-weight: bold;
+    }
+</style>
+
+<div class="container">
+    <p>Response by: @Model.UserName  on @Model.SubmissionDate.ToString("dd/MM/yyyy")</p>
+
+    @foreach (var detail in Model.ResponseDetails)
+    {
+        <h5>Question: @detail.Question.Text</h5>
+        
+        <h6>All Available Answers:</h6>
+        <ul>
+            @foreach (var answer in detail.Question.Answers)
+            {
+                <li class="badge badge-secondary">@answer.Text</li>
+            }
+        </ul>
+        <h6>Provided Answers:</h6>
+        <ul>
+            @foreach (var answer in detail.ResponseAnswers)
+            {
+                <li class="badge badge-success">@detail.Question.Answers.FirstOrDefault(a => a.Id == answer.AnswerId)?.Text</li>
+            }
+        </ul>
+    }
+</div>
+<div>
+    
+    <a asp-action="Index">Back to List</a>
+</div>

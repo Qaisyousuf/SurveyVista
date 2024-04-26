@@ -1,0 +1,462 @@
+﻿@model Response
+
+@{
+    ViewData["Title"] = "ViewResponses";
+}
+
+<style>
+    <style>
+    
+
+    .font-weight-bold {
+        font-weight: bold;
+    }
+
+    .text-primary {
+        color: #121212; /* Bootstrap primary color */
+    }
+
+    .selected-answer {
+        color: #28a745; /* Bootstrap success color */
+    }
+    
+
+   
+
+        .star-rating .text-primary {
+            color:goldenrod; /* Bootstrap primary blue */
+            font-weight: bold; /* Make text bold */
+        }
+
+        .star-rating .text-secondary {
+            color: #6c757d; /* Bootstrap secondary text color */
+        }
+
+        .star-rating .text-muted {
+            color: #6c757d; /* Muted text color for unselected star descriptions */
+        }
+
+    .color-1 {
+        color: #007bff;
+    }
+    /* Blue */
+    .color-2 {
+        color: #28a745;
+    }
+    /* Green */
+    .color-3 {
+        color: #ffc107;
+    }
+    /* Yellow */
+    .color-4 {
+        color: #dc3545;
+    }
+    /* Red */
+    .color-5 {
+        color: #17a2b8;
+    }
+
+    .color-6 {
+        color: #12b8;
+    }
+
+    .color-7 {
+        color: #d92683;
+    }
+
+    .color-8 {
+        color: #f181b6;
+    }
+
+    .color-8 {
+        color: #035b19;
+    }
+
+    .grayscale {
+        filter: grayscale(100%); /* Grays out the image */
+    }
+
+    .selected-image-card {
+        border: 3px solid #28a745; /* Bootstrap 'success' green color */
+        position: relative; /* Needed for absolute positioning of the check icon */
+    }
+
+        .selected-image-card::after {
+            content: "\2713"; /* Unicode character for a check mark */
+            font-family: "Bootstrap Icons"; /* Ensure this matches the icon font being used */
+            color: #28a745; /* Match the border color or choose another */
+            font-size: 24px; /* Adjust size as needed */
+            position: absolute;
+            top: 191px;
+            right: 67px;
+            z-index: 1;
+        }
+
+
+    /* Ensure the cards are not too stretched vertically */
+    .card-img-top {
+        width: auto;
+        max-height: 150px; /* Adjust the max-height as needed */
+        object-fit: cover; /* This will cover the area without stretching */
+    }
+
+    .slider {
+        -webkit-appearance: none; /* Override default appearance */
+        width: 100%; /* Slider takes up full container width */
+        height: 15px; /* Slider thickness */
+        border-radius: 5px; /* Roundness of the slider */
+        background: #d3d3d3; /* Background of the slider */
+        outline: none; /* Removes the outline */
+        opacity: 0.7; /* Slider opacity */
+        -webkit-transition: .2s; /* Smooth transitions */
+        transition: opacity .2s;
+    }
+
+        .slider:disabled {
+            background: #e9ecef; /* Light grey background when slider is disabled */
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none; /* Removes style of default thumb */
+            width: 25px; /* Thumb width */
+            height: 25px; /* Thumb height */
+            border-radius: 50%; /* Makes thumb circular */
+            background: #007bff; /* Thumb color */
+            cursor: pointer; /* Cursor appears as pointer */
+        }
+
+        .slider::-moz-range-thumb {
+            width: 25px; /* Thumb width for Mozilla */
+            height: 25px; /* Thumb height for Mozilla */
+            border-radius: 50%; /* Makes thumb circular for Mozilla */
+            background: #007bff; /* Thumb color for Mozilla */
+            cursor: pointer; /* Cursor appears as pointer for Mozilla */
+        }
+
+    #Errocard {
+        position: relative;
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-box-orient: vertical;
+        -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+        flex-direction: row;
+        word-wrap: break-word;
+        box-shadow: 0px 0px 8px -1px rgba(20,101,230,1);
+        -webkit-box-shadow: 0px 0px 8px -1px rgba(20,101,230,1);
+        border-radius: 10px;
+        background-color: transparent;
+        height: auto;
+        flex-wrap: nowrap;
+        align-items: center;
+        padding: 0 50px 0 50px;
+       
+        color:white;
+    }
+    .card{
+        margin-top:40px !important;
+    }
+    
+    main{
+       
+        background-attachment:fixed;
+        background-repeat: no-repeat;
+        background: linear-gradient(119deg, rgba(47, 82, 131, 1) 0%, rgba(29, 33, 59, 1) 34%, rgba(27, 54, 61, 1) 67%, rgba(58, 82, 116, 1) 100%) !important;
+    }
+
+    .card-header {
+        padding: 0.75rem 1.25rem;
+        margin-bottom: 0;
+        background-color: rgb(66 122 207 / 44%);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 0.25em 0.4em;
+        font-size: 116%;
+        font-weight: 700;
+        line-height: 1;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: baseline;
+        border-radius: 0.25rem;
+    
+</style>
+
+    @{
+        int numberindex = 0;
+    }
+
+
+<div class="container pt-5">
+   @*  <h2>Questionnaire: @Model.Questionnaire.Title</h2> *@
+    <span class="text-white badge badge-success display-3">Response Details for @Model.UserName (@Model.UserEmail)</span>
+    <h5 class="text-success">Submitted on: <span id="localTime">@Model.SubmissionDate.ToString("yyyy-MM-ddTHH:mm:ss")</span></h5>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var utcDate = document.getElementById('localTime').innerText;
+            var localDate = new Date(utcDate + 'Z'); // Add 'Z' to indicate UTC time
+            document.getElementById('localTime').innerText = localDate.toLocaleString();
+        });
+    </script>
+
+
+        @foreach (var detail in Model.ResponseDetails)
+        {
+        <div class="card mb-3" id="Errocard">
+            <div class="card-header">
+                Question Type:@detail.QuestionType.ToString()
+            </div>
+            <div class="card-body">
+                <h6 class="card-title"><span class="font-weight-bold">Question @((numberindex = numberindex + 1)):</span> @detail.Question.Text</h6>
+                <div class="card-text ml-2">
+                        @switch (detail.QuestionType)
+                        {
+                            case QuestionType.Text:
+                            case QuestionType.Open_ended:
+                            <p><strong>Answer:</strong> @detail.TextResponse</p>
+                                break;
+                            case QuestionType.Multiple_choice:
+                            case QuestionType.CheckBox:
+                            case QuestionType.TrueFalse:
+                            <strong>Answer:</strong>
+                                @if (detail.Question.Type == QuestionType.TrueFalse)
+                                {
+                                <!-- Use radio buttons for True/False questions -->
+                                <div class="form-group">
+                                        @foreach (var answer in detail.Question.Answers)
+                                        {
+                                            // Ensuring each question has a unique group name by using the Question ID
+                                            string groupName = $"response{detail.Question.Id}";
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio"
+                                                   name="@groupName" 
+                                                   id="radio-@answer.Id"
+                                                   value="@answer.Id"
+                                                   disabled @(detail.ResponseAnswers.Any(ra => ra.AnswerId == answer.Id) ? "checked" : "")>
+                                            <label class="form-check-label @(detail.ResponseAnswers.Any(ra => ra.AnswerId == answer.Id) ? "font-weight-bold text-primary" : "text-muted")"
+                                                   for="radio-@answer.Id">
+                                                    @answer.Text
+                                            </label>
+                                        </div>
+                                        }
+                                </div>
+                                }
+                                else
+                                {
+                                <!-- Use checkboxes for Multiple Choice and Checkbox questions -->
+                                <div class="form-group">
+                                        @foreach (var answer in detail.Question.Answers)
+                                        {
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="response@answer.Id"
+                                                   id="checkbox-@answer.Id" value="@answer.Id"
+                                                   disabled @(detail.ResponseAnswers.Any(ra => ra.AnswerId == answer.Id) ? "checked" : "")>
+                                            <label class="form-check-label @(detail.ResponseAnswers.Any(ra => ra.AnswerId == answer.Id) ? "font-weight-bold text-primary" : "text-muted")"
+                                                   for="checkbox-@answer.Id">
+                                                    @answer.Text
+                                            </label>
+                                        </div>
+                                        }
+                                </div>
+                                }
+                                break;
+
+                            case QuestionType.Rating:
+                                @if (detail.QuestionType == QuestionType.Rating)
+                                {
+                                <strong>User Selected rate</strong>
+                                <ul class="list-inline">
+                                        @foreach (var answer in detail.Question.Answers.OrderBy(a => a.Id))
+                                        {
+                                        <li class="list-inline-item  p-3">
+                                            <!-- Display answer text above the star -->
+                                            <div class="@(detail.ResponseAnswers.Any(ra => ra.AnswerId == answer.Id) ? "text-primary" : "text-muted")">
+                                                <span class="d-flex justify-content-center">@answer.Text</span>
+                                            </div>
+                                            <!-- Display star icon -->
+                                            <span class="@(detail.ResponseAnswers.Any(ra => ra.AnswerId == answer.Id) ? "text-primary fw-bold fs-3" : "text-secondary")">
+                                                <i class="bi bi-star-fill"></i> <!-- Star icon -->
+                                            </span>
+                                        </li>
+                                        }
+                                </ul>
+                                }
+                                
+                                break;
+                            case QuestionType.Likert:
+                            <strong> Answer:</strong>
+                            <ul class="list-unstyled m-3">
+                                    @foreach (var answer in detail.Question.Answers.OrderBy(a => a.Id))
+                                    {
+                                        // Construct a unique name for each question-answer pair to ensure radio buttons are not linked.
+                                        var radioName = $"likertResponse{detail.Question.Id}-{answer.Id}";
+                                        var isAnswerSelected = detail.ResponseAnswers.Any(ra => ra.AnswerId == answer.Id);
+
+                                    <li>
+                                        <label class=" @(isAnswerSelected ? "font-weight-bold text-primary" : "text-muted")">
+                                            <input type="radio"
+                                                   class="form-check-input"
+                                                   name="@radioName"
+                                                   value="@answer.Id"
+                                                   disabled
+                                                @(isAnswerSelected ? "checked='checked'" : "") />
+                                                @answer.Text
+                                        </label>
+                                    </li>
+                                    }
+                            </ul>
+
+
+                                break;
+                            case QuestionType.Matrix:
+                            <table class="table">
+
+                                <strong> Answer:</strong>
+                               @*  <thead>
+                                    <tr>
+                                        <th>User response</th>
+                                        
+                                    </tr>
+                                </thead> *@
+                                <tbody>
+                                        @foreach (var answer in detail.Question.Answers)
+                                        {
+                                            var isSelected = detail.ResponseAnswers.Any(ra => ra.AnswerId == answer.Id);
+                                            <tr>
+                                            <td class="@(isSelected ? "font-weight-bold text-primary" : "text-muted")">
+                                                    @answer.Text
+                                            </td>
+                                            <td>
+                                                <input type="radio" class="form-check-input" name="@($"response{detail.Question.Id}_{answer.Id}")" value="@answer.Id"
+                                                       disabled @(isSelected ? "checked='checked'" : "") />
+                                            </td>
+                                        </tr>
+                                        }
+                                </tbody>
+                            </table>
+                                break;
+
+
+                            case QuestionType.Ranking:
+                            <div class="row">
+                                <!-- Original Order of Answers -->
+                                <div class="col-md-6">
+                                    <strong>Original Order of Answers:</strong>
+                                    <ul class="list-group mb-3">
+                                            @foreach (var answer in detail.Question.Answers)
+                                            {
+                                                var userIndex = detail.ResponseAnswers.FindIndex(ra => ra.AnswerId == answer.Id) + 1;
+                                            <li class="list-group-item @($"color-{userIndex}")">
+                                                <span class="badge text-bg-secondary badge-pill">@userIndex</span>
+                                                    @answer.Text
+                                            </li>
+                                            }
+                                    </ul>
+                                </div>
+
+                                <!-- User Ranked Order -->
+                                <div class="col-md-6">
+                                    <strong>User Order of answers:</strong>
+                                    <ul class="list-group">
+                                            @for (int i = 0; i < detail.ResponseAnswers.Count; i++)
+                                            {
+                                                var ra = detail.ResponseAnswers[i];
+                                                var answer = detail.Question.Answers.FirstOrDefault(a => a.Id == ra.AnswerId);
+                                            <li class="list-group-item @($"color-{i+1}")">
+                                                <span class="badge text-bg-secondary badge-pill">@(i + 1)</span>
+                                                    @answer.Text
+                                            </li>
+                                            }
+                                    </ul>
+                                </div>
+                            </div>
+                         
+                                break;
+                            case QuestionType.Image:
+                            <div class="container">
+                                <div class="row">
+                                    <!-- All Images -->
+                                    <div class="col-md-12">
+                                        <strong>answers:</strong>
+                                        <div class="row">
+                                                @foreach (var answer in detail.Question.Answers)
+                                                {
+                                                    var isSelected = detail.ResponseAnswers.Any(ra => ra.AnswerId == answer.Id);
+                                                <div class="col-md-3 col-sm-4 col-6">
+                                                    <!-- Adjust column sizes for various breakpoints -->
+                                                    <div class="card mb-3 @(isSelected ? "selected-image-card" : "grayscale")">
+                                                        <img src="@answer.Text" class="card-img-top" alt="@answer.Text">
+                                                        <div class="card-body">
+                                                            <a class="btn btn-primary btn-sm btn-block" href="@answer.Text" target="_blank">
+                                                                View Image
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                                break;
+                            case QuestionType.Slider:
+                            <div class="container">
+                                <div class="row">
+                                    <!-- Slider Responses -->
+                                    <div class="col-md-12">
+                                        <strong>Answer</strong>
+                                        <ul class="list-group mb-3">
+                                                @foreach (var answer in detail.Question.Answers)
+                                                {
+                                                    // Retrieve the response that corresponds to the current answer
+                                                    var responseAnswer = detail.ResponseAnswers.FirstOrDefault(ra => ra.AnswerId == answer.Id);
+                                                    // Parse the response text to an integer
+                                                    int sliderValue = 0;
+                                                    Int32.TryParse(responseAnswer?.ResponseDetail.TextResponse, out sliderValue);
+
+                                                <li class="list-group-item">
+                                                    <label>@answer.Text</label>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="badge badge-secondary mr-2">0</span> <!-- Min value label -->
+                                                        <input type="range" min="0" max="100"
+                                                               value="@sliderValue" class="slider" disabled>
+                                                        <span class="badge badge-secondary ml-2">100</span> <!-- Max value label -->
+                                                    </div>
+                                                    <div class="mt-2">
+                                                        <span class="badge badge-primary badge-pill">User Response: @sliderValue</span>
+                                                    </div>
+                                                </li>
+                                                }
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                                break;
+                            // Handle other question types as previously detailed
+
+                            // Other cases as previously detailed
+                            default:
+                            <p>Unsupported question type.</p>
+                             break;
+                        }
+                </div>
+            </div>
+        </div>
+        }
+    <div>
+
+        <a asp-action="Index">Back to List</a>
+    </div>
+</div>
+
+
+
+
+
+

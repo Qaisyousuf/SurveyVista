@@ -34,7 +34,9 @@ namespace Data
 
         public DbSet<Subscription> Subscriptions { get; set; }
 
-      
+        public DbSet<Response> Responses { get; set; }
+        public DbSet<ResponseDetail> ResponseDetails { get; set; }
+        public DbSet<ResponseAnswer> ResponseAnswers { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -72,16 +74,18 @@ namespace Data
                 .HasKey(a => a.Id);
 
 
-            //modelBuilder.Entity<Page>()
-            //    .HasOne(p => p.footer)
-            //    .WithMany()
-            //    .HasForeignKey(p => p.FooterId)
-            //    .IsRequired(false)
-            //    .OnDelete(DeleteBehavior.Cascade);
-                
-            
+            // Questionnaire to Response relationship
+            modelBuilder.Entity<ResponseDetail>()
+            .HasOne(rd => rd.Response)
+            .WithMany(r => r.ResponseDetails)
+            .HasForeignKey(rd => rd.ResponseId)
+            .OnDelete(DeleteBehavior.Cascade);  // This is safe if only Responses are being deleted leading to ResponseDetails
 
-            
+            modelBuilder.Entity<ResponseDetail>()
+                .HasOne(rd => rd.Question)
+                .WithMany()
+                .HasForeignKey(rd => rd.QuestionId)
+                .OnDelete(DeleteBehavior.Restrict);
 
 
             base.OnModelCreating(modelBuilder);

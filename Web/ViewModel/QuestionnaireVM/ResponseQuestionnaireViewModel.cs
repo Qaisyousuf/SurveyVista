@@ -1,4 +1,5 @@
-﻿using Web.ViewModel.QuestionVM;
+﻿using System.ComponentModel.DataAnnotations;
+using Web.ViewModel.QuestionVM;
 
 namespace Web.ViewModel.QuestionnaireVM
 {
@@ -9,8 +10,15 @@ namespace Web.ViewModel.QuestionnaireVM
             public string? Title { get; set; }  // Title of the questionnaire
             public string? Description { get; set; }  // Description of the questionnaire
 
-            // Collection of questions
-            public List<ResponseQuestionViewModel> Questions { get; set; } = new List<ResponseQuestionViewModel>();
+            [Required]
+            public string? UserName { get; set; }
+
+             [Required]
+             public string? Email { get; set; }
+
+
+              // Collection of questions
+             public List<ResponseQuestionViewModel> Questions { get; set; } = new List<ResponseQuestionViewModel>();
        
 
     }
