@@ -13,6 +13,7 @@ using Services.Interaces;
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
+using System.Web;
 using Web.ViewModel.QuestionnaireVM;
 
 
@@ -470,7 +471,9 @@ namespace Web.Areas.Admin.Controllers
                 var questionnairePath = _configuration["Email:Questionnaire"];
                 int surveyId = viewModel.QuestionnaireId;
 
-               
+                var userEmailEncoded = HttpUtility.UrlEncode(viewModel.Email);
+
+
                 DateTime currentDateTime;
                 if (viewModel.ExpirationDateTime.HasValue)
                 {
@@ -491,9 +494,9 @@ namespace Web.Areas.Admin.Controllers
                 // Append the expiration date and time to the token (you might want to encrypt it for security)
                 string tokenWithExpiry = $"{token}|{expiryDateTime.ToString("yyyy-MM-ddTHH:mm:ssZ")}";
 
+                var completeUrl = $"{Request.Scheme}://{Request.Host}/{questionnairePath}/{viewModel.QuestionnaireId}?t={tokenWithExpiry}&E={userEmailEncoded}";
 
-
-                var completeUrl = $"{Request.Scheme}://{Request.Host}/{questionnairePath}/{viewModel.QuestionnaireId}?t={tokenWithExpiry}";
+                //var completeUrl = $"{Request.Scheme}://{Request.Host}/{questionnairePath}/{viewModel.QuestionnaireId}?t={tokenWithExpiry}&E={userEmail}";
 
                 //var completeUrl = $"{Request.Scheme}://{Request.Host}/{questionnairePath}/{viewModel.QuestionnaireId}";
 

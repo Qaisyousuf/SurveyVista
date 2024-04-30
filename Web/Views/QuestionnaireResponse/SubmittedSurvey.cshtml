@@ -1,8 +1,9 @@
 ﻿
 @{
-    ViewData["Title"] = "Thank You";
+    ViewData["Title"] = "SubmittedSurvey";
     Layout = "~/Views/Shared/_QuestionnaireResponse.cshtml";
 }
+
 
 <style>
     body {
@@ -135,10 +136,8 @@
 
             <div class="card" id="Errocard">
                 <div class="col-lg-7" id="boxError">
-                    <h4 class="text-white">Hello <span class="text-info font-weight-bold">@ViewBag.UserName</span></h4>
+                    <h5 class="text-white">Thank You, <span class="text-info font-weight-bolder">@ViewBag.submitedEmail</span>, you have already taken the survey.</h5>
 
-                    <h6 class="text-white">Thank you for taking the time to submit the survey!</h6>
-                    <p class="text-white">Your insights are invaluable to us and help us improve our services.</p>
                 </div>
                 <div class="col-lg-5" id="boxError">
                     <script src="https://unpkg.com/@@dotlottie/player-component@latest/dist/dotlottie-player.mjs" type="module"></script>
@@ -151,12 +150,4 @@
     </section>
 
 </div>
-
-
-
-
-
-
-
-
 

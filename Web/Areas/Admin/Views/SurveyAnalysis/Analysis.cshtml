@@ -1,0 +1,133 @@
+﻿@using Newtonsoft.Json
+@model ResponseQuestionnaireWithUsersViewModel
+
+@{
+    ViewData["Title"] = "Detailed Survey Analysis";
+}
+
+<style>
+    .progress {
+        position: relative;
+        height: 30px; /* Increased height for better visibility */
+    }
+
+    .progress-text {
+        position: absolute;
+        width: 100%;
+        text-align: center;
+        color: black; /* Ensures text is visible on light backgrounds */
+        font-weight: bold;
+        line-height: 30px; /* Align text vertically */
+    }
+
+    #Errocard{
+       
+      
+        box-shadow: 0px 0px 8px -1px rgba(20,101,230,1);
+        -webkit-box-shadow: 0px 0px 8px -1px rgba(20,101,230,1);
+        border-radius: 10px;
+        background-color: 0px 0px 8px -1px rgba(20,101,230,1);
+        height: auto;
+
+      
+       
+       
+    }
+
+    .Errocard {
+        box-shadow: 0px 0px 8px -1px rgba(20,101,230,1);
+        -webkit-box-shadow: 0px 0px 8px -1px rgba(20,101,230,1);
+        border-radius: 10px;
+       
+    }
+
+    rect{
+       
+        border-radius:10px !important;
+    }
+
+</style>
+
+<div class="container mt-5 p-5">
+
+
+    <div class="card" id="Errocard">
+        <div class="card-header">
+            Survey Analyzer
+        </div>
+        <div class="card-body">
+            <h5 class="card-title font-weight-bolder ">@Model.Title</h5>
+            <p class="card-text">@Html.Raw(Model.Description)</p>
+          
+        </div>
+        <div class="card-footer">
+            <div class="font-weight-bolder">
+               
+                Total user respond <span class="badge text-bg-primary">@Model.ParticipantCount</span><br />
+              
+                Users
+                @foreach (var item in Model.Users)
+                {
+                    <span class="badge text-bg-primary">@item.UserName</span>
+
+                }
+            </div>
+            
+        </div>
+    </div>
+   
+    <div class="mt-5" >
+        @foreach (var question in Model.Questions)
+        {
+  
+        
+            <div class="text-center">
+
+                <div id="chart_div_@question.Id" class="Errocard m-4" style="width: 1000px; height: 300px;"></div>
+            </div> 
+        }
+
+    </div>
+</div>
+
+
+
+
+@section Scripts {
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+        google.charts.load('current', { 'packages': ['corechart'] });
+        google.charts.setOnLoadCallback(drawCharts);
+
+        function drawCharts() {
+        @foreach (var question in Model.Questions)
+        {
+            <text>
+                var data = new google.visualization.DataTable();
+                data.addColumn('string', 'Option');
+                data.addColumn('number', 'Count');
+                data.addRows([
+                @foreach (var answer in question.Answers)
+                {
+                    <text>['@Html.Raw(answer.Text)', @answer.Count], </text>
+                }
+                 ]);
+
+                // Set chart options
+                var options = {
+                    'title': '@Html.Raw(question.Text)',
+                    is3D: true,
+                   
+                };
+
+                // Select the right container for the chart
+                var container = document.getElementById('chart_div_@question.Id');
+                if (container) {
+                    var chart = new google.visualization.PieChart(container);
+                    chart.draw(data, options);
+                }
+            </text>
+        }
+        }
+    </script>
+}

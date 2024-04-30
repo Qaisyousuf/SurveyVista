@@ -21,8 +21,6 @@
     }
     
 
-   
-
         .star-rating .text-primary {
             color:goldenrod; /* Bootstrap primary blue */
             font-weight: bold; /* Make text bold */
@@ -182,6 +180,7 @@
         white-space: nowrap;
         vertical-align: baseline;
         border-radius: 0.25rem;
+    }
     
 </style>
 
@@ -192,9 +191,8 @@
 
 <div class="container pt-5">
    @*  <h2>Questionnaire: @Model.Questionnaire.Title</h2> *@
-    <span class="text-white badge badge-success display-3">Response Details for @Model.UserName (@Model.UserEmail)</span>
+    <h5 class="text-white">Response Details for @Model.UserName (@Model.UserEmail)</h5>
     <h5 class="text-success">Submitted on: <span id="localTime">@Model.SubmissionDate.ToString("yyyy-MM-ddTHH:mm:ss")</span></h5>
-
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             var utcDate = document.getElementById('localTime').innerText;
@@ -202,7 +200,6 @@
             document.getElementById('localTime').innerText = localDate.toLocaleString();
         });
     </script>
-
 
         @foreach (var detail in Model.ResponseDetails)
         {

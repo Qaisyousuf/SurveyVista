@@ -46,5 +46,37 @@ namespace Web.Areas.Admin.Controllers
 
             return View(response); // Pass the response to the view
         }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var response = await _context.Responses.FindAsync(id);
+            if (response == null)
+            {
+                return NotFound();
+            }
+
+            _context.Responses.Remove(response);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteMultiple(int[] ids)
+        {
+            var responses = _context.Responses.Where(r => ids.Contains(r.Id));
+
+            _context.Responses.RemoveRange(responses);
+            await _context.SaveChangesAsync();
+            TempData["Success"] = "User response deleted successfully";
+            return RedirectToAction(nameof(Index));
+        }
+
+
+
     }
 }
