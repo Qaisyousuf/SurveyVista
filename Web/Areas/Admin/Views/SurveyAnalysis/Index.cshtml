@@ -16,14 +16,13 @@
 
             <form asp-action="DeleteMultiple" method="post">
 
-                <table class="table table-responsive w-100 d-block d-md-table ">
+                <table class="table table-responsive w-100 d-block d-md-table table-hover ">
                     <thead class="w-100">
                         <tr>
                             <th><input type="checkbox" onclick="selectAll(this)" /></th> <!-- Master checkbox -->
                             <th>Id</th>
                             <th>Questionnaire</th>
-                           
-                            <th>Action</th>
+                            <th class="text-end">Action</th>
                         </tr>
                     </thead>
                     <tbody class="w-100">
@@ -33,9 +32,9 @@
                                 <td><input type="checkbox" name="ids" value="@item.Id" /></td>
                                 <td>@item.Id</td>
                                 <td>@item.Title</td>
-                               
-                                <td class="">
-                                    <a asp-action="Analysis" asp-route-id="@item.Id" class="btn btn-warning btn-sm">Details</a>
+
+                                <td class="text-end">
+                                    <a asp-action="Analysis" asp-route-id="@item.Id" class="btn btn-info btn-sm"><i class="bi bi-graph-up-arrow"></i> Analyzer</a>
                                 </td>
                             </tr>
                         }

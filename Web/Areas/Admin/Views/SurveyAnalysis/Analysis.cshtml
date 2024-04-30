@@ -91,22 +91,11 @@
         </div>
     </div>
    
-   @*  <div class="mt-5" >
-        @foreach (var question in Model.Questions)
-        {
-  
-        
-            <div class="text-center">
-
-                <div id="chart_div_@question.Id" class="Errocard m-5 p-3" style="width:auto; height: 300px;"></div>
-            </div> 
-        }
-
-    </div> *@
     <div class="container mt-5 p-5">
         @foreach (var question in Model.Questions)
         {
             <div class="text-center">
+                
                 <!-- Chart container for all questions -->
                 <div id="chart_div_@question.Id" class="Errocard m-5 p-3" style="width:auto; height: 300px;"></div>
 
@@ -119,8 +108,8 @@
         }
     </div>
 
-
 </div>
+
 @section Scripts {
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
@@ -128,10 +117,10 @@
         google.charts.setOnLoadCallback(drawCharts);
 
         function drawCharts() {
-        @foreach (var question in Model.Questions.Select((value, index) => new { Value = value, Index = index }))
-        {
-            <text>
-                 var type = '@question.Value.Type.ToString()';
+            @foreach (var question in Model.Questions.Select((value, index) => new { Value = value, Index = index }))
+            {
+                <text>
+                var type = '@question.Value.Type.ToString()';
                 var chartContainer = document.getElementById('chart_div_@question.Value.Id');
                 var imgContainer = (type === "Image") ? document.getElementById('img_div_@question.Value.Id') : null;
 
@@ -150,25 +139,35 @@
                     '#404040'  // darker gray
                 ];
 
-
                 var data = new google.visualization.DataTable();
                 data.addColumn('string', 'Option');
                 data.addColumn('number', 'Count');
-                data.addRows([]);
-                var colorIndex = 0; // Initialize colorIndex here
-            </text>
-            @foreach (var answer in question.Value.Answers)
-            {
-                <text>
-                        data.addRow(['@Html.Raw(answer.Text)', @answer.Count]);
+                 var colorIndex = 0;
                 </text>
-            }
-            <text>
-                            var options = {
+                if (question.Value.Type ==QuestionType.Text || question.Value.Type ==QuestionType.Slider || question.Value.Type ==QuestionType.Open_ended)
+                {
+                    @foreach (var item in question.Value.SelectedText)
+                    {
+                        <text>
+                            data.addRow(['@Html.Raw(item)', 1]);
+                        </text>
+                    }
+                }
+                else
+                {
+                    @foreach (var answer in question.Value.Answers)
+                    {
+                        <text>
+                            data.addRow(['@Html.Raw(answer.Text)', @answer.Count]);
+                        </text>
+                    }
+                }
+                <text>
+                var options = {
                     'title': 'Question @(question.Index + 1): @Html.Raw(question.Value.Text)',
                     is3D: true,
-                    'titleTextStyle': { color: 'blue', fontSize: 15, bold: true },
-                    // 'colors': colors
+                    'titleTextStyle': { color: '#17a2b8', fontSize: 12, bold: true },
+                    'colors': colors
                 };
 
                 if (chartContainer) {
@@ -178,26 +177,105 @@
 
                 if (imgContainer && type === "Image") {
                     var imagesHtml = '';
-                @foreach (var answer in question.Value.Answers.Where(a => !string.IsNullOrEmpty(a.Text)))
-                {
-                    <text>
-                          var color = colors[colorIndex % colors.length]; // Correct usage of colorIndex
-                        imagesHtml += '<div style="display: inline-block; text-align: center; margin: 10px;">' +
-                            '<img src="@answer.Text" style="max-width:50%; height:auto; display: block; margin: auto;">' +
-                            '<div style="display: flex; align-items: center; gap: 10px;">' +
-                            '<span style="width: 12px; height: 12px; border-radius: 50%; background-color: ' + color + ';"></span>' +
-                            '<span style="color: ' + color + ';">@Html.Raw(answer.Text)</span>' +
-                            '</div></div>';
-                        colorIndex++; // Increment colorIndex within the loop
-                    </text>
+                    @foreach (var answer in question.Value.Answers.Where(a => !string.IsNullOrEmpty(a.Text)))
+                    {
+                        <text>
+                            var color = colors[colorIndex % colors.length];
+                            imagesHtml += '<div style="display: inline-block; text-align: center; margin: 10px;">' +
+                                          '<img src="@answer.Text" style="max-width:50%; height:auto; display: block; margin: auto;">' +
+                                          '<div style="display: flex; align-items: center; gap: 10px;">' +
+                                          '<span style="width: 12px; height: 12px; border-radius: 50%; background-color: ' + color + ';"></span>' +
+                                          '<span style="color: ' + color + ';">@Html.Raw(answer.Text)</span>' +
+                                          '</div></div>';
+                            colorIndex++;
+                        </text>
+                    }
+                    imgContainer.innerHTML = imagesHtml;
                 }
-                        imgContainer.innerHTML = imagesHtml;
-                }
-            </text>
+                </text>
+            }
         }
-                }
     </script>
 }
+
+
+@* @section Scripts {
+//     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+//     <script type="text/javascript">
+//         google.charts.load('current', { 'packages': ['corechart'] });
+//         google.charts.setOnLoadCallback(drawCharts);
+
+//         function drawCharts() {
+//         @foreach (var question in Model.Questions.Select((value, index) => new { Value = value, Index = index }))
+//         {
+//             <text>
+//                  var type = '@question.Value.Type.ToString()';
+//                 var chartContainer = document.getElementById('chart_div_@question.Value.Id');
+//                 var imgContainer = (type === "Image") ? document.getElementById('img_div_@question.Value.Id') : null;
+
+//                 var colors = [
+//                     '#cc0000', // dark red
+//                     '#00cc00', // dark green
+//                     '#0000cc', // dark blue
+//                     '#cccc00', // dark yellow
+//                     '#00cccc', // dark cyan
+//                     '#cc00cc', // dark magenta
+//                     '#008080', // dark teal
+//                     '#808000', // olive
+//                     '#800080', // purple
+//                     '#800000', // maroon
+//                     '#808080', // gray
+//                     '#404040'  // darker gray
+//                 ];
+
+
+//                 var data = new google.visualization.DataTable();
+//                 data.addColumn('string', 'Option');
+//                 data.addColumn('number', 'Count');
+//                 data.addRows([]);
+//                 var colorIndex = 0; // Initialize colorIndex here
+//             </text>
+//             @foreach (var answer in question.Value.Answers)
+//             {
+//                 <text>
+//                         data.addRow(['@Html.Raw(answer.Text)', @answer.Count]);
+//                 </text>
+//             }
+//             <text>
+//                             var options = {
+//                     'title': 'Question @(question.Index + 1): @Html.Raw(question.Value.Text)',
+//                     is3D: true,
+//                     'titleTextStyle': { color: '#17a2b8', fontSize: 12, bold: true },
+//                     'colors': colors
+//                 };
+
+//                 if (chartContainer) {
+//                     var chart = new google.visualization.PieChart(chartContainer);
+//                     chart.draw(data, options);
+//                 }
+
+//                 if (imgContainer && type === "Image") {
+//                     var imagesHtml = '';
+//                 @foreach (var answer in question.Value.Answers.Where(a => !string.IsNullOrEmpty(a.Text)))
+//                 {
+//                     <text>
+//                           var color = colors[colorIndex % colors.length]; // Correct usage of colorIndex
+//                         imagesHtml += '<div style="display: inline-block; text-align: center; margin: 10px;">' +
+//                             '<img src="@answer.Text" style="max-width:50%; height:auto; display: block; margin: auto;">' +
+//                             '<div style="display: flex; align-items: center; gap: 10px;">' +
+//                             '<span style="width: 12px; height: 12px; border-radius: 50%; background-color: ' + color + ';"></span>' +
+//                             '<span style="color: ' + color + ';">@Html.Raw(answer.Text)</span>' +
+//                             '</div></div>';
+//                         colorIndex++; // Increment colorIndex within the loop
+//                     </text>
+//                 }
+//                         imgContainer.innerHTML = imagesHtml;
+//                 }
+//             </text>
+//         }
+//                 }
+//     </script>
+// }
 
 
 

@@ -106,8 +106,8 @@
         background: #d3d3d3; /* Background of the slider */
         outline: none; /* Removes the outline */
         opacity: 0.7; /* Slider opacity */
-        -webkit-transition: .2s; /* Smooth transitions */
-        transition: opacity .2s;
+       
+      
     }
 
         .slider:disabled {
@@ -141,8 +141,10 @@
         -ms-flex-direction: column;
         flex-direction: row;
         word-wrap: break-word;
-        box-shadow: 0px 0px 8px -1px rgba(20,101,230,1);
-        -webkit-box-shadow: 0px 0px 8px -1px rgba(20,101,230,1);
+        box-shadow: 0px 0px 13px 0px rgb(20 101 230 / 35%);
+        -webkit-box-shadow: 0px 0px 13px 0px rgb(20 101 230 / 35%);
+        border-radius: 5px;
+
         border-radius: 10px;
         background-color: transparent;
         height: auto;
@@ -150,24 +152,37 @@
         align-items: center;
         padding: 0 50px 0 50px;
        
-        color:white;
+       
     }
     .card{
         margin-top:40px !important;
+        box-shadow: 0px 0px 13px 0px rgb(20 101 230 / 35%) !important;
+        -webkit-box-shadow: 0px 0px 13px 0px rgb(20 101 230 / 35%) !important;
+        border-radius: 5px;
     }
     
-    main{
+   /*  main{
        
         background-attachment:fixed;
         background-repeat: no-repeat;
         background: linear-gradient(119deg, rgba(47, 82, 131, 1) 0%, rgba(29, 33, 59, 1) 34%, rgba(27, 54, 61, 1) 67%, rgba(58, 82, 116, 1) 100%) !important;
     }
-
+ */
     .card-header {
         padding: 0.75rem 1.25rem;
         margin-bottom: 0;
-        background-color: rgb(66 122 207 / 44%);
-        border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+        background: #16283f;
+        color:white;
+       
+    }
+
+    #HeaderForQuestionType{
+        padding: 0.75rem 1.25rem;
+        background: #16283f;
+        color: white;
+        border-radius:5px;
+        box-shadow: 0px 0px 13px 0px rgb(20 101 230 / 35%) !important;
+        -webkit-box-shadow: 0px 0px 13px 0px rgb(20 101 230 / 35%) !important;
     }
 
     .badge {
@@ -191,8 +206,18 @@
 
 <div class="container pt-5">
    @*  <h2>Questionnaire: @Model.Questionnaire.Title</h2> *@
-    <h5 class="text-white">Response Details for @Model.UserName (@Model.UserEmail)</h5>
-    <h5 class="text-success">Submitted on: <span id="localTime">@Model.SubmissionDate.ToString("yyyy-MM-ddTHH:mm:ss")</span></h5>
+   <div class="card shadow-1">
+       <div class="card-header">
+           Respond from user
+       </div>
+       <div class="card-body">
+            <h6 class="font-weight-bold">Response Details for  <span class="badge badge-dark"> @Model.UserName (@Model.UserEmail)</span></h6>
+       </div>
+        <div class="card-header">
+            <strong class="">Submitted on: <span id="localTime">@Model.SubmissionDate.ToString("yyyy-MM-ddTHH:mm:ss")</span></strong>
+      </div>
+       
+   </div>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             var utcDate = document.getElementById('localTime').innerText;
@@ -204,7 +229,7 @@
         @foreach (var detail in Model.ResponseDetails)
         {
         <div class="card mb-3" id="Errocard">
-            <div class="card-header">
+            <div class="card-header" id="HeaderForQuestionType">
                 Question Type:@detail.QuestionType.ToString()
             </div>
             <div class="card-body">
