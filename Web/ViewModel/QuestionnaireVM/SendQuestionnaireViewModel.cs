@@ -8,10 +8,10 @@ namespace Web.ViewModel.QuestionnaireVM
     {
         public int Id { get; set; }
 
+      
+     
         [Required]
-        public string? Name { get; set; }
-        [Required]
-        public string? Email { get; set; }
+        public string? Emails { get; set; }
 
         [Required]
         [DisplayName("Set expiration date and time for the URL")]

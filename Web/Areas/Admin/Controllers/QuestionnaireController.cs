@@ -465,120 +465,69 @@ namespace Web.Areas.Admin.Controllers
         {
             if (ModelState.IsValid)
             {
-              
-
-                
                 var questionnairePath = _configuration["Email:Questionnaire"];
-                int surveyId = viewModel.QuestionnaireId;
-
-                var userEmailEncoded = HttpUtility.UrlEncode(viewModel.Email);
-
-
-                DateTime currentDateTime;
-                if (viewModel.ExpirationDateTime.HasValue)
-                {
-                    currentDateTime = viewModel.ExpirationDateTime.Value;
-                }
-                else
-                {
-                    
-                    currentDateTime = DateTime.Now;
-                }
-
-                // Calculate the expiration date and time by adding 5 minutes to the current date and time
-                DateTime expiryDateTime = currentDateTime;
-
-                // Generate a unique token, for example, using a cryptographic library or a GUID
+                DateTime currentDateTime = viewModel.ExpirationDateTime.HasValue ? viewModel.ExpirationDateTime.Value : DateTime.Now;
+                DateTime expiryDateTime = currentDateTime; // This line might need adjustment if you are actually setting an expiry.
                 string token = Guid.NewGuid().ToString();
-
-                // Append the expiration date and time to the token (you might want to encrypt it for security)
                 string tokenWithExpiry = $"{token}|{expiryDateTime.ToString("yyyy-MM-ddTHH:mm:ssZ")}";
-
-                var completeUrl = $"{Request.Scheme}://{Request.Host}/{questionnairePath}/{viewModel.QuestionnaireId}?t={tokenWithExpiry}&E={userEmailEncoded}";
-
-                //var completeUrl = $"{Request.Scheme}://{Request.Host}/{questionnairePath}/{viewModel.QuestionnaireId}?t={tokenWithExpiry}&E={userEmail}";
-
-                //var completeUrl = $"{Request.Scheme}://{Request.Host}/{questionnairePath}/{viewModel.QuestionnaireId}";
-
-
-                var toEmail = viewModel.Email;
+                var emailList = viewModel.Emails.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                                        .Select(email => email.Trim())
+                                        .ToList();
                 var question = _questionnaire.GetQuesById(viewModel.Id);
-
                 var subject = question.Title;
 
-                // Construct the email body with HTML formatting
-                string emailBody = $@"
-                                        <html>
-                                        <head>
-                                            <style>
-                                                /* Inline CSS styles */
-                                                body {{
-                                                    font-family: Arial, sans-serif;
-                                                }}
-                                               
-                                                .container {{
-                                                    max-width: 600px;
-                                                    margin: 0 auto;
-                                                    padding: 20px;
-                                                    border: 0.5px solid #ccc;
-                                                    border-radius: 5px;
-                                                    background-color: #f9f9f9;
-                                                }}
-                                                .button {{
-                                                    display: inline-block;
-                                                    padding: 10px 20px;
-                                                    background-color: #007bff;
-                                                    color: #ffffff;
-                                                    text-decoration: none;
-                                                    border-radius: 4px;
-                                                }}
-                                                .button:hover {{
-                                                    background-color: #0056b3;
-                                                }}
-                                            </style>
-                                        </head>
-                                        <body>
-                                            <div class='container'>
-                                                <h4>Hey {viewModel.Name},</h4>
-                                                <h5>{subject}</h5>
-                                             <p>Thank you for participating in our survey. Your feedback is valuable to us.</p>
-                                               <p>Please click the button below to start the survey:</p>
-                                                    <p class=""text-danger"">The survey will be expire :{expiryDateTime.ToLongDateString()} Time: {expiryDateTime.ToShortTimeString()} </p>
-                                                     <div style='text-align: center;'>
-                                                    <a href='{completeUrl}' class='button'>Start Survey</a>
-                                                <br>
-                                               
-                                                </div><br>
-                                                <p><strong>Søren Eggert Lundsteen Olsen</strong><br>
-                                                Seosoft ApS<br>
-                                                <hr>
-                                                Hovedgaden 3
-                                                Jordrup<br>
-                                                Kolding 6064<br>
-                                                Denmark</p>
-
-                                            </div>
-                                        </body>
-                                        </html>";
-
-
-                // Call the SendConfirmationEmailAsync method to send the email
-                var emailSend = new EmailToSend(toEmail, subject, emailBody);
-
-                bool emailSent = await _emailServices.SendConfirmationEmailAsync(emailSend);
-
-                if (emailSent)
+                bool allEmailsSent = true;
+                foreach (var email in emailList)
                 {
-                    // Email sent successfully
-                    // You can redirect to a success page or return a success message
-                    TempData["Success"] = "Questionnaire sent successfully";
-                    return RedirectToAction(nameof(Index));
+                    var userName = email.Substring(0, email.IndexOf('@')); // This assumes the email is valid and contains an '@'
+                    userName = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(userName.Replace(".", " ")); // Optional: Improve formatting, replace dots and capitalize names
+                    var userEmailEncoded = HttpUtility.UrlEncode(email);
+                    var completeUrl = $"{Request.Scheme}://{Request.Host}/{questionnairePath}/{viewModel.QuestionnaireId}?t={tokenWithExpiry}&E={userEmailEncoded}";
+
+                    string emailBody = $@"
+                <html>
+                <head>
+                    <style>
+                        body {{ font-family: Arial, sans-serif; }}
+                        .container {{ max-width: 600px; margin: 0 auto; padding: 20px; border: 0.5px solid #ccc; border-radius: 5px; background-color: #f9f9f9; }}
+                        .button {{ display: inline-block; padding: 10px 20px; background-color: #007bff; color: #ffffff; text-decoration: none; border-radius: 4px; }}
+                        .button:hover {{ background-color: #0056b3; }}
+                    </style>
+                </head>
+                <body>
+                    <div class='container'>
+                        <h4>Hey {userName},</h4>
+                        <h5>{subject}</h5>
+                        <p>Thank you for participating in our survey. Your feedback is valuable to us.</p>
+                        <p>Please click the button below to start the survey:</p>
+                        <p class='text-danger'>The survey will expire: {expiryDateTime.ToLongDateString()} Time: {expiryDateTime.ToShortTimeString()}</p>
+                        <div style='text-align: center;'>
+                            <a href='{completeUrl}' class='button'>Start Survey</a>
+                        </div><br>
+                        <p><strong>Søren Eggert Lundsteen Olsen</strong><br>
+                        Seosoft ApS<br>
+                        <hr>
+                        Hovedgaden 3 Jordrup<br>
+                        Kolding 6064<br>
+                        Denmark</p>
+                    </div>
+                </body>
+                </html>";
+
+                    var emailSend = new EmailToSend(email, subject, emailBody);
+                    bool emailSent = await _emailServices.SendConfirmationEmailAsync(emailSend);
+                    if (!emailSent)
+                    {
+                        allEmailsSent = false;
+                        ModelState.AddModelError(string.Empty, "Failed to send questionnaire via email to: " + email);
+                    }
                 }
-                else
+
+
+                if (allEmailsSent)
                 {
-                    // Email failed to send
-                    // You can return an error message or handle it as needed
-                    ModelState.AddModelError(string.Empty, "Failed to send questionnaire via email.");
+                    TempData["Success"] = "Questionnaire sent successfully to all recipients.";
+                    return RedirectToAction(nameof(Index));
                 }
             }
 

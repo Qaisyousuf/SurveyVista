@@ -110,6 +110,70 @@
 
 </div>
 
+@* @section Scripts {
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+        google.charts.load('current', { 'packages': ['corechart', 'bar','line','table'] }); // Ensure 'bar' package is loaded if using BarChart
+        google.charts.setOnLoadCallback(drawCharts);
+
+        function drawCharts() {
+            @foreach (var question in Model.Questions.Select((value, index) => new { Value = value, Index = index }))
+            {
+                <text>
+                var type = '@question.Value.Type.ToString()';
+                console.log('Type:', type); // Debug output to check type
+                var chartContainer = document.getElementById('chart_div_@question.Value.Id');
+                var chart; // Declare chart variable here for scope
+
+                var data = new google.visualization.DataTable();
+                data.addColumn('string', 'Option');
+                data.addColumn('number', 'Count');
+
+                </text>
+            if (question.Value.Type == QuestionType.Text || question.Value.Type == QuestionType.Slider || question.Value.Type == QuestionType.Open_ended)
+            {
+                    <text>
+                    console.log('Initializing Bar Chart'); // Debug output
+                    </text>
+                    @foreach (var item in question.Value.SelectedText)
+                    {
+                        <text>
+                            data.addRow(['@Html.Raw(item)', @question.Value.Answers]);
+                        </text>
+                    }
+                    <text>
+                    chart = new google.visualization.Table(chartContainer);
+                    </text>
+                } else {
+                    <text>
+                    console.log('Initializing Pie Chart'); // Debug output
+                    </text>
+                    @foreach (var answer in question.Value.Answers)
+                    {
+                        <text>
+                            data.addRow(['@Html.Raw(answer.Text)', @answer.Count]);
+                        </text>
+                    }
+                    <text>
+                    chart = new google.visualization.PieChart(chartContainer);
+                    </text>
+                }
+                <text>
+                var options = {
+                    'title': 'Question @(question.Index + 1): @Html.Raw(question.Value.Text)',
+                    is3D: type !== "Text" && type !== "Slider" && type !== "Open_ended", // Only use 3D for Pie Charts
+                    'titleTextStyle': { color: '#17a2b8', fontSize: 12, bold: true },
+                    'colors': ['#cc0000', '#00cc00', '#0000cc', '#cccc00', '#00cccc', '#cc00cc', '#008080', '#808000', '#800080', '#800000', '#808080', '#404040']
+                };
+
+                chart.draw(data, options); // Draw chart outside conditional blocks
+                </text>
+            }
+        }
+    </script>
+}
+ *@
+
 @section Scripts {
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
@@ -152,7 +216,13 @@
                             data.addRow(['@Html.Raw(item)', 1]);
                         </text>
                     }
+                      <text>
+                    // Initialize Bar Chart for Text, Slider, or Open-ended questions
+                    var chart = new google.visualization.BarChart(chartContainer);
+                    </text>
+
                 }
+
                 else
                 {
                     @foreach (var answer in question.Value.Answers)
@@ -167,7 +237,9 @@
                     'title': 'Question @(question.Index + 1): @Html.Raw(question.Value.Text)',
                     is3D: true,
                     'titleTextStyle': { color: '#17a2b8', fontSize: 12, bold: true },
-                    'colors': colors
+                    'colors': colors,
+                      'pieSliceText': 'percentage',  // Display percentages on the chart slices
+                         'tooltip': { text: 'percentage' }  // Configure tooltip to show percentage
                 };
 
                 if (chartContainer) {
