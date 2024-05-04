@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Model;
 using Services.Interaces;
@@ -7,6 +8,8 @@ using Web.ViewModel.PageVM;
 
 namespace Web.Areas.Admin.Controllers
 {
+
+    [Authorize(Roles = "Admin")]
     public class PageController : Controller
     {
         private readonly IPageRepository _pageRepository;

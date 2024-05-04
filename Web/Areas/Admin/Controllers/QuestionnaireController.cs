@@ -1,5 +1,6 @@
 ﻿using Data;
 using Mailjet.Client.Resources;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.WebUtilities;
@@ -19,6 +20,9 @@ using Web.ViewModel.QuestionnaireVM;
 
 namespace Web.Areas.Admin.Controllers
 {
+
+
+    [Authorize(Roles = "Admin")]
     public class QuestionnaireController : Controller
     {
         private readonly IQuestionnaireRepository _questionnaire;

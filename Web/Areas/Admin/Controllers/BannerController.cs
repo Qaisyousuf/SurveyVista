@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Model;
 using Services.Interaces;
 using System.Collections.Immutable;
@@ -6,6 +7,8 @@ using Web.ViewModel.BannerVM;
 
 namespace Web.Areas.Admin.Controllers
 {
+
+    [Authorize(Roles = "Admin")]
     public class BannerController : Controller
     {
         private readonly IBannerRepository _banner;

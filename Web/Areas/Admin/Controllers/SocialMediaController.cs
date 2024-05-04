@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Model;
 using Services.Interaces;
 using Web.ViewModel.SocialMediaVM;
 
 namespace Web.Areas.Admin.Controllers
 {
+
+    [Authorize(Roles = "Admin")]
     public class SocialMediaController : Controller
     {
         private readonly ISocialMediaRepository _context;

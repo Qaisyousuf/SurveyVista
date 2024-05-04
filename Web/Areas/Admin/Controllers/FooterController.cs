@@ -1,4 +1,5 @@
 ﻿using Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Forms.Mapping;
 using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.AspNetCore.Mvc;
@@ -13,6 +14,8 @@ using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Web.Areas.Admin.Controllers
 {
+
+    [Authorize(Roles = "Admin")]
     public class FooterController : Controller
     {
         private readonly IFooterRepository _footer;

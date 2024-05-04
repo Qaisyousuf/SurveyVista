@@ -1,8 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System.Text;
 
 namespace Web.Areas.Admin.Controllers
 {
+
+    [Authorize(Roles = "Admin")]
     public class OpenAIContentController : Controller
     {
         private readonly IConfiguration _configuration;

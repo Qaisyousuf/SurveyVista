@@ -1,14 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Model;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Data
 {
-    public class SurveyContext:DbContext
+    public class SurveyContext: IdentityDbContext<ApplicationUser, IdentityRole, string>
     {
         public SurveyContext(DbContextOptions<SurveyContext> option):base(option)
         {

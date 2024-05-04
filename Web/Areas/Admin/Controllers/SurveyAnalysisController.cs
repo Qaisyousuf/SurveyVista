@@ -6,9 +6,12 @@ using Model;
 using Web.ViewModel.QuestionnaireVM;
 
 using System.IO;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Web.Areas.Admin.Controllers
 {
+
+    [Authorize(Roles = "Admin")]
     public class SurveyAnalysisController : Controller
     {
         private readonly SurveyContext _context;

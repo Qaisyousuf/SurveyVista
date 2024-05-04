@@ -15,16 +15,16 @@ builder.Services.AddControllersWithViews();
 
 var config = builder.Configuration;
 
-builder.Services.AddDbContext<SurveyContext>(options =>
-{
-    options.UseSqlServer(config.GetConnectionString("SurveyVista"), cfg => cfg.MigrationsAssembly("Web"));
-});
+//builder.Services.AddDbContext<SurveyContext>(options =>
+//{
+//    options.UseSqlServer(config.GetConnectionString("SurveyVista"), cfg => cfg.MigrationsAssembly("Web"));
+//});
 
 
+builder.Services.AddRazorPages();
 
 
-
-
+builder.Services.ConfigureSQLConnection(config);
 builder.Services.ConfigurePageServices();
 builder.Services.ConfigureBannerServices();
 builder.Services.ConfigureAddress();
@@ -58,7 +58,11 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapRazorPages();
+app.MapControllers();
 
 
 app.MapControllerRoute(

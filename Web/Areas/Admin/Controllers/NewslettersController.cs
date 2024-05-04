@@ -1,4 +1,5 @@
 ﻿using Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +14,8 @@ using Web.ViewModel.NewsLetterVM;
 
 namespace Web.Areas.Admin.Controllers
 {
+
+    [Authorize(Roles = "Admin")]
     public class NewslettersController : Controller
     {
         private readonly INewsLetterRepository _repository;

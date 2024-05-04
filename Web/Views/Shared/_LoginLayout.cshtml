@@ -21,21 +21,21 @@
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
-                        <vc:navigation></vc:navigation>
+                    
 
                     </ul>
                     <ul class="navbar-nav">
                         @if (User.Identity.IsAuthenticated)
                         {
                             <li class="nav-item text-white">
-                              
-                                    <span class="badge mt-3">Hi @User.Identity.Name</span> 
-                              
+
+                                <span class="badge mt-3">Hi @User.Identity.Name</span>
+
                             </li>
                             <li class="nav-item text-white m-2">
 
                                 <a asp-controller="Admin" asp-action="Index" asp-area="Admin" class="btn btn-outline-info btn-sm " id="BannerButton">
-                                   @*  <span class="text-white navbar-text">Admin Dashboard</span> *@
+                                    @*  <span class="text-white navbar-text">Admin Dashboard</span> *@
                                     <span class="bi bi-gear"></span> Admin Dashboard
                                 </a>
                             </li>
@@ -55,8 +55,6 @@
                             </li>
                         }
                     </ul>
-                   
-
                 </div>
             </div>
         </nav>
@@ -64,17 +62,13 @@
     
         <main role="main">
 
-                <vc:banner></vc:banner>
-                 <partial name="_Notification" />
-
                 @RenderBody()
-     
         </main>
   
 
     
      
-      <vc:footer></vc:footer>
+     
      
   
     <script src="~/lib/jquery/dist/jquery.min.js"></script>

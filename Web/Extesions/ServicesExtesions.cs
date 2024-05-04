@@ -1,13 +1,10 @@
 ﻿using Data;
-using Mailjet.Client;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Model;
+using OpenAI_API;
 using Services.Implemnetation;
 using Services.Interaces;
-using System.Configuration;
-using OpenAI_API;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Web.AIConfiguration;
 
 namespace Web.Extesions
@@ -19,7 +16,21 @@ namespace Web.Extesions
             services.AddDbContext<SurveyContext>(option =>
             {
                 option.UseSqlServer(configuration.GetConnectionString("SurveyVista"), cfg => cfg.MigrationsAssembly("Web"));
+
+               
             });
+            services.AddIdentity<ApplicationUser, IdentityRole>(options => {
+                // Identity options configuration
+                options.Password.RequireDigit = true;
+                options.Password.RequireLowercase = true;
+                options.Password.RequiredLength = 6;
+                options.User.RequireUniqueEmail = true;
+            })
+                  .AddRoles<IdentityRole>()
+                  .AddRoleManager<RoleManager<IdentityRole>>()
+              .AddEntityFrameworkStores<SurveyContext>()
+              .AddDefaultTokenProviders();
+            
         }
 
 
