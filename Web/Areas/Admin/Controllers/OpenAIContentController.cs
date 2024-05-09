@@ -5,7 +5,7 @@ using System.Text;
 namespace Web.Areas.Admin.Controllers
 {
 
-    [Authorize(Roles = "Admin")]
+   
     public class OpenAIContentController : Controller
     {
         private readonly IConfiguration _configuration;

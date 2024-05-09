@@ -6,7 +6,7 @@ using Web.ViewModel.AddressVM;
 
 namespace Web.Areas.Admin.Controllers
 {
-    [Authorize(Roles ="Admin")]    
+     
     public class AddressController : Controller
     {
         private readonly IAddressRepository _addresContext;

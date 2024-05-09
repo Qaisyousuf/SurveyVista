@@ -6,7 +6,7 @@ using Web.ViewModel.AccountVM;
 namespace Web.Areas.Admin.Controllers
 {
 
-    [Authorize(Roles = "Admin")]
+   
     public class RolesController : Controller
     {
         private readonly RoleManager<IdentityRole> _roleManager;

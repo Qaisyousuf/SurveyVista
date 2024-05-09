@@ -35,6 +35,8 @@ namespace Data
         public DbSet<ResponseDetail> ResponseDetails { get; set; }
         public DbSet<ResponseAnswer> ResponseAnswers { get; set; }
 
+        public DbSet<SentNewsletterEamil> SentNewsletterEamils { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

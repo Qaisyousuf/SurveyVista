@@ -74,6 +74,10 @@ namespace Web.Extesions
         {
             services.AddTransient<IEmailServices, EmailServices>();
         }
+        public static void MailStatConfiguration(this IServiceCollection services)
+        {
+            services.AddTransient<IEmailStatsService, EmailStatsService>();
+        }
 
         //public static void MailConfiguration(this IServiceCollection services, IConfiguration configuration)
         //{

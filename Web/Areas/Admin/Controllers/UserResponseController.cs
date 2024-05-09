@@ -7,7 +7,7 @@ using Model;
 namespace Web.Areas.Admin.Controllers
 {
 
-    [Authorize(Roles = "Admin")]
+  
     public class UserResponseController : Controller
     {
         private readonly SurveyContext _context;

@@ -9,7 +9,7 @@ using Web.ViewModel.PageVM;
 namespace Web.Areas.Admin.Controllers
 {
 
-    [Authorize(Roles = "Admin")]
+    
     public class PageController : Controller
     {
         private readonly IPageRepository _pageRepository;

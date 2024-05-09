@@ -22,7 +22,7 @@ namespace Web.Areas.Admin.Controllers
 {
 
 
-    [Authorize(Roles = "Admin")]
+   
     public class QuestionnaireController : Controller
     {
         private readonly IQuestionnaireRepository _questionnaire;

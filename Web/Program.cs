@@ -11,6 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddHttpClient();
 
 
 var config = builder.Configuration;
@@ -36,6 +37,7 @@ builder.Services.AddScoped<SurveyContext>();
 builder.Services.AddTransient<NavigationViewComponent>();
 builder.Services.ConfigureNewsLetter();
 builder.Services.MailConfiguration();
+builder.Services.MailStatConfiguration();
 builder.Services.ConfigureOpenAI(config);
 
 
@@ -68,7 +70,11 @@ app.MapControllers();
 app.MapControllerRoute(
     name: "page",
     pattern: "{slug}", defaults: new { Controller = "Home", Action = "Index" });
-
+app.Use(async (context, next) =>
+{
+    context.Request.EnableBuffering(); // Enable buffering for reading request body multiple times
+    await next.Invoke();
+});
 
 app.MapAreaControllerRoute(
     name: "MyAdminArea",

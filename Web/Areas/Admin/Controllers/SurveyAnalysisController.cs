@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Authorization;
 namespace Web.Areas.Admin.Controllers
 {
 
-    [Authorize(Roles = "Admin")]
+ 
     public class SurveyAnalysisController : Controller
     {
         private readonly SurveyContext _context;
@@ -38,6 +38,8 @@ namespace Web.Areas.Admin.Controllers
             return View(viewModel);
         }
 
+
+      
 
         [HttpGet]
         public IActionResult Analysis(int id)
@@ -112,35 +114,6 @@ namespace Web.Areas.Admin.Controllers
             return View(viewModel);
            
         }
-
-        //[HttpGet]
-        //public IActionResult GenerateReport(int id)
-        //{
-        //    var viewModel = GetQuestionnaireData(id);
-        //    if (viewModel == null)
-        //    {
-        //        return NotFound("No questionnaire found with the given ID.");
-        //    }
-
-        //    var webReport = new WebReport();
-
-        //    // Load your FastReport report design
-        //    webReport.Report.Load(Path.Combine(env.WebRootPath, "Reports", "QuestionnaireReport.frx"));
-
-        //    // Register the data source
-        //    webReport.Report.RegisterData(new[] { viewModel }, "Questionnaire");
-
-        //    webReport.Report.Prepare();
-
-        //    using (MemoryStream ms = new MemoryStream())
-        //    {
-        //        webReport.Report.Export(new FastReport.Export.PdfSimple.PDFSimpleExport(), ms);
-        //        return File(ms.ToArray(), "application/pdf", "QuestionnaireReport.pdf");
-        //    }
-        //}
-
-   
-
 
 
     }

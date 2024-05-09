@@ -3,7 +3,120 @@
 @{
     ViewData["Title"] = "Newsletter list";
 }
+<style>
+    .badge-Sent {
+        display: inline-block;
+        padding: 0.25em 0.4em;
+        font-size: 75%;
+        font-weight: 700;
+        line-height: 1;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: baseline;
+        border-radius: 0.25rem;
+        color: #fff;
+        background-color: #6831c5;
+        ;
+    }
 
+    .badge-Deliverd {
+        display: inline-block;
+        padding: 0.25em 0.4em;
+        font-size: 75%;
+        font-weight: 700;
+        line-height: 1;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: baseline;
+        border-radius: 0.25rem;
+        color: #fff;
+        background-color: #44aebd;
+    }
+
+    .badge-Opend {
+        display: inline-block;
+        padding: 0.25em 0.4em;
+        font-size: 75%;
+        font-weight: 700;
+        line-height: 1;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: baseline;
+        border-radius: 0.25rem;
+        color: #fff;
+        background-color: #22a877;
+    }
+
+    .badge-Clicked {
+        display: inline-block;
+        padding: 0.25em 0.4em;
+        font-size: 75%;
+        font-weight: 700;
+        line-height: 1;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: baseline;
+        border-radius: 0.25rem;
+        color: #fff;
+        background-color: #3b76cb;
+    }
+
+    .badge-Bounced {
+        display: inline-block;
+        padding: 0.25em 0.4em;
+        font-size: 75%;
+        font-weight: 700;
+        line-height: 1;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: baseline;
+        border-radius: 0.25rem;
+        color: #fff;
+        background-color: #9585f4;
+    }
+
+    .badge-Spam {
+        display: inline-block;
+        padding: 0.25em 0.4em;
+        font-size: 75%;
+        font-weight: 700;
+        line-height: 1;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: baseline;
+        border-radius: 0.25rem;
+        color: #fff;
+        background-color: #f06b66;
+    }
+
+    .badge-Blocked {
+        display: inline-block;
+        padding: 0.25em 0.4em;
+        font-size: 75%;
+        font-weight: 700;
+        line-height: 1;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: baseline;
+        border-radius: 0.25rem;
+        color: #fff;
+        background-color: #98712d;
+    }
+
+    .badge-Unsubscribed {
+        display: inline-block;
+        padding: 0.25em 0.4em;
+        font-size: 75%;
+        font-weight: 700;
+        line-height: 1;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: baseline;
+        border-radius: 0.25rem;
+        color: #fff;
+        background-color: #cb4a49;
+    }
+</style>
 <div class="container mt-5">
 
     <partial name="_Notification" />
@@ -18,7 +131,7 @@
             </div>
             <p>
                
-                <a asp-action="Create" class="btn btn-primary @(@ViewBag.TotalSubscribedUsers <= 0 ? "disabled" : "")">compose newsletter</a>
+                <a asp-action="Create" class="btn btn-primary btn-sm @(@ViewBag.TotalSubscribedUsers <= 0 ? "disabled" : "")">compose newsletter</a>
             </p>
 
             <table class="table table-responsive w-100 d-block d-md-table ">
@@ -62,5 +175,82 @@
 
         </div>
     </div>
+
+
 </div>
 
+
+
+<div class="container">
+    
+    <h4>
+        <i class="bi bi-broadcast p-1 border-1 shadow-sm"></i> Real-Time Email Event Tracking
+    </h4>
+    <p>
+        <a asp-action="EmailStats" class="btn btn-primary btn-sm">View email tracking with chart</a>
+    </p>
+    <table class="table table-responsive w-100 d-block d-md-table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>Recipient</th>
+                <th>Sent Date</th>
+                <th>Subject</th>
+                <th>Sent</th>
+                <th>Delivered</th>
+                <th>Opened</th>
+                <th>Clicked</th>
+                <th>Bounced</th>
+                <th>Spam</th>
+                <th>Blocked</th>
+                <th>Unsubscribed</th>
+            </tr>
+        </thead>
+        <tbody id="emailStatsTableBody">
+            <!-- Rows will be dynamically inserted here -->
+        </tbody>
+    </table>
+</div>
+
+
+ @section Scripts{
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            function fetchData() {
+                fetch('@Url.Action("GetEmailStatsData", "Newsletters")')
+                    .then(response => response.json())
+                    .then(data => {
+                        updateTable(data);
+                    })
+                    .catch(error => console.error('Error fetching data:', error));
+            }
+
+            function updateTable(data) {
+                const tableBody = document.getElementById('emailStatsTableBody');
+                tableBody.innerHTML = ''; // Clear existing table rows
+
+                data.forEach(item => {
+                    const row = `
+                        <tr>
+                            <td>${item.recipientEmail}</td>
+                            <td>${item.sentDate}</td>
+                            <td>${item.subject}</td>
+                            <td>${item.isSent ? '<span class="badge-Sent">Sent</span>' : '<span class="badge badge-secondary">Pending</span>'}</td>
+                            <td>${item.isDelivered ? '<span class="badge-Deliverd">Delivered</span>' : '<span class="badge badge-secondary">Pending</span>'}</td>
+                            <td>${item.isOpened ? '<span class="badge-Opend">Opened</span>' : '<span class="badge badge-secondary">Pending</span>'}</td>
+                             <td>${item.isClicked ? '<span class="badge-Clicked">Clicked</span>' : '<span class="badge badge-secondary">Pending</span>'}</td>
+                            <td>${item.isBounced ? '<span class="badge-Opend">Bounced</span>' : '<span class="badge badge-secondary">Normal</span>'}</td>
+                            <td>${item.isSpam ? '<span class="badge-Spam">Spamed</span>' : '<span class="badge badge-secondary">Normal</span>'}</td>
+                            <td>${item.isBlocked ? '<span class="badge-Blocked">Blocked</span>' : '<span class="badge badge-secondary">Normal</span>'}</td>
+                            <td>${item.isUnsubscribed ? '<span class="badge-Unsubscribed">Unsubscribed</span>' : '<span class="badge badge-secondary">Normal</span>'}</td>
+                            <!-- Continue for each status -->
+                        </tr>
+                    `;
+                    tableBody.innerHTML += row; // Append new row
+                });
+            }
+
+            setInterval(fetchData, 5000); // Fetch data every 5 seconds
+        });
+    </script>
+
+ }

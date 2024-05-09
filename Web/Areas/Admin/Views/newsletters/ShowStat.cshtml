@@ -1,0 +1,28 @@
+﻿@model string
+@{
+    ViewData["Title"] = "Email Statistics";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+
+
+
+<h2>@ViewData["Title"]</h2>
+
+<div class="container">
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <title>Email Statistics</title>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <h1>Email Statistics</h1>
+                <pre>@Model</pre>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+
