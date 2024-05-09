@@ -204,47 +204,54 @@ namespace Web.Areas.Admin.Controllers
                         string eventType = e.Value<string>("event");
                         Console.WriteLine($"Processing {eventType} for {email}");
 
-                        var newsletterEmail = await _context.SentNewsletterEamils
-                                                            .FirstOrDefaultAsync(n => n.RecipientEmail == email);
+                        // Retrieve all matching newsletter email records
+                        var newsletterEmails = await _context.SentNewsletterEamils
+                            .Where(n => n.RecipientEmail == email)
+                            .ToListAsync();
 
-                        if (newsletterEmail == null)
+                        if (newsletterEmails == null || !newsletterEmails.Any())
                         {
                             Console.WriteLine("No newsletter email record found for email: " + email);
                             continue;
                         }
 
-                        switch (eventType)
+                        foreach (var newsletterEmail in newsletterEmails)
                         {
-                            case "sent":
-                                newsletterEmail.IsDelivered = true;
-                                break;
-                           
-                            case "open":
-                                newsletterEmail.IsOpened = true;
-                                break;
-                            case "click":
-                                newsletterEmail.IsClicked = true;
-                                break;
-                            case "bounce":
-                                newsletterEmail.IsBounced = true;
-                                break;
-                            case "spam":
-                                newsletterEmail.IsSpam = true;
-                                break;
-                            case "unsub":
-                                newsletterEmail.IsUnsubscribed = true;
-                                break;
-                            case "blocked":
-                                newsletterEmail.IsBlocked = true;
-                                break;
-                            default:
-                                Console.WriteLine($"Unhandled event type: {eventType}");
-                                break;
-                        }
+                            // Update the ReceivedActivity property to the current UTC time
+                            newsletterEmail.ReceivedActivity = DateTime.UtcNow.ToLocalTime();
 
-                        _context.Entry(newsletterEmail).State = EntityState.Modified;
+                            switch (eventType)
+                            {
+                                case "sent":
+                                    newsletterEmail.IsDelivered = true;
+                                    break;
+                                case "open":
+                                    newsletterEmail.IsOpened = true;
+                                    break;
+                                case "click":
+                                    newsletterEmail.IsClicked = true;
+                                    break;
+                                case "bounce":
+                                    newsletterEmail.IsBounced = true;
+                                    break;
+                                case "spam":
+                                    newsletterEmail.IsSpam = true;
+                                    break;
+                                case "unsub":
+                                    newsletterEmail.IsUnsubscribed = true;
+                                    break;
+                                case "blocked":
+                                    newsletterEmail.IsBlocked = true;
+                                    break;
+                                default:
+                                    Console.WriteLine($"Unhandled event type: {eventType}");
+                                    break;
+                            }
+
+                            _context.Entry(newsletterEmail).State = EntityState.Modified;
+                        }
                     }
-                    Console.WriteLine("Email got updated ");
+                    Console.WriteLine("Emails got updated ");
 
                     await _context.SaveChangesAsync();
                 }
@@ -256,9 +263,162 @@ namespace Web.Areas.Admin.Controllers
             }
 
             return Ok();
+
+            //using (var reader = new StreamReader(Request.Body))
+            //{
+            //    var requestBody = await reader.ReadToEndAsync();
+            //    Console.WriteLine("Received payload: " + requestBody);
+            //    Request.Body.Position = 0;
+
+            //    try
+            //    {
+            //        var events = JArray.Parse(requestBody);
+            //        if (events == null)
+            //        {
+            //            return BadRequest("Parsed data is null");
+            //        }
+
+            //        foreach (JObject e in events)
+            //        {
+            //            string email = e.Value<string>("email");
+            //            string eventType = e.Value<string>("event");
+            //            Console.WriteLine($"Processing {eventType} for {email}");
+
+            //            var newsletterEmail = await _context.SentNewsletterEamils
+            //                                                .FirstOrDefaultAsync(n => n.RecipientEmail == email);
+
+            //            if (newsletterEmail == null)
+            //            {
+            //                Console.WriteLine("No newsletter email record found for email: " + email);
+            //                continue;
+            //            }
+
+            //            // Update the ReceivedActivity property to the current UTC time
+            //            newsletterEmail.ReceivedActivity = DateTime.UtcNow.ToLocalTime();
+
+            //            switch (eventType)
+            //            {
+            //                case "sent":
+            //                    newsletterEmail.IsDelivered = true;
+            //                    break;
+            //                case "open":
+            //                    newsletterEmail.IsOpened = true;
+            //                    break;
+            //                case "click":
+            //                    newsletterEmail.IsClicked = true;
+            //                    break;
+            //                case "bounce":
+            //                    newsletterEmail.IsBounced = true;
+            //                    break;
+            //                case "spam":
+            //                    newsletterEmail.IsSpam = true;
+            //                    break;
+            //                case "unsub":
+            //                    newsletterEmail.IsUnsubscribed = true;
+            //                    break;
+            //                case "blocked":
+            //                    newsletterEmail.IsBlocked = true;
+            //                    break;
+            //                default:
+            //                    Console.WriteLine($"Unhandled event type: {eventType}");
+            //                    break;
+            //            }
+
+            //            _context.Entry(newsletterEmail).State = EntityState.Modified;
+            //        }
+            //        Console.WriteLine("Email got updated ");
+
+            //        await _context.SaveChangesAsync();
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        Console.WriteLine("Exception parsing JSON: " + ex.Message);
+            //        return BadRequest("Error parsing JSON: " + ex.Message);
+            //    }
+            //}
+
+            //return Ok();
         }
 
-        
+
+
+        //public async Task<IActionResult> MailjetWebhook()
+        //{
+        //    using (var reader = new StreamReader(Request.Body))
+        //    {
+        //        var requestBody = await reader.ReadToEndAsync();
+        //        Console.WriteLine("Received payload: " + requestBody);
+        //        Request.Body.Position = 0;
+
+        //        try
+        //        {
+        //            var events = JArray.Parse(requestBody);
+        //            if (events == null)
+        //            {
+        //                return BadRequest("Parsed data is null");
+        //            }
+
+        //            foreach (JObject e in events)
+        //            {
+        //                string email = e.Value<string>("email");
+        //                string eventType = e.Value<string>("event");
+        //                Console.WriteLine($"Processing {eventType} for {email}");
+
+        //                var newsletterEmail = await _context.SentNewsletterEamils
+        //                                                    .FirstOrDefaultAsync(n => n.RecipientEmail == email);
+
+        //                if (newsletterEmail == null)
+        //                {
+        //                    Console.WriteLine("No newsletter email record found for email: " + email);
+        //                    continue;
+        //                }
+
+        //                switch (eventType)
+        //                {
+        //                    case "sent":
+        //                        newsletterEmail.IsDelivered = true;
+        //                        break;
+
+        //                    case "open":
+        //                        newsletterEmail.IsOpened = true;
+        //                        break;
+        //                    case "click":
+        //                        newsletterEmail.IsClicked = true;
+        //                        break;
+        //                    case "bounce":
+        //                        newsletterEmail.IsBounced = true;
+        //                        break;
+        //                    case "spam":
+        //                        newsletterEmail.IsSpam = true;
+        //                        break;
+        //                    case "unsub":
+        //                        newsletterEmail.IsUnsubscribed = true;
+        //                        break;
+        //                    case "blocked":
+        //                        newsletterEmail.IsBlocked = true;
+        //                        break;
+        //                    default:
+        //                        Console.WriteLine($"Unhandled event type: {eventType}");
+        //                        break;
+        //                }
+
+        //                _context.Entry(newsletterEmail).State = EntityState.Modified;
+        //            }
+        //            Console.WriteLine("Email got updated ");
+
+        //            await _context.SaveChangesAsync();
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            Console.WriteLine("Exception parsing JSON: " + ex.Message);
+        //            return BadRequest("Error parsing JSON: " + ex.Message);
+        //        }
+        //    }
+
+        //    return Ok();
+        //}
+
+
 
         public async Task<IActionResult> EmailStats()
         {
@@ -266,142 +426,32 @@ namespace Web.Areas.Admin.Controllers
             return View(emails);
         }
 
+
+
         public async Task<IActionResult> GetEmailStatsData()
         {
             var model = await _context.SentNewsletterEamils.ToListAsync();
             return Json(model); // Returns the list of emails as JSON.
         }
 
-        public async Task<JsonResult> GetChartData()
-        {
-            var emails = await _context.SentNewsletterEamils.ToListAsync();
+        //public async Task<JsonResult> GetChartData()
+  
+        //    var emails = await _context.SentNewsletterEamils.ToListAsync();
 
-            var data = new
-            {
-                Sent = emails.Count(e => e.IsSent),
-                Delivered = emails.Count(e => e.IsDelivered),
-                Opened = emails.Count(e => e.IsOpened),
-                Clicked = emails.Count(e => e.IsClicked),
-                Bounced = emails.Count(e => e.IsBounced),
-                Spam = emails.Count(e => e.IsSpam),
-                Blocked = emails.Count(e => e.IsBlocked),
-                Unsubscribed = emails.Count(e => e.IsUnsubscribed)
-            };
-
-            return Json(data);
-        }
-
-
-
-
-
-
-
-
-        //[HttpPost]
-        //public async Task<IActionResult> Create(SendNewsLetterViewModel viewModel)
-        //{
-        //    if(ModelState.IsValid)
+        //    var data = new
         //    {
-        //        try
-        //        {
-        //            // Retrieve all subscribed users
-        //            var subscribedUsers = await _context.Subscriptions.Where(s => s.IsSubscribed).ToListAsync();
+        //        Sent = emails.Count(e => e.IsSent),
+        //        Delivered = emails.Count(e => e.IsDelivered),
+        //        Opened = emails.Count(e => e.IsOpened),
+        //        Clicked = emails.Count(e => e.IsClicked),
+        //        Bounced = emails.Count(e => e.IsBounced),
+        //        Spam = emails.Count(e => e.IsSpam),
+        //        Blocked = emails.Count(e => e.IsBlocked),
+        //        Unsubscribed = emails.Count(e => e.IsUnsubscribed)
+        //    };
 
-
-        //                string confirmationPath = _configuration["Email:unsubscribePath"];
-        //                // Send the newsletter email to each subscribed user
-        //                foreach (var user in subscribedUsers)
-        //                {
-        //                    string confirmationUrl = $"{Request.Scheme}://{Request.Host}/{confirmationPath}?email={user.Email}";
-
-        //                string emailBody = $@"<head>
-        //                                <meta charset=""UTF-8"">
-        //                                <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">
-        //                                <title>Email Confirmation</title>
-        //                                <style>
-        //                                    body {{
-        //                                        font-family: Arial, sans-serif;
-        //                                        line-height: 1.6;
-        //                                        margin: 0;
-        //                                        padding: 0;
-        //                                        background-color: #f9f9f9;
-        //                                    }}
-        //                                    .container {{
-        //                                          max-width: 800px;
-        //                                            margin: 0 auto;
-        //                                            padding: 20px;
-        //                                            border: 0.5px solid #ccc;
-        //                                            border-radius: 5px;
-        //                                            background-color: #f9f9f9;
-        //                                    }}
-        //                                    h4, h5, h6 {{
-        //                                        margin: 0;
-        //                                    }}
-        //                                    hr {{
-        //                                        border: none;
-        //                                        border-top: 1px solid #ccc;
-        //                                        margin: 10px 0;
-        //                                    }}
-        //                                    a.button {{
-        //                                        display: inline-block;
-        //                                        padding: 5px 10px;
-        //                                        background-color: #6c757d;
-        //                                        color: #fff;
-        //                                        text-decoration: none;
-        //                                        border-radius: 4px;
-        //                                    }}
-        //                                    a.button:hover {{
-        //                                        background-color: #5a6268;
-        //                                    }}
-        //                                        a {{
-        //                                            color: #007bff;
-        //                                            text-decoration: none;
-        //                                        }}
-        //                                        a:hover {{
-        //                                            text-decoration: underline;
-        //                                        }}
-        //                                </style>
-        //                            </head>
-        //                            <body>
-        //                                <div class=""container"">
-        //                                    <h4>Hey {user.Name},</h4>
-        //                                    <p>{viewModel.Body}</p><br>
-
-        //                                    <h5>Søren Eggert Lundsteen Olsen</h5>
-        //                                 <h5><a href=""https://www.seosoft.dk/"" target=""_blank"">SeoSoft ApS</a></h5>
-        //                                 <hr>
-        //                                    <h6>Hovedgaden 3<br>Jordrup<br>Kolding 6064<br>Denmark</h6>
-        //                                    <div style=""text-align: center;"">
-        //                                        <a href=""{confirmationUrl}"" class=""button"">Unsubscribe</a>
-        //                                    </div>
-        //                                </div>
-        //                            </body>";
-        //                    var email = new EmailToSend(user.Email, viewModel.Subject, emailBody);
-        //                    var isSent = await _emailServices.SendConfirmationEmailAsync(email);
-
-        //                    // Handle failure to send email if needed
-
-        //                }
-
-        //                TempData["success"] = "Nesletter sent successfully.";
-        //                return RedirectToAction(nameof(Index));
-
-
-
-        //        }
-        //        catch (Exception)
-        //        {
-        //            // Log or handle the exception as needed
-        //            TempData["success"] = "something went wrong.";
-        //            return RedirectToAction(nameof(Index));
-        //        }
-        //    }
-        //    return View(viewModel);
-
-
+        //    return Json(data);
         //}
-
 
 
 

@@ -124,13 +124,13 @@
         <p>
             <a asp-action="Index" class="btn btn-primary btn-sm">Back to list</a>
         </p>
-        <h1>EmailStats</h1>
+        <h3 class="text-primary p-3">Real-Time Email Event</h3>
 
-        <table class="table table-responsive w-100 d-block d-md-table table-bordered table-hover">
+        <table class="table table-responsive w-100 d-block d-md-table table-bordered table-hover shadow-lg rounded-2">
             <thead>
                 <tr>
                     <th>Recipient</th>
-                    <th>Sent Date</th>
+                    <th>Activity Date</th>
                     <th>Subject</th>
                     <th>Sent</th>
                     <th>Delivered</th>
@@ -147,7 +147,7 @@
                 {
                     <tr>
                         <td>@item.RecipientEmail</td>
-                        <td>@item.SentDate</td>
+                        <td>@item.ReceivedActivity</td>
                         <td>@item.Subject</td>
                         <td>
                             @if (item.IsSent)
@@ -234,51 +234,82 @@
             </tbody>
         </table>
 
+
       
-    
+
+       
+        
     </div>
+   
+    
 
   </div>
 
+<div class="container">
+    <div class="card shadow-lg rounded-2 p-3">
+        <div class="row p-3">
 
+            <div class="col-5 m-2">
+                <div id="chart_div_percentage" style="width: 500px; height: 300px;"></div>
+            </div>
+            <div class="col-5 m-2">
+                <div id="chart_div_labels" style="width: 500px; height: 300px;"></div>
+            </div>
+        </div>
+
+    </div>
    
-<h2>Email Statistics</h2>
-<div id="piechart" style="width: 900px; height: 500px;"></div>
-
+</div>
+   
 @section Scripts {
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
         google.charts.load('current', { 'packages': ['corechart'] });
-        google.charts.setOnLoadCallback(drawChart);
+        google.charts.setOnLoadCallback(drawCharts);
 
-        function drawChart() {
-            fetch('@Url.Action("GetChartData", "Newsletters")')
-                .then(response => response.json())
-                .then(data => {
-                    var dataTable = new google.visualization.DataTable();
-                    dataTable.addColumn('string', 'Type');
-                    dataTable.addColumn('number', 'Count');
-                    dataTable.addRows([
-                        ['Sent', data.Sent],
-                        ['Delivered', data.Delivered],
-                        ['Opened', data.Opened],
-                        ['Clicked', data.Clicked],
-                        ['Bounced', data.Bounced],
-                        ['Spam', data.Spam],
-                        ['Blocked', data.Blocked],
-                        ['Unsubscribed', data.Unsubscribed]
-                    ]);
+        function drawCharts() {
+            var data = new google.visualization.DataTable();
+            data.addColumn('string', 'Status');
+            data.addColumn('number', 'Count');
+            data.addRows([
+                ['Sent', @Model.Count(e => e.IsSent)],
+                ['Delivered', @Model.Count(e => e.IsDelivered)],
+                ['Opened', @Model.Count(e => e.IsOpened)],
+                ['Clicked', @Model.Count(e => e.IsClicked)],
+                ['Bounced', @Model.Count(e => e.IsBounced)],
+                ['Spam', @Model.Count(e => e.IsSpam)],
+                ['Blocked', @Model.Count(e => e.IsBlocked)],
+                ['Unsubscribed', @Model.Count(e => e.IsUnsubscribed)]
+            ]);
 
-                    var options = {
-                        title: 'Email Interaction Overview',
-                        width: 900,
-                        height: 500
-                    };
+            // Chart options for showing percentages
+            var optionsPercentage = {
+                title: 'Email Interactions (Percentage)',
+                width: 500,
+                height: 300,
+                is3D: true,
+                pieSliceText: 'percentage',
+                titleTextStyle: { color: '#3b76cb', fontSize: 12, bold: true }
+            };
 
-                    var chart = new google.visualization.PieChart(document.getElementById('piechart'));
-                    chart.draw(dataTable, options);
-                })
-                .catch(error => console.error('Failed to fetch email stats:', error));
+            // Chart options for showing labels
+            var optionsLabels = {
+                title: 'Email Interactions (Labels)',
+                width: 500,
+                height: 300,
+                is3D: true,
+                pieSliceText: 'label',
+                titleTextStyle: { color: '#3b76cb', fontSize: 12, bold: true }
+            };
+
+            // Draw the first chart
+            var chartPercentage = new google.visualization.PieChart(document.getElementById('chart_div_percentage'));
+            chartPercentage.draw(data, optionsPercentage);
+
+            // Draw the second chart
+            var chartLabels = new google.visualization.PieChart(document.getElementById('chart_div_labels'));
+            chartLabels.draw(data, optionsLabels);
         }
     </script>
 }
+

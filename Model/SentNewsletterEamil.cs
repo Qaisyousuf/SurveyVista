@@ -13,6 +13,7 @@ namespace Model
         public string? Subject { get; set; }        
         public string? Body { get; set; }           
         public DateTime SentDate { get; set; }      
+        public DateTime ReceivedActivity { get; set; }
         public bool IsDelivered { get; set; }       
         public bool IsOpened { get; set; }          
         public bool IsClicked { get; set; }         
