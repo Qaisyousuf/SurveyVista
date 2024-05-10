@@ -157,12 +157,14 @@ namespace Web.Areas.Admin.Controllers
                             RecipientEmail = user.Email,
                             Subject = viewModel.Subject,
                             Body = emailBody,
+                          
                            
                         SentDate = DateTime.UtcNow,
                             IsSent = isSent  // Assuming isSent returns a boolean indicating success
                         };
                         _context.SentNewsletterEamils.Add(sentEmail);
 
+                       
                         // Handle failure to send email if needed
                     }
 
@@ -181,6 +183,8 @@ namespace Web.Areas.Admin.Controllers
             return View(viewModel);
         }
 
+       
+
         [HttpPost]
         public async Task<IActionResult> MailjetWebhook()
         {
@@ -198,13 +202,14 @@ namespace Web.Areas.Admin.Controllers
                         return BadRequest("Parsed data is null");
                     }
 
-                    foreach (JObject e in events)
-                    {
-                        string email = e.Value<string>("email");
-                        string eventType = e.Value<string>("event");
-                        Console.WriteLine($"Processing {eventType} for {email}");
+                    var groupedEvents = events.GroupBy(e => e.Value<string>("email"));
 
-                        // Retrieve all matching newsletter email records
+                    foreach (var emailGroup in groupedEvents)
+                    {
+                        string email = emailGroup.Key;
+                        Console.WriteLine($"Processing events for email: {email}");
+
+                        // Retrieve all matching newsletter email records for the current email
                         var newsletterEmails = await _context.SentNewsletterEamils
                             .Where(n => n.RecipientEmail == email)
                             .ToListAsync();
@@ -219,33 +224,45 @@ namespace Web.Areas.Admin.Controllers
                         {
                             // Update the ReceivedActivity property to the current UTC time
                             newsletterEmail.ReceivedActivity = DateTime.UtcNow.ToLocalTime();
+                            string ipAddress = emailGroup.First().Value<string>("ip");
+                            string geolocation = emailGroup.First().Value<string>("geo");
 
-                            switch (eventType)
+                            // Update the newsletterEmail with IP address and geolocation
+                            newsletterEmail.IpAddress = ipAddress;
+                            newsletterEmail.Geo = geolocation;
+
+                            foreach (var e in emailGroup)
                             {
-                                case "sent":
-                                    newsletterEmail.IsDelivered = true;
-                                    break;
-                                case "open":
-                                    newsletterEmail.IsOpened = true;
-                                    break;
-                                case "click":
-                                    newsletterEmail.IsClicked = true;
-                                    break;
-                                case "bounce":
-                                    newsletterEmail.IsBounced = true;
-                                    break;
-                                case "spam":
-                                    newsletterEmail.IsSpam = true;
-                                    break;
-                                case "unsub":
-                                    newsletterEmail.IsUnsubscribed = true;
-                                    break;
-                                case "blocked":
-                                    newsletterEmail.IsBlocked = true;
-                                    break;
-                                default:
-                                    Console.WriteLine($"Unhandled event type: {eventType}");
-                                    break;
+                                string eventType = e.Value<string>("event");
+                                Console.WriteLine($"Processing {eventType} for {email}");
+
+                                switch (eventType)
+                                {
+                                    case "sent":
+                                        newsletterEmail.IsDelivered = true;
+                                        break;
+                                    case "open":
+                                        newsletterEmail.IsOpened = true;
+                                        break;
+                                    case "click":
+                                        newsletterEmail.IsClicked = true;
+                                        break;
+                                    case "bounce":
+                                        newsletterEmail.IsBounced = true;
+                                        break;
+                                    case "spam":
+                                        newsletterEmail.IsSpam = true;
+                                        break;
+                                    case "unsub":
+                                        newsletterEmail.IsUnsubscribed = true;
+                                        break;
+                                    case "blocked":
+                                        newsletterEmail.IsBlocked = true;
+                                        break;
+                                    default:
+                                        Console.WriteLine($"Unhandled event type: {eventType}");
+                                        break;
+                                }
                             }
 
                             _context.Entry(newsletterEmail).State = EntityState.Modified;
@@ -263,6 +280,12 @@ namespace Web.Areas.Admin.Controllers
             }
 
             return Ok();
+
+
+
+
+
+
 
             //using (var reader = new StreamReader(Request.Body))
             //{
@@ -435,7 +458,7 @@ namespace Web.Areas.Admin.Controllers
         }
 
         //public async Task<JsonResult> GetChartData()
-  
+
         //    var emails = await _context.SentNewsletterEamils.ToListAsync();
 
         //    var data = new
@@ -454,6 +477,18 @@ namespace Web.Areas.Admin.Controllers
         //}
 
 
+        [HttpPost]
+        public IActionResult DeleteSelected(List<int> selectedIds)
+        {
+            if (selectedIds != null && selectedIds.Count > 0)
+            {
+                var items = _context.SentNewsletterEamils.Where(x => selectedIds.Contains(x.Id)).ToList();
+                _context.SentNewsletterEamils.RemoveRange(items);
+                _context.SaveChanges();
+            }
+            TempData["Success"] = "Email tracking result deleted successfully";
+            return RedirectToAction(nameof(EmailStats));
+        }
 
         [HttpGet]
         public IActionResult Delete(int id)

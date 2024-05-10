@@ -4,6 +4,7 @@
     ViewData["Title"] = "EmailStats";
   
 }
+ <partial name="_Notification" />
 
 <style>
     .badge-Sent{
@@ -120,17 +121,23 @@
     }
 </style>
 <div class="container-fluid mt-4 mb-5">
-    <div class="col-10 offset-1">
-        <p>
+    <div class="col-10 offset-1 ">
+
+        <div class="card p-4  shadow-lg rounded-2">
+                   <p>
             <a asp-action="Index" class="btn btn-primary btn-sm">Back to list</a>
         </p>
-        <h3 class="text-primary p-3">Real-Time Email Event</h3>
+        <h3 class="text-primary">Real-Time Email tracking</h3>
 
-        <table class="table table-responsive w-100 d-block d-md-table table-bordered table-hover shadow-lg rounded-2">
-            <thead>
-                <tr>
-                    <th>Recipient</th>
+        <form asp-action="DeleteSelected" method="post">
+    <table class="table table-responsive w-100 d-block d-md-table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th><input type="checkbox" id="selectAll" /></th>
+              <th>Recipient</th>
                     <th>Activity Date</th>
+                    <th>IP</th>
+                    <th>Country</th>
                     <th>Subject</th>
                     <th>Sent</th>
                     <th>Delivered</th>
@@ -140,112 +147,114 @@
                     <th>Spam</th>
                     <th>Blocked</th>
                     <th>Unsubscribed</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in Model)
-                {
+                <!-- Additional headers omitted for brevity -->
+            </tr>
+        </thead>
+        <tbody>
+                        @foreach (var item in Model)
+                        {
                     <tr>
+                        <td><input type="checkbox" name="selectedIds" value="@item.Id" /></td>
                         <td>@item.RecipientEmail</td>
                         <td>@item.ReceivedActivity</td>
-                        <td>@item.Subject</td>
-                        <td>
-                            @if (item.IsSent)
-                            {
-                                <span class="badge-Sent">Sent</span>
-                            }
-                            else
-                            {
-                                <span class="badge badge-secondary">Pending</span>
-                            }
-                        </td>
-                        <td>
-                            @if (item.IsDelivered)
-                            {
-                                <span class="badge-Deliverd">Delivered</span>
-                            }
-                            else
-                            {
-                                <span class="badge badge-secondary">Pending</span>
-                            }
-                        </td>
-                        <td>
-                            @if (item.IsOpened)
-                            {
-                                <span class="badge-Opend">Opened</span>
-                            }
-                            else
-                            {
-                                <span class="badge badge-secondary">Pending</span>
-                            }
-                        </td>
-                        <td>
-                            @if (item.IsClicked)
-                            {
-                                <span class="badge-Clicked">Clicked</span>
-                            }
-                            else
-                            {
-                                <span class="badge badge-secondary">Pending</span>
-                            }
-                        </td>
-                        <td>
-                            @if (item.IsBounced)
-                            {
-                                <span class="badge-Bounced">Bounced</span>
-                            }
-                            else
-                            {
-                                <span class="badge badge-secondary">Normal</span>
-                            }
-                        </td>
-                        <td>
-                            @if (item.IsSpam)
-                            {
-                                <span class="badge-Spam">Spam</span>
-                            }
-                            else
-                            {
-                                <span class="badge badge-secondary">Normal</span>
-                            }
-                        </td>
-                        <td>
-                            @if (item.IsBlocked)
-                            {
-                                <span class="badge-Blocked">Blocked</span>
-                            }
-                            else
-                            {
-                                <span class="badge badge-secondary">Normal</span>
-                            }
-                        </td>
-                        <td>
-                            @if (item.IsUnsubscribed)
-                            {
-                                <span class="badge-Unsubscribed">Unsubscribed</span>
-                            }
-                            else
-                            {
-                                <span class="badge badge-secondary">Normal</span>
-                            }
-                        </td>
+                            <td>@item.IpAddress</td>
+                            <td>@item.Geo</td>
+                            <td>@item.Subject</td>
+                            <td>
+                                    @if (item.IsSent)
+                                    {
+                                        <span class="badge-Sent">Sent</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-secondary">Pending</span>
+                                    }
+                            </td>
+                            <td>
+                                    @if (item.IsDelivered)
+                                    {
+                                        <span class="badge-Deliverd">Delivered</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-secondary">Pending</span>
+                                    }
+                            </td>
+                            <td>
+                                    @if (item.IsOpened)
+                                    {
+                                        <span class="badge-Opend">Opened</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-secondary">Pending</span>
+                                    }
+                            </td>
+                            <td>
+                                    @if (item.IsClicked)
+                                    {
+                                        <span class="badge-Clicked">Clicked</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-secondary">Pending</span>
+                                    }
+                            </td>
+                            <td>
+                                    @if (item.IsBounced)
+                                    {
+                                        <span class="badge-Bounced">Bounced</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-secondary">Normal</span>
+                                    }
+                            </td>
+                            <td>
+                                    @if (item.IsSpam)
+                                    {
+                                        <span class="badge-Spam">Spam</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-secondary">Normal</span>
+                                    }
+                            </td>
+                            <td>
+                                    @if (item.IsBlocked)
+                                    {
+                                        <span class="badge-Blocked">Blocked</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-secondary">Normal</span>
+                                    }
+                            </td>
+                            <td>
+                                    @if (item.IsUnsubscribed)
+                                    {
+                                        <span class="badge-Unsubscribed">Unsubscribed</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-secondary">Normal</span>
+                                    }
+                            </td>
                     </tr>
-                }
-            </tbody>
-        </table>
+                        }
+        </tbody>
+    </table>
+    <button type="submit" class="btn btn-danger">Delete Selected</button>
+</form>
 
-
-      
-
-       
-        
-    </div>
-   
-    
+   </div>
 
   </div>
+        </div>
 
-<div class="container">
+ 
+
+<div class="container mb-4">
     <div class="card shadow-lg rounded-2 p-3">
         <div class="row p-3">
 
@@ -255,6 +264,10 @@
             <div class="col-5 m-2">
                 <div id="chart_div_labels" style="width: 500px; height: 300px;"></div>
             </div>
+            <div class="col-8 m-2">
+                <div id="geo_chart_div" style="width: 500px; height: 300px;"></div>
+            </div>
+          
         </div>
 
     </div>
@@ -263,11 +276,25 @@
    
 @section Scripts {
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+        <script>
+        document.getElementById('selectAll').addEventListener('change', function (event) {
+            var checkboxes = document.querySelectorAll('input[type="checkbox"][name="selectedIds"]');
+            for (var checkbox of checkboxes) {
+                checkbox.checked = this.checked;
+            }
+        });
+    </script>
+
     <script type="text/javascript">
-        google.charts.load('current', { 'packages': ['corechart'] });
+        google.charts.load('current', { 'packages': ['corechart', 'geochart'] });
         google.charts.setOnLoadCallback(drawCharts);
 
         function drawCharts() {
+            drawEmailInteractionCharts();
+            drawGeoChart();
+        }
+
+        function drawEmailInteractionCharts() {
             var data = new google.visualization.DataTable();
             data.addColumn('string', 'Status');
             data.addColumn('number', 'Count');
@@ -282,7 +309,6 @@
                 ['Unsubscribed', @Model.Count(e => e.IsUnsubscribed)]
             ]);
 
-            // Chart options for showing percentages
             var optionsPercentage = {
                 title: 'Email Interactions (Percentage)',
                 width: 500,
@@ -292,7 +318,6 @@
                 titleTextStyle: { color: '#3b76cb', fontSize: 12, bold: true }
             };
 
-            // Chart options for showing labels
             var optionsLabels = {
                 title: 'Email Interactions (Labels)',
                 width: 500,
@@ -302,14 +327,61 @@
                 titleTextStyle: { color: '#3b76cb', fontSize: 12, bold: true }
             };
 
-            // Draw the first chart
             var chartPercentage = new google.visualization.PieChart(document.getElementById('chart_div_percentage'));
             chartPercentage.draw(data, optionsPercentage);
 
-            // Draw the second chart
             var chartLabels = new google.visualization.PieChart(document.getElementById('chart_div_labels'));
             chartLabels.draw(data, optionsLabels);
         }
+
+        function drawGeoChart() {
+            var geoData = new google.visualization.DataTable();
+            geoData.addColumn('string', 'Country');
+            geoData.addColumn('number', 'Sent');
+            geoData.addColumn('number', 'Delivered');
+            geoData.addColumn('number', 'Opened');
+            geoData.addColumn('number', 'Clicked');
+            geoData.addColumn('number', 'Bounced');
+            geoData.addColumn('number', 'Spam');
+            geoData.addColumn('number', 'Blocked');
+            geoData.addColumn('number', 'Unsubscribed');
+
+        @foreach (var geoGroup in Model.GroupBy(e => e.Geo))
+        {
+            var sent = geoGroup.Count(e => e.IsSent);
+            var delivered = geoGroup.Count(e => e.IsDelivered);
+            var opened = geoGroup.Count(e => e.IsOpened);
+            var clicked = geoGroup.Count(e => e.IsClicked);
+            var bounced = geoGroup.Count(e => e.IsBounced);
+            var spam = geoGroup.Count(e => e.IsSpam);
+            var blocked = geoGroup.Count(e => e.IsBlocked);
+            var unsubscribed = geoGroup.Count(e => e.IsUnsubscribed);
+
+            <text>
+                    geoData.addRow([
+                        '@Html.Raw(geoGroup.Key)',
+                @sent, @delivered, @opened, @clicked,
+                @bounced, @spam, @blocked, @unsubscribed
+                    ]);
+            </text>
+        }
+
+            var geoOptions = {
+                title: 'Detailed Email Statistics by Geography',
+                width: 700,
+                height: 300,
+                chartArea: { width: '50%', height: '70%' },
+                vAxis: { title: 'Country', titleTextStyle: { color: '#333' } },
+                hAxis: { minValue: 0 },
+                bar: { groupWidth: '75%' },
+                isStacked: true
+            };
+
+            var geoChart = new google.visualization.BarChart(document.getElementById('geo_chart_div'));
+            geoChart.draw(geoData, geoOptions);
+        }
+
     </script>
 }
+
 

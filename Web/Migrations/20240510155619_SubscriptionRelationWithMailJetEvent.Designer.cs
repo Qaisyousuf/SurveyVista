@@ -4,6 +4,7 @@ using Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Web.Migrations
 {
     [DbContext(typeof(SurveyContext))]
-    partial class SurveyContextModelSnapshot : ModelSnapshot
+    [Migration("20240510155619_SubscriptionRelationWithMailJetEvent")]
+    partial class SubscriptionRelationWithMailJetEvent
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -593,7 +596,12 @@ namespace Web.Migrations
                     b.Property<string>("Subject")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("SubscriptionId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("SubscriptionId");
 
                     b.ToTable("SentNewsletterEamils");
                 });
@@ -792,6 +800,17 @@ namespace Web.Migrations
                     b.Navigation("Question");
 
                     b.Navigation("Response");
+                });
+
+            modelBuilder.Entity("Model.SentNewsletterEamil", b =>
+                {
+                    b.HasOne("Model.Subscription", "Subscription")
+                        .WithMany()
+                        .HasForeignKey("SubscriptionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Subscription");
                 });
 
             modelBuilder.Entity("Model.Footer", b =>

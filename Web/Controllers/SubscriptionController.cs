@@ -188,6 +188,17 @@ namespace Web.Controllers
                         // Update the IsSubscribed property to true
                         subscription.IsSubscribed = true;
                         _context.Subscriptions.Update(subscription);
+
+                        var sentEmails = _context.SentNewsletterEamils.Where(e => e.RecipientEmail == email);
+
+
+                        // Set IsUnsubscribed flag to true for email events
+                        foreach (var emailEvent in sentEmails)
+                        {
+                            emailEvent.IsUnsubscribed = false;
+                            _context.Entry(emailEvent).State = EntityState.Modified;
+                        }
+
                         await _context.SaveChangesAsync();
 
                         // Send a "thank you" email to the user
@@ -282,61 +293,73 @@ namespace Web.Controllers
                         _context.Subscriptions.Remove(subscription);
                         await _context.SaveChangesAsync();
 
+                        // Remove the email from SentNewsletterEmail
+                        var sentEmails = _context.SentNewsletterEamils.Where(e => e.RecipientEmail == email);
+
+
+                        // Set IsUnsubscribed flag to true for email events
+                        foreach (var emailEvent in sentEmails)
+                        {
+                            emailEvent.IsUnsubscribed = true;
+                            _context.Entry(emailEvent).State = EntityState.Modified;
+                        }
+
+                        await _context.SaveChangesAsync();
+
                         // Inform the user that the email has been unsubscribed
                         ViewBag.Message = "You have successfully unsubscribed from our newsletter. We're sorry to see you go";
 
                         // Optionally, send an email confirmation to the user
                         string subject = "Unsubscription Confirmation";
                         string body = $@"<head>
-                                            <meta charset=""UTF-8"">
-                                            <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">
-                                            <title>Unsubscribe Confirmation</title>
-                                            <style>
-                                                body {{
-                                                    font-family: Arial, sans-serif;
-                                                    line-height: 1.6;
-                                                    margin: 0;
-                                                    padding: 0;
-                                                    background-color: #f9f9f9;
-                                                }}
-                                                .container {{
-                                                     max-width: 800px;
-                                                    margin: 0 auto;
-                                                    padding: 20px;
-                                                    border: 0.5px solid #ccc;
-                                                    border-radius: 5px;
-                                                    background-color: #f9f9f9;
-                                                }}
-                                                h5, h6 {{
-                                                    margin: 0;
-                                                }}
-                                                hr {{
-                                                    border: none;
-                                                    border-top: 1px solid #ccc;
-                                                    margin: 10px 0;
-                                                }}
-                                                a {{
-                                                    color: #007bff;
-                                                    text-decoration: none;
-                                                }}
-                                                a:hover {{
-                                                    text-decoration: underline;
-                                                }}
-                                            </style>
-                                        </head>
-                                        <body>
-                                            <div class=""container"">
-                                                <h3>Unsubscribe Confirmation</h3>
-                                                <p>You have successfully unsubscribed from our newsletter. We're sorry to see you go.</p>
-                                                <br>
-                                                 <h5><strong>Søren Eggert Lundsteen Olsen</strong></h5>
-                                                <h5><a href=""https://www.seosoft.dk/"" target=""_blank"">SeoSoft ApS</a></h5>
-                                                <hr>
-                                                <h6>Hovedgaden 3<br>Jordrup<br>Kolding 6064<br>Denmark</h6>
-                                            </div>
-                                        </body>
-                                        </html>";
-
+                                    <meta charset=""UTF-8"">
+                                    <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">
+                                    <title>Unsubscribe Confirmation</title>
+                                    <style>
+                                        body {{
+                                            font-family: Arial, sans-serif;
+                                            line-height: 1.6;
+                                            margin: 0;
+                                            padding: 0;
+                                            background-color: #f9f9f9;
+                                        }}
+                                        .container {{
+                                             max-width: 800px;
+                                            margin: 0 auto;
+                                            padding: 20px;
+                                            border: 0.5px solid #ccc;
+                                            border-radius: 5px;
+                                            background-color: #f9f9f9;
+                                        }}
+                                        h5, h6 {{
+                                            margin: 0;
+                                        }}
+                                        hr {{
+                                            border: none;
+                                            border-top: 1px solid #ccc;
+                                            margin: 10px 0;
+                                        }}
+                                        a {{
+                                            color: #007bff;
+                                            text-decoration: none;
+                                        }}
+                                        a:hover {{
+                                            text-decoration: underline;
+                                        }}
+                                    </style>
+                                </head>
+                                <body>
+                                    <div class=""container"">
+                                        <h3>Unsubscribe Confirmation</h3>
+                                        <p>You have successfully unsubscribed from our newsletter. We're sorry to see you go.</p>
+                                        <br>
+                                         <h5><strong>Søren Eggert Lundsteen Olsen</strong></h5>
+                                        <h5><a href=""https://www.seosoft.dk/"" target=""_blank"">SeoSoft ApS</a></h5>
+                                        <hr>
+                                        <h6>Hovedgaden 3<br>Jordrup<br>Kolding 6064<br>Denmark</h6>
+                                    </div>
+                                </body>
+                                </html>";
 
                         var thankYouEmail = new EmailToSend(subscription.Email, subject, body);
                         await _mailSerivces.SendConfirmationEmailAsync(thankYouEmail);
@@ -363,6 +386,106 @@ namespace Web.Controllers
                 return View("Error"); // You can return a view to show an error message
             }
         }
+
+
+        //[HttpGet]
+        //public async Task<IActionResult> UnsubscribeConfirmation(string email)
+        //{
+        //    try
+        //    {
+        //        // Find the subscription with the provided email
+        //        var subscription = await _context.Subscriptions.FirstOrDefaultAsync(s => s.Email == email);
+
+        //        if (subscription != null)
+        //        {
+        //            if (subscription.IsSubscribed)
+        //            {
+        //                // Update the IsSubscribed property to false
+        //                subscription.IsSubscribed = false;
+        //                _context.Subscriptions.Remove(subscription);
+        //                await _context.SaveChangesAsync();
+
+        //                // Inform the user that the email has been unsubscribed
+        //                ViewBag.Message = "You have successfully unsubscribed from our newsletter. We're sorry to see you go";
+
+        //                // Optionally, send an email confirmation to the user
+        //                string subject = "Unsubscription Confirmation";
+        //                string body = $@"<head>
+        //                                    <meta charset=""UTF-8"">
+        //                                    <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">
+        //                                    <title>Unsubscribe Confirmation</title>
+        //                                    <style>
+        //                                        body {{
+        //                                            font-family: Arial, sans-serif;
+        //                                            line-height: 1.6;
+        //                                            margin: 0;
+        //                                            padding: 0;
+        //                                            background-color: #f9f9f9;
+        //                                        }}
+        //                                        .container {{
+        //                                             max-width: 800px;
+        //                                            margin: 0 auto;
+        //                                            padding: 20px;
+        //                                            border: 0.5px solid #ccc;
+        //                                            border-radius: 5px;
+        //                                            background-color: #f9f9f9;
+        //                                        }}
+        //                                        h5, h6 {{
+        //                                            margin: 0;
+        //                                        }}
+        //                                        hr {{
+        //                                            border: none;
+        //                                            border-top: 1px solid #ccc;
+        //                                            margin: 10px 0;
+        //                                        }}
+        //                                        a {{
+        //                                            color: #007bff;
+        //                                            text-decoration: none;
+        //                                        }}
+        //                                        a:hover {{
+        //                                            text-decoration: underline;
+        //                                        }}
+        //                                    </style>
+        //                                </head>
+        //                                <body>
+        //                                    <div class=""container"">
+        //                                        <h3>Unsubscribe Confirmation</h3>
+        //                                        <p>You have successfully unsubscribed from our newsletter. We're sorry to see you go.</p>
+        //                                        <br>
+        //                                         <h5><strong>Søren Eggert Lundsteen Olsen</strong></h5>
+        //                                        <h5><a href=""https://www.seosoft.dk/"" target=""_blank"">SeoSoft ApS</a></h5>
+        //                                        <hr>
+        //                                        <h6>Hovedgaden 3<br>Jordrup<br>Kolding 6064<br>Denmark</h6>
+        //                                    </div>
+        //                                </body>
+        //                                </html>";
+
+
+        //                var thankYouEmail = new EmailToSend(subscription.Email, subject, body);
+        //                await _mailSerivces.SendConfirmationEmailAsync(thankYouEmail);
+
+        //                return View(subscription); // You can return a view to show a confirmation message
+        //            }
+        //            else
+        //            {
+        //                // If IsSubscribed is already false, inform the user that the email is already unsubscribed
+        //                ViewBag.Message = "Your email is already unsubscribed. Thank you!";
+        //                return View(subscription); // You can return a view to show a message
+        //            }
+        //        }
+        //        else
+        //        {
+        //            // Inform the user that the unsubscription process couldn't be completed
+        //            ViewBag.Message = "You have been unsubscribed from our newsletter. subscribe first.";
+        //            return View(subscription); // You can return a view to show an error message
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        // Log or handle the exception as needed
+        //        return View("Error"); // You can return a view to show an error message
+        //    }
+        //}
 
 
 

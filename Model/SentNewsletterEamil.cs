@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,6 +24,13 @@ namespace Model
         public bool IsSent { get; set; }
         public bool IsUnsubscribed { get; set; }
         public bool IsBlocked { get; set; }
+
+        public string? Geo { get; set; }
+
+        public string? IpAddress { get; set; }
+
+
+ 
 
     }
 }
