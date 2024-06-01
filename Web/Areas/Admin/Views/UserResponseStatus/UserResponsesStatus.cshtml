@@ -40,7 +40,7 @@
         justify-content: center;
         width: 40px;
         height: 40px;
-        background-color: #007bff;
+        background-color: #aed5ff;
         color: white;
         border-radius: 50%;
         font-size: 14px;
@@ -56,6 +56,8 @@
     }
 </style>
 
+
+
 <div class="container-fluid mt-3">
     <p>
         <a asp-action="Index" class="btn btn-primary btn-sm">Back to list</a>
@@ -63,24 +65,34 @@
 
     <div class="card p-5 m-3 shadow">
         <div class="bd-callout bd-callout-primary">
-            <h4 class="text-primary">User Responses</h4>
-            <text>@Model.UserName (@Model.UserEmail)</text>
-        </div>
+           
+            <h6 class="text-primary font-weight-bold"><i class="bi bi-person"></i> @Model.UserName (@Model.UserEmail)</h6>
+            <p class="text-info"><i class="bi bi-calculator"></i> Total responses: @Model.Responses.Count()</p>
 
+
+            <a asp-action="GenerateReport" asp-route-userEmail="@Model.UserEmail" asp-route-format="pdf" class="btn btn-info btn-sm">
+                <i class="bi bi-filetype-pdf"></i> Generate PDF Report
+            </a>
+            <a asp-action="GenerateReport" asp-route-userEmail="@Model.UserEmail" asp-route-format="excel" class="btn btn-info btn-sm">
+                <i class="bi bi-file-excel"></i> Generate Excel Report
+            </a>
+        </div>
+     
         <!-- Stepper -->
         <div class="stepper-wrapper">
             @foreach (var response in Model.Responses)
             {
                 <div class="stepper-item">
                     <div class="step-counter">
-                        <span class="badge bg-primary p-3 shadow">@response.Questionnaire.Title</span>
+                        <span class="badge bg-primary p-2 shadow">@response.Questionnaire.Title  <i class="bi bi-arrow-right-circle-fill"></i></span>
                     </div>
                     <div class="step-content">
 
                         <div class="card p-4">
                             <div class="step-header">
-                                <h6>Survey: @response.Questionnaire.Title</h6>
-                                <p>Submitted on: @response.SubmissionDate</p>
+                                <h6 class="text-primary font-weight-bold"><i class="bi bi-ui-checks"></i> @response.Questionnaire.Title</h6>
+                                <h6 class="text-success"><i class="bi bi-calendar2-week"></i> Submitted on: @response.SubmissionDate</h6>
+                                <p class="text-info"><i class="bi bi-question-square"></i> Total questions: @response.Questionnaire.Questions.Count()</p>
                             </div>
 
                             <!-- Collapsible button -->
@@ -154,104 +166,7 @@
 </div>
 
 
-@* <div class="container-fluid mt-3">
-    <p>
-        <a asp-action="Index" class="btn btn-primary btn-sm">Back to list</a>
-    </p>
 
-    <div class="card p-5 m-3 shadow">
-        <div class="bd-callout bd-callout-primary">
-            <h4 class="text-primary">User Responses</h4>
-            <text>@Model.UserName (@Model.UserEmail)</text>
-        </div>
-      
-        <div>
-            @foreach (var response in Model.Responses)
-            {
-                <div class="container card mt-4 p-3">
-                    <div>
-                        <h6>Survey: @response.Questionnaire.Title</h6>
-                        <p>Submitted on: @response.SubmissionDate</p>
-
-                        <!-- Collapsible button -->
-                        <button class="btn btn-primary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#collapseResponse-@response.Id" aria-expanded="false" aria-controls="collapseResponse-@response.Id">
-                            View Responses
-                        </button>
-
-                        <!-- Collapsible content -->
-                        <div class="collapse mt-3" id="collapseResponse-@response.Id">
-                            <table class="table table-responsive w-100 d-block d-md-table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Question</th>
-                                        <th>Response</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var detail in response.ResponseDetails)
-                                    {
-                                        <tr>
-                                            <td>@detail.Question.Text</td>
-                                            <td>
-                                                @if (detail.QuestionType == QuestionType.Text || detail.QuestionType == QuestionType.Slider || detail.QuestionType == QuestionType.Open_ended)
-                                                {
-                                                    <ul class="list-group">
-                                                        <li class="list-group-item d-flex justify-content-between align-items-center border-1">
-                                                            Question type
-                                                            <span class="badge text-bg-primary rounded-pill p-1s">@detail.QuestionType</span>
-                                                        </li>
-
-                                                    </ul>
-                                                    <br />
-                                                   
-                                                    <ul class="list-group">
-                                                        <li class="list-group-item d-flex justify-content-between align-items-center border-1">
-
-                                                            Answer
-                                                            <span class="badge text-bg-primary rounded-pill p-1">@detail.TextResponse</span>
-                                                        </li>
-                                                    </ul>
-                                                 
-                                                }
-                                                else
-                                                {
-
-                                                    <ul class="list-group">
-                                                        <li class="list-group-item d-flex justify-content-between align-items-center border-1">
-                                                            Question type
-                                                            <span class="badge text-bg-primary rounded-pill p-1">@detail.QuestionType</span>
-                                                        </li>
-                                                       
-                                                    </ul>
-                                                    <br />
-
-                                                    <ul class="list-group">
-
-                                                        @foreach (var answer in detail.ResponseAnswers)
-                                                        {
-                                                          
-
-                                                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                                Answer
-                                                                <span class="badge text-bg-primary rounded-pill p-1">@detail.Question.Answers.FirstOrDefault(a => a.Id == answer.AnswerId)?.Text</span>
-                                                            </li>
-                                                        }
-
-                                                    </ul>
-
-                                                }
-                                            </td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            }
-        </div>
-    </div>
-</div> *@
 
 @section Scripts {
     <!-- Include Bootstrap 5 JS for collapse functionality -->
