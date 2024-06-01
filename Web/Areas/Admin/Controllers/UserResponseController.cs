@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Model;
+using Services.Interaces;
+using Web.ViewModel.QuestionnaireVM;
 
 namespace Web.Areas.Admin.Controllers
 {
@@ -11,10 +13,12 @@ namespace Web.Areas.Admin.Controllers
     public class UserResponseController : Controller
     {
         private readonly SurveyContext _context;
+        private readonly IUserResponseRepository _userResponse;
 
-        public UserResponseController(SurveyContext context)
+        public UserResponseController(SurveyContext context, IUserResponseRepository userResponse)
         {
             _context = context;
+            _userResponse = userResponse;
         }
         public async Task<IActionResult> Index()
         {
@@ -49,6 +53,31 @@ namespace Web.Areas.Admin.Controllers
 
             return View(response); // Pass the response to the view
         }
+
+
+
+        public async Task<IActionResult> UserResponsesStatus(string userName)
+        {
+            var responses = await _userResponse.GetResponsesByUserAsync(userName);
+
+            if (responses == null || !responses.Any())
+            {
+                return NotFound();
+            }
+
+            var userEmail = responses.First().UserEmail;
+
+            var viewModel = new UserResponsesViewModel
+            {
+                UserName = userName,
+                UserEmail = userEmail,
+                Responses = responses.ToList()
+            };
+
+            return View(viewModel);
+        }
+
+
 
 
         [HttpPost]

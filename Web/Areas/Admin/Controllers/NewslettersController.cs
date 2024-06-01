@@ -14,6 +14,9 @@ using Services.Implemnetation;
 using Services.Interaces;
 using Web.AIConfiguration;
 using Web.ViewModel.NewsLetterVM;
+using iText.Kernel.Pdf;
+using iText.Kernel.Pdf.Canvas.Parser;
+using System.Text.RegularExpressions;
 
 namespace Web.Areas.Admin.Controllers
 {
@@ -35,13 +38,21 @@ namespace Web.Areas.Admin.Controllers
             _configuration = configuration;
         
         }
-        public IActionResult Index()
+        public IActionResult Index(int page = 1)
         {
-            var totalSubscribedUsers = _context.Subscriptions.Count(s => s.IsSubscribed);
+            const int PageSize = 10;
 
-            // Pass the total count to the view
+            var totalSubscribedUsers = _context.Subscriptions.Count(s => s.IsSubscribed);
             ViewBag.TotalSubscribedUsers = totalSubscribedUsers;
-            var newsLetterFromdb = _repository.GetAll();
+
+            var totalSubscriptions = _context.Subscriptions.Count();
+            var totalPages = (int)Math.Ceiling(totalSubscriptions / (double)PageSize);
+
+            var newsLetterFromdb = _repository.GetAll()
+                                              .OrderByDescending(x=>x.Id)
+                                              .Skip((page - 1) * PageSize)
+                                              .Take(PageSize)
+                                              .ToList();
 
             var viewmodel = new List<NewsLetterViewModel>();
 
@@ -49,13 +60,21 @@ namespace Web.Areas.Admin.Controllers
             {
                 viewmodel.Add(new NewsLetterViewModel
                 {
-                    Id=item.Id,
-                    Name=item.Name,
-                    Email=item.Email,
-                    IsSubscribed=item.IsSubscribed
+                    Id = item.Id,
+                    Name = item.Name,
+                    Email = item.Email,
+                    IsSubscribed = item.IsSubscribed
                 });
             }
-            return View(viewmodel);
+
+            var listViewModel = new PaginationViewModel
+            {
+                Subscriptions = viewmodel,
+                CurrentPage = page,
+                TotalPages = totalPages
+            };
+
+            return View(listViewModel);
         }
 
         public IActionResult Create()
@@ -70,7 +89,21 @@ namespace Web.Areas.Admin.Controllers
 
 
         [HttpPost]
-      
+        public IActionResult DeleteSelectedSubscription(List<int> selectedIds)
+        {
+            if (selectedIds != null && selectedIds.Any())
+            {
+                var subscriptions = _context.Subscriptions.Where(s => selectedIds.Contains(s.Id)).ToList();
+                _context.Subscriptions.RemoveRange(subscriptions);
+                _context.SaveChanges();
+            }
+            TempData["Success"] = "Subscriber deleted successfully";
+            return RedirectToAction(nameof(Index));
+        }
+
+
+
+        [HttpPost]
         public async Task<IActionResult> Create(SendNewsLetterViewModel viewModel)
         {
             if (ModelState.IsValid)
@@ -183,10 +216,77 @@ namespace Web.Areas.Admin.Controllers
             return View(viewModel);
         }
 
-       
+        [HttpGet]
+        public IActionResult UploadSubscribers()
+        {
+            return View();
+        }
 
         [HttpPost]
-        public async Task<IActionResult> MailjetWebhook()
+        public async Task<IActionResult> UploadSubscribers(PdfUploadViewModel viewModel)
+        {
+            if (!ModelState.IsValid)
+            {
+                TempData["error"] = "Invalid model state.";
+                return BadRequest("Invalid model state.");
+            }
+
+            if (viewModel.SubscriberFile == null || viewModel.SubscriberFile.Length == 0)
+            {
+                TempData["error"] = "No file uploaded or file is empty.";
+                return BadRequest("No file uploaded or file is empty.");
+            }
+
+            var newSubscribers = new List<Subscription>();
+            try
+            {
+                using (var pdfReader = new PdfReader(viewModel.SubscriberFile.OpenReadStream()))
+                using (var pdfDocument = new PdfDocument(pdfReader))
+                {
+                    for (int page = 1; page <= pdfDocument.GetNumberOfPages(); page++)
+                    {
+                        var text = PdfTextExtractor.GetTextFromPage(pdfDocument.GetPage(page));
+                        var matches = Regex.Matches(text, @"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b", RegexOptions.IgnoreCase);
+                        foreach (Match match in matches)
+                        {
+                            var email = match.Value.ToLower();
+                            var name = email.Split('@')[0].Replace(".", " ").Replace("_", " ");
+                            if (!newSubscribers.Any(s => s.Email == email))
+                            {
+                                newSubscribers.Add(new Subscription { Email = email, Name = name, IsSubscribed = true });
+                            }
+                        }
+                    }
+                }
+
+                // Optional: Check existing emails to avoid duplicates
+                var existingEmails = _context.Subscriptions.Select(s => s.Email).ToHashSet();
+                newSubscribers = newSubscribers.Where(s => !existingEmails.Contains(s.Email)).ToList();
+
+                if (newSubscribers.Any())
+                {
+                    _context.Subscriptions.AddRange(newSubscribers);
+                    await _context.SaveChangesAsync();
+                    TempData["success"] = $"{newSubscribers.Count} new subscribers added successfully.";
+                    return Ok($"{newSubscribers.Count} new subscribers added successfully.");
+                }
+                else
+                {
+                    TempData["info"] = "No new subscribers found in the file.";
+                    return Ok("No new subscribers found in the file.");
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["error"] = $"Error processing file: {ex.Message}";
+                return BadRequest($"Error processing file: {ex.Message}");
+            }
+        }
+
+
+
+        [HttpPost]
+        public async Task<IActionResult> MailTracking()
         {
             using (var reader = new StreamReader(Request.Body))
             {

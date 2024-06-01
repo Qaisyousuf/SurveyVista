@@ -1,0 +1,62 @@
+﻿@model IEnumerable<UserResponsesViewModel>
+
+@{
+    ViewData["Title"] = "User Responses status";
+}
+
+
+
+<div class="container-fluid mt-4 mb-5">
+    <div class="col-10 offset-1 ">
+
+        <div class="card p-4  shadow-lg rounded-2">
+          
+            <h3 class="text-primary">Response status</h3>
+
+            <form asp-action="DeleteSelected" method="post">
+                <table class="table table-responsive w-100 d-block d-md-table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Survey</th>
+                           
+                            <th>Action</th>
+                          
+                            <!-- Additional headers omitted for brevity -->
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                
+                                <td>@item.UserName</td>
+                                <td>@item.UserEmail</td>
+                                <td>
+                                    <ul>
+                                        @foreach (var response in item.Responses)
+                                        {
+                                            <span class="badge badge-primary p-2 shadow">@response.Questionnaire.Title</span>
+                                        }
+                                    </ul>
+                                </td>
+                                <td class="text-end">
+                                    <a asp-controller="UserResponseStatus" asp-action="UserResponsesStatus" asp-route-UserEmail="@item.UserEmail" class="btn btn-info btn-sm"><i class="bi bi-eye"></i> View Responses status</a>
+                                </td>
+
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+              
+            </form>
+
+        </div>
+
+    </div>
+</div>
+
+
+
+

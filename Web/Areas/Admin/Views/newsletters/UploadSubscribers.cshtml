@@ -1,0 +1,80 @@
+﻿@model PdfUploadViewModel
+
+@{
+    ViewData["Title"] = "UploadSubscribers";
+}
+
+<style>
+.loader {
+    border: 16px solid #f3f3f3; /* Light grey */
+    border-top: 16px solid #3498db; /* Blue */
+    border-radius: 50%;
+    width: 120px;
+    height: 120px;
+    animation: spin 2s linear infinite;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-left: -60px;
+    margin-top: -60px;
+    z-index: 1000;
+}
+
+@@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+</style>
+
+  <partial name="_Notification" />
+<div class="container mt-5">
+    <form id="uploadForm" asp-action="UploadSubscribers" method="post" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="SubscriberFile">Upload PDF:</label>
+            <input type="file" name="SubscriberFile" class="form-control" required />
+        </div>
+        <button type="submit" class="btn btn-primary"><i class="bi bi-box-arrow-in-down"></i> Upload</button>
+    </form>
+    
+    <div id="loader" class="loader" style="display: none;"></div>
+</div>
+
+@section Scripts {
+    @{
+        <partial name="_ValidationScriptsPartial" />
+    }
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            var form = event.target;
+            var formData = new FormData(form);
+            var xhr = new XMLHttpRequest();
+
+            // Show the loader
+            document.getElementById('loader').style.display = 'block';
+
+            xhr.addEventListener('load', function() {
+                // Hide the loader
+                document.getElementById('loader').style.display = 'none';
+
+                if (xhr.status === 200) {
+                    window.location.href = '@Url.Action("Index", "Newsletters")';
+                } else {
+                    alert('Upload failed!');
+                }
+            });
+
+            xhr.addEventListener('error', function() {
+                // Hide the loader
+                document.getElementById('loader').style.display = 'none';
+
+                alert('Upload failed!');
+            });
+
+            xhr.open('POST', form.action);
+            xhr.setRequestHeader("RequestVerificationToken", document.querySelector('input[name="__RequestVerificationToken"]').value);
+            xhr.send(formData);
+        });
+    </script>
+}

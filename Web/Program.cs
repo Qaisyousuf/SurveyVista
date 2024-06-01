@@ -38,6 +38,8 @@ builder.Services.AddTransient<NavigationViewComponent>();
 builder.Services.ConfigureNewsLetter();
 builder.Services.MailConfiguration();
 builder.Services.MailStatConfiguration();
+builder.Services.ConfigureDashboard();
+builder.Services.UserResponseConfiguration();
 builder.Services.ConfigureOpenAI(config);
 
 

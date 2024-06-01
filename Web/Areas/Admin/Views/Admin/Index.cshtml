@@ -1,1 +1,68 @@
-﻿
+﻿@model DashboardViewModel
+
+<h2>Admin Dashboard</h2>
+
+<div id="modelCountChart" style="width: 100%; height: 500px;"></div>
+<div id="bannerSelectionChart" style="width: 100%; height: 500px;"></div>
+<div id="footerSelectionChart" style="width: 100%; height: 500px;"></div>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript">
+    google.charts.load('current', { 'packages': ['corechart'] });
+    google.charts.setOnLoadCallback(drawModelCountChart);
+    google.charts.setOnLoadCallback(drawBannerSelectionChart);
+    google.charts.setOnLoadCallback(drawFooterSelectionChart);
+
+    function drawModelCountChart() {
+        var data = google.visualization.arrayToDataTable([
+            ['Model', 'Count'],
+    @foreach (var entry in Model.ModelCounts)
+    {
+        <text>['@entry.Key', @entry.Value], </text>
+    }
+            ]);
+
+        var options = {
+            title: 'Model Counts',
+           
+        };
+
+        var chart = new google.visualization.PieChart(document.getElementById('modelCountChart'));
+        chart.draw(data, options);
+    }
+
+    function drawBannerSelectionChart() {
+        var data = google.visualization.arrayToDataTable([
+            ['Banner ID', 'Count'],
+    @foreach (var entry in Model.BannerSelections)
+    {
+        <text>['@entry.Key', @entry.Value], </text>
+    }
+            ]);
+
+        var options = {
+            title: 'Banner Selections',
+           
+        };
+
+        var chart = new google.visualization.PieChart(document.getElementById('bannerSelectionChart'));
+        chart.draw(data, options);
+    }
+
+    function drawFooterSelectionChart() {
+        var data = google.visualization.arrayToDataTable([
+            ['Footer ID', 'Count'],
+    @foreach (var entry in Model.FooterSelections)
+    {
+        <text>['@entry.Key', @entry.Value], </text>
+    }
+            ]);
+
+        var options = {
+            title: 'Footer Selections',
+           
+        };
+
+        var chart = new google.visualization.PieChart(document.getElementById('footerSelectionChart'));
+        chart.draw(data, options);
+    }
+</script>

@@ -1,8 +1,10 @@
-﻿@model IEnumerable<Web.ViewModel.NewsLetterVM.NewsLetterViewModel>
+﻿@model PaginationViewModel
 
 @{
     ViewData["Title"] = "Newsletter list";
 }
+
+
 <style>
     .badge-Sent {
         display: inline-block;
@@ -126,17 +128,186 @@
         <div class="card-body">
             <h4 class="card-title">Subscribers list</h4>
             <div class="alert alert-info" role="alert">
+                Total Subscribed Users: <strong>@ViewBag.TotalSubscribedUsers</strong>
+            </div>
+            <p>
+                <a asp-action="UploadSubscribers" class="btn btn-info"><i class="bi bi-cloud-arrow-up"></i> Upload subscribers form file</a>
+            </p>
+            <p>
+                <a asp-action="Create" class="btn btn-primary btn-sm @(@ViewBag.TotalSubscribedUsers <= 0 ? "disabled" : "")">compose newsletter</a>
+            </p>
+
+            <form id="deleteForm" method="post" asp-action="DeleteSelectedSubscription">
+                <table class="table table-responsive w-100 d-block d-md-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">
+                                <input type="checkbox" id="selectAll">
+                            </th>
+                            <th scope="col">Id</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">IsSubscribed</th>
+                            <th scope="col" class="d-flex justify-content-end">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="justify-content-center">
+                        @foreach (var item in Model.Subscriptions)
+                        {
+                            <tr class="table-secondary">
+                                <td>
+                                    <input type="checkbox" name="selectedIds" value="@item.Id">
+                                </td>
+                                <td>@item.Id</td>
+                                <td>@item.Name</td>
+                                <td>@item.Email</td>
+                                <td>
+                                    @if(item.IsSubscribed)
+                                    {
+                                        <span class="badge badge-success p-1">Subscribed @Html.DisplayFor(modelItem => item.IsSubscribed)</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-secondary p-1">Not subscribed @Html.DisplayFor(modelItem => item.IsSubscribed)</span>
+                                    }
+                                </td>
+                                <td class="d-flex justify-content-end">
+                                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i> Delete</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                <button type="submit" class="btn btn-danger mt-3">Delete Selected</button>
+            </form>
+
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    @for (int i = 1; i <= Model.TotalPages; i++)
+                    {
+                        <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                            <a class="page-link" asp-action="Index" asp-route-page="@i">@i</a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid mb-5 mt-4">
+    <div class="col-md-10 col-lg-10 col-sm-12 offset-1">
+        <div class="card rounded-2 shadow-lg p-3 mt-3">
+            <h4 class="text-primary">
+                <i class="bi bi-broadcast"></i> Real-Time Email Tracking
+            </h4>
+            <p>
+                <a asp-action="EmailStats" class="btn btn-primary btn-sm">View email tracking with chart</a>
+            </p>
+            <table class="table table-responsive d-block d-md-table table-bordered table-hover mt-3">
+                <thead>
+                    <tr>
+                        <th>Recipient</th>
+                        <th>Activity Date</th>
+                        <th>Subject</th>
+                        <th>IP</th>
+                        <th>Country</th>
+                        <th>Sent</th>
+                        <th>Delivered</th>
+                        <th>Opened</th>
+                        <th>Clicked</th>
+                        <th>Bounced</th>
+                        <th>Spam</th>
+                        <th>Blocked</th>
+                        <th>Unsubscribed</th>
+                    </tr>
+                </thead>
+                <tbody id="emailStatsTableBody">
+                    <!-- Rows will be dynamically inserted here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            function fetchData() {
+                fetch('@Url.Action("GetEmailStatsData", "Newsletters")')
+                    .then(response => response.json())
+                    .then(data => {
+                        updateTable(data);
+                    })
+                    .catch(error => console.error('Error fetching data:', error));
+            }
+
+            function updateTable(data) {
+                const tableBody = document.getElementById('emailStatsTableBody');
+                tableBody.innerHTML = ''; // Clear existing table rows
+
+                data.forEach(item => {
+                    const row = `
+                        <tr>
+                            <td>${item.recipientEmail}</td>
+                            <td>${item.receivedActivity}</td>
+                            <td>${item.subject}</td>
+                            <td>${item.ipAddress}</td>
+                            <td>${item.geo}</td>
+                            <td>${item.isSent ? '<span class="badge-Sent">Sent</span>' : '<span class="badge badge-secondary">Pending</span>'}</td>
+                            <td>${item.isDelivered ? '<span class="badge-Deliverd">Delivered</span>' : '<span class="badge badge-secondary">Pending</span>'}</td>
+                            <td>${item.isOpened ? '<span class="badge-Opend">Opened</span>' : '<span class="badge badge-secondary">Pending</span>'}</td>
+                            <td>${item.isClicked ? '<span class="badge-Clicked">Clicked</span>' : '<span class="badge badge-secondary">Pending</span>'}</td>
+                            <td>${item.isBounced ? '<span class="badge-Bounced">Bounced</span>' : '<span class="badge badge-secondary">Normal</span>'}</td>
+                            <td>${item.isSpam ? '<span class="badge-Spam">Spamed</span>' : '<span class="badge badge-secondary">Normal</span>'}</td>
+                            <td>${item.isBlocked ? '<span class="badge-Blocked">Blocked</span>' : '<span class="badge badge-secondary">Normal</span>'}</td>
+                            <td>${item.isUnsubscribed ? '<span class="badge-Unsubscribed">Unsubscribed</span>' : '<span class="badge badge-secondary">Normal</span>'}</td>
+                        </tr>
+                    `;
+                    tableBody.innerHTML += row; // Append new row
+                });
+            }
+
+            setInterval(fetchData, 5000); // Fetch data every 5 seconds
+
+            document.getElementById('selectAll').addEventListener('click', function() {
+                const checkboxes = document.querySelectorAll('input[name="selectedIds"]');
+                checkboxes.forEach(checkbox => checkbox.checked = this.checked);
+            });
+        });
+    </script>
+}
+
+
+
+
+
+@* <div class="container mt-5 mb-3">
+
+    <partial name="_Notification" />
+
+    <div class="card bg-default mb-3 rounded-2 shadow-lg">
+        <div class="card-header">Subscribers</div>
+        <div class="card-body">
+            <h4 class="card-title">Subscribers list</h4>
+            <div class="alert alert-info" role="alert">
               
                 Total Subscribed Users: <strong>@ViewBag.TotalSubscribedUsers</strong>
             </div>
+              <p>
+                <a asp-action="UploadSubscribers" class="btn btn-info">Upload subscribers form file</a>
+            </p>
             <p>
                
                 <a asp-action="Create" class="btn btn-primary btn-sm @(@ViewBag.TotalSubscribedUsers <= 0 ? "disabled" : "")">compose newsletter</a>
             </p>
-
-            <table class="table table-responsive w-100 d-block d-md-table ">
+            <form id="deleteForm" method="post" asp-action="DeleteSelectedSubscription">
+                 <table class="table table-responsive w-100 d-block d-md-table ">
                 <thead>
                     <tr>
+                         <th scope="col">
+                                <input type="checkbox" id="selectAll">
+                            </th>
                         <th scope="col">Id</th>
                         <th scope="col">Name</th>
                         <th scope="col">Email</th>
@@ -148,7 +319,9 @@
                     @foreach (var item in Model)
                     {
                         <tr class=" table-secondary">
-
+                             <td>
+                                    <input type="checkbox" name="selectedIds" value="@item.Id">
+                                </td>
                             <td>@item.Id</td>
                             <td>@item.Name</td>
                             <td>@item.Email</td>
@@ -172,6 +345,9 @@
 
                 </tbody>
             </table>
+              <button type="submit" class="btn btn-danger mt-3">Delete Selected</button>
+            </form>
+           
 
         </div>
     </div>
@@ -192,6 +368,7 @@
     <p>
         <a asp-action="EmailStats" class="btn btn-primary btn-sm">View email tracking with chart</a>
     </p>
+
     <table class="table table-responsive d-block d-md-table table-bordered table-hover mt-3">
         <thead>
             <tr>
@@ -260,7 +437,11 @@
             }
 
             setInterval(fetchData, 5000); // Fetch data every 5 seconds
+                 document.getElementById('selectAll').addEventListener('click', function() {
+                    const checkboxes = document.querySelectorAll('input[name="selectedIds"]');
+                    checkboxes.forEach(checkbox => checkbox.checked = this.checked);
+                });
         });
     </script>
 
- }
+ } *@

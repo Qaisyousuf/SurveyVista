@@ -320,15 +320,23 @@
 
             <h4>@Model.Title</h4>
             <p>@Html.Raw(Model.Description)</p>
-            <div class="form-group">
-                <label for="userName">Your Name:</label>
+          
+           
+            <div class="container">
+                  <div class="continaer">
+                <div class="row">
+                    <div class="col-md-6 col-lg-6 col-sm-12">
+                   <div class="mb-3">
+                <label for="userName">Your Name</label>
                 <input type="text" class="form-control" id="userName" name="UserName" placeholder="Enter your name">
             </div>
-            <div class="form-group">
-                <label for="Email">Email Address:</label>
+            <div class="mb-3">
+                <label for="Email">Email Address</label>
                 <input type="email" class="form-control" id="Email" name="Email" placeholder="Enter your email">
             </div>
-            <div class="container">
+               </div>
+                </div>
+            </div>
                 <div class="row align-items-center">
                     <!-- Stepper -->
                     <div class="col-md-3">

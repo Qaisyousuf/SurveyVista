@@ -53,6 +53,10 @@ namespace Web.Extesions
         {
             services.AddScoped<ISocialMediaRepository,SocialMediaRepository>();
         }
+        public static void ConfigureDashboard(this IServiceCollection services)
+        {
+            services.AddScoped<IDashboardRepository, DashboardRepository>();
+        }
 
         public static void ConfigureFooter(this IServiceCollection services)
         {
@@ -73,6 +77,10 @@ namespace Web.Extesions
         public static void MailConfiguration(this IServiceCollection services)
         {
             services.AddTransient<IEmailServices, EmailServices>();
+        }
+        public static void UserResponseConfiguration(this IServiceCollection services)
+        {
+            services.AddTransient<IUserResponseRepository, UserResponseRepository>();
         }
         public static void MailStatConfiguration(this IServiceCollection services)
         {

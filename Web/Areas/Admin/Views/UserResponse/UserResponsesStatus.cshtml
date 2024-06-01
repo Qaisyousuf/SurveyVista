@@ -1,0 +1,43 @@
+﻿@model UserResponsesViewModel
+
+@{
+    ViewData["Title"] = "User Responses";
+}
+
+<h2>User Responses</h2>
+
+<div>
+    <h3>@Model.UserName (@Model.UserEmail)</h3>
+</div>
+
+@foreach (var response in Model.Responses)
+{
+    <div>
+        <h4>Questionnaire: @response.Questionnaire.Title</h4>
+        <p>Submitted on: @response.SubmissionDate</p>
+
+        <ul>
+            @foreach (var detail in response.ResponseDetails)
+            {
+                <li>
+                    Question: @detail.Question.Text
+                    @if (detail.QuestionType == QuestionType.Text)
+                    {
+                        <p>Answer: @detail.TextResponse</p>
+                    }
+                    else
+                    {
+                        <ul>
+                            @foreach (var answer in detail.ResponseAnswers)
+                            {
+                                <li>Answer ID: @answer.AnswerId</li>
+                            }
+                        </ul>
+                    }
+                </li>
+            }
+        </ul>
+    </div>
+}
+
+
