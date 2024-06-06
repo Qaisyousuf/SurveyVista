@@ -64,7 +64,6 @@
 
             <nav class="navbar navbar-expand-lg navbar-light bg-brimary">
                 <div class="container-fluid">
-
                     <button type="button" id="sidebarCollapse" class="btn btn-primary">
                         <i class="bi bi-list"></i>
                         <span class="sr-only">Toggle Menu</span>
@@ -74,25 +73,42 @@
                         <i class="bi bi-list"></i>
                         <span class="sr-only"></span>
                     </button>
-               
 
-                    <div class=" collapse navbar-collapse" id="navbarSupportedContent">
+                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
                         <ul class="nav navbar-nav ml-auto">
-                           
-                          
-                            <div class="dropdown mr-2">
-                                <button class="btn btn-primary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                  Account 
+
+                            <span class="dropdown mr-2">
+                                <button class="btn btn-info btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        Notifications <span class="badge badge-danger" id="notificationCount">0</span>
+                                    </a>
                                 </button>
                                 <ul class="dropdown-menu">
-                                    <li> <a class="dropdown-item" asp-controller="Roles" asp-action="index"> Roles</a></li>
-                                    <li> <a class="dropdown-item" asp-controller="Users" asp-action="index"> Users</a></li>
-                                   
+                                    <li>
+                                     <a class="dropdown-item" href="#">
+                                            <h6 class="dropdown-header">New Notifications</h6>
+                                            <div id="notifications">
+
+                                            </div>
+                                    </a>
+                                    </li>
+                                 
                                 </ul>
-                            </div>
+                          </span>
+                          
+ 
+                            <span class="dropdown mr-2">
+                                <button class="btn btn-primary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Account
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" asp-controller="Roles" asp-action="index">Roles</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Users" asp-action="index">Users</a></li>
+                                </ul>
+                            </span>
                             <li class="nav-item">
                                 <form asp-area="Admin" asp-controller="Admin" asp-action="Logout" method="post">
-                                    <button type="submit" class="btn btn-danger btn-sm"> <span class="bi bi-box-arrow-left"></span> Logout</button>
+                                    <button type="submit" class="btn btn-danger btn-sm"><span class="bi bi-box-arrow-left"></span> Logout</button>
                                 </form>
                             </li>
                         </ul>
@@ -115,6 +131,40 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/5.0.11/signalr.min.js"></script>
+    <script type="text/javascript">
+        // Establish a connection to the SignalR hub
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/notificationHub")
+            .build();
+
+        // Function to add a notification to the list
+        function addNotification(userName, email) {
+            const notificationsList = document.getElementById("notifications");
+            const li = document.createElement("li");
+            li.className = "list-group-item";
+            li.textContent = `New submission from ${userName}`;
+            notificationsList.appendChild(li);
+
+            // Update the notification count
+            const notificationCount = document.getElementById("notificationCount");
+            notificationCount.textContent = parseInt(notificationCount.textContent) + 1;
+        }
+
+        // Receive notification from the server
+        connection.on("ReceiveNotification", function (userName, email) {
+            addNotification(userName, email);
+        });
+
+        // Start the connection
+        connection.start().catch(function (err) {
+            return console.error(err.toString());
+        });
+    </script>
+
     @await RenderSectionAsync("Scripts", required: false)
+
+
+   
 </body>
 </html>

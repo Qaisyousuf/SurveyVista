@@ -1,11 +1,64 @@
 ﻿@model DashboardViewModel
+@{
+    ViewData["Title"] = "Admin";
+}
 
-<h2>Admin Dashboard</h2>
+<style>
+    #BackgroundColor{
+        background-color:white;
+    }
+</style>
 
-<div id="modelCountChart" style="width: 100%; height: 500px;"></div>
-<div id="bannerSelectionChart" style="width: 100%; height: 500px;"></div>
-<div id="footerSelectionChart" style="width: 100%; height: 500px;"></div>
+<div class="container-fluid">
+
+   
+        <div class="bd-callout bd-callout-primary shadow p-3" id="BackgroundColor">
+        <div class="row">
+            <div class="col-md-3 p-3">
+
+                <h4 class="display-5">Welcome</h4>
+                <h4 class="font-weight-bold text-success"><i class="bi bi-person-fill-check"></i> @Model.FirstName @Model.LastName</h4>
+            </div>
+            <div class="col-md-3">
+
+                <div id="modelCountChart" style="width: 100%; height: 150px;"></div>
+            </div>
+            <div class="col-md-3">
+
+                <div id="bannerSelectionChart" style="width: 100%; height: 150px;"></div>
+            </div>
+            <div class="col-md-3">
+
+                <div id="footerSelectionChart" style="width: 100%; height: 150px;"></div>
+            </div>
+        </div>
+        </div>
+
+    <div class="bd-callout bd-callout-primary shadow p-3" id="BackgroundColor">
+        <div class="row">
+          
+           
+            <div class="col-md-6">
+
+                <div id="performance_chart" style="width: 100%; height: 500px;"></div>
+            </div>
+            <div class="col-md-6">
+
+                <div id="visitor_chart" style="width: 100%; height: 500px;"></div>
+            </div>
+        </div>
+    </div>
+
+
+    
+</div>
+
+
+
+
+
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
 <script type="text/javascript">
     google.charts.load('current', { 'packages': ['corechart'] });
     google.charts.setOnLoadCallback(drawModelCountChart);
@@ -22,7 +75,7 @@
             ]);
 
         var options = {
-            title: 'Model Counts',
+            title: 'Model Usage of page',
            
         };
 
@@ -66,3 +119,96 @@
         chart.draw(data, options);
     }
 </script>
+<script type="text/javascript">
+    google.charts.load('current', { 'packages': ['corechart'] });
+    google.charts.setOnLoadCallback(drawCharts);
+
+    var performanceChart;
+    var performanceData;
+    var performanceOptions = {
+        title: 'Application Performance',
+        hAxis: { title: 'Time' },
+        vAxes: {
+            0: { title: 'CPU Usage (%)' },
+            1: { title: 'Memory Usage (MB)' }
+        },
+        series: {
+            0: { targetAxisIndex: 0 },  // First series (CPU) on first y-axis
+            1: { targetAxisIndex: 1 }   // Second series (Memory) on second y-axis
+        },
+        legend: { position: 'bottom' },
+        colors: ['#a52714', '#097138']  // Example colors for CPU and Memory
+    };
+
+    var visitorChart;
+    var visitorData;
+    var visitorOptions = {
+        title: 'Website Visitors',
+        hAxis: { title: 'Time' },
+        vAxis: { title: 'Visitors' },
+        legend: { position: 'bottom' },
+        colors: ['#1c91c0']
+    };
+
+    function drawCharts() {
+        // Draw performance chart
+        performanceData = new google.visualization.DataTable();
+        performanceData.addColumn('string', 'Time');
+        performanceData.addColumn('number', 'CPU Usage');
+        performanceData.addColumn('number', 'Memory Usage');
+
+        performanceChart = new google.visualization.LineChart(document.getElementById('performance_chart'));
+        fetchPerformanceData();
+
+        // Draw visitor chart
+        visitorData = new google.visualization.DataTable();
+        visitorData.addColumn('string', 'Time');
+        visitorData.addColumn('number', 'Visitors');
+
+        visitorChart = new google.visualization.LineChart(document.getElementById('visitor_chart'));
+        fetchVisitorData();
+    }
+
+    function fetchPerformanceData() {
+        fetch('@Url.Action("GetPerformanceData", "admin")')
+            .then(response => response.json())
+            .then(performanceDataArray => {
+                updatePerformanceChart(performanceDataArray);
+            })
+            .catch(error => console.error('Error fetching performance data:', error));
+    }
+
+    function fetchVisitorData() {
+        fetch('@Url.Action("GetVisitorData", "admin")')
+            .then(response => response.json())
+            .then(visitorDataArray => {
+                updateVisitorChart(visitorDataArray);
+            })
+            .catch(error => console.error('Error fetching visitor data:', error));
+    }
+
+    function updatePerformanceChart(performanceDataArray) {
+        performanceData.removeRows(0, performanceData.getNumberOfRows());
+
+        performanceDataArray.forEach(point => {
+            performanceData.addRow([point.time, point.cpuUsage, point.memoryUsage]);
+        });
+
+        performanceChart.draw(performanceData, performanceOptions);
+    }
+
+    function updateVisitorChart(visitorDataArray) {
+        visitorData.removeRows(0, visitorData.getNumberOfRows());
+
+        visitorDataArray.forEach(point => {
+            visitorData.addRow([point.time, point.visitorCount]);
+        });
+
+        visitorChart.draw(visitorData, visitorOptions);
+    }
+
+    // Fetch data every 5 seconds
+    setInterval(fetchPerformanceData, 5000);
+    setInterval(fetchVisitorData, 5000);
+</script>
+

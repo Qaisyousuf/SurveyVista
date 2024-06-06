@@ -16,17 +16,16 @@
             <p>
                 <a asp-action="Create" class="btn btn-primary"><span><i class="bi bi-plus-square-fill"></i></span> Create New</a>
             </p>
-            <table class="table table-responsive table-light table-hover ">
+            <table class="table table-responsive w-100 d-block d-md-table table-bordered table-hover ">
                 <thead class="w-auto">
                     <tr>
 
                         <th scope="col">Id</th>
                         <th scope="col">Title</th>
-                        <th scope="col">Description</th>
                         <th scope="col">Total Questions</th>
                         <th scope="col"> <span class="badge badge-primary">Questions</span> | <span class="badge badge-info">Type</span> | <span class="badge badge-success">Answers </span></th>
                        
-                        <th scope="col" class="d-flex justify-content-end">Action</th>
+                        <th scope="col">Action</th>
                     </tr>
                 </thead>
                 <tbody class="w-auto">
@@ -35,28 +34,11 @@
                         <tr class="table-secondary">
 
                             <td>@item.Id</td>
-                      @*       <td> @item.Title</td> *@
+
                                 <td>
-                                <div class="title-container">
-                                    <div class="title-text">
-                                        <span class="item-title">@Html.Raw(item.Title.Length >= 30 ? item.Title.Substring(0, 30) : item.Title)</span>
-                                        <span class="more-title" style="display:none;">@(item.Title.Length > 30 ? item.Title.Substring(30) : "")</span>
-                                        <a href="#" id="ReadMore" class="read-more-title-btn">Read More</a>
-                                    </div>
-                                </div>
+                                    @item.Title
                                 </td>
                            
-                      @*       <td>@Html.Raw(item.Description)</td> *@
-                            <td>
-                                <!-- Display only a portion of the description initially -->
-                                <div class="description-container">
-                                    <div class="description-text">
-                                        <span class="item-description">@Html.Raw(item.Description.Length >= 30 ? item.Description.Substring(0, 30) : item.Title)</span>
-                                        <span class="more-text" style="display:none;">@(item.Description.Length > 30 ? item.Description.Substring(30) : "")</span>
-                                        <a href="#" id="ReadMore" class=" read-more-btn">Read More</a>
-                                    </div>
-                                </div>
-                            </td>
 
                             <td>
                                 @* <button type="button" class="btn btn-primary btn-sm">
@@ -106,23 +88,7 @@
 @section Scripts{
     <script>
         $(document).ready(function () {
-            $('.read-more-btn').click(function () {
-                var $descriptionText = $(this).closest('.description-container').find('.description-text');
-                var $moreText = $descriptionText.find('.more-text');
-                var $toggleMore = $descriptionText.find('.toggle-more');
-
-                if ($moreText.is(':visible')) {
-                    $moreText.slideUp();
-                    $toggleMore.fadeIn();
-                } else {
-                    $moreText.slideDown();
-                    $toggleMore.fadeOut();
-                }
-
-                $(this).text(function (i, text) {
-                    return text === "Read More" ? "Read Less" : "Read More";
-                });
-            });
+           
             $('.read-more-title-btn').click(function () {
                 var $titleText = $(this).closest('.title-container').find('.title-text');
                 var $moreTitle = $titleText.find('.more-title');

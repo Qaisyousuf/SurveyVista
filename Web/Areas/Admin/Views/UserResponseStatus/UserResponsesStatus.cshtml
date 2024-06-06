@@ -1,4 +1,5 @@
-﻿@model UserResponsesViewModel
+﻿@using Newtonsoft.Json
+@model UserResponsesViewModel
 
 @{
     ViewData["Title"] = "User Responses";
@@ -54,6 +55,17 @@
     .step-header {
         margin-bottom: 10px;
     }
+
+    #QuestionnairCard{
+        
+        
+        padding:2rem;
+        border: 0.5px solid #e7e7e7;
+        border-radius:3px;
+        -webkit-box-shadow: 0px 0px 14px -7px rgba(0,0,0,0.75);
+        -moz-box-shadow: 0px 0px 14px -7px rgba(0,0,0,0.75);
+        box-shadow: 0px 0px 14px -7px rgba(0,0,0,0.75);
+    }
 </style>
 
 
@@ -63,21 +75,37 @@
         <a asp-action="Index" class="btn btn-primary btn-sm">Back to list</a>
     </p>
 
-    <div class="card p-5 m-3 shadow">
-        <div class="bd-callout bd-callout-primary">
+    <div class="card p-5 m-3">
+        <div class="bd-callout bd-callout-primary shadow">
            
-            <h6 class="text-primary font-weight-bold"><i class="bi bi-person"></i> @Model.UserName (@Model.UserEmail)</h6>
-            <p class="text-info"><i class="bi bi-calculator"></i> Total responses: @Model.Responses.Count()</p>
+            <div class="row p-4">
+                <div class="col-md-3 mt-5">
+                    <h6 class="text-primary font-weight-bold"><i class="bi bi-person"></i> @Model.UserName (@Model.UserEmail)</h6>
+                    <p class="text-info font-weight-bold"><i class="bi bi-calculator"></i> Total responses: @Model.Responses.Count()</p>
 
+                    <a asp-action="GenerateReport" asp-route-userEmail="@Model.UserEmail" asp-route-format="pdf" class="btn btn-info btn-sm">
+                        <i class="bi bi-filetype-pdf"></i> PDF Reports
+                    </a>
+                    <a asp-action="GenerateReport" asp-route-userEmail="@Model.UserEmail" asp-route-format="excel" class="btn btn-info btn-sm">
+                        <i class="bi bi-file-excel"></i> Excel Reports
+                    </a>
+                </div>
+               
+                <div class="col-md-9">
+                    <div id="user_survey_summary_chart_div" style=" width: 100%; height: 200px;"></div>
+                </div>
+               
+            </div>
+            <hr class="border border-info border-1 opacity-50">
+            <div class="col-md-12 ">
+                <div id="chart_div" style="width: 100%; height: 400px;"></div>
+            </div>
+           
 
-            <a asp-action="GenerateReport" asp-route-userEmail="@Model.UserEmail" asp-route-format="pdf" class="btn btn-info btn-sm">
-                <i class="bi bi-filetype-pdf"></i> Generate PDF Report
-            </a>
-            <a asp-action="GenerateReport" asp-route-userEmail="@Model.UserEmail" asp-route-format="excel" class="btn btn-info btn-sm">
-                <i class="bi bi-file-excel"></i> Generate Excel Report
-            </a>
+          
         </div>
-     
+       
+
         <!-- Stepper -->
         <div class="stepper-wrapper">
             @foreach (var response in Model.Responses)
@@ -88,18 +116,40 @@
                     </div>
                     <div class="step-content">
 
-                        <div class="card p-4">
-                            <div class="step-header">
-                                <h6 class="text-primary font-weight-bold"><i class="bi bi-ui-checks"></i> @response.Questionnaire.Title</h6>
-                                <h6 class="text-success"><i class="bi bi-calendar2-week"></i> Submitted on: @response.SubmissionDate</h6>
-                                <p class="text-info"><i class="bi bi-question-square"></i> Total questions: @response.Questionnaire.Questions.Count()</p>
+                        <div id="QuestionnairCard">
+
+                            <div class="row">
+                                <div class="col-md-7 p-4">
+
+                                    <div class="step-header">
+                                        <h6 class="text-primary font-weight-bold"><i class="bi bi-ui-checks"></i> @response.Questionnaire.Title</h6>
+                                        <h6 class="text-success font-weight-bold"><i class="bi bi-calendar2-week"></i> Submitted on: @response.SubmissionDate</h6>
+                                        <p class="text-info font-weight-bold"><i class="bi bi-question-square"></i> Total questions: @response.Questionnaire.Questions.Count()</p>
+                                    </div>
+
+                                    <!-- Buttons to generate individual reports -->
+                                    <a asp-action="GenerateQuestionnairePdfReport" asp-route-questionnaireId="@response.Questionnaire.Id" class="btn btn-info btn-sm ">
+                                        <i class="bi bi-filetype-pdf"></i> PDF report
+                                    </a>
+                                    <a asp-action="GenerateQuestionnaireExcelReport" asp-route-questionnaireId="@response.Questionnaire.Id" class="btn btn-info btn-sm">
+                                        <i class="bi bi-file-excel"></i> Excel report
+                                    </a><br />
+                                    <!-- Buttons to generate individual reports -->
+                                    <!-- Collapsible button -->
+                                    <button class="btn btn-primary btn-sm mt-2" type="button" data-bs-toggle="collapse" data-bs-target="#collapseResponse-@response.Id" aria-expanded="false" aria-controls="collapseResponse-@response.Id">
+                                        View Responses
+                                    </button>
+                                </div>
+
+
+                                <div class="col-md-5">
+                                    <div id="survey_questions_answers_summary_chart_div_@response.Questionnaire.Id" style="width: 100%; height: 200px;"></div>
+                                </div>
                             </div>
 
-                            <!-- Collapsible button -->
-                            <button class="btn btn-primary btn-sm mt-2" type="button" data-bs-toggle="collapse" data-bs-target="#collapseResponse-@response.Id" aria-expanded="false" aria-controls="collapseResponse-@response.Id">
-                                View Responses
-                            </button>
 
+                           
+                      
                             <!-- Collapsible content -->
                             <div class="collapse mt-3" id="collapseResponse-@response.Id">
                                 <table class="table table-responsive w-100 d-block d-md-table table-hover">
@@ -170,7 +220,171 @@
 
 @section Scripts {
     <!-- Include Bootstrap 5 JS for collapse functionality -->
-  
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    
+
+    <script type="text/javascript">
+        google.charts.load('current', { packages: ['corechart', 'line'] });
+        google.charts.setOnLoadCallback(drawChart);
+
+        function getDescriptiveValue(sliderValue) {
+            if (sliderValue >= 0 && sliderValue <= 10) {
+                return 1; // Normal
+            } else if (sliderValue > 10 && sliderValue <= 20) {
+                return 2; // Better
+            } else if (sliderValue > 20 && sliderValue <= 30) {
+                return 3; // Good
+            } else if (sliderValue > 30 && sliderValue <= 40) {
+                return 4; // Very Good
+            } else if (sliderValue > 40 && sliderValue <= 50) {
+                return 5; // Excellent
+            } else if (sliderValue > 50 && sliderValue <= 60) {
+                return 6; // Outstanding
+            } else if (sliderValue > 60 && sliderValue <= 70) {
+                return 7; // Remarkable
+            } else if (sliderValue > 70 && sliderValue <= 80) {
+                return 8; // Exceptional
+            } else if (sliderValue > 80 && sliderValue <= 90) {
+                return 9; // Superior
+            } else if (sliderValue > 90 && sliderValue <= 100) {
+                return 10; // Perfect
+            } else {
+                return 0; // Unknown
+            }
+        }
+
+        function drawChart() {
+            var data = new google.visualization.DataTable();
+            data.addColumn('string', 'Survey and Submission Date');
+            data.addColumn('number', 'Status');
+
+            var responsesData = [
+        @foreach (var response in Model.Responses)
+        {
+            @foreach (var detail in response.ResponseDetails.Where(d => d.QuestionType == QuestionType.Slider))
+            {
+                @:['@response.Questionnaire.Title - @response.SubmissionDate.ToString("yyyy-MMMM-dd HH:mm")', getDescriptiveValue(@(detail.TextResponse != null ? int.Parse(detail.TextResponse) : 0))],
+            }
+        }
+             ];
+
+            responsesData.forEach(function (row) {
+                data.addRow(row);
+            });
+
+            var options = {
+                title: 'User Progress',
+                hAxis: {
+                    title: 'Questionnaire and Submission Date'
+                },
+                vAxis: {
+                    title: 'Status',
+                    ticks: [
+                        { v: 0, f: 'Unknown' },
+                        { v: 1, f: 'Normal' },
+                        { v: 2, f: 'Better' },
+                        { v: 3, f: 'Good' },
+                        { v: 4, f: 'Very Good' },
+                        { v: 5, f: 'Excellent' },
+                        { v: 6, f: 'Outstanding' },
+                        { v: 7, f: 'Remarkable' },
+                        { v: 8, f: 'Exceptional' },
+                        { v: 9, f: 'Superior' },
+                        { v: 10, f: 'Perfect' }
+                    ]
+                },
+                'titleTextStyle': { color: '#17a2b8', fontSize: 16, bold: true },
+            };
+
+            var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+            chart.draw(data, options);
+        }
+    </script>
+
+    <script type="text/javascript">
+        google.charts.load('current', { packages: ['corechart', 'bar'] });
+        google.charts.setOnLoadCallback(drawUserSurveySummaryChart);
+
+        function drawUserSurveySummaryChart() {
+            var data = new google.visualization.DataTable();
+            data.addColumn('string', 'User');
+            data.addColumn('number', 'Total Surveys');
+            data.addColumn('number', 'Total Questions');
+            data.addColumn('number', 'Total Answers');
+
+            var userSurveySummaryData = @Html.Raw(JsonConvert.SerializeObject(
+            Model.Responses
+            .GroupBy(response => response.UserEmail)
+            .Select(g => new
+            {
+                UserName = g.First().UserName,
+                TotalSurveys = g.Count(),
+                TotalQuestions = g.SelectMany(r => r.ResponseDetails).Count(),
+                TotalAnswers = g.SelectMany(r => r.ResponseDetails.SelectMany(rd => rd.ResponseAnswers)).Count()
+            })
+            .ToList()
+            ));
+
+            userSurveySummaryData.forEach(function (row) {
+                data.addRow([row.UserName, row.TotalSurveys, row.TotalQuestions, row.TotalAnswers]);
+            });
+
+            var options = {
+                title: 'User Survey Summary',
+                hAxis: {
+                    title: 'Count'
+                },
+                vAxis: {
+                    title: 'User'
+                },
+                        'titleTextStyle': { color: '#17a2b8', fontSize: 16, bold: true },
+            };
+
+            var chart = new google.visualization.BarChart(document.getElementById('user_survey_summary_chart_div'));
+            chart.draw(data, options);
+        }
+    </script>
+    <script type="text/javascript">
+        google.charts.load('current', { packages: ['corechart'] });
+        google.charts.setOnLoadCallback(drawSurveyQuestionsAnswersSummaryCharts);
+
+        function drawSurveyQuestionsAnswersSummaryCharts() {
+            var surveyQuestionsSummaryData = @Html.Raw(JsonConvert.SerializeObject(
+            Model.Responses
+            .GroupBy(response => response.Questionnaire.Title)
+            .Select(g => new
+            {
+                SurveyTitle = g.Key,
+                SurveyId = g.First().Questionnaire.Id,
+                TotalQuestions = g.SelectMany(r => r.ResponseDetails).Count(),
+                TotalAnswers = g.SelectMany(r => r.ResponseDetails.SelectMany(rd => rd.ResponseAnswers)).Count()
+            })
+            .ToList()
+            ));
+
+            surveyQuestionsSummaryData.forEach(function (row) {
+                drawSingleSurveyChart(row.SurveyTitle, row.SurveyId, row.TotalQuestions, row.TotalAnswers);
+            });
+        }
+
+        function drawSingleSurveyChart(surveyTitle, surveyId, totalQuestions, totalAnswers) {
+            var data = new google.visualization.DataTable();
+            data.addColumn('string', 'Category');
+            data.addColumn('number', 'Count');
+
+            data.addRow(['Questions', totalQuestions]);
+            data.addRow(['Answers', totalAnswers]);
+
+            var options = {
+             
+                is3D: true,
+                titleTextStyle: { color: '#17a2b8', fontSize: 16, bold: true },
+            };
+
+            var chart = new google.visualization.PieChart(document.getElementById('survey_questions_answers_summary_chart_div_' + surveyId));
+            chart.draw(data, options);
+        }
+    </script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             var collapseElements = document.querySelectorAll('[data-bs-toggle="collapse"]');

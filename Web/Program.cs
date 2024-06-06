@@ -41,6 +41,7 @@ builder.Services.MailStatConfiguration();
 builder.Services.ConfigureDashboard();
 builder.Services.UserResponseConfiguration();
 builder.Services.ConfigureOpenAI(config);
+builder.Services.AddSignalR();
 
 
 
@@ -87,5 +88,7 @@ app.MapControllerRoute(
     name: "default",
     pattern:"{controller=Home}/{action=Index}/{id?}");
 
+
+app.MapHub<NotificationHub>("/notificationHub");
 
 app.Run();

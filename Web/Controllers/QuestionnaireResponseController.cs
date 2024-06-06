@@ -1,10 +1,12 @@
 ﻿using Data;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using Model;
 using Newtonsoft.Json;
 using Services.EmailSend;
+using Services.Implemnetation;
 using Services.Interaces;
 using System.Globalization;
 using System.Security.Cryptography;
@@ -20,12 +22,14 @@ namespace Web.Controllers
         private readonly IQuestionnaireRepository _questionnaireRepository;
         private readonly SurveyContext _context;
         private readonly IEmailServices _emailServices;
+        private readonly IHubContext<NotificationHub> _hubContext;
 
-        public QuestionnaireResponseController(IQuestionnaireRepository questionnaireRepository,SurveyContext context, IEmailServices emailServices)
+        public QuestionnaireResponseController(IQuestionnaireRepository questionnaireRepository,SurveyContext context, IEmailServices emailServices, IHubContext<NotificationHub> hubContext)
         {
             _questionnaireRepository = questionnaireRepository;
             _context = context;
             _emailServices = emailServices;
+            _hubContext = hubContext;
         }
         public IActionResult Index()
         {
@@ -109,14 +113,15 @@ namespace Web.Controllers
         {
             bool hasSubmitted = _context.Responses.Any(r => r.QuestionnaireId == questionnaire.Id && r.UserEmail == questionnaire.Email);
 
-           
 
+            var cetZone = TimeZoneInfo.FindSystemTimeZoneById("Central European Standard Time");
+            var cetTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, cetZone);
             var response = new Response
             {
                 QuestionnaireId = questionnaire.Id,
                 UserName = questionnaire.UserName,
                 UserEmail = questionnaire.Email,
-                SubmissionDate = DateTime.UtcNow,
+                SubmissionDate = cetTime,
                 ResponseDetails = questionnaire.Questions.Select(q => new ResponseDetail
                 {
                     QuestionId = q.Id,
@@ -198,6 +203,8 @@ namespace Web.Controllers
 
 
             TempData["UserName"] = questionnaire.UserName;
+
+            _hubContext.Clients.All.SendAsync("ReceiveNotification", questionnaire.UserName, questionnaire.Email);
 
             return RedirectToAction(nameof(ThankYou));
 
