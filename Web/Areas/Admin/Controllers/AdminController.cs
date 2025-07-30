@@ -10,7 +10,7 @@ namespace Web.Areas.Admin.Controllers
 {
 
 
-    [Authorize(Roles ="Admin")]
+    [Authorize(Roles = "Admin")]
     public class AdminController : Controller
     {
         private readonly SignInManager<ApplicationUser> _signInManager;

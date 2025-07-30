@@ -1,9 +1,5 @@
 using Data;
-using Microsoft.AspNetCore.Mvc.Razor;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Services.Implemnetation;
-using Services.Interaces;
 using Web.Extesions;
 using Web.ViewComponents;
 

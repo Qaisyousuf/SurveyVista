@@ -1,14 +1,20 @@
 ﻿using Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.EntityFrameworkCore;
 using Model;
 using OpenAI_API;
 using Services.Implemnetation;
 using Services.Interaces;
+using System.Net;
 using Web.AIConfiguration;
 
 namespace Web.Extesions
 {
+    
+    
     public static class ServicesExtesions
     {
         public static void ConfigureSQLConnection(this IServiceCollection services, IConfiguration configuration)

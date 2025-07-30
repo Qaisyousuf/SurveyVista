@@ -69,7 +69,7 @@
                         <span class="sr-only">Toggle Menu</span>
                     </button>
                     <button class="navbar-toggler btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                            aria-expanded="false" aria-label="Toggle navigation">
+                        aria-expanded="false" aria-label="Toggle navigation">
                         <i class="bi bi-list"></i>
                         <span class="sr-only"></span>
                     </button>
@@ -77,27 +77,25 @@
                     <div class="collapse navbar-collapse" id="navbarSupportedContent">
                         <ul class="nav navbar-nav ml-auto">
 
-                            <span class="dropdown mr-2">
-                                <button class="btn btn-info btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                        Notifications <span class="badge badge-danger" id="notificationCount">0</span>
-                                    </a>
+                            <span class="dropdown m-2">
+                                <button class="bg-transparent text-white btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                     <span class="badge badge-danger" id="notificationCount">0</span>
                                 </button>
-                                <ul class="dropdown-menu">
+                                <ul class="dropdown-menu" id="notificationDropdown">
                                     <li>
-                                     <a class="dropdown-item" href="#">
-                                            <h6 class="dropdown-header">New Notifications</h6>
-                                            <div id="notifications">
+                                        <a class="dropdown-item" href="#">
 
+                                            <div id="notifications">
+                                               
                                             </div>
-                                    </a>
+                                        </a>
                                     </li>
-                                 
                                 </ul>
-                          </span>
+                            </span>
+
                           
  
-                            <span class="dropdown mr-2">
+                            <span class="dropdown m-2">
                                 <button class="btn btn-primary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     Account
                                 </button>
@@ -106,7 +104,7 @@
                                     <li><a class="dropdown-item" asp-controller="Users" asp-action="index">Users</a></li>
                                 </ul>
                             </span>
-                            <li class="nav-item">
+                            <li class="nav-item m-2">
                                 <form asp-area="Admin" asp-controller="Admin" asp-action="Logout" method="post">
                                     <button type="submit" class="btn btn-danger btn-sm"><span class="bi bi-box-arrow-left"></span> Logout</button>
                                 </form>
@@ -138,17 +136,77 @@
             .withUrl("/notificationHub")
             .build();
 
+        // Function to load notifications from local storage
+        function loadNotifications() {
+            const notificationsList = document.getElementById("notifications");
+            const notificationCount = document.getElementById("notificationCount");
+
+            // Retrieve notifications from local storage
+            const storedNotifications = JSON.parse(localStorage.getItem("notifications")) || [];
+
+            // Update the notification count
+            notificationCount.textContent = storedNotifications.length;
+
+            // Add each stored notification to the list
+            storedNotifications.forEach(notification => {
+                const div = document.createElement("div");
+                div.className = "list-group-item";
+
+                const link = document.createElement("a");
+                link.href = `/admin/UserResponseStatus/UserResponsesStatus?UserEmail=${notification.email}`;
+                link.textContent = notification.text;
+                link.addEventListener("click", () => {
+                    removeNotification(div, notification.id);
+                });
+
+                div.appendChild(link);
+                notificationsList.appendChild(div);
+            });
+        }
+
         // Function to add a notification to the list
         function addNotification(userName, email) {
             const notificationsList = document.getElementById("notifications");
-            const li = document.createElement("li");
-            li.className = "list-group-item";
-            li.textContent = `New submission from ${userName}`;
-            notificationsList.appendChild(li);
+            const notificationCount = document.getElementById("notificationCount");
+
+            // Create a unique ID for the notification
+            const notificationId = Date.now();
+
+            // Create notification item
+            const div = document.createElement("div");
+            div.className = "list-group-item";
+
+            const link = document.createElement("a");
+            link.href = `/admin/UserResponseStatus/UserResponsesStatus?UserEmail=${email}`;
+            link.textContent = ` ${userName}`;
+            link.addEventListener("click", () => {
+                removeNotification(div, notificationId);
+            });
+
+            div.appendChild(link);
+            notificationsList.appendChild(div);
+
+            // Update the notification count
+            notificationCount.textContent = parseInt(notificationCount.textContent) + 1;
+
+            // Store the notification in local storage
+            const storedNotifications = JSON.parse(localStorage.getItem("notifications")) || [];
+            storedNotifications.push({ id: notificationId, text: link.textContent, email: email });
+            localStorage.setItem("notifications", JSON.stringify(storedNotifications));
+        }
+
+        // Function to remove a notification
+        function removeNotification(div, id) {
+            div.remove();
 
             // Update the notification count
             const notificationCount = document.getElementById("notificationCount");
-            notificationCount.textContent = parseInt(notificationCount.textContent) + 1;
+            notificationCount.textContent = parseInt(notificationCount.textContent) - 1;
+
+            // Remove the notification from local storage
+            let storedNotifications = JSON.parse(localStorage.getItem("notifications")) || [];
+            storedNotifications = storedNotifications.filter(notification => notification.id !== id);
+            localStorage.setItem("notifications", JSON.stringify(storedNotifications));
         }
 
         // Receive notification from the server
@@ -157,10 +215,100 @@
         });
 
         // Start the connection
-        connection.start().catch(function (err) {
+        connection.start().then(loadNotifications).catch(function (err) {
             return console.error(err.toString());
         });
     </script>
+
+
+    @* <script type="text/javascript">
+        // Establish a connection to the SignalR hub
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/notificationHub")
+            .build();
+
+        // Function to load notifications from local storage
+        function loadNotifications() {
+            const notificationsList = document.getElementById("notifications");
+            const notificationCount = document.getElementById("notificationCount");
+
+            // Retrieve notifications from local storage
+            const storedNotifications = JSON.parse(localStorage.getItem("notifications")) || [];
+
+            // Update the notification count
+            notificationCount.textContent = storedNotifications.length;
+
+            // Add each stored notification to the list
+            storedNotifications.forEach(notification => {
+                const div = document.createElement("div");
+                div.className = "list-group-item";
+                div.textContent = notification.text;
+
+                // Add click event to remove notification
+                div.addEventListener("click", () => {
+                    removeNotification(div, notification.id);
+                });
+
+                notificationsList.appendChild(div);
+            });
+        }
+
+        // Function to add a notification to the list
+        function addNotification(userName, email) {
+            const notificationsList = document.getElementById("notifications");
+            const notificationCount = document.getElementById("notificationCount");
+
+            // Create a unique ID for the notification
+            const notificationId = Date.now();
+
+            // Create notification item
+            const div = document.createElement("div");
+            div.className = "list-group-item";
+            div.textContent = `New submission from ${userName}`;
+
+            // Add click event to remove notification
+            div.addEventListener("click", () => {
+                removeNotification(div, notificationId);
+            });
+
+            // Append the new notification
+            notificationsList.appendChild(div);
+
+            // Update the notification count
+            notificationCount.textContent = parseInt(notificationCount.textContent) + 1;
+
+            // Store the notification in local storage
+            const storedNotifications = JSON.parse(localStorage.getItem("notifications")) || [];
+            storedNotifications.push({ id: notificationId, text: div.textContent });
+            localStorage.setItem("notifications", JSON.stringify(storedNotifications));
+        }
+
+        // Function to remove a notification
+        function removeNotification(div, id) {
+            div.remove();
+
+            // Update the notification count
+            const notificationCount = document.getElementById("notificationCount");
+            notificationCount.textContent = parseInt(notificationCount.textContent) - 1;
+
+            // Remove the notification from local storage
+            let storedNotifications = JSON.parse(localStorage.getItem("notifications")) || [];
+            storedNotifications = storedNotifications.filter(notification => notification.id !== id);
+            localStorage.setItem("notifications", JSON.stringify(storedNotifications));
+        }
+
+        // Receive notification from the server
+        connection.on("ReceiveNotification", function (userName, email) {
+            addNotification(userName, email);
+        });
+
+        // Start the connection
+        connection.start().then(loadNotifications).catch(function (err) {
+            return console.error(err.toString());
+        });
+    </script> *@
+
+
 
     @await RenderSectionAsync("Scripts", required: false)
 

@@ -195,8 +195,8 @@
     </div>
 </div>
 
-<div class="container-fluid mb-5 mt-4">
-    <div class="col-md-10 col-lg-10 col-sm-12 offset-1">
+<div class="container mb-5 mt-4">
+  
         <div class="card rounded-2 shadow-lg p-3 mt-3">
             <h4 class="text-primary">
                 <i class="bi bi-broadcast"></i> Real-Time Email Tracking
@@ -204,7 +204,7 @@
             <p>
                 <a asp-action="EmailStats" class="btn btn-primary btn-sm">View email tracking with chart</a>
             </p>
-            <table class="table table-responsive d-block d-md-table table-bordered table-hover mt-3">
+            <table class=" table table-responsive">
                 <thead>
                     <tr>
                         <th>Recipient</th>
@@ -222,12 +222,12 @@
                         <th>Unsubscribed</th>
                     </tr>
                 </thead>
-                <tbody id="emailStatsTableBody">
+                <tbody class="" id="emailStatsTableBody">
                     <!-- Rows will be dynamically inserted here -->
                 </tbody>
             </table>
         </div>
-    </div>
+
 </div>
 
 @section Scripts{

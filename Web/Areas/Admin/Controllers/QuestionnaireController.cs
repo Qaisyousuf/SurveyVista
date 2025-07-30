@@ -403,7 +403,7 @@ namespace Web.Areas.Admin.Controllers
                 // If deletion is successful, you can redirect to a success page or return a success message
                 return Json(new { success = true, message = "Item deleted successfully" });
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // Log the exception or handle it appropriately
                 return StatusCode(500, "An error occurred while processing your request.");

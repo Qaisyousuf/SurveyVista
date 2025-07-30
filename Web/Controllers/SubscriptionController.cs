@@ -153,7 +153,7 @@ namespace Web.Controllers
                     TempData["success"] = "Subscription successful. Please confirm your email.";
                     return RedirectToAction("", "home");
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     TempData["error"] = "Failed to subscribe.";
                     return RedirectToAction("", "home");
