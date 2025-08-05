@@ -8,15 +8,19 @@ namespace Services.EmailSend
 {
     public class EmailToSend
     {
-        public EmailToSend(string to, string subject, string body)
+        public string To { get; set; }
+        public string Subject { get; set; }
+        public string HtmlBody { get; set; }
+        public Dictionary<string, string> Headers { get; set; }
+
+        public EmailToSend(string to, string subject, string htmlBody)
         {
             To = to;
             Subject = subject;
-            Body = body;
+            HtmlBody = htmlBody;
+            Headers = new Dictionary<string, string>(); // optional unless needed
         }
-
-        public string To { get; set; }
-        public string Subject { get; set; }
-        public string Body { get; set; }
     }
+
+
 }

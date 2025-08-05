@@ -17,37 +17,50 @@ namespace Services.Implemnetation
         {
             _configuration = configuration;
         }
+
         public async Task<bool> SendConfirmationEmailAsync(EmailToSend emailSend)
         {
+            var apiKey = _configuration["MailJet:ApiKey"];
+            var secretKey = _configuration["MailJet:SecretKey"];
+            var fromEmail = _configuration["Email:From"];
+            var fromName = _configuration["Email:ApplicationName"];
 
+            var client = new MailjetClient(apiKey, secretKey);
 
-
-            MailjetClient client = new MailjetClient(_configuration["MailJet:ApiKey"], _configuration["MailJet:SecretKey"]);
-
-            var email = new TransactionalEmailBuilder()
-                .WithFrom(new SendContact(_configuration["Email:From"], _configuration["Email:ApplicationName"]))
-                .WithSubject(emailSend.Subject)
-                .WithHtmlPart(emailSend.Body)
-                .WithTo(new SendContact(emailSend.To))
-                .Build();
-
-
-            var response = await client.SendTransactionalEmailAsync(email);
-
-            if (response.Messages != null)
+            var message = new JObject
             {
-                if (response.Messages[0].Status == "success")
+                ["From"] = new JObject
                 {
-                    return true;
+                    ["Email"] = fromEmail,
+                    ["Name"] = fromName
+                },
+                ["To"] = new JArray
+            {
+                new JObject
+                {
+                    ["Email"] = emailSend.To,
+                    ["Name"] = emailSend.To.Split('@')[0]
                 }
+            },
+                ["Subject"] = emailSend.Subject,
+                ["HTMLPart"] = emailSend.HtmlBody
+            };
+
+            // ✨ Add headers if any
+            if (emailSend.Headers != null && emailSend.Headers.Any())
+            {
+                message["Headers"] = JObject.FromObject(emailSend.Headers);
             }
 
+            var request = new MailjetRequest
+            {
+                Resource = SendV31.Resource
+            }
+            .Property(Send.Messages, new JArray { message });
 
-            return false;
-
-
+            var response = await client.PostAsync(request);
+            return response.IsSuccessStatusCode;
         }
-
-
     }
+
 }

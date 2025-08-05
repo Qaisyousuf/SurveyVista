@@ -35,6 +35,182 @@
     --font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 /*_______________________________________________________________________________start of the custom CSS_____________________________________________________________*/
+/* Additional Footer Improvements - Compact Version */
+
+/* Footer section styling */
+footer {
+    background: linear-gradient(135deg, #141c27 0%, #1a2332 100%);
+    position: relative;
+}
+
+    footer::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, #33b3ae, transparent);
+    }
+
+/* Compact container spacing */
+.container-fluid.px-4 {
+    padding-left: 3rem !important;
+    padding-right: 3rem !important;
+}
+
+@media (max-width: 768px) {
+    .container-fluid.px-4 {
+        padding-left: 1.5rem !important;
+        padding-right: 1.5rem !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .container-fluid.px-4 {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+}
+
+/* Compact footer headings */
+footer h5 {
+    color: #33b3ae !important;
+    font-weight: 600;
+    font-size: 1.1rem;
+    position: relative;
+    padding-bottom: 5px;
+}
+
+    footer h5::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 25px;
+        height: 2px;
+        background: #33b3ae;
+    }
+
+footer h6 {
+    color: #ffffff !important;
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+/* Compact social media links styling */
+footer .d-flex a {
+    padding: 6px 10px;
+    border: 1px solid rgba(51, 179, 174, 0.3);
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    background: rgba(51, 179, 174, 0.1);
+    font-size: 0.85rem;
+}
+
+    footer .d-flex a:hover {
+        background: #33b3ae;
+        color: #ffffff !important;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(51, 179, 174, 0.3);
+    }
+
+/* Compact navigation links styling */
+footer .nav-item a {
+    transition: all 0.3s ease;
+    padding: 2px 0;
+    display: block;
+    font-size: 0.9rem;
+}
+
+    footer .nav-item a:hover {
+        color: #33b3ae !important;
+        padding-left: 5px;
+    }
+
+/* Compact contact links styling */
+footer a[href^="mailto:"],
+footer a[href^="tel:"] {
+    transition: all 0.3s ease;
+    font-size: 0.85rem;
+}
+
+    footer a[href^="mailto:"]:hover,
+    footer a[href^="tel:"]:hover {
+        color: #33b3ae !important;
+    }
+
+/* Compact bottom section styling */
+footer hr {
+    margin: 1rem 0 0.5rem 0;
+    opacity: 0.3;
+}
+
+footer .row:last-child span {
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+}
+
+/* Compact text styling */
+footer .small {
+    font-size: 0.85rem !important;
+}
+
+footer .text-muted.small {
+    font-size: 0.8rem !important;
+}
+
+/* Responsive improvements for compact design */
+@media (max-width: 992px) {
+    #rowSection {
+        flex-direction: column;
+    }
+
+    #box {
+        width: 100% !important;
+        margin-bottom: 1.5rem;
+    }
+
+    footer .container-fluid .row {
+        text-align: center;
+    }
+
+    footer .d-flex {
+        justify-content: center !important;
+    }
+}
+
+/* Compact animation for footer elements */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+footer .col-lg-3,
+footer .col-lg-2,
+footer .col-lg-4 {
+    animation: fadeInUp 0.5s ease forwards;
+}
+
+    footer .col-lg-3:nth-child(1) {
+        animation-delay: 0.1s;
+    }
+
+    footer .col-lg-2:nth-child(2) {
+        animation-delay: 0.15s;
+    }
+
+    footer .col-lg-4:nth-child(3) {
+        animation-delay: 0.2s;
+    }
 #Background {
     background-color: #141c27 !important;
 }
@@ -420,6 +596,8 @@ body, html {
     }
 
 /*_______________________________________________________________________________end of the custom CSS_____________________________________________________________*/
+
+
 *,
 *::before,
 *::after {
