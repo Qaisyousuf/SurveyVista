@@ -113,7 +113,6 @@ namespace Web.Controllers
         {
             bool hasSubmitted = _context.Responses.Any(r => r.QuestionnaireId == questionnaire.Id && r.UserEmail == questionnaire.Email);
 
-
             var cetZone = TimeZoneInfo.FindSystemTimeZoneById("Central European Standard Time");
             var cetTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, cetZone);
             var response = new Response
@@ -125,89 +124,152 @@ namespace Web.Controllers
                 ResponseDetails = questionnaire.Questions.Select(q => new ResponseDetail
                 {
                     QuestionId = q.Id,
-                    QuestionType=q.Type,
-                    // Handle TextResponse based on question type
-                    TextResponse = (q.Type == QuestionType.Open_ended || q.Type == QuestionType.Text || q.Type==QuestionType.Slider)
-                                   ? string.Join(" ", q.SelectedText)  // Ensure SelectedText is appropriately used based on question type
+                    QuestionType = q.Type,
+                    TextResponse = (q.Type == QuestionType.Open_ended || q.Type == QuestionType.Text || q.Type == QuestionType.Slider)
+                                   ? string.Join(" ", q.SelectedText)
                                    : null,
                     ResponseAnswers = q.SelectedAnswerIds
                         .Select(aid => new ResponseAnswer { AnswerId = aid })
-                        .ToList() // Ensure that the list is initialized correctly
+                        .ToList()
                 }).ToList()
             };
 
-
             _context.Responses.Add(response);
             _context.SaveChanges();
-            var subject = $"Thank You for Your Feedback, {questionnaire.UserName}!";
+
+            // ✅ PERSONAL SUBJECT LINE (like survey invitation)
+            var subject = $"Tak for din besvarelse, {questionnaire.UserName}";
+
             var toEmail = questionnaire.Email;
-            string emailBody = $@"
-                                        <html>
-                                        <head>
-                                            <style>
-                                                /* Inline CSS styles */
-                                                body {{
-                                                    font-family: Arial, sans-serif;
-                                                }}
-                                               
-                                                .container {{
-                                                    max-width: 600px;
-                                                    margin: 0 auto;
-                                                    padding: 20px;
-                                                    border: 0.5px solid #ccc;
-                                                    border-radius: 5px;
-                                                    background-color: #f9f9f9;
-                                                }}
-                                                .button {{
-                                                    display: inline-block;
-                                                    padding: 10px 20px;
-                                                    background-color: #007bff;
-                                                    color: #ffffff;
-                                                    text-decoration: none;
-                                                    border-radius: 4px;
-                                                }}
-                                                .button:hover {{
-                                                    background-color: #0056b3;
-                                                }}
-                                            </style>
-                                        </head>
-                                        <body>
-                                            <div class='container'>
-                                                <h4>Hey {questionnaire.UserName.ToUpper()},</h4>
-                                                <h5>{subject}</h5>
-                                            <p><strong>Thank you so much for taking the time to provide us with your valuable feedback!</strong></p>
 
-                                                    <p>If you have any more thoughts to share or need assistance, please don't hesitate to reach out. You can email us directly at seo@seosoft.dk, and we'll be more than happy to help.</p>
+            // ✅ SIMPLE, PROFESSIONAL EMAIL BODY
+            string emailBody = GenerateThankYouEmailBody(questionnaire.UserName);
 
-                                                    <p>Thank you once again, {questionnaire.UserName}, for helping us make SeoSoft ApS even better. We truly value your support and participation.</p>
-                                               
-                                               
-                                              <br>
-                                                <p><strong>Søren Eggert Lundsteen Olsen</strong><br>
-                                                Seosoft ApS<br>
-                                                <hr>
-                                                Hovedgaden 3
-                                                Jordrup<br>
-                                                Kolding 6064<br>
-                                                Denmark</p>
-
-                                            </div>
-                                        </body>
-                                        </html>";
-
-
-            // Call the SendConfirmationEmailAsync method to send the email
-            var emailSend = new EmailToSend(toEmail, subject, emailBody);
+            // ✅ SAME HEADERS AS SURVEY INVITATION (Primary Inbox Optimized)
+            var emailSend = new EmailToSend(toEmail, subject, emailBody)
+            {
+                Headers = new Dictionary<string, string>
+                    {
+                        { "X-Priority", "1" },
+                        { "Importance", "High" },
+                        { "List-Unsubscribe", "<mailto:kontakt@nvkn.dk?subject=Unsubscribe>" },
+                        { "List-Unsubscribe-Post", "List-Unsubscribe=One-Click" },
+                        { "X-Microsoft-Classification", "Personal" }
+                    }
+            };
 
             _emailServices.SendConfirmationEmailAsync(emailSend);
 
-
             TempData["UserName"] = questionnaire.UserName;
-
             _hubContext.Clients.All.SendAsync("ReceiveNotification", questionnaire.UserName, questionnaire.Email);
 
             return RedirectToAction(nameof(ThankYou));
+        }
 
+        // ✅ COMPLETE CORRECTED METHOD: Danish Thank You Email Body
+        private static string GenerateThankYouEmailBody(string userName)
+        {
+            return $@"
+<!DOCTYPE html>
+<html lang='da'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Tak for dit svar</title>
+    <style>
+        body {{
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            line-height: 1.4;
+            color: #333;
+            background-color: #ffffff;
+            margin: 0;
+            padding: 0;
+        }}
+        
+        .container {{
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff;
+        }}
+        
+        .header {{
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }}
+        
+        .content {{
+            margin-bottom: 20px;
+        }}
+        
+        .content p {{
+            margin: 10px 0;
+        }}
+        
+        .signature {{
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #ccc;
+        }}
+        
+        .company-info {{
+            font-size: 12px;
+            color: #666;
+            margin-top: 15px;
+        }}
+        
+        .footer {{
+            border-top: 1px solid #ccc;
+            padding-top: 15px;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #666;
+        }}
+        
+        .link {{
+            color: #0066cc;
+            text-decoration: none;
+        }}
+    </style>
+</head>
+<body>
+    <div class='container'>
+        <div class='header'>
+            <strong>Nærværskonsulenterne ApS</strong>
+        </div>
+        
+               <div class='content'>
+            <p>Kære {userName},</p>
+    
+            <p><strong>Vi har modtaget din besvarelse. Tak for din tid, {userName}.</strong></p>
+    
+            <p>Har du spørgsmål, er du velkommen til at kontakte os på <a href='mailto:kontakt@nvkn.dk' class='link'>kontakt@nvkn.dk</a>.</p>
+        </div>
+
+        
+        <div class='signature'>
+            <p>Med venlig hilsen,<br/>
+            <strong>Nærværskonsulenterne ApS</strong></p>
+        </div>
+        
+        <div class='company-info'>
+            <p><strong>Nærværskonsulenterne ApS</strong><br/>
+            Brødemosevej 24A<br/>
+            3300 Frederiksværk<br/>
+            Danmark</p>
+            <br/>
+           
+        </div>
+        
+        <div class='footer'>
+            <p>Ønsker du ikke længere at modtage disse emails? 
+            <a href='mailto:kontakt@nvkn.dk?subject=Afmeld%20fra%20emails' style='color: #666;'>Klik her for at afmelde</a></p>
+        </div>
+    </div>
+</body>
+</html>";
         }
 
         [HttpGet]

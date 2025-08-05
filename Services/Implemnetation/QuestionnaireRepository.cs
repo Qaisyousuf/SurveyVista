@@ -2,11 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using Model;
 using Services.Interaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Services.Implemnetation
 {
