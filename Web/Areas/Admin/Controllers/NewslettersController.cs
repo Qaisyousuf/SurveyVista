@@ -112,74 +112,48 @@ namespace Web.Areas.Admin.Controllers
                 {
                     // Retrieve all subscribed users
                     var subscribedUsers = await _context.Subscriptions.Where(s => s.IsSubscribed).ToListAsync();
-
                     string confirmationPath = _configuration["Email:unsubscribePath"];
+
                     // Send the newsletter email to each subscribed user
                     foreach (var user in subscribedUsers)
                     {
-                        string confirmationUrl = $"{Request.Scheme}://{Request.Host}/{confirmationPath}?email={user.Email}";
-                        string emailBody = $@"<head>
-                                <meta charset=""UTF-8"">
-                                <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">
-                                <title>Email Confirmation</title>
-                                <style>
-                                    body {{
-                                        font-family: Arial, sans-serif;
-                                        line-height: 1.6;
-                                        margin: 0;
-                                        padding: 0;
-                                        background-color: #f9f9f9;
-                                    }}
-                                    .container {{
-                                          max-width: 800px;
-                                            margin: 0 auto;
-                                            padding: 20px;
-                                            border: 0.5px solid #ccc;
-                                            border-radius: 5px;
-                                            background-color: #f9f9f9;
-                                    }}
-                                    h4, h5, h6 {{
-                                        margin: 0;
-                                    }}
-                                    hr {{
-                                        border: none;
-                                        border-top: 1px solid #ccc;
-                                        margin: 10px 0;
-                                    }}
-                                    a.button {{
-                                        display: inline-block;
-                                        padding: 5px 10px;
-                                        background-color: #6c757d;
-                                        color: #fff;
-                                        text-decoration: none;
-                                        border-radius: 4px;
-                                    }}
-                                    a.button:hover {{
-                                        background-color: #5a6268;
-                                    }}
-                                        a {{
-                                            color: #007bff;
-                                            text-decoration: none;
-                                        }}
-                                        a:hover {{
-                                            text-decoration: underline;
-                                        }}
-                                </style>
-                            </head>
-                            <body>
-                                <div class=""container"">
-                                    <h4>Hey {user.Name},</h4>
-                                    <p>{viewModel.Body}</p><br>
-                                 
-                                    <h5>Søren Eggert Lundsteen Olsen</h5>
-                                 <h5><a href=""https://www.seosoft.dk/"" target=""_blank"">SeoSoft ApS</a></h5>
-                                 <hr>
-                                    <h6>Hovedgaden 3<br>Jordrup<br>Kolding 6064<br>Denmark</h6>
-                                    <div style=""text-align: center;"">
-                                        <a href=""{confirmationUrl}"" class=""button"">Unsubscribe</a>
+                        string unsubscribeUrl = $"{Request.Scheme}://{Request.Host}/{confirmationPath}?email={user.Email}";
+
+                        // This HTML version with proper line breaks works for primary inbox
+                        string emailBody = $@"<!DOCTYPE html>
+                                <html>
+                                <head>
+                                    <meta charset=""UTF-8"">
+                                </head>
+                                <body>
+    
+                                    <p>Hej {user.Name},</p>
+    
+                                    <div>
+                                        {viewModel.Body.Replace("\n", "<br><br>")}
                                     </div>
-                                </div>
-                            </body>";
+    
+                                    <p>Hvis du har spørgsmål, kan du kontakte os på kontakt@nvkn.dk</p>
+    
+                                    <p>Med venlig hilsen,<br/>
+                                    Nærværskonsulenterne ApS</p>
+    
+                                    <hr>
+    
+                                    <p><small>
+                                        Nærværskonsulenterne ApS<br/>
+                                        Brødemosevej 24A, 3300 Frederiksværk<br/>
+                                        kontakt@nvkn.dk
+                                    </small></p>
+    
+                                    <p>
+                                        <a href=""{unsubscribeUrl}"">
+                                            <button type=""button"">Afmeld nyhedsbrev</button>
+                                        </a>
+                                    </p>
+    
+                                </body>
+                                </html>";
 
                         var email = new EmailToSend(user.Email, viewModel.Subject, emailBody);
                         var isSent = await _emailServices.SendConfirmationEmailAsync(email);
@@ -190,32 +164,27 @@ namespace Web.Areas.Admin.Controllers
                             RecipientEmail = user.Email,
                             Subject = viewModel.Subject,
                             Body = emailBody,
-                          
-                           
-                        SentDate = DateTime.UtcNow,
-                            IsSent = isSent  // Assuming isSent returns a boolean indicating success
+                            SentDate = DateTime.UtcNow,
+                            IsSent = isSent
                         };
                         _context.SentNewsletterEamils.Add(sentEmail);
 
-                       
-                        // Handle failure to send email if needed
+                        // Add small delay to look more natural
+                        await Task.Delay(2000); // 2 second delay between sends
                     }
 
-                    await _context.SaveChangesAsync();  // Save changes for all sent emails
-
-                    TempData["success"] = "Newsletter sent successfully.";
+                    await _context.SaveChangesAsync();
+                    TempData["success"] = "Nyhedsbrev sendt successfully.";
                     return RedirectToAction(nameof(Index));
                 }
                 catch (Exception ex)
                 {
-                    // Log or handle the exception as needed
-                    TempData["error"] = "Something went wrong: " + ex.Message;
+                    TempData["error"] = "Noget gik galt: " + ex.Message;
                     return RedirectToAction(nameof(Index));
                 }
             }
             return View(viewModel);
         }
-
         [HttpGet]
         public IActionResult UploadSubscribers()
         {
