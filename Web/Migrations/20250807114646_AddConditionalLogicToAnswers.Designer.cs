@@ -4,6 +4,7 @@ using Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Web.Migrations
 {
     [DbContext(typeof(SurveyContext))]
-    partial class SurveyContextModelSnapshot : ModelSnapshot
+    [Migration("20250807114646_AddConditionalLogicToAnswers")]
+    partial class AddConditionalLogicToAnswers
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -206,11 +209,14 @@ namespace Web.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("ConditionJson")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("NextQuestionId")
+                        .HasColumnType("int");
 
                     b.Property<int>("QuestionId")
                         .HasColumnType("int");
+
+                    b.Property<bool>("SkipToEnd")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Text")
                         .HasColumnType("nvarchar(max)");
@@ -504,8 +510,14 @@ namespace Web.Migrations
                     b.Property<int>("AnswerId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("NextQuestionId")
+                        .HasColumnType("int");
+
                     b.Property<int>("ResponseDetailId")
                         .HasColumnType("int");
+
+                    b.Property<bool>("SkipToEnd")
+                        .HasColumnType("bit");
 
                     b.HasKey("Id");
 

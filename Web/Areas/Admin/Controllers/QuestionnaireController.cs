@@ -387,32 +387,29 @@ namespace Web.Areas.Admin.Controllers
         [ActionName("Delete")]
         public async Task<IActionResult> DeleteConfirm(int id)
         {
-
-
-
             try
             {
-                var deletedQuestionnaire = _questionnaire.Delete(id);
+                // Your Delete method is async Task, so you need to await it
+                // It doesn't return anything, so don't assign it to a variable
+                await _questionnaire.Delete(id);
 
-
-                if (deletedQuestionnaire == null)
-                {
-                    return NotFound(); // Or handle not found case appropriately
-                }
-
-                // If deletion is successful, you can redirect to a success page or return a success message
+                // If we reach here, deletion was successful (no exception thrown)
                 return Json(new { success = true, message = "Item deleted successfully" });
             }
-            catch (Exception)
+            catch (ArgumentNullException ex)
             {
-                // Log the exception or handle it appropriately
-                return StatusCode(500, "An error occurred while processing your request.");
+                return Json(new { success = false, message = "Invalid ID provided" });
             }
-
-
-
-
-
+            catch (ArgumentException ex)
+            {
+                return Json(new { success = false, message = "Questionnaire not found" });
+            }
+            catch (Exception ex)
+            {
+                // Log the actual exception to see what's wrong
+                System.Diagnostics.Debug.WriteLine($"Delete error: {ex.Message}");
+                return Json(new { success = false, message = "An error occurred while deleting the questionnaire" });
+            }
         }
 
         [HttpGet]
@@ -667,7 +664,117 @@ namespace Web.Areas.Admin.Controllers
             return tokenWithExpiry;
         }
 
+        // Add these methods to your existing QuestionnaireController class
 
+        [HttpGet]
+        public IActionResult SetLogic(int id)
+        {
+            var questionnaire = _questionnaire.GetQuestionnaireWithQuestionAndAnswer(id);
+
+            if (questionnaire == null)
+            {
+                return NotFound();
+            }
+
+            var viewModel = new SetLogicViewModel
+            {
+                QuestionnaireId = questionnaire.Id,
+                QuestionnaireName = questionnaire.Title ?? "Untitled Survey",
+                Questions = questionnaire.Questions.Select((q, index) => new QuestionLogicViewModel
+                {
+                    QuestionId = q.Id,
+                    QuestionText = q.Text ?? "",
+                    QuestionType = q.Type,
+                    QuestionNumber = index + 1,
+                    Answers = q.Answers.Select(a =>
+                    {
+                        var answerCondition = new AnswerConditionViewModel
+                        {
+                            AnswerId = a.Id,
+                            AnswerText = a.Text ?? ""
+                        };
+
+                        // Parse existing condition if it exists
+                        if (!string.IsNullOrEmpty(a.ConditionJson))
+                        {
+                            try
+                            {
+                                var condition = System.Text.Json.JsonSerializer.Deserialize<AnswerConditionViewModel>(a.ConditionJson);
+                                if (condition != null)
+                                {
+                                    answerCondition.ActionType = condition.ActionType;
+                                    answerCondition.TargetQuestionNumber = condition.TargetQuestionNumber;
+                                    answerCondition.SkipCount = condition.SkipCount;
+                                    answerCondition.EndMessage = condition.EndMessage;
+                                }
+                            }
+                            catch (System.Text.Json.JsonException)
+                            {
+                                // If JSON is malformed, use default values
+                            }
+                        }
+
+                        return answerCondition;
+                    }).ToList()
+                }).ToList()
+            };
+
+            // Pass total question count for dropdown options
+            ViewBag.TotalQuestions = questionnaire.Questions.Count;
+
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SaveLogic(SaveConditionsViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                TempData["Error"] = "Invalid data provided.";
+                return RedirectToAction(nameof(SetLogic), new { id = model.QuestionnaireId });
+            }
+
+            try
+            {
+                // Get questionnaire with answers
+                var questionnaire = _questionnaire.GetQuestionnaireWithQuestionAndAnswer(model.QuestionnaireId);
+
+                if (questionnaire == null)
+                {
+                    TempData["Error"] = "Questionnaire not found.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                // Update each answer's condition
+                foreach (var conditionUpdate in model.Conditions)
+                {
+                    var answer = questionnaire.Questions
+                        .SelectMany(q => q.Answers)
+                        .FirstOrDefault(a => a.Id == conditionUpdate.AnswerId);
+
+                    if (answer != null)
+                    {
+                        answer.ConditionJson = string.IsNullOrEmpty(conditionUpdate.ConditionJson)
+                            ? null
+                            : conditionUpdate.ConditionJson;
+                    }
+                }
+
+                // Save changes
+                await _questionnaire.Update(questionnaire);
+                await _questionnaire.commitAsync();
+
+                TempData["Success"] = "Conditional logic saved successfully!";
+                return RedirectToAction(nameof(SetLogic), new { id = model.QuestionnaireId });
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "An error occurred while saving conditions: " + ex.Message;
+                return RedirectToAction(nameof(SetLogic), new { id = model.QuestionnaireId });
+            }
+        }
 
     }
+
+
 }

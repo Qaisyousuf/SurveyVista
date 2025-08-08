@@ -12,7 +12,7 @@
                 Are you sure you want to delete:
 
                 <span class="badge bg-danger p-2 shadow rounded">
-                    <span class="item-title ">@Html.Raw(Model.Title.Length >= 30 ? Model.Title.Substring(0, 30) : Model.Title)</span>
+                    <span class="item-title ">@Html.Raw(Model.Title.Length >= 100 ? Model.Title.Substring(0, 100) : Model.Title)</span>
                     <span class="more-title " style="display:none;">@(Model.Title.Length > 30 ? Model.Title.Substring(30) : "")</span>
                 </span>
                 <button type="button" class="btn btn-link readMoreBtn">Read More</button>

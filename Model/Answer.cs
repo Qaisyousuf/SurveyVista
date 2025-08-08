@@ -20,5 +20,7 @@ namespace Model
         public int QuestionId { get; set; } // Foreign key for Question
         [ForeignKey("QuestionId")]
         public Question? Question { get; set; }
+
+        public string? ConditionJson { get; set; }
     }
 }

@@ -1,0 +1,1281 @@
+﻿@model SetLogicViewModel
+
+@{
+    ViewData["Title"] = "Set Conditional Logic";
+}
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    .conditional-logic-page {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        min-height: 100vh;
+        color: #2c3e50;
+        padding: 20px;
+    }
+
+    .main-container {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        overflow: hidden;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .header {
+        background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
+        color: white;
+        padding: 30px 40px;
+        position: relative;
+    }
+
+    .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .header-left h1 {
+        font-size: 2.2rem;
+        font-weight: 600;
+        margin: 0 0 8px 0;
+    }
+
+    .header-left p {
+        font-size: 1rem;
+        opacity: 0.9;
+        margin: 0;
+    }
+
+    .header-stats {
+        text-align: right;
+    }
+
+    .stats-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        line-height: 1;
+        display: block;
+    }
+
+    .stats-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+
+    .page-content {
+        padding: 30px 40px;
+    }
+
+    .alert {
+        padding: 15px 20px;
+        margin-bottom: 25px;
+        border-radius: 8px;
+        border: none;
+        font-weight: 500;
+    }
+
+    .alert-success {
+        background: #d4edda;
+        color: #155724;
+        border-left: 4px solid #28a745;
+    }
+
+    .alert-danger {
+        background: #f8d7da;
+        color: #721c24;
+        border-left: 4px solid #dc3545;
+    }
+
+    .overview-section {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 30px;
+        margin-bottom: 30px;
+        border: 1px solid #e9ecef;
+    }
+
+    .overview-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 25px;
+        text-align: center;
+    }
+
+    .questions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 15px;
+    }
+
+    .question-overview-card {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        border: 1px solid #dee2e6;
+        transition: all 0.2s ease;
+        position: relative;
+    }
+
+        .question-overview-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-color: #6c5ce7;
+        }
+
+    .question-number {
+        font-weight: 700;
+        color: #6c5ce7;
+        font-size: 1.1rem;
+        margin-bottom: 8px;
+    }
+
+    .question-preview {
+        font-size: 0.9rem;
+        color: #6c757d;
+        line-height: 1.4;
+    }
+
+    .logic-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+        color: white;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .questions-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        margin-top: 30px;
+    }
+
+    .question-card {
+        background: white;
+        border-radius: 12px;
+        border: 1px solid #e9ecef;
+        overflow: hidden;
+        transition: all 0.2s ease;
+    }
+
+        .question-card:hover {
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+    .question-header {
+        background: #f8f9fa;
+        padding: 20px 25px;
+        border-bottom: 1px solid #e9ecef;
+        position: relative;
+    }
+
+        .question-header.has-logic {
+            background: linear-gradient(135deg, #ffe8e8, #fff0f0);
+            border-bottom-color: #ff6b6b;
+        }
+
+            .question-header.has-logic::after {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 3px;
+                background: linear-gradient(90deg, #ff6b6b, #ee5a24);
+            }
+
+    .question-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin: 0 0 8px 0;
+        color: #2c3e50;
+        line-height: 1.3;
+    }
+
+    .question-meta {
+        font-size: 0.9rem;
+        color: #6c757d;
+        margin: 0;
+    }
+
+    .question-controls {
+        margin-top: 15px;
+    }
+
+    .btn-toggle {
+        background: #6c5ce7;
+        border: none;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+        .btn-toggle:hover {
+            background: #5f4fcf;
+            transform: translateY(-1px);
+        }
+
+        .btn-toggle.hide-btn {
+            background: #6c757d;
+        }
+
+            .btn-toggle.hide-btn:hover {
+                background: #545b62;
+            }
+
+    .question-content {
+        padding: 25px;
+        display: none;
+    }
+
+        .question-content.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+    @@keyframes fadeIn {
+        from
+
+    {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+
+    .answers-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 20px;
+        grid-auto-rows: auto;
+        align-items: start;
+    }
+
+        /* For questions with multiple answers, display in 2 columns on larger screens */
+        .answers-grid.multi-answers {
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        }
+
+    .answer-card {
+        background: #fdfdfd;
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        overflow: hidden;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        height: auto;
+        min-height: auto;
+    }
+
+        .answer-card.has-condition {
+            border-color: #ff6b6b;
+            background: linear-gradient(135deg, #fff8f8, #fff0f0);
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.1);
+        }
+
+        .answer-card:hover {
+            border-color: #6c5ce7;
+            box-shadow: 0 6px 20px rgba(108, 92, 231, 0.15);
+            transform: translateY(-2px);
+        }
+
+    .answer-header {
+        background: #e9ecef;
+        padding: 15px 20px;
+        border-bottom: 1px solid #dee2e6;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .answer-card.has-condition .answer-header {
+        background: #ff6b6b;
+        color: white;
+    }
+
+    .answer-title {
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .active-badge {
+        background: white;
+        color: #ff6b6b;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .answer-content {
+        padding: 20px;
+    }
+
+    .answer-actions {
+        padding: 15px 20px;
+        background: #f8f9fa;
+        border-top: 1px solid #e9ecef;
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+        align-items: center;
+    }
+
+    .btn-save-answer {
+        background: #28a745;
+        border: none;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+        .btn-save-answer:hover {
+            background: #218838;
+            transform: translateY(-1px);
+        }
+
+    .btn-reset-answer {
+        background: #dc3545;
+        border: none;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+        .btn-reset-answer:hover {
+            background: #c82333;
+            transform: translateY(-1px);
+        }
+
+    .answer-status {
+        font-size: 0.8rem;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-weight: 500;
+        margin-right: auto;
+    }
+
+        .answer-status.saved {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .answer-status.modified {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+    .answer-text {
+        font-weight: 600;
+        color: #495057;
+        font-size: 1rem;
+        margin: 0 0 20px 0;
+        padding: 12px;
+        background: white;
+        border-radius: 6px;
+        border-left: 4px solid #6c5ce7;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 8px;
+        display: block;
+        font-size: 0.9rem;
+    }
+
+    .form-control {
+        border: 2px solid #e9ecef;
+        border-radius: 6px;
+        padding: 10px 15px;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+        width: 100%;
+        height: auto;
+    }
+
+        .form-control:focus {
+            border-color: #6c5ce7;
+            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
+            outline: none;
+        }
+
+    .condition-option {
+        margin-bottom: 15px;
+    }
+
+    .condition-summary {
+        background: linear-gradient(135deg, #e3f2fd, #f3e5f5);
+        color: #1565c0;
+        padding: 15px;
+        border-radius: 8px;
+        margin-top: 15px;
+        font-weight: 500;
+        border-left: 4px solid #2196f3;
+    }
+
+    .save-section {
+        background: #f8f9fa;
+        padding: 30px;
+        margin: 30px 0 0 0;
+        border-radius: 12px;
+        text-align: center;
+        border-top: 1px solid #e9ecef;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+        border: none;
+        color: white;
+        padding: 12px 24px;
+        margin: 8px;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        display: inline-block;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3);
+            color: white;
+            text-decoration: none;
+        }
+
+    .btn-secondary {
+        background: #6c757d;
+        border: none;
+        color: white;
+        padding: 12px 24px;
+        margin: 8px;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        display: inline-block;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+        .btn-secondary:hover {
+            background: #545b62;
+            transform: translateY(-2px);
+            color: white;
+            text-decoration: none;
+        }
+
+    .d-none {
+        display: none !important;
+    }
+
+    .small-text {
+        font-size: 0.8rem;
+        color: #6c757d;
+        margin-top: 5px;
+    }
+
+    @@media (max-width: 768px) {
+        .questions-container
+
+    {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .header-content {
+        text-align: center;
+    }
+
+    .header-left h1 {
+        font-size: 1.8rem;
+    }
+
+    .page-content {
+        padding: 20px;
+    }
+
+    .questions-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Always single column for answers on mobile */
+    .answers-grid.multi-answers {
+        grid-template-columns: 1fr;
+    }
+
+    }
+</style>
+
+<div class="conditional-logic-page">
+    <div class="main-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-content">
+                <div class="header-left">
+                    <h1>🔮 Conditional Logic Manager</h1>
+                    <p>Configure smart question routing for: <strong>@Model.QuestionnaireName</strong></p>
+                </div>
+                <div class="header-stats">
+                    <span class="stats-number">@Model.Questions.Count</span>
+                    <div class="stats-label">Questions</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="page-content">
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle"></i> @TempData["Success"]
+                </div>
+            }
+
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle"></i> @TempData["Error"]
+                </div>
+            }
+
+            <!-- Overview Section -->
+            <div class="overview-section">
+                <h2 class="overview-title">📋 Survey Structure Overview</h2>
+                <div class="questions-grid">
+                    @for (int i = 0; i < Model.Questions.Count; i++)
+                    {
+                        var hasConditions = Model.Questions[i].Answers.Any(a => a.ActionType != ConditionActionType.Continue);
+
+                        <div class="question-overview-card">
+                            @if (hasConditions)
+                            {
+                                <div class="logic-badge">🔥 Logic</div>
+                            }
+                        <div class="question-number">Q@(i + 1)</div>
+                        <div class="question-preview">
+                            @(Model.Questions[i].QuestionText.Length > 60
+                                                        ? Model.Questions[i].QuestionText.Substring(0, 60) + "..."
+                                                        : Model.Questions[i].QuestionText)
+                        </div>
+                    </div>
+                                        }
+                </div>
+            </div>
+
+            <form id="logicForm" method="post" asp-action="SaveLogic" novalidate>
+                <input type="hidden" name="QuestionnaireId" value="@Model.QuestionnaireId" />
+
+                <!-- Questions in 2-Column Layout -->
+                <div class="questions-container">
+                    @for (int questionIndex = 0; questionIndex < Model.Questions.Count; questionIndex++)
+                    {
+                        var question = Model.Questions[questionIndex];
+                        var hasConditions = question.Answers.Any(a => a.ActionType != ConditionActionType.Continue);
+
+                        <div class="question-card">
+                            <div class="question-header @(hasConditions ? "has-logic" : "")">
+                                <h3 class="question-title">
+                                    Question @(questionIndex + 1): @question.QuestionText
+                                </h3>
+                                <p class="question-meta">
+                                    @question.QuestionType • @question.Answers.Count answers
+                                    @if (hasConditions)
+                                    {
+                                        <span style="margin-left: 10px; color: #ff6b6b; font-weight: 600;">
+                                            <i class="fas fa-magic"></i> Has Logic Rules
+                                        </span>
+                                    }
+                                </p>
+                                <div class="question-controls">
+                                    <button type="button" class="btn-toggle show-btn" onclick="showQuestion(@questionIndex)">
+                                        <i class="fas fa-eye"></i> Show Details
+                                    </button>
+                                    <button type="button" class="btn-toggle hide-btn d-none" onclick="hideQuestion(@questionIndex)">
+                                        <i class="fas fa-eye-slash"></i> Hide Details
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div id="question-content-@questionIndex" class="question-content">
+                                @if (question.Answers.Any())
+                                {
+                                    <div class="answers-grid">
+                                        @for (int answerIndex = 0; answerIndex < question.Answers.Count; answerIndex++)
+                                        {
+                                            var answer = question.Answers[answerIndex];
+                                            var hasCondition = answer.ActionType != ConditionActionType.Continue;
+
+                                            <div class="answer-card @(hasCondition ? "has-condition" : "")">
+                                                <div class="answer-header">
+                                                    <h4 class="answer-title">📝 Answer @(answerIndex + 1)</h4>
+                                                    @if (hasCondition)
+                                                    {
+                                                        <span class="active-badge">
+                                                            <i class="fas fa-cog"></i> Active
+                                                        </span>
+                                                    }
+                                                </div>
+                                                <div class="answer-content">
+                                                    <div class="answer-text">@answer.AnswerText</div>
+
+                                                    <!-- Action Type Selection -->
+                                                    <div class="form-group">
+                                                        <label class="form-label">When this answer is selected:</label>
+                                                        <select class="form-control action-type-select"
+                                                                data-answer-id="@answer.AnswerId"
+                                                                onchange="toggleConditionOptions(this)">
+                                                            @if (answer.ActionType == ConditionActionType.Continue)
+                                                            {
+                                                                <option value="0" selected>➡️ Continue to next question</option>
+                                                            }
+                                                            else
+                                                            {
+                                                                <option value="0">➡️ Continue to next question</option>
+                                                            }
+
+                                                            @if (answer.ActionType == ConditionActionType.SkipToQuestion)
+                                                            {
+                                                                <option value="1" selected>🎯 Skip to specific question</option>
+                                                            }
+                                                            else
+                                                            {
+                                                                <option value="1">🎯 Skip to specific question</option>
+                                                            }
+
+                                                            @if (answer.ActionType == ConditionActionType.SkipCount)
+                                                            {
+                                                                <option value="2" selected>⏭️ Skip number of questions</option>
+                                                            }
+                                                            else
+                                                            {
+                                                                <option value="2">⏭️ Skip number of questions</option>
+                                                            }
+
+                                                            @if (answer.ActionType == ConditionActionType.EndSurvey)
+                                                            {
+                                                                <option value="3" selected>🏁 End survey</option>
+                                                            }
+                                                            else
+                                                            {
+                                                                <option value="3">🏁 End survey</option>
+                                                            }
+                                                        </select>
+                                                    </div>
+
+                                                    <!-- Skip to Question Option -->
+                                                    @{
+                                                        var skipToDisplay = answer.ActionType == ConditionActionType.SkipToQuestion ? "block" : "none";
+                                                    }
+                                                    <div class="condition-option skip-to-question"
+                                                         data-answer-id="@answer.AnswerId"
+                                                         style="display: @skipToDisplay;">
+                                                        <div class="form-group">
+                                                            <label class="form-label">🎯 Go to question:</label>
+                                                            <select class="form-control target-question-select">
+                                                                @for (int targetQ = questionIndex + 2; targetQ <= ViewBag.TotalQuestions; targetQ++)
+                                                                {
+                                                                    var targetQuestionText = "";
+                                                                    if (targetQ <= Model.Questions.Count)
+                                                                    {
+                                                                        var targetQuestionObj = Model.Questions[targetQ - 1];
+                                                                        targetQuestionText = targetQuestionObj.QuestionText.Length > 50
+                                                                        ? targetQuestionObj.QuestionText.Substring(0, 50) + "..."
+                                                                        : targetQuestionObj.QuestionText;
+                                                                    }
+
+                                                                    @if (answer.TargetQuestionNumber == targetQ)
+                                                                    {
+                                                                        <option value="@targetQ" selected>
+                                                                            Q@(targetQ): @targetQuestionText
+                                                                        </option>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <option value="@targetQ">
+                                                                            Q@(targetQ): @targetQuestionText
+                                                                        </option>
+                                                                    }
+                                                                }
+                                                            </select>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Skip Count Option -->
+                                                    @{
+                                                        var skipCountDisplay = answer.ActionType == ConditionActionType.SkipCount ? "block" : "none";
+                                                        var maxSkip = Math.Max(1, ViewBag.TotalQuestions - questionIndex - 1);
+                                                        var skipValue = answer.SkipCount ?? 1;
+                                                    }
+                                                    <div class="condition-option skip-count"
+                                                         data-answer-id="@answer.AnswerId"
+                                                         style="display: @skipCountDisplay;">
+                                                        <div class="form-group">
+                                                            <label class="form-label">⏭️ Number of questions to skip:</label>
+                                                            @if (maxSkip > 0)
+                                                            {
+                                                                <input type="number" class="form-control skip-count-input"
+                                                                       min="1" max="@maxSkip"
+                                                                       value="@skipValue" />
+                                                                <div class="small-text">Maximum: @maxSkip questions</div>
+                                                            }
+                                                            else
+                                                            {
+                                                                <input type="number" class="form-control skip-count-input"
+                                                                       value="1" readonly />
+                                                                <div class="small-text">No more questions to skip</div>
+                                                            }
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- End Survey Option -->
+                                                    @{
+                                                        var endSurveyDisplay = answer.ActionType == ConditionActionType.EndSurvey ? "block" : "none";
+                                                    }
+                                                    <div class="condition-option end-survey"
+                                                         data-answer-id="@answer.AnswerId"
+                                                         style="display: @endSurveyDisplay;">
+                                                        <div class="form-group">
+                                                            <label class="form-label">🏁 End message (optional):</label>
+                                                            <input type="text" class="form-control end-message-input"
+                                                                   placeholder="Thank you for participating!"
+                                                                   value="@(answer.EndMessage ?? "")" />
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Condition Summary -->
+                                                    <div class="condition-summary">
+                                                        <strong>
+                                                            <i class="fas fa-info-circle"></i>
+                                                            Result:
+                                                        </strong>
+                                                        <span class="summary-text">@GetConditionSummary(answer)</span>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Individual Answer Actions -->
+                                                <div class="answer-actions">
+                                                    <span class="answer-status" data-answer-id="@answer.AnswerId"></span>
+                                                    <button type="button" class="btn-reset-answer" onclick="resetAnswer(@answer.AnswerId)">
+                                                        <i class="fas fa-undo"></i> Reset
+                                                    </button>
+                                                    <button type="button" class="btn-save-answer" onclick="saveAnswer(@answer.AnswerId)">
+                                                        <i class="fas fa-save"></i> Save
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div style="background: #e3f2fd; color: #1565c0; padding: 20px; border-radius: 8px; text-align: center;">
+                                        <i class="fas fa-info-circle"></i>
+                                        This question has no answers to configure conditions for.
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <!-- Save Section -->
+                <div class="save-section">
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-save"></i> Save Conditional Logic
+                    </button>
+                    <a href="@Url.Action("Index")" class="btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to Questionnaires
+                    </a>
+                    <button type="button" class="btn-secondary" onclick="previewLogic()">
+                        <i class="fas fa-eye"></i> Preview Logic Flow
+                    </button>
+                    <button type="button" class="btn-secondary" onclick="clearAllConditions()">
+                        <i class="fas fa-eraser"></i> Clear All Conditions
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function showQuestion(questionIndex) {
+            const content = document.getElementById(`question-content-${questionIndex}`);
+            const showBtn = document.querySelector(`[onclick="showQuestion(${questionIndex})"]`);
+            const hideBtn = document.querySelector(`[onclick="hideQuestion(${questionIndex})"]`);
+
+            content.classList.add('show');
+            showBtn.classList.add('d-none');
+            hideBtn.classList.remove('d-none');
+        }
+
+        function hideQuestion(questionIndex) {
+            const content = document.getElementById(`question-content-${questionIndex}`);
+            const showBtn = document.querySelector(`[onclick="showQuestion(${questionIndex})"]`);
+            const hideBtn = document.querySelector(`[onclick="hideQuestion(${questionIndex})"]`);
+
+            content.classList.remove('show');
+            showBtn.classList.remove('d-none');
+            hideBtn.classList.add('d-none');
+        }
+
+        function toggleConditionOptions(selectElement) {
+            const answerId = selectElement.getAttribute('data-answer-id');
+            const selectedValue = selectElement.value;
+
+            // Hide all condition options for this answer
+            const conditionOptions = document.querySelectorAll(`[data-answer-id="${answerId}"].condition-option`);
+            conditionOptions.forEach(option => {
+                option.style.display = 'none';
+            });
+
+            // Show the relevant condition option
+            let targetClass = '';
+            switch(selectedValue) {
+                case '1': targetClass = 'skip-to-question'; break;
+                case '2': targetClass = 'skip-count'; break;
+                case '3': targetClass = 'end-survey'; break;
+            }
+
+            if (targetClass) {
+                const targetOption = document.querySelector(`[data-answer-id="${answerId}"].${targetClass}`);
+                if (targetOption) {
+                    targetOption.style.display = 'block';
+                }
+            }
+
+            updateConditionSummary(selectElement);
+            updateQuestionHeaderStatus();
+            markAnswerAsModified(answerId);
+        }
+
+        function updateConditionSummary(selectElement) {
+            const answerId = selectElement.getAttribute('data-answer-id');
+            const selectedValue = selectElement.value;
+            const summaryElement = selectElement.closest('.answer-content').querySelector('.summary-text');
+
+            let summaryText = '';
+            switch(selectedValue) {
+                case '0':
+                    summaryText = 'Continue to the next question normally';
+                    break;
+                case '1':
+                    const targetSelect = selectElement.closest('.answer-content').querySelector('.target-question-select');
+                    if (targetSelect) {
+                        const selectedOption = targetSelect.options[targetSelect.selectedIndex];
+                        const optionText = selectedOption ? selectedOption.text : '';
+                        summaryText = `Jump to ${optionText}`;
+                    } else {
+                        summaryText = 'Jump to specific question';
+                    }
+                    break;
+                case '2':
+                    const skipInput = selectElement.closest('.answer-content').querySelector('.skip-count-input');
+                    const skipCount = skipInput ? skipInput.value : '1';
+                    summaryText = `Skip ${skipCount} question(s)`;
+                    break;
+                case '3':
+                    summaryText = 'End the survey immediately';
+                    break;
+            }
+
+            if (summaryElement) {
+                summaryElement.textContent = summaryText;
+            }
+        }
+
+        function updateQuestionHeaderStatus() {
+            document.querySelectorAll('.question-card').forEach(card => {
+                const actionSelects = card.querySelectorAll('.action-type-select');
+                let hasConditions = false;
+
+                actionSelects.forEach(select => {
+                    if (select.value !== '0') {
+                        hasConditions = true;
+                    }
+                });
+
+                const header = card.querySelector('.question-header');
+
+                if (hasConditions) {
+                    header.classList.add('has-logic');
+                } else {
+                    header.classList.remove('has-logic');
+                }
+
+                // Update answer cards
+                actionSelects.forEach(select => {
+                    const answerCard = select.closest('.answer-card');
+                    if (select.value !== '0') {
+                        answerCard.classList.add('has-condition');
+                    } else {
+                        answerCard.classList.remove('has-condition');
+                    }
+                });
+            });
+        }
+
+        function markAnswerAsModified(answerId) {
+            const answerCard = document.querySelector(`[data-answer-id="${answerId}"]`).closest('.answer-card');
+            const statusElement = answerCard.querySelector('.answer-status');
+
+            if (statusElement && !statusElement.classList.contains('modified')) {
+                statusElement.textContent = '● Modified';
+                statusElement.className = 'answer-status modified';
+            }
+        }
+
+        function saveAnswer(answerId) {
+            const answerCard = document.querySelector(`[data-answer-id="${answerId}"]`).closest('.answer-card');
+            const actionSelect = answerCard.querySelector('.action-type-select');
+            const statusElement = answerCard.querySelector('.answer-status');
+
+            if (!actionSelect) return;
+
+            const actionType = actionSelect.value;
+            let condition = {
+                ActionType: parseInt(actionType)
+            };
+
+            // Get additional data based on action type
+            switch(actionType) {
+                case '1': // Skip to question
+                    const targetSelect = answerCard.querySelector('.target-question-select');
+                    if (targetSelect && targetSelect.value && targetSelect.closest('.condition-option').style.display !== 'none') {
+                        condition.TargetQuestionNumber = parseInt(targetSelect.value);
+                    }
+                    break;
+                case '2': // Skip count
+                    const skipInput = answerCard.querySelector('.skip-count-input');
+                    if (skipInput && skipInput.value && skipInput.closest('.condition-option').style.display !== 'none') {
+                        condition.SkipCount = parseInt(skipInput.value);
+                    }
+                    break;
+                case '3': // End survey
+                    const endMessageInput = answerCard.querySelector('.end-message-input');
+                    if (endMessageInput && endMessageInput.closest('.condition-option').style.display !== 'none') {
+                        condition.EndMessage = endMessageInput.value || null;
+                    }
+                    break;
+            }
+
+            // Here you could make an AJAX call to save individual answer
+            // For now, we'll just show success message and update status
+            statusElement.textContent = '✓ Saved';
+            statusElement.className = 'answer-status saved';
+            updateQuestionHeaderStatus();
+            showToast('Answer condition saved successfully!', 'success');
+
+            // Optional: Make AJAX call to server
+            // fetch('/YourController/SaveAnswerCondition', {
+            //     method: 'POST',
+            //     headers: {
+            //         'Content-Type': 'application/json'
+            //     },
+            //     body: JSON.stringify({
+            //         AnswerId: answerId,
+            //         ConditionJson: JSON.stringify(condition)
+            //     })
+            // });
+        }
+
+        function resetAnswer(answerId) {
+            if (confirm('Are you sure you want to reset this answer to "Continue to next question"?')) {
+                const answerCard = document.querySelector(`[data-answer-id="${answerId}"]`).closest('.answer-card');
+                const actionSelect = answerCard.querySelector('.action-type-select');
+                const statusElement = answerCard.querySelector('.answer-status');
+
+                if (actionSelect) {
+                    actionSelect.value = '0';
+                    toggleConditionOptions(actionSelect);
+
+                    statusElement.textContent = '↻ Reset';
+                    statusElement.className = 'answer-status modified';
+
+                    updateQuestionHeaderStatus();
+                    showToast('Answer condition reset successfully!', 'success');
+                }
+            }
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.textContent = message;
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? '#28a745' : '#dc3545'};
+                color: white;
+                padding: 12px 20px;
+                border-radius: 6px;
+                z-index: 10000;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            `;
+
+            document.body.appendChild(toast);
+
+            // Fade in
+            setTimeout(() => {
+                toast.style.opacity = '1';
+            }, 100);
+
+            // Remove after 3 seconds
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => {
+                    if (document.body.contains(toast)) {
+                        document.body.removeChild(toast);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        function clearAllConditions() {
+            if (confirm('🗑️ Are you sure you want to reset all conditions to "Continue to next question"?\n\nThis action cannot be undone and will remove all your conditional logic rules.')) {
+                document.querySelectorAll('.action-type-select').forEach(select => {
+                    select.value = '0';
+                    toggleConditionOptions(select);
+                });
+
+                // Reset all status indicators
+                document.querySelectorAll('.answer-status').forEach(status => {
+                    status.textContent = '↻ Reset';
+                    status.className = 'answer-status modified';
+                });
+
+                updateQuestionHeaderStatus();
+                alert('✅ All conditions have been cleared!\n\nDon\'t forget to save your changes.');
+            }
+        }
+
+        function previewLogic() {
+            const conditions = [];
+            const answerContents = document.querySelectorAll('.answer-content');
+
+            answerContents.forEach(container => {
+                const actionSelect = container.querySelector('.action-type-select');
+                if (actionSelect && actionSelect.value !== '0') {
+                    const summaryText = container.querySelector('.summary-text').textContent;
+                    const answerText = container.querySelector('.answer-text').textContent.trim();
+                    conditions.push(`• ${answerText} → ${summaryText}`);
+                }
+            });
+
+            if (conditions.length === 0) {
+                alert('📋 No conditional logic configured yet.\n\nAll answers will continue to the next question normally.');
+            } else {
+                alert('🔮 Active Conditional Logic Rules:\n\n' + conditions.join('\n\n'));
+            }
+        }
+
+        // Form submission handling
+        document.getElementById('logicForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const conditions = [];
+            const answerContents = document.querySelectorAll('.answer-content');
+
+            answerContents.forEach((container, index) => {
+                const actionSelect = container.querySelector('.action-type-select');
+                if (!actionSelect) return;
+
+                const answerId = actionSelect.getAttribute('data-answer-id');
+                const actionType = actionSelect.value;
+
+                let condition = {
+                    ActionType: parseInt(actionType)
+                };
+
+                // Get additional data based on action type
+                switch(actionType) {
+                    case '1': // Skip to question
+                        const targetSelect = container.querySelector('.target-question-select');
+                        if (targetSelect && targetSelect.value && targetSelect.closest('.condition-option').style.display !== 'none') {
+                            condition.TargetQuestionNumber = parseInt(targetSelect.value);
+                        }
+                        break;
+                    case '2': // Skip count
+                        const skipInput = container.querySelector('.skip-count-input');
+                        if (skipInput && skipInput.value && skipInput.closest('.condition-option').style.display !== 'none') {
+                            condition.SkipCount = parseInt(skipInput.value);
+                        }
+                        break;
+                    case '3': // End survey
+                        const endMessageInput = container.querySelector('.end-message-input');
+                        if (endMessageInput && endMessageInput.closest('.condition-option').style.display !== 'none') {
+                            condition.EndMessage = endMessageInput.value || null;
+                        }
+                        break;
+                }
+
+                const conditionJson = JSON.stringify(condition);
+                conditions.push({
+                    AnswerId: parseInt(answerId),
+                    ConditionJson: conditionJson
+                });
+            });
+
+            // Remove any existing hidden inputs to avoid duplicates
+            const existingInputs = this.querySelectorAll('input[name^="Conditions["]');
+            existingInputs.forEach(input => input.remove());
+
+            // Create hidden inputs for conditions
+            const form = this;
+            conditions.forEach((condition, index) => {
+                const answerIdInput = document.createElement('input');
+                answerIdInput.type = 'hidden';
+                answerIdInput.name = `Conditions[${index}].AnswerId`;
+                answerIdInput.value = condition.AnswerId;
+                form.appendChild(answerIdInput);
+
+                const conditionInput = document.createElement('input');
+                conditionInput.type = 'hidden';
+                conditionInput.name = `Conditions[${index}].ConditionJson`;
+                conditionInput.value = condition.ConditionJson;
+                form.appendChild(conditionInput);
+            });
+
+            // Submit the form
+            form.submit();
+        });
+
+        // Initialize condition summaries on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const actionSelects = document.querySelectorAll('.action-type-select');
+            actionSelects.forEach(updateConditionSummary);
+
+            // Add multi-answers class for questions with multiple answers
+            document.querySelectorAll('.answers-grid').forEach(grid => {
+                const answerCards = grid.querySelectorAll('.answer-card');
+                if (answerCards.length > 1) {
+                    grid.classList.add('multi-answers');
+                }
+            });
+
+            // Add event listeners to target question selects
+            const targetSelects = document.querySelectorAll('.target-question-select');
+            targetSelects.forEach(select => {
+                select.addEventListener('change', function() {
+                    const actionSelect = this.closest('.answer-content').querySelector('.action-type-select');
+                    if (actionSelect) {
+                        updateConditionSummary(actionSelect);
+                        const answerId = actionSelect.getAttribute('data-answer-id');
+                        markAnswerAsModified(answerId);
+                    }
+                });
+            });
+
+            // Add event listeners to skip count inputs
+            const skipInputs = document.querySelectorAll('.skip-count-input');
+            skipInputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    const actionSelect = this.closest('.answer-content').querySelector('.action-type-select');
+                    if (actionSelect) {
+                        updateConditionSummary(actionSelect);
+                        const answerId = actionSelect.getAttribute('data-answer-id');
+                        markAnswerAsModified(answerId);
+                    }
+                });
+            });
+
+            // Add event listeners to end message inputs
+            const endMessageInputs = document.querySelectorAll('.end-message-input');
+            endMessageInputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    const actionSelect = this.closest('.answer-content').querySelector('.action-type-select');
+                    if (actionSelect) {
+                        const answerId = actionSelect.getAttribute('data-answer-id');
+                        markAnswerAsModified(answerId);
+                    }
+                });
+            });
+
+            // Initialize answer status indicators
+            document.querySelectorAll('.answer-status').forEach(status => {
+                status.textContent = '';
+            });
+
+            // Update header status on page load
+            updateQuestionHeaderStatus();
+        });
+    </script>
+}
+
+@functions {
+    string GetConditionSummary(AnswerConditionViewModel answer)
+    {
+        switch (answer.ActionType)
+        {
+            case ConditionActionType.Continue:
+                return "Continue to the next question normally";
+            case ConditionActionType.SkipToQuestion:
+                if (answer.TargetQuestionNumber.HasValue && answer.TargetQuestionNumber.Value <= Model.Questions.Count)
+                {
+                    var targetQuestion = Model.Questions[answer.TargetQuestionNumber.Value - 1];
+                    var questionPreview = targetQuestion.QuestionText.Length > 30
+                        ? targetQuestion.QuestionText.Substring(0, 30) + "..."
+                        : targetQuestion.QuestionText;
+                    return $"Jump to Q{answer.TargetQuestionNumber}: {questionPreview}";
+                }
+                return $"Jump to Question {answer.TargetQuestionNumber}";
+            case ConditionActionType.SkipCount:
+                return $"Skip {answer.SkipCount} question(s)";
+            case ConditionActionType.EndSurvey:
+                return "End the survey immediately";
+            default:
+                return "No condition set";
+        }
+    }
+}
