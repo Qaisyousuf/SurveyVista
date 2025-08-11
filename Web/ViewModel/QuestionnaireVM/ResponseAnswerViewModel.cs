@@ -6,5 +6,6 @@
         public string? Text { get; set; }  // Answer text
 
         public int? Count { get; set; }
+        public string? ConditionJson { get; set; }  // Add this line for conditional logic
     }
 }

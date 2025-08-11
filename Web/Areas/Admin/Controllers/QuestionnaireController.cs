@@ -773,6 +773,188 @@ namespace Web.Areas.Admin.Controllers
                 return RedirectToAction(nameof(SetLogic), new { id = model.QuestionnaireId });
             }
         }
+        // Add these methods to your existing controller (the one with SetLogic and SaveLogic)
+
+        [HttpPost]
+        public async Task<IActionResult> SaveAnswerCondition([FromBody] SaveAnswerConditionRequest request)
+        {
+            try
+            {
+                // Validate the request
+                if (request == null || request.AnswerId <= 0)
+                {
+                    return Json(new { success = false, message = "Invalid answer ID provided." });
+                }
+
+                // Get the questionnaire with all related data
+                var questionnaire = _questionnaire.GetQuestionnaireWithQuestionAndAnswer(request.QuestionnaireId);
+
+                if (questionnaire == null)
+                {
+                    return Json(new { success = false, message = "Questionnaire not found." });
+                }
+
+                // Find the specific answer
+                var answer = questionnaire.Questions
+                    .SelectMany(q => q.Answers)
+                    .FirstOrDefault(a => a.Id == request.AnswerId);
+
+                if (answer == null)
+                {
+                    return Json(new { success = false, message = "Answer not found." });
+                }
+
+                // Validate and store the condition JSON
+                if (string.IsNullOrEmpty(request.ConditionJson))
+                {
+                    // Clear the condition (set to continue)
+                    answer.ConditionJson = null;
+                }
+                else
+                {
+                    // Validate JSON format
+                    try
+                    {
+                        var testParse = System.Text.Json.JsonSerializer.Deserialize<ConditionData>(request.ConditionJson);
+                        answer.ConditionJson = request.ConditionJson;
+                    }
+                    catch (System.Text.Json.JsonException)
+                    {
+                        return Json(new { success = false, message = "Invalid condition data format." });
+                    }
+                }
+
+                // Save changes using your repository pattern
+                await _questionnaire.Update(questionnaire);
+                await _questionnaire.commitAsync();
+
+                // Generate summary for response
+                string summary = GetConditionSummaryFromJson(answer.ConditionJson);
+
+                return Json(new
+                {
+                    success = true,
+                    message = "Answer condition saved successfully!",
+                    summary = summary
+                });
+            }
+            catch (Exception ex)
+            {
+                // Log error if you have logging configured
+                // _logger?.LogError(ex, "Error saving answer condition for AnswerId: {AnswerId}", request.AnswerId);
+                return Json(new
+                {
+                    success = false,
+                    message = "An error occurred while saving the condition. Please try again."
+                });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ResetAnswerCondition([FromBody] ResetAnswerConditionRequest request)
+        {
+            try
+            {
+                if (request == null || request.AnswerId <= 0)
+                {
+                    return Json(new { success = false, message = "Invalid answer ID provided." });
+                }
+
+                var questionnaire = _questionnaire.GetQuestionnaireWithQuestionAndAnswer(request.QuestionnaireId);
+
+                if (questionnaire == null)
+                {
+                    return Json(new { success = false, message = "Questionnaire not found." });
+                }
+
+                var answer = questionnaire.Questions
+                    .SelectMany(q => q.Answers)
+                    .FirstOrDefault(a => a.Id == request.AnswerId);
+
+                if (answer == null)
+                {
+                    return Json(new { success = false, message = "Answer not found." });
+                }
+
+                // Reset to default (Continue)
+                answer.ConditionJson = null;
+
+                await _questionnaire.Update(questionnaire);
+                await _questionnaire.commitAsync();
+
+                return Json(new
+                {
+                    success = true,
+                    message = "Answer condition reset successfully!"
+                });
+            }
+            catch (Exception ex)
+            {
+                // _logger?.LogError(ex, "Error resetting answer condition for AnswerId: {AnswerId}", request.AnswerId);
+                return Json(new
+                {
+                    success = false,
+                    message = "An error occurred while resetting the condition. Please try again."
+                });
+            }
+        }
+
+        // Helper method to generate summary from JSON
+        private string GetConditionSummaryFromJson(string conditionJson)
+        {
+            if (string.IsNullOrEmpty(conditionJson))
+            {
+                return "Continue to the next question normally";
+            }
+
+            try
+            {
+                var condition = System.Text.Json.JsonSerializer.Deserialize<ConditionData>(conditionJson);
+                if (condition == null) return "Continue to the next question normally";
+
+                switch (condition.ActionType)
+                {
+                    case 0: // Continue
+                        return "Continue to the next question normally";
+                    case 1: // SkipToQuestion
+                        return condition.TargetQuestionNumber.HasValue
+                            ? $"Jump to Question {condition.TargetQuestionNumber}"
+                            : "Jump to specific question";
+                    case 2: // SkipCount
+                        return $"Skip {condition.SkipCount ?? 1} question(s)";
+                    case 3: // EndSurvey
+                        return "End the survey immediately";
+                    default:
+                        return "Continue to the next question normally";
+                }
+            }
+            catch
+            {
+                return "Continue to the next question normally";
+            }
+        }
+
+        // Request models - Add these classes to your project
+        public class SaveAnswerConditionRequest
+        {
+            public int AnswerId { get; set; }
+            public string ConditionJson { get; set; } = string.Empty;
+            public int QuestionnaireId { get; set; }
+        }
+
+        public class ResetAnswerConditionRequest
+        {
+            public int AnswerId { get; set; }
+            public int QuestionnaireId { get; set; }
+        }
+
+        public class ConditionData
+        {
+            public int ActionType { get; set; }
+            public int? TargetQuestionNumber { get; set; }
+            public int? SkipCount { get; set; }
+            public string? EndMessage { get; set; }
+        }
 
     }
 

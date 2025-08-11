@@ -310,7 +310,6 @@
 
 </style>
 
-
 <div class="QuestionContainer">
     <section class="hero container card">
         <form id="questionnaireForm" method="post" asp-action="DisplayQuestionnaire">
@@ -369,20 +368,17 @@
                                 <input type="hidden" name="Questions[@i].Answers[@j].Text" value="@answer.Text">
                                 <!-- Add more hidden fields as needed for other properties of the answer -->
                             }
-                            <div class="step @(i == 0 ? "active" : "")">
+                            <div class="step @(i == 0 ? "active" : "")" data-question-id="@question.Id">
 
                                 <p class="font-weight-normal">@(i + 1). @question.Text</p>
-
-                              
 
                                 @switch (question.Type)
                                 {
                                     case QuestionType.Text:
                                         @foreach (var answer in question.Answers)
                                         {
-
                                             <input type="Text" class="form-control" id="question@(i + 1)" name="Questions[@i].SelectedText" rows="3" placeholder="Enter answer"></input>
-                                            <input class="form-control hidden-textarea" id="question@(i + 1)" name="Questions[@i].SelectedAnswerIds" value="@answer.Id" rows="3" placeholder="Enter answer" ></input>
+                                            <input class="form-control hidden-textarea" id="question@(i + 1)" name="Questions[@i].SelectedAnswerIds" value="@answer.Id" rows="3" placeholder="Enter answer" data-condition="@answer.ConditionJson"></input>
                                         }
                                         break;
                                     case QuestionType.CheckBox:
@@ -394,7 +390,7 @@
                                             @foreach (var answer in question.Answers)
                                             {
                                                 <div class="form-check">
-                                                    <input class="form-check-input" id="question@(i)_answer@(answer.Id)" type="checkbox" name="Questions[@i].SelectedAnswerIds" value="@answer.Id" >
+                                                    <input class="form-check-input" id="question@(i)_answer@(answer.Id)" type="checkbox" name="Questions[@i].SelectedAnswerIds" value="@answer.Id" data-condition="@answer.ConditionJson">
                                                     <label class="form-check-label" for="question@(i)_answer@(answer.Id)">
                                                         @answer.Text
                                                     </label>
@@ -410,7 +406,7 @@
                                             @foreach (var answer in question.Answers)
                                             {
                                                 <div class="form-check">
-                                                    <input class="form-check-input answer-input" type="radio" id="question@(i)_answer@(answer.Id)" name="Questions[@i].SelectedAnswerIds" value="@answer.Id">
+                                                    <input class="form-check-input answer-input" type="radio" id="question@(i)_answer@(answer.Id)" name="Questions[@i].SelectedAnswerIds" value="@answer.Id" data-condition="@answer.ConditionJson">
 
                                                     <label class="form-check-label" for="question@(i)_answer@(answer.Id)">
                                                         @answer.Text
@@ -428,7 +424,7 @@
                                         {
 
                                             <textarea type="Text" class="form-control" id="question@(i + 1)" name="Questions[@i].SelectedText" value="@answer.Text" rows="3" placeholder="Enter answer"></textarea>
-                                            <input type="hidden" class="form-control" id="question@(i + 1)" name="Questions[@i].SelectedAnswerIds" value="@answer.Id" rows="3" placeholder="Enter answer"></input>
+                                            <input type="hidden" class="form-control" id="question@(i + 1)" name="Questions[@i].SelectedAnswerIds" value="@answer.Id" rows="3" placeholder="Enter answer" data-condition="@answer.ConditionJson"></input>
                                         }
 
                                         break;
@@ -438,7 +434,7 @@
                                         @foreach (var answer in question.Answers)
                                         {
                                             <input type="range" class="form-range " id="question@(i + 1)" name="Questions[@i].SelectedText" min="0" max="100" step="1">
-                                            <input type="hidden" class="form-range " id="question@(i + 1)" name="Questions[@i].SelectedAnswerIds" value="@answer.Id" min="0" max="100" step="1">
+                                            <input type="hidden" class="form-range " id="question@(i + 1)" name="Questions[@i].SelectedAnswerIds" value="@answer.Id" min="0" max="100" step="1" data-condition="@answer.ConditionJson">
 
                                             <output id="question@(i + 1)_output">50</output>
                                             <script>
@@ -458,7 +454,7 @@
                                                     <div class="rating-label">@answer.Text</div>
                                                     <input type="radio" id="question@(i)_rating@(answer.Id)"
                                                            name="Questions[@i].SelectedAnswerIds"
-                                                           value="@answer.Id" class="rating-input" hidden>
+                                                           value="@answer.Id" class="rating-input" hidden data-condition="@answer.ConditionJson">
                                                     <label for="question@(i)_rating@(answer.Id)" class="bi bi-star-fill rating-star"></label>
                                                 </div>
                                             }
@@ -478,7 +474,7 @@
                                                             <li class="draggable-item" draggable="true" id="@answer.Id" ondragstart="dragStart(event);" ondragover="allowDrop(event);" ondrop="drop(event);">
                                                                 <span class="answer-index">@index. </span> @answer.Text
                                                                 <i class="bi bi-grip-vertical mr-auto"></i>
-                                                                <input type="hidden" name="Questions[@i].SelectedAnswerIds" value="@answer.Id">
+                                                                <input type="hidden" name="Questions[@i].SelectedAnswerIds" value="@answer.Id" data-condition="@answer.ConditionJson">
                                                                 <button type="button" class="up-button btn btn-primary btn-sm " onclick="moveUp(this.parentElement)">
                                                                     <i class="bi bi-arrow-up"></i> Up
                                                                 </button>
@@ -559,7 +555,7 @@
                                                     @foreach (var answer in question.Answers)
                                                     {
                                                         <label class="likert-option">
-                                                            <input class="form-check-input" type="radio" id="question@(i)_answer@(answer.Id)" name="Questions[@i].SelectedAnswerIds" value="@answer.Id">
+                                                            <input class="form-check-input" type="radio" id="question@(i)_answer@(answer.Id)" name="Questions[@i].SelectedAnswerIds" value="@answer.Id" data-condition="@answer.ConditionJson">
                                                             @answer.Text
                                                         </label>
                                                     }
@@ -589,7 +585,7 @@
                                                         @foreach (var option in question.Answers)  // Use consistent options for each sub-question
                                                         {
                                                             <td>
-                                                                <input type="radio" name="Questions[@i].SelectedAnswerIds" value="@option.Id">
+                                                                <input type="radio" name="Questions[@i].SelectedAnswerIds" value="@option.Id" data-condition="@option.ConditionJson">
                                                             </td>
                                                         }
                                                     </tr>
@@ -625,7 +621,7 @@
                                                 {
                                                     <div class="card image-card" id="card_@answer.Id" onclick="selectImageCard('@answer.Id', '@question.Id')">
                                                         <img src="@answer.Text" alt="Image option" class="img-fluid" />
-                                                        <input type="radio" id="image_answer_@answer.Id" name="Questions[@i].SelectedAnswerIds" value="@answer.Id" hidden />
+                                                        <input type="radio" id="image_answer_@answer.Id" name="Questions[@i].SelectedAnswerIds" value="@answer.Id" hidden data-condition="@answer.ConditionJson" />
                                                     </div>
                                                 }
                                             </div>
@@ -671,11 +667,7 @@
         </form>
     </section>
 </div>
-
-
 @section Scripts {
-
-
     @{
         <partial name="_ValidationScriptsPartial" />
     }
@@ -687,26 +679,114 @@
                 console.error('Form not found!');
                 return;
             }
+
+            // Track the actual navigation path
+            let navigationPath = [0]; // Start with question 1 (index 0)
+
+            // Get conditions from the CURRENT step only
+            function getCurrentStepConditions() {
+                const currentStepElement = steps[currentStep];
+                const activeConditions = [];
+                
+                // Only check inputs in the current step
+                const currentStepInputs = currentStepElement.querySelectorAll('input:checked, input[type="text"]:not([value=""]), textarea:not([value=""])');
+                
+                currentStepInputs.forEach(input => {
+                    const condition = input.getAttribute('data-condition');
+                    if (condition && condition !== '' && condition !== 'null') {
+                        try {
+                            const conditionData = JSON.parse(condition);
+                            activeConditions.push(conditionData);
+                        } catch (e) {
+                            console.log('Invalid condition JSON:', condition);
+                        }
+                    }
+                });
+
+                return activeConditions;
+            }
+
+            function shouldApplyCondition() {
+                const conditions = getCurrentStepConditions();
+                
+                for (let condition of conditions) {
+                    if (condition.ActionType === 1 && condition.TargetQuestionNumber) {
+                        // SkipToQuestion
+                        return { action: 'jumpTo', target: condition.TargetQuestionNumber };
+                    } else if (condition.ActionType === 2 && condition.SkipCount) {
+                        // SkipCount
+                        return { action: 'skip', count: condition.SkipCount };
+                    } else if (condition.ActionType === 3) {
+                        // EndSurvey
+                        return { action: 'end', message: condition.EndMessage };
+                    }
+                }
+                
+                return { action: 'continue' };
+            }
+
+            function getCurrentStepNumber() {
+                return currentStep + 1; // Convert 0-based index to 1-based question number
+            }
+
+            function jumpToQuestion(questionNumber) {
+                const targetStepIndex = questionNumber - 1; // Convert to 0-based index
+                if (targetStepIndex >= 0 && targetStepIndex < steps.length) {
+                    currentStep = targetStepIndex;
+                    navigationPath.push(currentStep); // Track the path
+                    showStep(currentStep);
+                    updateStepper();
+                    console.log(`Jumped to question ${questionNumber}, path:`, navigationPath);
+                }
+            }
+
+            function skipQuestions(skipCount) {
+                const newStepIndex = currentStep + skipCount + 1;
+                if (newStepIndex < steps.length) {
+                    currentStep = newStepIndex;
+                    navigationPath.push(currentStep); // Track the path
+                    showStep(currentStep);
+                    updateStepper();
+                } else {
+                    // If skip goes beyond last question, show submit
+                    currentStep = steps.length - 1;
+                    navigationPath.push(currentStep);
+                    showStep(currentStep);
+                    updateStepper();
+                }
+                console.log(`Skipped ${skipCount} questions, path:`, navigationPath);
+            }
+
+            function endSurvey(endMessage) {
+                // Hide all steps and show end message
+                steps.forEach(step => step.style.display = 'none');
+                
+                const endMessageDiv = document.createElement('div');
+                endMessageDiv.className = 'alert alert-success text-center';
+                endMessageDiv.innerHTML = `
+                    <h4>Survey Completed</h4>
+                    <p>${endMessage || 'Thank you for completing the survey!'}</p>
+                `;
+                
+                const formContainer = document.querySelector('.col-md-9');
+                formContainer.appendChild(endMessageDiv);
+                
+                // Hide submit button
+                submitButton.style.display = 'none';
+            }
+
+            // Rating functionality
             $(document).ready(function () {
                 $('.rating-item').on('click', function () {
-                    // Remove 'selected' class from all stars within the same rating
                     $(this).siblings().find('.rating-star').removeClass('selected');
-
-                    // Add 'selected' class to the clicked star and all stars before it within the same rating
                     $(this).find('.rating-star').addClass('selected');
                     $(this).prevAll().find('.rating-star').addClass('selected');
-
-                    // Toggle 'fill' class on the clicked star
                     $(this).find('.rating-star').toggleClass('bi-star-fill bi-star');
-
-                    // Check the corresponding radio input
                     $(this).find('.rating-input').prop('checked', true);
                 });
             });
 
-
-
-            // Ensure we only add listeners once by checking if they've been added already
+            // Ranking functionality
             if (!window.hasEventListenersAdded) {
                 const upButtons = document.querySelectorAll('.up-button');
                 const downButtons = document.querySelectorAll('.down-button');
@@ -723,8 +803,9 @@
                     });
                 });
 
-                window.hasEventListenersAdded = true; // Set a flag to indicate listeners are added
+                window.hasEventListenersAdded = true;
             }
+
             function moveUp(button) {
                 var li = button.parentNode;
                 if (li.previousElementSibling) {
@@ -738,30 +819,15 @@
                     li.parentNode.insertBefore(li.nextElementSibling, li);
                 }
             }
-            function updateOrder() {
-                document.querySelectorAll('.rank-list').forEach((list, index) => {
-                    list.querySelectorAll('li').forEach((li, idx) => {
-                        // Assuming each li has a hidden input as the last child
-                        li.querySelector('input[type="hidden"]').value = li.getAttribute('data-answer-id');
-                    });
-                });
-            }
 
-
-
-
+            // Stepper functionality
             const steps = form.querySelectorAll('.step');
             const stepIndicators = document.querySelectorAll('.step-indicator');
             const submitButton = form.querySelector('.submit');
             let currentStep = 0;
 
-            // Prevent form submission
             form.addEventListener('submit', function (event) {
-                // event.preventDefault();
-                console.log('Form submission prevented.');
-
-                // Here, you can add logic to handle the form data client-side,
-                // such as validating input or sending it via AJAX.
+                console.log('Form submission');
                 const formData = new FormData(form);
                 formData.forEach((value, key) => {
                     console.log(`${key}: ${value}`);
@@ -784,26 +850,59 @@
                 submitButton.style.display = index === steps.length - 1 ? 'block' : 'none';
             }
 
+            // Fixed goToNextStep - only applies conditions from current step
             function goToNextStep() {
-                if (currentStep < steps.length - 1) {
-                    currentStep++;
-                    showStep(currentStep);
-                    updateStepper();
+                const conditionResult = shouldApplyCondition();
+                
+                switch (conditionResult.action) {
+                    case 'jumpTo':
+                        console.log(`Applying condition: Jump to question ${conditionResult.target}`);
+                        jumpToQuestion(conditionResult.target);
+                        break;
+                        
+                    case 'skip':
+                        console.log(`Applying condition: Skip ${conditionResult.count} questions`);
+                        skipQuestions(conditionResult.count);
+                        break;
+                        
+                    case 'end':
+                        console.log('Applying condition: End survey');
+                        endSurvey(conditionResult.message);
+                        break;
+                        
+                    case 'continue':
+                    default:
+                        // Normal next step
+                        if (currentStep < steps.length - 1) {
+                            currentStep++;
+                            navigationPath.push(currentStep); // Track normal navigation
+                            showStep(currentStep);
+                            updateStepper();
+                            console.log(`Normal next to question ${currentStep + 1}, path:`, navigationPath);
+                        }
+                        break;
                 }
             }
 
+            // Fixed goToPrevStep - follows actual navigation path
             function goToPrevStep() {
-                if (currentStep > 0) {
-                    currentStep--;
+                if (navigationPath.length > 1) {
+                    // Remove current step from path
+                    navigationPath.pop();
+                    // Go to previous step in the actual path
+                    currentStep = navigationPath[navigationPath.length - 1];
                     showStep(currentStep);
                     updateStepper();
+                    console.log(`Previous to question ${currentStep + 1}, path:`, navigationPath);
+                } else {
+                    console.log('Already at the first question');
                 }
             }
 
             function updateStepper() {
                 const currentStepIndex = currentStep;
                 stepIndicators.forEach((indicator, i) => {
-                    indicator.style.backgroundColor = i === currentStepIndex ? '#33b3ae' : ''; // Change to your primary color
+                    indicator.style.backgroundColor = i === currentStepIndex ? '#33b3ae' : '';
                 });
             }
 
@@ -822,210 +921,54 @@
             showStep(currentStep);
         });
 
+        // Global functions
+        function allowDrop(ev) {
+            ev.preventDefault();
+        }
 
+        function dragStart(ev) {
+            ev.dataTransfer.setData("text", ev.target.id);
+        }
 
-       
+        function drop(ev) {
+            ev.preventDefault();
+            var data = ev.dataTransfer.getData("text");
+            var draggedElement = document.getElementById(data);
+            var dropTarget = ev.target.closest('.draggable-item');
+            if (dropTarget) {
+                var targetRect = dropTarget.getBoundingClientRect();
+                var midPoint = targetRect.top + (targetRect.height / 2);
 
-
-        // document.addEventListener("DOMContentLoaded", function () {
-        //     const stepper = document.querySelector('.stepper');
-        //     if (!stepper) {
-        //         console.error('Stepper not found!');
-        //         return;
-        //     }
-
-        //     let shownTypes = new Set(); // Set to track shown question types
-        //     const stepIndicators = stepper.querySelectorAll('.step-indicator');
-
-        //     stepIndicators.forEach(indicator => {
-        //         const type = indicator.querySelector('.step-label').textContent.trim(); // Get the text content of the step-label
-        //         if (shownTypes.has(type)) {
-        //             // If this type has already been shown, hide this indicator
-        //             indicator.style.display = 'none';
-        //         } else {
-        //             // Otherwise, mark this type as shown
-        //             shownTypes.add(type);
-        //         }
-        //     });
-        // });
-    </script>
-
-    @*    <script>
-
-    document.addEventListener("DOMContentLoaded", function () {
-        const form = document.getElementById('questionnaireForm');
-        const steps = form.querySelectorAll('.step');
-        const stepIndicators = document.querySelectorAll('.step-indicator');
-        const submitButton = form.querySelector('.submit');
-        let currentStep = 0;
-
-            document.addEventListener('DOMContentLoaded', function () {
-                const form = document.getElementById('questionnaireForm');  // Replace 'myForm' with your actual form ID
-
-                form.addEventListener('submit', function (event) {
-                    event.preventDefault();  // Stop the form from submitting
-                    console.log('Form submission prevented.');
-
-                    // Here, you can add any logic to handle the form data client-side,
-                    // such as validating input, organizing data, or sending it via AJAX.
-
-                    // Example of gathering form data:
-                    const formData = new FormData(form);
-                    formData.forEach((value, key) => {
-                        console.log(`${key}: ${value}`);
-                    });
-
-                    // Optionally, you could send the formData using fetch() or another AJAX method
-                });
-            });
-
-
-            function handleSubmit(event) {
-                event.preventDefault(); // Stop the form from submitting normally
-
-                const form = event.target; // Get the form that triggered the event
-                const formData = new FormData(form);
-
-                // Assuming you need to do something special with `SelectedAnswerIds`
-                const refinedFormData = new FormData();
-                formData.forEach((value, key) => {
-                    if (key.includes("SelectedAnswerIds")) {
-                        document.querySelectorAll(`input[name="${key}"]:checked`).forEach(checkbox => {
-                            refinedFormData.append(key, checkbox.value); // Only append checked items
-                        });
+                var list = dropTarget.parentNode;
+                if (ev.clientY < midPoint) {
+                    list.insertBefore(draggedElement, dropTarget);
+                } else {
+                    if (dropTarget.nextSibling) {
+                        list.insertBefore(draggedElement, dropTarget.nextSibling);
                     } else {
-                        refinedFormData.append(key, value); // Append other data normally
+                        list.appendChild(draggedElement);
                     }
-                });
-
-                // Debugging: log formData to ensure it's captured correctly
-                console.log('Prepared formData for submission:');
-                refinedFormData.forEach((value, key) => {
-                    console.log(`${key}: ${value}`);
-                });
-
-                // Fetch API to submit the refined FormData
-                fetch(form.action, {
-                    method: 'POST',
-                    body: refinedFormData,
-                })
-                    .then(response => response.json()) // Assuming JSON response
-                    .then(data => {
-                        console.log('Submission successful', data);
-                        // Handle success (e.g., display a success message, redirect, etc.)
-                    })
-                    .catch(error => {
-                        console.error('Submission failed', error);
-                        // Handle errors (e.g., display error message)
-                    });
-            }
-
-            function updateSelectedText(radio, text, index) {
-                console.log("Radio checked:", radio.checked);  // Check if the radio is indeed checked
-                console.log("Text to set:", text);  // What text is being set
-                console.log("Target hidden input ID:", 'selected_text_question' + index);  // Which input we're targeting
-
-                var hiddenInput = document.getElementById('selected_text_question' + index);
-                if (radio.checked) {
-                    hiddenInput.value = text;
-                    console.log("Updated hidden input value:", hiddenInput.value);  // Verify the value is set
                 }
-            }
-
-        function showStep(index) {
-            steps.forEach((step, i) => {
-                if (i === index) {
-                    step.style.display = 'block';
-                } else {
-                    step.style.display = 'none';
-                }
-            });
-
-            stepIndicators.forEach((indicator, i) => {
-                if (i === index) {
-                    indicator.classList.add('active');
-                } else {
-                    indicator.classList.remove('active');
-                }
-            });
-
-            if (index === steps.length - 1) {
-                submitButton.style.display = 'block';
-            } else {
-                submitButton.style.display = 'none';
             }
         }
 
-        function goToNextStep() {
-            if (currentStep < steps.length - 1) {
-                currentStep++;
-                showStep(currentStep);
-            }
+        function selectImageCard(answerId, questionId) {
+            var cards = document.querySelectorAll('.image-question[data-question-id="' + questionId + '"] .card');
+            cards.forEach(function (card) {
+                card.classList.remove('selected');
+            });
+
+            var selectedCard = document.getElementById('card_' + answerId);
+            selectedCard.classList.add('selected');
+
+            var radioButton = document.getElementById('image_answer_' + answerId);
+            radioButton.checked = true;
         }
 
-        function goToPrevStep() {
-            if (currentStep > 0) {
-                currentStep--;
-                showStep(currentStep);
-            }
-        }
-
-        const nextButtons = form.querySelectorAll('.next');
-        nextButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                goToNextStep();
-                updateStepper();
-            });
-        });
-
-        const prevButtons = form.querySelectorAll('.prev');
-        prevButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                goToPrevStep();
-                updateStepper();
-            });
-        });
-
-        function updateStepper() {
-            const currentStepIndex = currentStep;
-            stepIndicators.forEach((indicator, i) => {
-                if (i === currentStepIndex) {
-                    indicator.style.backgroundColor = '#33b3ae'; // Change to your primary color
-                } else {
-                    indicator.style.backgroundColor = ''; // Reset to default color for non-active steps
-                }
+        function removeSelected(parent) {
+            parent.querySelectorAll('.draggable-item').forEach(sibling => {
+                sibling.classList.remove('selected');
             });
         }
-
-
-        showStep(currentStep);
-        updateStepper();
-
-        $('.rating i').on('click', function () {
-            var value = $(this).data('value');
-            var questionIndex = $(this).closest('.rating').data('question');
-            var selectedStars = $(this).closest('.rating').find('i.selected').length;
-
-            // Unselect all stars
-            $(this).closest('.rating').find('i').removeClass('selected');
-
-            // Select the clicked star and all preceding stars
-            $(this).addClass('selected').prevAll().addClass('selected');
-
-            // Update the hidden input value if needed
-            $('input[name="question' + questionIndex + '_rating"]').val(value);
-
-            // Update the label with the number of selected stars
-            $(this).closest('.rating').next('.selected-count').text(selectedStars);
-        });
-
-        // Prevent the default action for the anchor tags within the rating
-        $('.rating a').on('click', function (e) {
-            e.preventDefault();
-        });
-    });
-        event.preventDefault();
-</script> *@
-
+    </script>
 }
-

@@ -287,6 +287,28 @@ namespace Web.Controllers
         }
 
 
+        //private ResponseQuestionnaireViewModel MapToViewModel(Questionnaire questionnaire)
+        //{
+        //    var viewModel = new ResponseQuestionnaireViewModel
+        //    {
+        //        Id = questionnaire.Id,
+        //        Title = questionnaire.Title,
+        //        Description = questionnaire.Description,
+        //        Questions = questionnaire.Questions.Select(q => new ResponseQuestionViewModel
+        //        {
+        //            Id = q.Id,
+        //            Text = q.Text,
+        //            Type = q.Type,
+        //            Answers = q.Answers.Select(a => new ResponseAnswerViewModel
+        //            {
+        //                Id = a.Id,
+        //                Text = a.Text
+        //            }).ToList()
+        //        }).ToList()
+        //    };
+
+        //    return viewModel;
+        //}
         private ResponseQuestionnaireViewModel MapToViewModel(Questionnaire questionnaire)
         {
             var viewModel = new ResponseQuestionnaireViewModel
@@ -302,14 +324,14 @@ namespace Web.Controllers
                     Answers = q.Answers.Select(a => new ResponseAnswerViewModel
                     {
                         Id = a.Id,
-                        Text = a.Text
+                        Text = a.Text,
+                        ConditionJson = a.ConditionJson  // Add this line
                     }).ToList()
                 }).ToList()
             };
 
             return viewModel;
         }
-
 
 
 

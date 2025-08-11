@@ -305,32 +305,88 @@
         }
 
     .answer-header {
-        background: #e9ecef;
-        padding: 15px 20px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 18px 20px;
         border-bottom: 1px solid #dee2e6;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+        position: relative;
     }
 
     .answer-card.has-condition .answer-header {
-        background: #ff6b6b;
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
         color: white;
     }
 
+    .answer-header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .answer-title-section {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .answer-number {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #6c5ce7;
+        margin-bottom: 5px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .answer-card.has-condition .answer-number {
+        color: rgba(255, 255, 255, 0.9);
+    }
+
     .answer-title {
+        font-size: 1.1rem;
         font-weight: 600;
         margin: 0;
+        line-height: 1.4;
+        color: #2c3e50;
+        word-wrap: break-word;
+    }
+
+    .answer-card.has-condition .answer-title {
+        color: white;
+    }
+
+    .answer-badges {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        align-items: flex-end;
     }
 
     .active-badge {
-        background: white;
+        background: rgba(255, 255, 255, 0.95);
         color: #ff6b6b;
-        padding: 4px 10px;
-        border-radius: 12px;
+        padding: 6px 12px;
+        border-radius: 15px;
         font-size: 0.75rem;
         font-weight: 600;
         text-transform: uppercase;
+        letter-spacing: 0.5px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .condition-type-badge {
+        background: rgba(108, 92, 231, 0.1);
+        color: #6c5ce7;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .answer-card.has-condition .condition-type-badge {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
     }
 
     .answer-content {
@@ -348,7 +404,7 @@
     }
 
     .btn-save-answer {
-        background: #28a745;
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
         border: none;
         color: white;
         padding: 8px 16px;
@@ -359,15 +415,24 @@
         transition: all 0.2s ease;
         text-transform: uppercase;
         letter-spacing: 0.5px;
+        box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
     }
 
         .btn-save-answer:hover {
-            background: #218838;
+            background: linear-gradient(135deg, #218838 0%, #1ea472 100%);
             transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+        }
+
+        .btn-save-answer:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
 
     .btn-reset-answer {
-        background: #dc3545;
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
         border: none;
         color: white;
         padding: 8px 16px;
@@ -378,41 +443,55 @@
         transition: all 0.2s ease;
         text-transform: uppercase;
         letter-spacing: 0.5px;
+        box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
     }
 
         .btn-reset-answer:hover {
-            background: #c82333;
+            background: linear-gradient(135deg, #c82333 0%, #a71e2a 100%);
             transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+        }
+
+        .btn-reset-answer:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
 
     .answer-status {
         font-size: 0.8rem;
-        padding: 4px 8px;
-        border-radius: 4px;
+        padding: 6px 12px;
+        border-radius: 15px;
         font-weight: 500;
         margin-right: auto;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
 
         .answer-status.saved {
-            background: #d4edda;
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
             color: #155724;
+            border: 1px solid #b8dabd;
         }
 
         .answer-status.modified {
-            background: #fff3cd;
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
             color: #856404;
+            border: 1px solid #ffeaa7;
         }
 
-    .answer-text {
-        font-weight: 600;
-        color: #495057;
-        font-size: 1rem;
-        margin: 0 0 20px 0;
-        padding: 12px;
-        background: white;
-        border-radius: 6px;
-        border-left: 4px solid #6c5ce7;
-    }
+        .answer-status.saving {
+            background: linear-gradient(135deg, #cce7ff 0%, #b3d9ff 100%);
+            color: #0066cc;
+            border: 1px solid #99ccff;
+        }
+
+        .answer-status.error {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
 
     .form-group {
         margin-bottom: 20px;
@@ -552,6 +631,17 @@
         grid-template-columns: 1fr;
     }
 
+    .answer-header-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .answer-badges {
+        align-items: flex-start;
+        flex-direction: row;
+    }
+
     }
 </style>
 
@@ -612,6 +702,7 @@
 
             <form id="logicForm" method="post" asp-action="SaveLogic" novalidate>
                 <input type="hidden" name="QuestionnaireId" value="@Model.QuestionnaireId" />
+                @Html.AntiForgeryToken()
 
                 <!-- Questions in 2-Column Layout -->
                 <div class="questions-container">
@@ -653,19 +744,27 @@
                                             var answer = question.Answers[answerIndex];
                                             var hasCondition = answer.ActionType != ConditionActionType.Continue;
 
-                                            <div class="answer-card @(hasCondition ? "has-condition" : "")">
+                                            <div class="answer-card @(hasCondition ? "has-condition" : "")" data-answer-id="@answer.AnswerId">
                                                 <div class="answer-header">
-                                                    <h4 class="answer-title">📝 Answer @(answerIndex + 1)</h4>
-                                                    @if (hasCondition)
-                                                    {
-                                                        <span class="active-badge">
-                                                            <i class="fas fa-cog"></i> Active
-                                                        </span>
-                                                    }
+                                                    <div class="answer-header-content">
+                                                        <div class="answer-title-section">
+                                                            <div class="answer-number">Answer @(answerIndex + 1)</div>
+                                                            <h4 class="answer-title">@answer.AnswerText</h4>
+                                                        </div>
+                                                        <div class="answer-badges">
+                                                            @if (hasCondition)
+                                                            {
+                                                                <span class="active-badge">
+                                                                    <i class="fas fa-cog"></i> Active
+                                                                </span>
+                                                                <span class="condition-type-badge">
+                                                                    @GetConditionTypeBadge(answer.ActionType)
+                                                                </span>
+                                                            }
+                                                        </div>
+                                                    </div>
                                                 </div>
                                                 <div class="answer-content">
-                                                    <div class="answer-text">@answer.AnswerText</div>
-
                                                     <!-- Action Type Selection -->
                                                     <div class="form-group">
                                                         <label class="form-label">When this answer is selected:</label>
@@ -829,14 +928,12 @@
                 <!-- Save Section -->
                 <div class="save-section">
                     <button type="submit" class="btn-primary">
-                        <i class="fas fa-save"></i> Save Conditional Logic
+                        <i class="fas fa-save"></i> Save All Conditional Logic
                     </button>
                     <a href="@Url.Action("Index")" class="btn-secondary">
                         <i class="fas fa-arrow-left"></i> Back to Questionnaires
                     </a>
-                    <button type="button" class="btn-secondary" onclick="previewLogic()">
-                        <i class="fas fa-eye"></i> Preview Logic Flow
-                    </button>
+                  
                     <button type="button" class="btn-secondary" onclick="clearAllConditions()">
                         <i class="fas fa-eraser"></i> Clear All Conditions
                     </button>
@@ -895,11 +992,11 @@
 
             updateConditionSummary(selectElement);
             updateQuestionHeaderStatus();
+            updateAnswerCardBadges(answerId, selectedValue);
             markAnswerAsModified(answerId);
         }
 
         function updateConditionSummary(selectElement) {
-            const answerId = selectElement.getAttribute('data-answer-id');
             const selectedValue = selectElement.value;
             const summaryElement = selectElement.closest('.answer-content').querySelector('.summary-text');
 
@@ -933,6 +1030,36 @@
             }
         }
 
+        function updateAnswerCardBadges(answerId, actionValue) {
+            const answerCard = document.querySelector(`[data-answer-id="${answerId}"]`);
+            const badgesContainer = answerCard.querySelector('.answer-badges');
+
+            // Remove existing badges
+            badgesContainer.innerHTML = '';
+
+            if (actionValue !== '0') {
+                // Add active badge
+                const activeBadge = document.createElement('span');
+                activeBadge.className = 'active-badge';
+                activeBadge.innerHTML = '<i class="fas fa-cog"></i> Active';
+                badgesContainer.appendChild(activeBadge);
+
+                // Add condition type badge
+                const typeBadge = document.createElement('span');
+                typeBadge.className = 'condition-type-badge';
+                switch(actionValue) {
+                    case '1': typeBadge.textContent = 'Skip To'; break;
+                    case '2': typeBadge.textContent = 'Skip Count'; break;
+                    case '3': typeBadge.textContent = 'End Survey'; break;
+                }
+                badgesContainer.appendChild(typeBadge);
+
+                answerCard.classList.add('has-condition');
+            } else {
+                answerCard.classList.remove('has-condition');
+            }
+        }
+
         function updateQuestionHeaderStatus() {
             document.querySelectorAll('.question-card').forEach(card => {
                 const actionSelects = card.querySelectorAll('.action-type-select');
@@ -951,35 +1078,32 @@
                 } else {
                     header.classList.remove('has-logic');
                 }
-
-                // Update answer cards
-                actionSelects.forEach(select => {
-                    const answerCard = select.closest('.answer-card');
-                    if (select.value !== '0') {
-                        answerCard.classList.add('has-condition');
-                    } else {
-                        answerCard.classList.remove('has-condition');
-                    }
-                });
             });
         }
 
         function markAnswerAsModified(answerId) {
-            const answerCard = document.querySelector(`[data-answer-id="${answerId}"]`).closest('.answer-card');
+            const answerCard = document.querySelector(`[data-answer-id="${answerId}"]`);
             const statusElement = answerCard.querySelector('.answer-status');
 
-            if (statusElement && !statusElement.classList.contains('modified')) {
+            if (statusElement && !statusElement.classList.contains('modified') && !statusElement.classList.contains('saving')) {
                 statusElement.textContent = '● Modified';
                 statusElement.className = 'answer-status modified';
             }
         }
 
         function saveAnswer(answerId) {
-            const answerCard = document.querySelector(`[data-answer-id="${answerId}"]`).closest('.answer-card');
+            const answerCard = document.querySelector(`[data-answer-id="${answerId}"]`);
             const actionSelect = answerCard.querySelector('.action-type-select');
             const statusElement = answerCard.querySelector('.answer-status');
+            const saveButton = answerCard.querySelector('.btn-save-answer');
 
             if (!actionSelect) return;
+
+            // Show saving status
+            statusElement.textContent = '⏳ Saving...';
+            statusElement.className = 'answer-status saving';
+            saveButton.disabled = true;
+            saveButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving';
 
             const actionType = actionSelect.value;
             let condition = {
@@ -1008,42 +1132,129 @@
                     break;
             }
 
-            // Here you could make an AJAX call to save individual answer
-            // For now, we'll just show success message and update status
-            statusElement.textContent = '✓ Saved';
-            statusElement.className = 'answer-status saved';
-            updateQuestionHeaderStatus();
-            showToast('Answer condition saved successfully!', 'success');
+            // Get anti-forgery token
+            const token = document.querySelector('input[name="__RequestVerificationToken"]');
 
-            // Optional: Make AJAX call to server
-            // fetch('/YourController/SaveAnswerCondition', {
-            //     method: 'POST',
-            //     headers: {
-            //         'Content-Type': 'application/json'
-            //     },
-            //     body: JSON.stringify({
-            //         AnswerId: answerId,
-            //         ConditionJson: JSON.stringify(condition)
-            //     })
-            // });
+            const requestData = {
+                AnswerId: parseInt(answerId),
+                ConditionJson: JSON.stringify(condition),
+                QuestionnaireId: @Model.QuestionnaireId
+            };
+
+            // Create headers with anti-forgery token
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+
+            if (token) {
+                headers['RequestVerificationToken'] = token.value;
+            }
+
+            // Make AJAX call to save individual answer
+            fetch('@Url.Action("SaveAnswerCondition")', {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify(requestData)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    statusElement.textContent = '✓ Saved';
+                    statusElement.className = 'answer-status saved';
+
+                    // Update the summary if provided
+                    if (data.summary) {
+                        const summaryElement = answerCard.querySelector('.summary-text');
+                        if (summaryElement) {
+                            summaryElement.textContent = data.summary;
+                        }
+                    }
+
+                    showToast('Answer condition saved successfully!', 'success');
+                } else {
+                    statusElement.textContent = '✗ Error';
+                    statusElement.className = 'answer-status error';
+                    showToast(data.message || 'Failed to save answer condition.', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                statusElement.textContent = '✗ Error';
+                statusElement.className = 'answer-status error';
+                showToast('An error occurred while saving the answer condition.', 'error');
+            })
+            .finally(() => {
+                // Re-enable save button
+                saveButton.disabled = false;
+                saveButton.innerHTML = '<i class="fas fa-save"></i> Save';
+                updateQuestionHeaderStatus();
+            });
         }
 
         function resetAnswer(answerId) {
             if (confirm('Are you sure you want to reset this answer to "Continue to next question"?')) {
-                const answerCard = document.querySelector(`[data-answer-id="${answerId}"]`).closest('.answer-card');
-                const actionSelect = answerCard.querySelector('.action-type-select');
+                const answerCard = document.querySelector(`[data-answer-id="${answerId}"]`);
                 const statusElement = answerCard.querySelector('.answer-status');
+                const resetButton = answerCard.querySelector('.btn-reset-answer');
 
-                if (actionSelect) {
-                    actionSelect.value = '0';
-                    toggleConditionOptions(actionSelect);
+                // Show loading state
+                statusElement.textContent = '⏳ Resetting...';
+                statusElement.className = 'answer-status saving';
+                resetButton.disabled = true;
+                resetButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Resetting';
 
-                    statusElement.textContent = '↻ Reset';
-                    statusElement.className = 'answer-status modified';
+                const token = document.querySelector('input[name="__RequestVerificationToken"]');
+                const headers = {
+                    'Content-Type': 'application/json'
+                };
 
-                    updateQuestionHeaderStatus();
-                    showToast('Answer condition reset successfully!', 'success');
+                if (token) {
+                    headers['RequestVerificationToken'] = token.value;
                 }
+
+                fetch('@Url.Action("ResetAnswerCondition")', {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify({
+                        AnswerId: parseInt(answerId),
+                        QuestionnaireId: @Model.QuestionnaireId
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Reset the form controls
+                        const actionSelect = answerCard.querySelector('.action-type-select');
+                        if (actionSelect) {
+                            actionSelect.value = '0';
+                            toggleConditionOptions(actionSelect);
+                        }
+
+                        statusElement.textContent = '↻ Reset';
+                        statusElement.className = 'answer-status modified';
+                        showToast('Answer condition reset successfully!', 'success');
+                    } else {
+                        statusElement.textContent = '✗ Error';
+                        statusElement.className = 'answer-status error';
+                        showToast(data.message || 'Failed to reset answer condition.', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    statusElement.textContent = '✗ Error';
+                    statusElement.className = 'answer-status error';
+                    showToast('An error occurred while resetting the answer condition.', 'error');
+                })
+                .finally(() => {
+                    resetButton.disabled = false;
+                    resetButton.innerHTML = '<i class="fas fa-undo"></i> Reset';
+                    updateQuestionHeaderStatus();
+                });
             }
         }
 
@@ -1055,13 +1266,16 @@
                 position: fixed;
                 top: 20px;
                 right: 20px;
-                background: ${type === 'success' ? '#28a745' : '#dc3545'};
+                background: ${type === 'success' ? 'linear-gradient(135deg, #28a745, #20c997)' : 'linear-gradient(135deg, #dc3545, #c82333)'};
                 color: white;
-                padding: 12px 20px;
-                border-radius: 6px;
+                padding: 15px 25px;
+                border-radius: 8px;
                 z-index: 10000;
                 opacity: 0;
-                transition: opacity 0.3s ease;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 20px ${type === 'success' ? 'rgba(40, 167, 69, 0.3)' : 'rgba(220, 53, 69, 0.3)'};
+                font-weight: 500;
+                max-width: 300px;
             `;
 
             document.body.appendChild(toast);
@@ -1069,17 +1283,19 @@
             // Fade in
             setTimeout(() => {
                 toast.style.opacity = '1';
+                toast.style.transform = 'translateY(0)';
             }, 100);
 
-            // Remove after 3 seconds
+            // Remove after 4 seconds
             setTimeout(() => {
                 toast.style.opacity = '0';
+                toast.style.transform = 'translateY(-20px)';
                 setTimeout(() => {
                     if (document.body.contains(toast)) {
                         document.body.removeChild(toast);
                     }
                 }, 300);
-            }, 3000);
+            }, 4000);
         }
 
         function clearAllConditions() {
@@ -1096,7 +1312,7 @@
                 });
 
                 updateQuestionHeaderStatus();
-                alert('✅ All conditions have been cleared!\n\nDon\'t forget to save your changes.');
+                showToast('All conditions have been cleared! Don\'t forget to save your changes.', 'success');
             }
         }
 
@@ -1108,8 +1324,9 @@
                 const actionSelect = container.querySelector('.action-type-select');
                 if (actionSelect && actionSelect.value !== '0') {
                     const summaryText = container.querySelector('.summary-text').textContent;
-                    const answerText = container.querySelector('.answer-text').textContent.trim();
-                    conditions.push(`• ${answerText} → ${summaryText}`);
+                    const answerCard = actionSelect.closest('.answer-card');
+                    const answerTitle = answerCard.querySelector('.answer-title').textContent.trim();
+                    conditions.push(`• ${answerTitle} → ${summaryText}`);
                 }
             });
 
@@ -1276,6 +1493,21 @@
                 return "End the survey immediately";
             default:
                 return "No condition set";
+        }
+    }
+
+    string GetConditionTypeBadge(ConditionActionType actionType)
+    {
+        switch (actionType)
+        {
+            case ConditionActionType.SkipToQuestion:
+                return "Skip To";
+            case ConditionActionType.SkipCount:
+                return "Skip Count";
+            case ConditionActionType.EndSurvey:
+                return "End Survey";
+            default:
+                return "";
         }
     }
 }
