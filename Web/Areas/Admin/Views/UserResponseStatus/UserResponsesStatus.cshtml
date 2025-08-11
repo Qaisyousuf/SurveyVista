@@ -5,8 +5,6 @@
     ViewData["Title"] = "User Responses";
 }
 
-
-
 <style>
     .stepper-wrapper {
         display: flex;
@@ -56,19 +54,51 @@
         margin-bottom: 10px;
     }
 
-    #QuestionnairCard{
-        
-        
-        padding:2rem;
+    #QuestionnairCard {
+        padding: 2rem;
         border: 0.5px solid #e7e7e7;
-        border-radius:3px;
+        border-radius: 3px;
         -webkit-box-shadow: 0px 0px 14px -7px rgba(0,0,0,0.75);
         -moz-box-shadow: 0px 0px 14px -7px rgba(0,0,0,0.75);
         box-shadow: 0px 0px 14px -7px rgba(0,0,0,0.75);
     }
+
+    .status-answered {
+        background-color: #d4edda;
+        border-color: #c3e6cb;
+        color: #155724;
+        padding: 8px;
+        border-radius: 4px;
+        margin-bottom: 5px;
+    }
+
+    .status-shown {
+        background-color: #fff3cd;
+        border-color: #ffeaa7;
+        color: #856404;
+        padding: 8px;
+        border-radius: 4px;
+        margin-bottom: 5px;
+    }
+
+    .status-skipped {
+        background-color: #d1ecf1;
+        border-color: #bee5eb;
+        color: #0c5460;
+        padding: 8px;
+        border-radius: 4px;
+        margin-bottom: 5px;
+    }
+
+    .status-unknown {
+        background-color: #f8f9fa;
+        border-color: #dee2e6;
+        color: #6c757d;
+        padding: 8px;
+        border-radius: 4px;
+        margin-bottom: 5px;
+    }
 </style>
-
-
 
 <div class="container-fluid mt-3">
     <p>
@@ -77,7 +107,7 @@
 
     <div class="card p-5 m-3">
         <div class="bd-callout bd-callout-primary shadow">
-           
+
             <div class="row p-4">
                 <div class="col-md-3 mt-5">
                     <h6 class="text-primary font-weight-bold"><i class="bi bi-person"></i> @Model.UserName (@Model.UserEmail)</h6>
@@ -90,21 +120,17 @@
                         <i class="bi bi-file-excel"></i> Excel Reports
                     </a>
                 </div>
-               
+
                 <div class="col-md-9">
                     <div id="user_survey_summary_chart_div" style=" width: auto; height: 200px;"></div>
                 </div>
-               
+
             </div>
             <hr class="border border-info border-1 opacity-50">
             <div class="col-md-12 ">
                 <div id="chart_div" style="width: 100%; height: 400px;"></div>
             </div>
-           
-
-          
         </div>
-       
 
         <!-- Stepper -->
         <div class="stepper-wrapper">
@@ -141,64 +167,92 @@
                                     </button>
                                 </div>
 
-
                                 <div class="col-md-5">
                                     <div id="survey_questions_answers_summary_chart_div_@response.Questionnaire.Id" style="width: 100%; height: 200px;"></div>
                                 </div>
                             </div>
 
-
-                           
-                      
                             <!-- Collapsible content -->
                             <div class="collapse mt-3" id="collapseResponse-@response.Id">
                                 <table class="table table-responsive w-100 d-block d-md-table table-hover">
                                     <thead>
                                         <tr>
                                             <th>Question</th>
+                                            <th>Status</th>
                                             <th>Response</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach (var detail in response.ResponseDetails)
+                                        @foreach (var question in response.Questionnaire.Questions.OrderBy(q => q.Id))
                                         {
+                                            var responseDetail = response.ResponseDetails.FirstOrDefault(rd => rd.QuestionId == question.Id);
+
                                             <tr>
-                                                <td>@detail.Question.Text</td>
                                                 <td>
-                                                    @if (detail.QuestionType == QuestionType.Text || detail.QuestionType == QuestionType.Slider || detail.QuestionType == QuestionType.Open_ended)
+                                                    <strong>@question.Text</strong>
+                                                    <br />
+                                                    <small class="text-muted">Type: @question.Type</small>
+                                                </td>
+                                                <td>
+                                                    @if (responseDetail != null)
                                                     {
-                                                        <ul class="list-group">
-                                                            <li class="list-group-item d-flex justify-content-between align-items-center border-1">
-                                                                Question type
-                                                                <span class="badge text-bg-primary rounded-pill p-1">@detail.QuestionType</span>
-                                                            </li>
-                                                        </ul>
-                                                        <br />
-                                                        <ul class="list-group">
-                                                            <li class="list-group-item d-flex justify-content-between align-items-center border-1">
-                                                                Answer
-                                                                <span class="badge text-bg-primary rounded-pill p-1">@detail.TextResponse</span>
-                                                            </li>
-                                                        </ul>
+                                                        @switch (responseDetail.Status)
+                                                        {
+                                                            case ResponseStatus.Answered:
+                                                                <div class="status-answered">
+                                                                    <strong>✅ Answered</strong>
+                                                                </div>
+                                                                break;
+
+                                                            case ResponseStatus.Shown:
+                                                                <div class="status-shown">
+                                                                    <strong>⚠️ Shown but not answered</strong>
+                                                                    <br />
+                                                                    <small>Question was displayed but left blank</small>
+                                                                </div>
+                                                                break;
+
+                                                            case ResponseStatus.Skipped:
+                                                                <div class="status-skipped">
+                                                                    <strong>⏭️ Skipped</strong>
+                                                                    <br />
+                                                                    <small>@responseDetail.SkipReason</small>
+                                                                </div>
+                                                                break;
+                                                        }
                                                     }
                                                     else
                                                     {
-                                                        <ul class="list-group">
-                                                            <li class="list-group-item d-flex justify-content-between align-items-center border-1">
-                                                                Question type
-                                                                <span class="badge text-bg-primary rounded-pill p-1">@detail.QuestionType</span>
-                                                            </li>
-                                                        </ul>
-                                                        <br />
-                                                        <ul class="list-group">
-                                                            @foreach (var answer in detail.ResponseAnswers)
-                                                            {
-                                                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                                    Answer
-                                                                    <span class="badge text-bg-primary rounded-pill p-1">@detail.Question.Answers.FirstOrDefault(a => a.Id == answer.AnswerId)?.Text</span>
-                                                                </li>
-                                                            }
-                                                        </ul>
+                                                        <div class="status-unknown">
+                                                            <strong>❓ No response data</strong>
+                                                            <br />
+                                                            <small>Status unknown</small>
+                                                        </div>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    @if (responseDetail != null && responseDetail.Status == ResponseStatus.Answered)
+                                                    {
+                                                        @if (responseDetail.QuestionType == QuestionType.Text || responseDetail.QuestionType == QuestionType.Slider || responseDetail.QuestionType == QuestionType.Open_ended)
+                                                        {
+                                                            <div class="alert alert-light">
+                                                                <strong>Answer:</strong> @responseDetail.TextResponse
+                                                            </div>
+                                                        }
+                                                        else if (responseDetail.ResponseAnswers.Any())
+                                                        {
+                                                            <div class="d-flex flex-wrap gap-1">
+                                                                @foreach (var answer in responseDetail.ResponseAnswers)
+                                                                {
+                                                                    var answerText = question.Answers.FirstOrDefault(a => a.Id == answer.AnswerId)?.Text;
+                                                                    <span class="badge bg-success">@answerText</span>
+                                                                }
+                                                            </div>
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted">No response provided</span>
                                                     }
                                                 </td>
                                             </tr>
@@ -207,7 +261,6 @@
                                 </table>
                             </div>
                         </div>
-                      
                     </div>
                 </div>
             }
@@ -215,13 +268,10 @@
     </div>
 </div>
 
-
-
-
 @section Scripts {
     <!-- Include Bootstrap 5 JS for collapse functionality -->
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-    
+
 
     <script type="text/javascript">
         google.charts.load('current', { packages: ['corechart', 'line'] });
@@ -261,10 +311,10 @@
             var responsesData = [
         @foreach (var response in Model.Responses)
         {
-            @foreach (var detail in response.ResponseDetails.Where(d => d.QuestionType == QuestionType.Slider))
-            {
-                @:['@response.Questionnaire.Title - @response.SubmissionDate.ToString("yyyy-MMMM-dd HH:mm")', getDescriptiveValue(@(detail.TextResponse != null ? int.Parse(detail.TextResponse) : 0))],
-            }
+                @foreach (var detail in response.ResponseDetails.Where(d => d.QuestionType == QuestionType.Slider))
+                {
+                        @:['@response.Questionnaire.Title - @response.SubmissionDate.ToString("yyyy-MMMM-dd HH:mm")', getDescriptiveValue(@(detail.TextResponse != null ? int.Parse(detail.TextResponse) : 0))],
+                }
         }
              ];
 
@@ -313,21 +363,21 @@
             data.addColumn('number', 'Total Answers');
 
             var userSurveySummaryData = @Html.Raw(JsonConvert.SerializeObject(
-            Model.Responses
-            .GroupBy(response => response.UserEmail)
-            .Select(g => new
-            {
-                UserName = g.First().UserName,
-                TotalSurveys = g.Count(),
-                TotalQuestions = g.SelectMany(r => r.ResponseDetails).Count(),
-                TotalAnswers = g.SelectMany(r => r.ResponseDetails.SelectMany(rd => rd.ResponseAnswers)).Count()
-            })
-            .ToList()
-            ));
+                    Model.Responses
+                    .GroupBy(response => response.UserEmail)
+                    .Select(g => new
+                    {
+                            UserName = g.First().UserName,
+                            TotalSurveys = g.Count(),
+                            TotalQuestions = g.SelectMany(r => r.ResponseDetails).Count(),
+                            TotalAnswers = g.SelectMany(r => r.ResponseDetails.SelectMany(rd => rd.ResponseAnswers)).Count()
+                    })
+                    .ToList()
+                    ));
 
-            userSurveySummaryData.forEach(function (row) {
-                data.addRow([row.UserName, row.TotalSurveys, row.TotalQuestions, row.TotalAnswers]);
-            });
+        userSurveySummaryData.forEach(function (row) {
+            data.addRow([row.UserName, row.TotalSurveys, row.TotalQuestions, row.TotalAnswers]);
+        });
 
             var options = {
                 title: 'User Survey Summary',
@@ -350,22 +400,22 @@
 
         function drawSurveyQuestionsAnswersSummaryCharts() {
             var surveyQuestionsSummaryData = @Html.Raw(JsonConvert.SerializeObject(
-            Model.Responses
-            .GroupBy(response => response.Questionnaire.Title)
-            .Select(g => new
-            {
-                SurveyTitle = g.Key,
-                SurveyId = g.First().Questionnaire.Id,
-                TotalQuestions = g.SelectMany(r => r.ResponseDetails).Count(),
-                TotalAnswers = g.SelectMany(r => r.ResponseDetails.SelectMany(rd => rd.ResponseAnswers)).Count()
-            })
-            .ToList()
-            ));
+                Model.Responses
+                .GroupBy(response => response.Questionnaire.Title)
+                .Select(g => new
+                {
+                        SurveyTitle = g.Key,
+                        SurveyId = g.First().Questionnaire.Id,
+                        TotalQuestions = g.SelectMany(r => r.ResponseDetails).Count(),
+                        TotalAnswers = g.SelectMany(r => r.ResponseDetails.SelectMany(rd => rd.ResponseAnswers)).Count()
+                })
+                .ToList()
+                ));
 
-            surveyQuestionsSummaryData.forEach(function (row) {
-                drawSingleSurveyChart(row.SurveyTitle, row.SurveyId, row.TotalQuestions, row.TotalAnswers);
-            });
-        }
+        surveyQuestionsSummaryData.forEach(function (row) {
+            drawSingleSurveyChart(row.SurveyTitle, row.SurveyId, row.TotalQuestions, row.TotalAnswers);
+        });
+    }
 
         function drawSingleSurveyChart(surveyTitle, surveyId, totalQuestions, totalAnswers) {
             var data = new google.visualization.DataTable();
@@ -376,7 +426,7 @@
             data.addRow(['Answers', totalAnswers]);
 
             var options = {
-             
+
                 is3D: true,
                 titleTextStyle: { color: '#17a2b8', fontSize: 16, bold: true },
             };

@@ -20,7 +20,8 @@ namespace Web.ViewModel.QuestionnaireVM
 
       
             public List<ResponseQuestionViewModel> Questions { get; set; } = new List<ResponseQuestionViewModel>();
-       
 
+        public string QuestionsShown { get; set; } = string.Empty;
+        public string QuestionsSkipped { get; set; } = string.Empty;
     }
 }

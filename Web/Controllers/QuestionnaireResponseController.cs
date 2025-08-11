@@ -1,19 +1,16 @@
 ﻿using Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using Model;
 using Newtonsoft.Json;
 using Services.EmailSend;
 using Services.Implemnetation;
 using Services.Interaces;
 using System.Globalization;
-using System.Security.Cryptography;
-using System.Text;
-using Web.ViewModel.AnswerVM;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Web.ViewModel.QuestionnaireVM;
-using Web.ViewModel.QuestionVM;
+
 
 namespace Web.Controllers
 {
@@ -110,8 +107,13 @@ namespace Web.Controllers
         }
         [HttpPost]
         public IActionResult DisplayQuestionnaire([FromForm] ResponseQuestionnaireViewModel questionnaire)
+
         {
+           
             bool hasSubmitted = _context.Responses.Any(r => r.QuestionnaireId == questionnaire.Id && r.UserEmail == questionnaire.Email);
+
+            // Get the actual questionnaire from database
+            var dbQuestionnaire = _questionnaireRepository.GetQuestionnaireWithQuestionAndAnswer(questionnaire.Id);
 
             var cetZone = TimeZoneInfo.FindSystemTimeZoneById("Central European Standard Time");
             var cetTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, cetZone);
@@ -121,17 +123,7 @@ namespace Web.Controllers
                 UserName = questionnaire.UserName,
                 UserEmail = questionnaire.Email,
                 SubmissionDate = cetTime,
-                ResponseDetails = questionnaire.Questions.Select(q => new ResponseDetail
-                {
-                    QuestionId = q.Id,
-                    QuestionType = q.Type,
-                    TextResponse = (q.Type == QuestionType.Open_ended || q.Type == QuestionType.Text || q.Type == QuestionType.Slider)
-                                   ? string.Join(" ", q.SelectedText)
-                                   : null,
-                    ResponseAnswers = q.SelectedAnswerIds
-                        .Select(aid => new ResponseAnswer { AnswerId = aid })
-                        .ToList()
-                }).ToList()
+                ResponseDetails = CreateResponseDetailsForAllQuestions(dbQuestionnaire, questionnaire.Questions, questionnaire.QuestionsShown, questionnaire.QuestionsSkipped)
             };
 
             _context.Responses.Add(response);
@@ -165,6 +157,128 @@ namespace Web.Controllers
 
             return RedirectToAction(nameof(ThankYou));
         }
+
+        private List<ResponseDetail> CreateResponseDetailsForAllQuestions(Questionnaire questionnaire, List<ResponseQuestionViewModel> answeredQuestions, string questionsShownJson, string questionsSkippedJson)
+        {
+            var responseDetails = new List<ResponseDetail>();
+
+            // Parse tracking data
+            List<int> questionsShown = new List<int>();
+            List<SkippedQuestionInfo> questionsSkipped = new List<SkippedQuestionInfo>();
+
+            try
+            {
+                if (!string.IsNullOrEmpty(questionsShownJson))
+                {
+                    questionsShown = System.Text.Json.JsonSerializer.Deserialize<List<int>>(questionsShownJson) ?? new List<int>();
+                }
+
+                if (!string.IsNullOrEmpty(questionsSkippedJson))
+                {
+                    questionsSkipped = System.Text.Json.JsonSerializer.Deserialize<List<SkippedQuestionInfo>>(questionsSkippedJson) ?? new List<SkippedQuestionInfo>();
+                }
+            }
+            catch (System.Text.Json.JsonException ex)
+            {
+                // Log error if needed
+                Console.WriteLine($"Error parsing tracking data: {ex.Message}");
+            }
+
+            // Get ALL questions from the questionnaire
+            var allQuestions = questionnaire.Questions.OrderBy(q => q.Id).ToList();
+
+            foreach (var dbQuestion in allQuestions)
+            {
+                var questionNumber = GetQuestionNumber(dbQuestion.Id, allQuestions);
+                var answeredQuestion = answeredQuestions.FirstOrDefault(aq => aq.Id == dbQuestion.Id);
+                var skippedInfo = questionsSkipped.FirstOrDefault(sq => sq.QuestionNumber == questionNumber);
+
+                ResponseDetail responseDetail;
+
+                if (answeredQuestion != null && HasValidResponse(answeredQuestion))
+                {
+                    // Question was ANSWERED
+                    responseDetail = new ResponseDetail
+                    {
+                        QuestionId = dbQuestion.Id,
+                        QuestionType = dbQuestion.Type,
+                        Status = ResponseStatus.Answered,
+                        TextResponse = (dbQuestion.Type == QuestionType.Open_ended ||
+                                       dbQuestion.Type == QuestionType.Text ||
+                                       dbQuestion.Type == QuestionType.Slider)
+                                       ? string.Join(" ", answeredQuestion.SelectedText)
+                                       : null,
+                        ResponseAnswers = answeredQuestion.SelectedAnswerIds
+                            .Select(aid => new ResponseAnswer { AnswerId = aid })
+                            .ToList()
+                    };
+                }
+                else if (skippedInfo != null)
+                {
+                    // Question was SKIPPED due to conditional logic
+                    responseDetail = new ResponseDetail
+                    {
+                        QuestionId = dbQuestion.Id,
+                        QuestionType = dbQuestion.Type,
+                        Status = ResponseStatus.Skipped,
+                        SkipReason = skippedInfo.Reason
+                    };
+                }
+                else if (questionsShown.Contains(questionNumber))
+                {
+                    // Question was SHOWN but left blank
+                    responseDetail = new ResponseDetail
+                    {
+                        QuestionId = dbQuestion.Id,
+                        QuestionType = dbQuestion.Type,
+                        Status = ResponseStatus.Shown,
+                        SkipReason = null
+                    };
+                }
+                else
+                {
+                    // Fallback - assume shown if no tracking data available
+                    responseDetail = new ResponseDetail
+                    {
+                        QuestionId = dbQuestion.Id,
+                        QuestionType = dbQuestion.Type,
+                        Status = ResponseStatus.Shown,
+                        SkipReason = null
+                    };
+                }
+
+                responseDetails.Add(responseDetail);
+            }
+
+            return responseDetails;
+        }
+
+        private int GetQuestionNumber(int questionId, List<Question> allQuestions)
+        {
+            return allQuestions.FindIndex(q => q.Id == questionId) + 1;
+        }
+
+        private bool HasValidResponse(ResponseQuestionViewModel question)
+        {
+            bool hasTextResponse = question.SelectedText != null &&
+                                  question.SelectedText.Any(text => !string.IsNullOrWhiteSpace(text));
+
+            bool hasAnswerResponse = question.SelectedAnswerIds != null &&
+                                    question.SelectedAnswerIds.Any();
+
+            return hasTextResponse || hasAnswerResponse;
+        }
+
+        // Add this class for JSON deserialization
+        public class SkippedQuestionInfo
+        {
+            [JsonPropertyName("questionNumber")]
+            public int QuestionNumber { get; set; }
+
+            [JsonPropertyName("reason")]
+            public string Reason { get; set; } = string.Empty;
+        }
+
 
         // ✅ COMPLETE CORRECTED METHOD: Danish Thank You Email Body
         private static string GenerateThankYouEmailBody(string userName)

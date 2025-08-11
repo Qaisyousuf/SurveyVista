@@ -314,6 +314,13 @@
     <section class="hero container card">
         <form id="questionnaireForm" method="post" asp-action="DisplayQuestionnaire">
             <input type="hidden" name="Id" value="@Model.Id">
+    <input type="hidden" name="Title" value="@Model.Title">
+    <input type="hidden" name="Description" value="@Model.Description">
+    
+    <!-- Add these new hidden inputs for tracking -->
+    <input type="hidden" id="questionsShown" name="QuestionsShown" value="">
+    <input type="hidden" id="questionsSkipped" name="QuestionsSkipped" value="">
+            <input type="hidden" name="Id" value="@Model.Id">
             <input type="hidden" name="Title" value="@Model.Title">
             <input type="hidden" name="Description" value="@Model.Description">
 
@@ -680,8 +687,31 @@
                 return;
             }
 
-            // Track the actual navigation path
+            // Track which questions were shown and skipped - FIXED VARIABLE NAMES
+            let questionsShownArray = [1]; // Start with question 1
+            let questionsSkippedArray = [];
             let navigationPath = [0]; // Start with question 1 (index 0)
+
+            function trackQuestionShown(questionNumber) {
+                if (!questionsShownArray.includes(questionNumber)) {
+                    questionsShownArray.push(questionNumber);
+                    console.log('Question shown:', questionNumber, 'Total shown:', questionsShownArray);
+                }
+            }
+
+            function trackQuestionSkipped(questionNumber, reason) {
+                const skipInfo = {
+                    questionNumber: questionNumber,
+                    reason: reason
+                };
+                questionsSkippedArray.push(skipInfo);
+                console.log('Question skipped:', skipInfo);
+            }
+
+            function updateTrackingInputs() {
+                document.getElementById('questionsShown').value = JSON.stringify(questionsShownArray);
+                document.getElementById('questionsSkipped').value = JSON.stringify(questionsSkippedArray);
+            }
 
             // Get conditions from the CURRENT step only
             function getCurrentStepConditions() {
@@ -732,8 +762,16 @@
             function jumpToQuestion(questionNumber) {
                 const targetStepIndex = questionNumber - 1; // Convert to 0-based index
                 if (targetStepIndex >= 0 && targetStepIndex < steps.length) {
+                    const currentQuestionNumber = getCurrentStepNumber();
+                    
+                    // Track skipped questions between current and target
+                    for (let i = currentQuestionNumber + 1; i < questionNumber; i++) {
+                        trackQuestionSkipped(i, `Skipped due to jump condition from question ${currentQuestionNumber}`);
+                    }
+                    
                     currentStep = targetStepIndex;
                     navigationPath.push(currentStep); // Track the path
+                    trackQuestionShown(questionNumber); // Track the target question as shown
                     showStep(currentStep);
                     updateStepper();
                     console.log(`Jumped to question ${questionNumber}, path:`, navigationPath);
@@ -741,10 +779,21 @@
             }
 
             function skipQuestions(skipCount) {
+                const currentQuestionNumber = getCurrentStepNumber();
                 const newStepIndex = currentStep + skipCount + 1;
+                
+                // Track skipped questions
+                for (let i = 1; i <= skipCount; i++) {
+                    const skippedQuestionNumber = currentQuestionNumber + i;
+                    if (skippedQuestionNumber <= steps.length) {
+                        trackQuestionSkipped(skippedQuestionNumber, `Skipped due to skip condition from question ${currentQuestionNumber}`);
+                    }
+                }
+                
                 if (newStepIndex < steps.length) {
                     currentStep = newStepIndex;
                     navigationPath.push(currentStep); // Track the path
+                    trackQuestionShown(getCurrentStepNumber()); // Track the new question as shown
                     showStep(currentStep);
                     updateStepper();
                 } else {
@@ -758,6 +807,13 @@
             }
 
             function endSurvey(endMessage) {
+                const currentQuestionNumber = getCurrentStepNumber();
+                
+                // Track all remaining questions as skipped
+                for (let i = currentQuestionNumber + 1; i <= steps.length; i++) {
+                    trackQuestionSkipped(i, `Survey ended early from question ${currentQuestionNumber}`);
+                }
+                
                 // Hide all steps and show end message
                 steps.forEach(step => step.style.display = 'none');
                 
@@ -827,7 +883,10 @@
             let currentStep = 0;
 
             form.addEventListener('submit', function (event) {
-                console.log('Form submission');
+                updateTrackingInputs();
+                console.log('Form submission with tracking data');
+                console.log('Questions shown:', questionsShownArray);
+                console.log('Questions skipped:', questionsSkippedArray);
                 const formData = new FormData(form);
                 formData.forEach((value, key) => {
                     console.log(`${key}: ${value}`);
@@ -876,6 +935,7 @@
                         if (currentStep < steps.length - 1) {
                             currentStep++;
                             navigationPath.push(currentStep); // Track normal navigation
+                            trackQuestionShown(getCurrentStepNumber()); // Track question as shown
                             showStep(currentStep);
                             updateStepper();
                             console.log(`Normal next to question ${currentStep + 1}, path:`, navigationPath);

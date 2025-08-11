@@ -23,5 +23,15 @@ namespace Model
         public QuestionType QuestionType { get; set; }
         public string? TextResponse { get; set; }
         public List<ResponseAnswer> ResponseAnswers { get; set; } = new List<ResponseAnswer>();
+
+        public ResponseStatus Status { get; set; } = ResponseStatus.Shown;
+        public string? SkipReason { get; set; } // Why it was skipped (JSON of condition)
+    }
+
+    public enum ResponseStatus
+    {
+        Answered = 1,      // Question was answered
+        Shown = 2,         // Question was shown but left blank
+        Skipped = 3        // Question was skipped due to conditional logic
     }
 }

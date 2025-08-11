@@ -46,9 +46,10 @@ namespace Web.Areas.Admin.Controllers
         {
             var responses = await _context.Responses
                 .Include(r => r.Questionnaire)
+                    .ThenInclude(q => q.Questions.OrderBy(qu => qu.Id))
                 .Include(r => r.ResponseDetails)
                     .ThenInclude(rd => rd.Question)
-                        .ThenInclude(q => q.Answers) // Include the Answers entity
+                        .ThenInclude(q => q.Answers)
                 .Include(r => r.ResponseDetails)
                     .ThenInclude(rd => rd.ResponseAnswers)
                 .Where(r => r.UserEmail == userEmail)
