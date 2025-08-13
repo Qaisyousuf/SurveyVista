@@ -1,153 +1,423 @@
-﻿
-@{
+﻿@{
     ViewData["Title"] = "SubmittedSurvey";
     Layout = "~/Views/Shared/_QuestionnaireResponse.cshtml";
 }
 
-
 <style>
     body {
-        height: 100% !important;
+        height: 100vh !important;
+        min-height: 100vh !important;
+        margin: 0;
+        padding: 0;
         background-repeat: no-repeat;
-        background: linear-gradient(119deg, rgba(47,82,131,1) 0%, rgba(29,33,59,1) 34%, rgba(27,54,61,1) 67%, rgba(58,82,116,1) 100%) !important
+        background-attachment: fixed;
+        background-size: 100% 100%;
+        background: linear-gradient(119deg, rgba(47,82,131,1) 0%, rgba(29,33,59,1) 34%, rgba(27,54,61,1) 67%, rgba(58,82,116,1) 100%) !important;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        overflow-x: hidden;
     }
 
-    #rowSectionError {
+    html {
+        height: 100% !important;
+        background: linear-gradient(119deg, rgba(47,82,131,1) 0%, rgba(29,33,59,1) 34%, rgba(27,54,61,1) 67%, rgba(58,82,116,1) 100%) !important;
+    }
+
+    .already-submitted-container {
+        min-height: 93vh;
         display: flex;
-        flex-wrap: nowrap;
-        justify-content: space-around;
         align-items: center;
-        align-content: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .already-submitted-card {
+        background: rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(25px);
+        -webkit-backdrop-filter: blur(25px);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        border-radius: 28px;
+        padding: 60px 40px;
+        max-width: 1000px;
         width: 100%;
-        flex-direction: row;
-    }
-
-    #Errocard {
+        box-shadow: 0 0 0 1px rgba(100, 181, 246, 0.4), 0 0 30px rgba(100, 181, 246, 0.5), 0 0 60px rgba(100, 181, 246, 0.4), 0 0 120px rgba(100, 181, 246, 0.25), 0 20px 60px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.3), inset 0 -1px 0 rgba(255, 255, 255, 0.1);
         position: relative;
-        display: -webkit-box;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-box-orient: vertical;
-        -webkit-box-direction: normal;
-        -ms-flex-direction: column;
-        flex-direction: row;
-        word-wrap: break-word;
-        box-shadow: 0px 0px 36px -12px rgba(20,101,230,1);
-        -webkit-box-shadow: 0px 0px 20px 2px rgba(20,101,230,1);
-        border-radius: 10px;
-        background-color: transparent;
-        height: 400px;
-        flex-wrap: nowrap;
+        overflow: hidden;
+    }
+
+        .already-submitted-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+            border-radius: 28px 28px 0 0;
+        }
+
+        .already-submitted-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 20%, rgba(100, 181, 246, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(66, 165, 245, 0.08) 0%, transparent 50%), radial-gradient(circle at 40% 60%, rgba(255, 255, 255, 0.03) 0%, transparent 50%);
+            border-radius: 28px;
+            pointer-events: none;
+        }
+
+    .content-wrapper {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
         align-items: center;
-        padding: 0 50px 0 50px;
-        margin: 150px 30px 0px 30px;
     }
 
+    .text-content {
+        z-index: 2;
+        position: relative;
+    }
 
+    .greeting {
+        font-size: 2.2rem;
+        font-weight: 300;
+        color: #ffffff;
+        margin-bottom: 16px;
+        line-height: 1.3;
+    }
 
+    .user-email {
+        color: #64b5f6;
+        font-weight: 600;
+        background: linear-gradient(135deg, #64b5f6, #42a5f5);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        word-break: break-word;
+    }
 
+    .already-submitted-message {
+        font-size: 1.1rem;
+        color: rgba(255, 255, 255, 0.8);
+        line-height: 1.6;
+        margin-top: 20px;
+    }
 
-    @@media (max-width: 792px) {
+    .animation-content {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+    }
 
+    .animation-wrapper {
+        position: relative;
+        display: inline-block;
+    }
 
-        #Errocard {
-            display: flex;
-            flex-direction: column;
-            flex-wrap: wrap;
-            justify-content: center;
-            align-items: center;
-            align-content: center;
-            height: 70vh;
-            padding: 0 20px 0 20px;
+    .animation-glow {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 380px;
+        height: 380px;
+        background: radial-gradient(circle, rgba(100, 181, 246, 0.4) 0%, rgba(100, 181, 246, 0.2) 30%, transparent 70%);
+        border-radius: 50%;
+        animation: pulse 4s ease-in-out infinite;
+        filter: blur(1px);
+    }
+
+    @@keyframes pulse {
+        0%, 100%
+
+    {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.7;
+    }
+
+    50% {
+        transform: translate(-50%, -50%) scale(1.15);
+        opacity: 0.4;
+    }
+
+    }
+
+    .info-badge {
+        background: linear-gradient(135deg, #42a5f5, #1e88e5);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        display: inline-block;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 12px rgba(66, 165, 245, 0.3);
+    }
+
+    .decorative-elements {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        width: 120px;
+        height: 120px;
+        background: linear-gradient(45deg, rgba(100, 181, 246, 0.15), rgba(66, 165, 245, 0.1));
+        border-radius: 50%;
+        filter: blur(40px);
+        animation: float 6s ease-in-out infinite;
+    }
+
+        .decorative-elements::after {
+            content: '';
+            position: absolute;
+            bottom: -60px;
+            left: -60px;
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(45deg, rgba(255, 255, 255, 0.08), rgba(100, 181, 246, 0.06));
+            border-radius: 50%;
+            filter: blur(30px);
+            animation: float 8s ease-in-out infinite reverse;
         }
 
-        #boxError {
-            width: auto;
-            height: 30%;
-            margin: 5px;
+    .floating-particles {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        pointer-events: none;
+        overflow: hidden;
+        border-radius: 28px;
+    }
+
+        .floating-particles::before,
+        .floating-particles::after {
+            content: '';
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(100, 181, 246, 0.6);
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(100, 181, 246, 0.8), 0 0 20px rgba(100, 181, 246, 0.4);
+        }
+
+        .floating-particles::before {
+            top: 20%;
+            left: 10%;
+            animation: particleFloat1 12s linear infinite;
+        }
+
+        .floating-particles::after {
+            top: 60%;
+            right: 15%;
+            animation: particleFloat2 15s linear infinite;
+        }
+
+    @@keyframes float {
+        0%, 100%
+
+    {
+        transform: translateY(0px) rotate(0deg);
+    }
+
+    50% {
+        transform: translateY(-10px) rotate(180deg);
+    }
+
+    }
+
+    @@keyframes particleFloat1 {
+        0%
+
+    {
+        transform: translateY(0px) translateX(0px) scale(1);
+        opacity: 0;
+    }
+
+    10% {
+        opacity: 1;
+    }
+
+    90% {
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateY(-100px) translateX(50px) scale(0.5);
+        opacity: 0;
+    }
+
+    }
+
+    @@keyframes particleFloat2 {
+        0%
+
+    {
+        transform: translateY(0px) translateX(0px) scale(0.8);
+        opacity: 0;
+    }
+
+    15% {
+        opacity: 1;
+    }
+
+    85% {
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateY(-120px) translateX(-30px) scale(0.3);
+        opacity: 0;
+    }
+
+    }
+
+    /* Responsive Design */
+    @@media (max-width: 768px) {
+        .already-submitted-card {
+            padding: 40px 24px;
+            margin: 20px;
+            border-radius: 20px;
+        }
+
+        .content-wrapper {
+            grid-template-columns: 1fr;
+            gap: 30px;
+            text-align: center;
+        }
+
+        .greeting {
+            font-size: 1.8rem;
+        }
+
+        .already-submitted-message {
+            font-size: 1rem;
+        }
+
+        .animation-glow {
+            width: 280px;
+            height: 280px;
+        }
+
+        dotlottie-player {
+            width: 250px !important;
+            height: 250px !important;
         }
     }
 
-    @@media (max-width: 800px) {
-
-
-        #Errocard {
-            display: flex;
-            flex-direction: column;
-            flex-wrap: nowrap;
-            justify-content: center;
-            align-items: center;
-            align-content: center;
-            height: 70vh;
-            padding: 0 20px 0 20px;
+    @@media (max-width: 480px) {
+        .already-submitted-container {
+            padding: 15px;
         }
 
-        #boxError {
-            width: auto;
-            height: 30%;
-            margin: 5px;
+        .already-submitted-card {
+            padding: 30px 20px;
+        }
+
+        .greeting {
+            font-size: 1.6rem;
+        }
+
+        .already-submitted-message {
+            font-size: 0.95rem;
+        }
+
+        .animation-glow {
+            width: 220px;
+            height: 220px;
+        }
+
+        dotlottie-player {
+            width: 200px !important;
+            height: 200px !important;
         }
     }
 
-
-    @@media (max-width: 1300px) {
-
-
-        #Errocard {
-            position: relative;
-            display: -webkit-box;
-            display: -ms-flexbox;
-            display: flex;
-            -webkit-box-orient: vertical;
-            -webkit-box-direction: normal;
-            -ms-flex-direction: column;
-            flex-direction: row;
-            word-wrap: break-word;
-            box-shadow: 0px 0px 36px -12px rgba(20,101,230,1);
-            -webkit-box-shadow: 0px 0px 20px 2px rgba(20,101,230,1);
-            border-radius: 10px;
-            background-color: transparent;
-            height: 400px;
-            flex-wrap: nowrap;
-            align-items: center;
-            padding: 0 50px 0 50px;
-            margin: 50px 30px 0px 30px;
+    @@media (min-width: 1200px) {
+        .already-submitted-card {
+            padding: 80px 60px;
         }
 
-        #boxError {
-            width: auto;
-            margin: 5px;
+        .greeting {
+            font-size: 2.5rem;
         }
 
+        .already-submitted-message {
+            font-size: 1.2rem;
+        }
+    }
 
-        #boxBanner {
-            display: block;
-            width: auto;
-            margin: 5px;
+    /* Animation for card entrance */
+    .already-submitted-card {
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    @@keyframes fadeInUp {
+        from
+
+    {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+
+    /* Subtle hover effects */
+    .already-submitted-card:hover {
+        transform: translateY(-5px);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 0 0 1px rgba(100, 181, 246, 0.5), 0 0 40px rgba(100, 181, 246, 0.6), 0 0 80px rgba(100, 181, 246, 0.5), 0 0 150px rgba(100, 181, 246, 0.4), 0 25px 80px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.4), inset 0 -1px 0 rgba(255, 255, 255, 0.15);
+    }
+
+        .already-submitted-card:hover .animation-glow {
+            transform: translate(-50%, -50%) scale(1.2);
+            opacity: 0.8;
+        }
+
+        .already-submitted-card:hover .floating-particles::before,
+        .already-submitted-card:hover .floating-particles::after {
+            animation-duration: 8s, 10s;
         }
 </style>
 
-<div class="d-flex flex-column" id="BannerBackground">
+<div class="already-submitted-container">
+    <div class="already-submitted-card">
+        <div class="floating-particles"></div>
+        <div class="decorative-elements"></div>
 
-    <!-- FOR DEMO PURPOSE -->
-    <section class="text-white">
-        <div class="container py-1">
+        <div class="content-wrapper">
+            <div class="text-content">
+                <div class="info-badge">ℹ Allerede Gennemført</div>
 
+                <h1 class="greeting">
+                    Tak, <span class="user-email">@ViewBag.submitedEmail</span>
+                </h1>
 
-            <div class="card" id="Errocard">
-                <div class="col-lg-7" id="boxError">
-                    <h5 class="text-white">Thank You, <span class="text-info font-weight-bolder">@ViewBag.submitedEmail</span>, you have already taken the survey.</h5>
-
-                </div>
-                <div class="col-lg-5" id="boxError">
-                    <script src="https://unpkg.com/@@dotlottie/player-component@latest/dist/dotlottie-player.mjs" type="module"></script>
-                    <dotlottie-player src="https://lottie.host/b19b8f6f-debe-408a-99db-1b82713cc8b4/C7LtuHstVr.json" class="img-fluid" speed="1" style="width: 300px; height: 300px;" direction="1" playMode="normal" autoplay></dotlottie-player>
-                </div>
+                <p class="already-submitted-message">
+                    Du har allerede udfyldt undersøgelsen. Vi sætter pris på din deltagelse!
+                </p>
             </div>
 
-
+            <div class="animation-content">
+                <div class="animation-wrapper">
+                    <div class="animation-glow"></div>
+                    <script src="https://unpkg.com/@@dotlottie/player-component@latest/dist/dotlottie-player.mjs" type="module"></script>
+                    <dotlottie-player src="https://lottie.host/b19b8f6f-debe-408a-99db-1b82713cc8b4/C7LtuHstVr.json"
+                                      style="width: 320px; height: 320px;"
+                                      speed="1"
+                                      direction="1"
+                                      playMode="normal"
+                                      autoplay>
+                    </dotlottie-player>
+                </div>
+            </div>
         </div>
-    </section>
-
+    </div>
 </div>
-

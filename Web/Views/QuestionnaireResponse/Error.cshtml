@@ -1,174 +1,457 @@
-﻿
-@{
+﻿@{
     ViewData["Title"] = "Error";
     Layout = "~/Views/Shared/_QuestionnaireResponse.cshtml";
 }
 
 <style>
     body {
-        height:100% !important;
-      
+        height: 100vh !important;
+        min-height: 100vh !important;
+        margin: 0;
+        padding: 0;
         background-repeat: no-repeat;
-        background: linear-gradient(119deg, rgba(47,82,131,1) 0%, rgba(29,33,59,1) 34%, rgba(27,54,61,1) 67%, rgba(58,82,116,1) 100%) !important
+        background-attachment: fixed;
+        background-size: 100% 100%;
+        background: linear-gradient(119deg, rgba(47,82,131,1) 0%, rgba(29,33,59,1) 34%, rgba(27,54,61,1) 67%, rgba(58,82,116,1) 100%) !important;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        overflow-x: hidden;
     }
 
-    #rowSectionError {
+    html {
+        height: 100% !important;
+        background: linear-gradient(119deg, rgba(47,82,131,1) 0%, rgba(29,33,59,1) 34%, rgba(27,54,61,1) 67%, rgba(58,82,116,1) 100%) !important;
+    }
+
+    .error-container {
+        min-height: 93vh;
         display: flex;
-        flex-wrap: nowrap;
-        justify-content: space-around;
         align-items: center;
-        align-content: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .error-card {
+        background: rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(25px);
+        -webkit-backdrop-filter: blur(25px);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        border-radius: 28px;
+        padding: 60px 40px;
+        max-width: 1000px;
         width: 100%;
-        
-        flex-direction: row;
-       
-    }
-    #Errocard{
+        box-shadow: 0 0 0 1px rgba(255, 107, 107, 0.4), 0 0 30px rgba(255, 107, 107, 0.3), 0 0 60px rgba(255, 107, 107, 0.2), 0 0 120px rgba(255, 107, 107, 0.15), 0 20px 60px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.3), inset 0 -1px 0 rgba(255, 255, 255, 0.1);
         position: relative;
-        display: -webkit-box;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-box-orient: vertical;
-        -webkit-box-direction: normal;
-        -ms-flex-direction: column;
-        flex-direction: row;
-      
-        word-wrap: break-word;
-        box-shadow: 0px 0px 36px -12px rgba(20,101,230,1);
-        -webkit-box-shadow: 0px 0px 36px -12px rgba(20,101,230,1);
-        -moz-box-shadow: 0px 0px 36px -12px rgba(20,101,230,1);
-        border-radius: 10px;
-        background-color: transparent;
-        height:400px;
-        flex-wrap: nowrap;
-        align-items: center;
-        padding:0 50px 0 50px;
-        margin:150px 30px 0px 30px;
-      
+        overflow: hidden;
     }
 
+        .error-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+            border-radius: 28px 28px 0 0;
+        }
 
-    
+        .error-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 20%, rgba(255, 107, 107, 0.08) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(255, 87, 87, 0.06) 0%, transparent 50%), radial-gradient(circle at 40% 60%, rgba(255, 255, 255, 0.03) 0%, transparent 50%);
+            border-radius: 28px;
+            pointer-events: none;
+        }
 
+    .content-wrapper {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+        align-items: center;
+    }
 
-    @@media (max-width: 792px) {
+    .text-content {
+        z-index: 2;
+        position: relative;
+    }
 
+    .error-message {
+        font-size: 1.8rem;
+        font-weight: 400;
+        color: #ff6b6b;
+        margin-bottom: 20px;
+        line-height: 1.4;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
 
-        #Errocard {
+    .error-description {
+        font-size: 1.1rem;
+        color: rgba(255, 255, 255, 0.8);
+        line-height: 1.6;
+        margin-bottom: 30px;
+    }
+
+    .contact-button {
+        background: linear-gradient(135deg, #ff6b6b, #ff5252);
+        color: white;
+        padding: 12px 24px;
+        border-radius: 25px;
+        text-decoration: none;
+        font-size: 1rem;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4), 0 0 20px rgba(255, 107, 107, 0.2);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: none;
+        cursor: pointer;
+    }
+
+        .contact-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.5), 0 0 30px rgba(255, 107, 107, 0.3);
+            color: white;
+            text-decoration: none;
+        }
+
+        .contact-button:active {
+            transform: translateY(0);
+        }
+
+    .animation-content {
         display: flex;
-        flex-direction:column;
-        flex-wrap: wrap;
         justify-content: center;
         align-items: center;
-        align-content: center;
-        
-        height: 70vh;
-        padding: 0 20px 0 20px;
-        
+        position: relative;
     }
 
-        #boxError {
-        width: auto;
-        height: 30%;
-        margin: 5px;
-    }
-}
-
-    @@media (max-width: 800px) {
-
-
-        #Errocard {
-            display: flex;
-            flex-direction: column;
-            flex-wrap: nowrap;
-            justify-content: center;
-            align-items: center;
-            align-content: center;
-            height: 70vh;
-            padding: 0 20px 0 20px;
-        }
-
-        #boxError {
-            width: auto;
-            height: 30%;
-            margin: 5px;
-        }
+    .animation-wrapper {
+        position: relative;
+        display: inline-block;
     }
 
-
-    @@media (max-width: 1300px) {
-
-
-        #Errocard {
-            position: relative;
-            display: -webkit-box;
-            display: -ms-flexbox;
-            display: flex;
-            -webkit-box-orient: vertical;
-            -webkit-box-direction: normal;
-            -ms-flex-direction: column;
-            flex-direction: row;
-            word-wrap: break-word;
-            box-shadow: 0px 0px 36px -12px rgba(20,101,230,1);
-            -webkit-box-shadow: 0px 0px 36px -12px rgba(20,101,230,1);
-            -moz-box-shadow: 0px 0px 36px -12px rgba(20,101,230,1);
-            border-radius: 10px;
-            background-color: transparent;
-            height: 400px;
-            flex-wrap: nowrap;
-            align-items: center;
-            padding: 0 50px 0 50px;
-            margin: 50px 30px 0px 30px;
-        }
-
-        #boxError {
-            width: auto;
-            
-            margin: 5px;
-        }
-    
-
-    #boxBanner {
-        display: block;
-        width: auto;
-        margin: 5px;
-       
+    .animation-glow {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 380px;
+        height: 380px;
+        background: radial-gradient(circle, rgba(255, 107, 107, 0.3) 0%, rgba(255, 107, 107, 0.15) 30%, transparent 70%);
+        border-radius: 50%;
+        animation: pulse 4s ease-in-out infinite;
+        filter: blur(1px);
     }
+
+    @@keyframes pulse {
+        0%, 100%
+
+    {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.6;
+    }
+
+    50% {
+        transform: translate(-50%, -50%) scale(1.15);
+        opacity: 0.3;
+    }
+
+    }
+
+    .error-badge {
+        background: linear-gradient(135deg, #ff6b6b, #ff5252);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        display: inline-block;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+    }
+
+    .decorative-elements {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        width: 120px;
+        height: 120px;
+        background: linear-gradient(45deg, rgba(255, 107, 107, 0.12), rgba(255, 87, 87, 0.08));
+        border-radius: 50%;
+        filter: blur(40px);
+        animation: float 6s ease-in-out infinite;
+    }
+
+        .decorative-elements::after {
+            content: '';
+            position: absolute;
+            bottom: -60px;
+            left: -60px;
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(45deg, rgba(255, 255, 255, 0.08), rgba(255, 107, 107, 0.06));
+            border-radius: 50%;
+            filter: blur(30px);
+            animation: float 8s ease-in-out infinite reverse;
+        }
+
+    .floating-particles {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        pointer-events: none;
+        overflow: hidden;
+        border-radius: 28px;
+    }
+
+        .floating-particles::before,
+        .floating-particles::after {
+            content: '';
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 107, 107, 0.6);
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(255, 107, 107, 0.8), 0 0 20px rgba(255, 107, 107, 0.4);
+        }
+
+        .floating-particles::before {
+            top: 20%;
+            left: 10%;
+            animation: particleFloat1 12s linear infinite;
+        }
+
+        .floating-particles::after {
+            top: 60%;
+            right: 15%;
+            animation: particleFloat2 15s linear infinite;
+        }
+
+    @@keyframes float {
+        0%, 100%
+
+    {
+        transform: translateY(0px) rotate(0deg);
+    }
+
+    50% {
+        transform: translateY(-10px) rotate(180deg);
+    }
+
+    }
+
+    @@keyframes particleFloat1 {
+        0%
+
+    {
+        transform: translateY(0px) translateX(0px) scale(1);
+        opacity: 0;
+    }
+
+    10% {
+        opacity: 1;
+    }
+
+    90% {
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateY(-100px) translateX(50px) scale(0.5);
+        opacity: 0;
+    }
+
+    }
+
+    @@keyframes particleFloat2 {
+        0%
+
+    {
+        transform: translateY(0px) translateX(0px) scale(0.8);
+        opacity: 0;
+    }
+
+    15% {
+        opacity: 1;
+    }
+
+    85% {
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateY(-120px) translateX(-30px) scale(0.3);
+        opacity: 0;
+    }
+
+    }
+
+    .email-icon {
+        width: 16px;
+        height: 16px;
+        fill: currentColor;
+    }
+
+    /* Responsive Design */
+    @@media (max-width: 768px) {
+        .error-card {
+            padding: 40px 24px;
+            margin: 20px;
+            border-radius: 20px;
+        }
+
+        .content-wrapper {
+            grid-template-columns: 1fr;
+            gap: 30px;
+            text-align: center;
+        }
+
+        .error-message {
+            font-size: 1.5rem;
+        }
+
+        .error-description {
+            font-size: 1rem;
+        }
+
+        .animation-glow {
+            width: 280px;
+            height: 280px;
+        }
+
+        dotlottie-player {
+            width: 250px !important;
+            height: 250px !important;
+        }
+    }
+
+    @@media (max-width: 480px) {
+        .error-container {
+            padding: 15px;
+        }
+
+        .error-card {
+            padding: 30px 20px;
+        }
+
+        .error-message {
+            font-size: 1.3rem;
+        }
+
+        .error-description {
+            font-size: 0.95rem;
+        }
+
+        .animation-glow {
+            width: 220px;
+            height: 220px;
+        }
+
+        dotlottie-player {
+            width: 200px !important;
+            height: 200px !important;
+        }
+    }
+
+    @@media (min-width: 1200px) {
+        .error-card {
+            padding: 80px 60px;
+        }
+
+        .error-message {
+            font-size: 2rem;
+        }
+
+        .error-description {
+            font-size: 1.2rem;
+        }
+    }
+
+    /* Animation for card entrance */
+    .error-card {
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    @@keyframes fadeInUp {
+        from
+
+    {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+
+    /* Subtle hover effects */
+    .error-card:hover {
+        transform: translateY(-5px);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 0 0 1px rgba(255, 107, 107, 0.5), 0 0 40px rgba(255, 107, 107, 0.4), 0 0 80px rgba(255, 107, 107, 0.3), 0 0 150px rgba(255, 107, 107, 0.2), 0 25px 80px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.4), inset 0 -1px 0 rgba(255, 255, 255, 0.15);
+    }
+
+        .error-card:hover .animation-glow {
+            transform: translate(-50%, -50%) scale(1.2);
+            opacity: 0.7;
+        }
+
+        .error-card:hover .floating-particles::before,
+        .error-card:hover .floating-particles::after {
+            animation-duration: 8s, 10s;
+        }
 </style>
 
-<div class="d-flex flex-column" id="BannerBackground">
+<div class="error-container">
+    <div class="error-card">
+        <div class="floating-particles"></div>
+        <div class="decorative-elements"></div>
 
-    <!-- FOR DEMO PURPOSE -->
-    <section class=" text-white">
-        <div class="container py-1">
-       
-          
-                <div class="card" id="Errocard">
-                    <div class="col-lg-6" id="boxError">
-                        <h5 class="text-danger">@ViewBag.ErrorMessage</h5>
+        <div class="content-wrapper">
+            <div class="text-content">
+                <div class="error-badge">⚠ Fejl Opstået</div>
 
+                <h1 class="error-message">
+                    Undersøgelseslinket er udløbet.
+                </h1>
 
-                        @*   <p class="fst-italic text-muted">@Html.Raw(Model.Content) <a class="text-primary" href="@Model.Sitecopyright" target="_blank">SeoSoft</a></p> *@
+                <p class="error-description">
+                    Anmod om et nyt link for at få adgang til undersøgelsen.
+                </p>
 
-                        <a href="#" class="btn btn-sm mt-3" id="BannerButon"> Contact <i class="bi bi-ui-checks"></i></a>
+                <a href="mailto:kontakt@nvkn.dk" class="contact-button">
+                    <svg class="email-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        <polyline points="22,6 12,13 2,6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    Kontakt Os
+                </a>
+            </div>
 
-                    </div>
-                <div class="col-lg-6" id="boxError">
-                        <script src="https://unpkg.com/@@dotlottie/player-component@latest/dist/dotlottie-player.mjs" type="module"></script>
-                        <dotlottie-player src="https://lottie.host/e3084d59-5df1-44e9-a0fe-0a015257fba7/LVAJX2PbZo.json" class="img-fluid" speed="1" style="width: auto; height: auto;" direction="1" playMode="normal" loop autoplay></dotlottie-player>
-                    </div>
+            <div class="animation-content">
+                <div class="animation-wrapper">
+                    <div class="animation-glow"></div>
+                    <script src="https://unpkg.com/@@dotlottie/player-component@latest/dist/dotlottie-player.mjs" type="module"></script>
+                    <dotlottie-player src="https://lottie.host/e3084d59-5df1-44e9-a0fe-0a015257fba7/LVAJX2PbZo.json"
+                                      style="width: 320px; height: 320px;"
+                                      speed="1"
+                                      direction="1"
+                                      playMode="normal"
+                                      loop
+                                      autoplay>
+                    </dotlottie-player>
                 </div>
-               
-            
+            </div>
         </div>
-    </section>
-
+    </div>
 </div>
-
-
-
-
-
-
-  
-

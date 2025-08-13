@@ -3,901 +3,1411 @@
     ViewData["Title"] = "DisplayQuestionnaire";
     Layout = "~/Views/Shared/_QuestionnaireResponse.cshtml";
 }
+
 <style>
+    /* Next Generation UI Enhancements */
+    @@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    /* Simplified CSS Variables */
+    :root {
+        --bg-primary: #0e1419;
+        --bg-secondary: #141b23;
+        --bg-tertiary: #1a212a;
+        --surface-primary: rgba(20, 28, 38, 0.75);
+        --surface-secondary: rgba(26, 35, 47, 0.55);
+        --surface-glass: rgba(255, 255, 255, 0.02);
+        --text-primary: #e2eaf0;
+        --text-secondary: #b4c1cd;
+        --text-muted: #8494a6;
+        --accent-primary: #4a90a4;
+        --accent-secondary: #6ba3b5;
+        --accent-tertiary: #5a7a8a;
+        --accent-gradient: linear-gradient(135deg, #4a90a4 0%, #6ba3b5 100%);
+        --border-subtle: rgba(255, 255, 255, 0.06);
+        --border-accent: rgba(74, 144, 164, 0.25);
+        --shadow-soft: 0 6px 24px rgba(0, 0, 0, 0.25);
+        --shadow-medium: 0 12px 36px rgba(0, 0, 0, 0.3);
+        --shadow-strong: 0 18px 48px rgba(0, 0, 0, 0.35);
+        --glow-accent: 0 0 30px rgba(74, 144, 164, 0.12);
+        --blur-light: blur(10px);
+        --blur-heavy: blur(16px);
+    }
+
+    /* Advanced Keyframes */
+    @@keyframes morphIn {
+        0%
+
+    {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+        filter: blur(8px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+    }
+
+    }
+
+    @@keyframes glowPulse {
+        0%, 100%
+
+    {
+        box-shadow: var(--glow-accent);
+    }
+
+    50% {
+        box-shadow: 0 0 45px rgba(74, 144, 164, 0.18);
+    }
+
+    }
+
+    @@keyframes floatUp {
+        0%, 100%
+
+    {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-4px);
+    }
+
+    }
+
+    @@keyframes shimmer {
+        0%
+
+    {
+        background-position: -200% center;
+    }
+
+    100% {
+        background-position: 200% center;
+    }
+
+    }
+
+    /* Base Styles */
+    * {
+        box-sizing: border-box;
+    }
+
+    html, body {
+        height: 100%;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    }
+
     body {
-        height: 100% !important;
-        background-color: #141c27 !important;
+        background: radial-gradient(circle at 20% 10%, rgba(74, 144, 164, 0.08) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(106, 163, 181, 0.06) 0%, transparent 50%), linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+        color: var(--text-primary);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        overflow-x: hidden;
     }
 
-
-    #rowSectionError {
-        display: flex;
-        flex-wrap: nowrap;
-        justify-content: space-around;
-        align-items: center;
-        align-content: center;
-        width: 100%;
-        flex-direction: row;
+    /* Enhanced Typography */
+    h4, h5, h6 {
+        color: var(--text-primary);
+        font-weight: 600;
+        letter-spacing: -0.02em;
     }
 
-
-    output {
-        color: white !important;
-        font-weight: bold;
+    p, label {
+        color: var(--text-secondary);
+        line-height: 1.6;
+        font-weight: 400;
     }
 
-    #boxBanner {
-        display: block;
-        width: auto;
-        margin: 5px;
-    }
-
+    /* Main Container */
     .QuestionContainer {
-        padding-top: 50px;
-        padding-bottom: 100px;
+        padding: 60px 0 100px;
+        min-height: 100vh;
     }
 
-    .stepper {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
+    /* Hero Card - Enhanced Glassmorphism */
+    .hero.container.card {
+        padding: 40px;
+        border: 1px solid var(--border-subtle);
+        background: linear-gradient(135deg, var(--surface-primary) 0%, var(--surface-secondary) 100%);
+        backdrop-filter: var(--blur-light);
+        -webkit-backdrop-filter: var(--blur-light);
+        border-radius: 24px;
+        box-shadow: var(--shadow-strong);
+        position: relative;
+        overflow: hidden;
     }
 
-
-    .step-indicator {
-        width: 150px;
-        height: 30px;
-        border-radius: 3px;
-        background-color: transparent;
-        margin-bottom: 10px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        color: white; /* Text color */
-        font-weight: bold;
-        border: 0.05px solid #294255;
-        box-shadow: 0px 0px 6px 2px rgba(0,0,0,0.18);
-        -webkit-box-shadow: 0px 0px 6px 2px rgba(0,0,0,0.18);
-        -moz-box-shadow: 0px 0px 6px 2px rgba(0,0,0,0.18);
-    }
-
-        .step-indicator.active {
-            background-color: #33b3ae; /* Primary color for active step */
-            box-shadow: 0px 0px 21px -4px rgba(0,0,0,0.45);
-            -webkit-box-shadow: 0px 0px 21px -4px rgba(0,0,0,0.45);
-            -moz-box-shadow: 0px 0px 21px -4px rgba(0,0,0,0.45);
+        .hero.container.card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--accent-gradient);
+            opacity: 0.6;
         }
 
+        .hero.container.card::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(74, 144, 164, 0.02) 0%, transparent 70%);
+            pointer-events: none;
+            animation: floatUp 6s ease-in-out infinite;
+        }
 
-    h4, h5, h6, p, label {
-        color: aliceblue;
-    }
-
-
-
-    .card {
-        box-shadow: 0px 0px 36px -12px rgba(20,101,230,1);
-        -webkit-box-shadow: 0px 0px 36px -12px rgba(20,101,230,1);
-        -moz-box-shadow: 0px 0px 36px -12px rgba(20,101,230,1);
-        border-radius: 10px;
-        background-color: transparent;
-        padding: 50px;
-    }
-
-
+    /* Enhanced Form Controls */
     .form-control {
-        width: 80%;
-        margin: 15px 0px 0px 0px;
+        width: 100%;
+        margin-top: 12px;
+        color: var(--text-primary);
+        background: var(--surface-glass);
+        border: 1px solid var(--border-subtle);
+        border-radius: 16px;
+        padding: 16px 20px;
+        font-size: 15px;
+        font-weight: 400;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        backdrop-filter: blur(8px);
+        position: relative;
     }
 
+        .form-control:focus {
+            background: rgba(26, 42, 64, 0.8);
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 4px rgba(0, 212, 170, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            outline: none;
+            transform: translateY(-1px);
+        }
 
+        .form-control::placeholder {
+            color: var(--text-muted);
+            opacity: 0.8;
+        }
 
-    .hidden-textarea {
-        display: none;
+    /* Next-Gen Buttons */
+    .btn {
+        border-radius: 16px;
+        padding: 14px 24px;
+        border: none;
+        font-weight: 500;
+        font-size: 14px;
+        letter-spacing: 0.02em;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(8px);
     }
 
-    .rating .rating-item {
-        display: inline-block; /* Align items horizontally */
-        text-align: center; /* Center-align the label and star */
-        margin: 5px; /* Spacing between rating items */
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+    .btn-sm {
+        padding: 12px 20px;
+        border-radius: 14px;
+        font-size: 13px;
     }
 
-    .rating .rating-label {
-        display: block; /* Ensure the label is on a new line */
-        margin-bottom: 2px; /* Space between label and star */
-        font-size: 14px; /* Smaller font size for the label */
+    .btn-primary {
+        background: var(--accent-gradient);
+        color: white;
+        box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        position: relative;
+    }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium), var(--glow-accent), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: translateY(-1px);
+        }
+
+    .btn-secondary {
+        background: var(--surface-primary);
+        border: 1px solid var(--border-subtle);
+        color: var(--text-secondary);
+        backdrop-filter: blur(12px);
+    }
+
+        .btn-secondary:hover {
+            background: var(--surface-secondary);
+            border-color: var(--border-accent);
+            transform: translateY(-1px);
+            color: var(--text-primary);
+        }
+
+    .btn-info {
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
         color: white;
     }
 
-    /* Style the stars */
-    .rating .rating-star {
-        font-size: 24px; /* Adjust size as needed */
-        color: #ccc; /* Default color of stars */
-        cursor: pointer; /* Change cursor to pointer on hover */
-        transition: color 0.3s ease; /* Smooth transition for color change */
+    /* Enhanced Stepper */
+    .stepper {
+        position: sticky;
+        top: 32px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        align-items: stretch;
+        z-index: 10;
     }
 
-        /* Style the stars when they are hovered over */
-        .rating .rating-star:hover,
-        .rating .rating-star:hover ~ .rating-star {
-            color: #ffe350; /* Color when hovered */
-        }
-
-        /* Style the stars when they are selected */
-        .rating .rating-star.selected {
-            color: #df9d01; /* Color of selected stars */
-        }
-
-
-
-    .rank-list {
-        list-style-type: none;
-        padding: 0;
+    .step-indicator {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        width: 100%;
+        max-width: 280px;
+        padding: 16px 20px;
+        border-radius: 20px;
+        background: var(--surface-glass);
+        color: var(--text-muted);
+        border: 1px solid var(--border-subtle);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        backdrop-filter: var(--blur-light);
+        position: relative;
+        overflow: hidden;
     }
 
-        .rank-list li {
-            padding: 5px;
-            margin-bottom: 2px;
-            color: white
+        .step-indicator::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--accent-gradient);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: -1;
         }
 
+        .step-indicator .step-number {
+            display: grid;
+            place-items: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--surface-secondary);
+            border: 1px solid var(--border-subtle);
+            font-weight: 600;
+            color: var(--text-primary);
+            flex: 0 0 auto;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 1;
+        }
 
+        .step-indicator .step-label {
+            font-size: 14px;
+            letter-spacing: 0.02em;
+            font-weight: 500;
+            position: relative;
+            z-index: 1;
+        }
+
+        .step-indicator.active {
+            color: white;
+            border-color: var(--accent-primary);
+            background: var(--surface-primary);
+            box-shadow: var(--glow-accent);
+            animation: glowPulse 3s ease-in-out infinite;
+        }
+
+            .step-indicator.active::before {
+                opacity: 0.15;
+            }
+
+            .step-indicator.active .step-number {
+                background: var(--accent-gradient);
+                border-color: var(--accent-secondary);
+                color: white;
+                box-shadow: 0 4px 16px rgba(0, 212, 170, 0.3);
+            }
+
+    /* Enhanced Steps */
+    .step {
+        border: 1px solid var(--border-subtle);
+        background: var(--surface-glass);
+        border-radius: 24px;
+        padding: 32px;
+        margin-bottom: 24px;
+        box-shadow: var(--shadow-soft);
+        animation: morphIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
+        backdrop-filter: var(--blur-light);
+        position: relative;
+        overflow: hidden;
+    }
+
+        .step::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--accent-gradient);
+            opacity: 0.4;
+        }
+
+        .step p {
+            font-size: 16px;
+            margin-bottom: 24px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+    /* Enhanced Rating System */
+    .rating {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        padding: 8px 0;
+    }
+
+        .rating .rating-item {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            padding: 16px 20px;
+            border-radius: 16px;
+            background: var(--surface-glass);
+            border: 1px solid var(--border-subtle);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(8px);
+            cursor: pointer;
+        }
+
+            .rating .rating-item:hover {
+                background: var(--surface-secondary);
+                border-color: var(--accent-primary);
+                transform: translateY(-2px);
+            }
+
+        .rating .rating-label {
+            color: var(--text-primary);
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .rating .rating-star {
+            font-size: 32px;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
+        }
+
+            .rating .rating-star:hover {
+                transform: translateY(-2px) scale(1.1);
+                color: #fbbf24;
+                filter: drop-shadow(0 4px 16px rgba(251, 191, 36, 0.4));
+            }
+
+            .rating .rating-star.selected {
+                color: #f59e0b;
+                filter: drop-shadow(0 4px 16px rgba(245, 158, 11, 0.6));
+                transform: scale(1.05);
+            }
+
+    /* Enhanced Likert Scale */
     .likert {
-        box-shadow: 0px 0px 7px 0px rgba(20,101,230,1);
-        -moz-box-shadow: 0px 0px 36px -12px rgba(20, 101, 230, 1);
-        -webkit-box-shadow: 0px 0px 7px 0px rgba(20,101,230,1);
-        border-radius: 5px;
-        background-color: transparent;
-        padding: 20px;
+        border-radius: 20px;
+        padding: 24px;
+        background: var(--surface-glass);
+        border: 1px solid var(--border-accent);
+        box-shadow: var(--shadow-soft);
+        backdrop-filter: var(--blur-light);
+        position: relative;
     }
 
-        .likert .statement {
-            margin-bottom: 10px;
+        .likert::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--accent-gradient);
+            opacity: 0.6;
         }
 
         .likert .responses {
             display: flex;
-            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 16px;
         }
 
         .likert .likert-option {
             flex: 1;
+            min-width: 140px;
             text-align: center;
         }
 
         .likert label {
             display: block;
             cursor: pointer;
-            padding: 20px;
-            background-color: #33b3ae;
-            border-radius: 2px;
-            margin: 3px;
-            transition: background-color 0.3s;
-            font-size: 0.8rem;
+            padding: 16px 20px;
+            background: var(--surface-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 14px;
+            font-weight: 500;
+            backdrop-filter: blur(8px);
+            position: relative;
+            overflow: hidden;
         }
+
+            .likert label::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: var(--accent-gradient);
+                opacity: 0;
+                transition: opacity 0.3s ease;
+                z-index: -1;
+            }
+
+            .likert label:hover {
+                border-color: var(--accent-primary);
+                transform: translateY(-1px);
+                box-shadow: 0 8px 24px rgba(0, 212, 170, 0.15);
+            }
 
         .likert input[type="radio"]:checked + label {
-            background-color: transparent;
+            background: var(--surface-primary);
             color: white;
-            font-size: 1rem;
+            border-color: var(--accent-primary);
+            box-shadow: var(--glow-accent);
+            transform: scale(0.98);
         }
 
-    .card-deck .card {
-        cursor: pointer;
-        padding: 10px;
-        border: 2px solid transparent;
-        box-shadow: 0px 0px 36px -12px rgba(20,101,230,1);
-        -webkit-box-shadow: 0px 0px 5px 0px rgba(20,101,230,1);
-        -moz-box-shadow: 0px 0px 36px -12px rgba(20, 101, 230, 1);
-        background-color: transparent;
-        transition: border 0.3s ease; /* Add transition for a smooth effect */
-    }
-        /*  img{
-            border-radius:3px;
-            box-shadow: 0px 0px 36px -12px rgba(20,101,230,1);
-            -webkit-box-shadow: 0px 0px 5px 0px rgba(20,101,230,1);
-            -moz-box-shadow: 0px 0px 36px -12px rgba(20, 101, 230, 1);
-        }
-     */
-        .card-deck .card:hover {
-            border: 2px solid #007bff;
-            transition: border 0.3s ease; /* Ensure the transition applies to the hover state as well */
-        }
+            .likert input[type="radio"]:checked + label::before {
+                opacity: 0.2;
+            }
 
-    .card-deck .image-card.selected {
-        border: 4px solid #28a745; /* Green border for selected cards */
+    /* Enhanced Matrix */
+    .matrix-question {
+        --mx-bg: var(--surface-glass);
+        --mx-head: var(--surface-primary);
+        --mx-cell: var(--surface-secondary);
     }
 
-    .card-deck .image-option {
+        .matrix-question .table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            overflow: hidden;
+            border-radius: 20px;
+            background: var(--mx-bg);
+            box-shadow: var(--shadow-soft);
+            backdrop-filter: var(--blur-light);
+        }
+
+        .matrix-question th, .matrix-question td {
+            border: 1px solid var(--border-subtle);
+            color: var(--text-primary);
+            padding: 16px 20px;
+        }
+
+        .matrix-question th {
+            background: var(--mx-head);
+            font-weight: 600;
+            font-size: 14px;
+            letter-spacing: 0.02em;
+        }
+
+        .matrix-question td {
+            background: var(--mx-cell);
+            text-align: center;
+        }
+
+    .matrix-choice {
         display: block;
+        padding: 12px 16px;
+        border-radius: 12px;
+        border: 1px solid var(--border-subtle);
+        background: var(--surface-glass);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        color: var(--text-primary);
+        font-weight: 500;
+        backdrop-filter: blur(8px);
+        cursor: pointer;
     }
 
-
-
-        .card-deck .image-option input[type="radio"] {
-            display: none; /* Hide radio button */
+        .matrix-choice:hover {
+            border-color: var(--accent-primary);
+            background: var(--surface-primary);
+            transform: translateY(-1px);
         }
 
-    .matrix-question .table {
-        box-shadow: 0px 0px 7px 0px rgba(20,101,230,1);
-        -moz-box-shadow: 0px 0px 36px -12px rgba(20, 101, 230, 1);
-        -webkit-box-shadow: 0px 0px 7px 0px rgba(20,101,230,1);
-        border-radius: 5px;
-        background-color: transparent;
-        padding: 20px;
-        width: 100%;
-    }
-
-    .matrix-question th, .matrix-question td {
-        text-align: left; /* Aligns text to the left */
-        border: 2px solid white;
-        width: 100%;
-    }
-
-    .matrix-question th {
-        background-color: #33b3ae; /* Semi-transparent background for headers */
-        color: white; /* White text color for headers */
-    }
-
-    .matrix-question td {
-        background-color: #33b3ae; /* Semi-transparent background for headers */
+    .matrix-radio:checked + .matrix-choice {
+        background: var(--accent-gradient);
+        border-color: var(--accent-secondary);
         color: white;
-        text-align: left;
+        box-shadow: 0 4px 16px rgba(0, 212, 170, 0.3);
     }
 
-    input[type="radio"] {
-        border: 1px solid #007bff !important;
+    /* Enhanced Image Cards */
+    .card-deck {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 20px;
+        padding: 8px 0;
     }
 
-    .matrix-question input[type="radio"] {
-        border: 1px solid #007bff !important;
-    }
+        .card-deck .card {
+            cursor: pointer;
+            padding: 0;
+            border: 1px solid var(--border-subtle);
+            background: var(--surface-glass);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow-soft);
+            backdrop-filter: var(--blur-light);
+            position: relative;
+        }
 
+            .card-deck .card::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: var(--accent-gradient);
+                opacity: 0;
+                transition: opacity 0.3s ease;
+                z-index: 1;
+                pointer-events: none;
+            }
 
+            .card-deck .card:hover {
+                transform: translateY(-4px) scale(1.02);
+                border-color: var(--accent-primary);
+                box-shadow: var(--shadow-medium), var(--glow-accent);
+            }
+
+        .card-deck .image-card.selected {
+            border: 2px solid var(--accent-primary);
+            box-shadow: var(--glow-accent);
+            transform: translateY(-2px) scale(1.01);
+        }
+
+            .card-deck .image-card.selected::before {
+                opacity: 0.1;
+            }
+
+        .card-deck img {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.3s ease;
+        }
+
+        .card-deck .card:hover img {
+            transform: scale(1.05);
+        }
+
+    /* Enhanced Ranking */
     .sortable-list {
         list-style: none;
         padding: 0;
-    }
-
-
-
-    .draggable-item:hover {
-        background-color: #e0e0e0;
-    }
-
-    button {
-        margin-left: 10px;
+        margin: 0;
+        gap: 12px;
+        display: flex;
+        flex-direction: column;
     }
 
     .draggable-item {
-        padding: 10px;
-        margin-bottom: 5px;
-        background-color: #f8f9fa; /* Light gray background for default state */
-        border: 1px solid #ccc;
-        cursor: grab; /* Cursor indicates that this item is draggable */
-        transition: background-color 0.3s ease; /* Smooth transition for background color */
-        border-radius: 5px;
-        margin: 10px;
-        display: flex; /* Enable flexbox */
-        align-items: center; /* Center items vertically */
-        justify-content: space-between; /* Spread out content */
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 20px 24px;
+        margin: 0;
+        background: var(--surface-glass);
+        border: 1px solid var(--border-subtle);
+        color: var(--text-primary);
+        border-radius: 16px;
+        cursor: grab;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        backdrop-filter: var(--blur-light);
+        position: relative;
+        overflow: hidden;
     }
+
+        .draggable-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--accent-gradient);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .draggable-item:hover {
+            background: var(--surface-secondary);
+            border-color: var(--accent-primary);
+            transform: translateX(8px);
+            box-shadow: var(--shadow-soft);
+        }
+
+            .draggable-item:hover::before {
+                transform: scaleY(1);
+            }
 
         .draggable-item.selected {
-            background-color: #33b3ae;
-            ; /* Blue background for selected state */
-            color: white; /* White text color for better visibility */
+            background: var(--surface-primary);
+            border-color: var(--accent-primary);
+            box-shadow: var(--glow-accent);
+            transform: translateX(12px);
         }
 
-    .up-button, .down-button {
-        margin: 0 5px; /* Spacing between buttons */
-    }
+            .draggable-item.selected::before {
+                transform: scaleY(1);
+            }
 
     .answer-index {
-        font-weight: bold;
+        font-weight: 700;
+        opacity: 0.9;
+        margin-right: 12px;
+        color: var(--accent-primary);
     }
 
+    /* Enhanced Form Check */
+    .form-check {
+        margin-bottom: 16px;
+        position: relative;
+    }
 
-  
+    .form-check-input {
+        margin-right: 12px;
+        accent-color: var(--accent-primary);
+        transform: scale(1.2);
+    }
 
-        .draggable-item .bi-grip-vertical {
-            margin-right: auto; /* Pushes all elements to the right of it to the far right */
+    .form-check-label {
+        color: var(--text-primary);
+        font-weight: 400;
+        cursor: pointer;
+        transition: color 0.2s ease;
+        padding-left: 8px;
+    }
+
+        .form-check-label:hover {
+            color: var(--accent-secondary);
         }
 
-        .draggable-item button {
-            margin-left: 5px; /* Space between buttons */
+    /* Enhanced Range Slider */
+    .form-range {
+        width: 100%;
+        height: 8px;
+        background: var(--surface-secondary);
+        border-radius: 8px;
+        outline: none;
+        -webkit-appearance: none;
+        appearance: none;
+        margin: 16px 0;
+    }
+
+        .form-range::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            background: var(--accent-gradient);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 212, 170, 0.4);
+            transition: all 0.2s ease;
         }
 
+            .form-range::-webkit-slider-thumb:hover {
+                transform: scale(1.2);
+                box-shadow: 0 6px 16px rgba(0, 212, 170, 0.6);
+            }
+
+        .form-range::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            background: var(--accent-gradient);
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 4px 12px rgba(0, 212, 170, 0.4);
+        }
+
+    /* Output styling */
+    output {
+        color: var(--text-primary) !important;
+        font-weight: 600;
+        font-size: 18px;
+        margin-left: 16px;
+        padding: 8px 16px;
+        background: var(--surface-glass);
+        border-radius: 12px;
+        border: 1px solid var(--border-subtle);
+        backdrop-filter: blur(8px);
+    }
+
+    /* Enhanced Mobile Responsiveness */
+    @@media (max-width: 576px) {
+        .stepper
+
+    {
+        display: none;
+    }
+
+    .step {
+        padding: 24px 20px;
+        border-radius: 20px;
+    }
+
+    .hero.container.card {
+        padding: 24px 20px;
+        border-radius: 20px;
+    }
+
+    .card-deck {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+    }
+
+    .matrix-question .table {
+        display: block;
+        overflow-x: auto;
+    }
+
+    .likert .responses {
+        flex-direction: column;
+    }
+
+    .rating .rating-item {
+        flex: 1 1 calc(50% - 8px);
+    }
+
+    .step .mt-3 {
+        position: sticky;
+        bottom: 0;
+        background: linear-gradient(180deg, transparent 0%, var(--bg-secondary) 85%);
+        padding: 16px 0 0;
+        backdrop-filter: var(--blur-heavy);
+        border-radius: 16px 16px 0 0;
+        margin: 0 -20px;
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    .draggable-item {
+        padding: 16px 20px;
+    }
+
+    }
+
+    @@media (max-width: 991px) {
+        .stepper
+
+    {
+        position: relative;
+        top: 0;
+        flex-direction: row;
+        flex-wrap: wrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 8px;
+        gap: 12px;
+    }
+
+    .step-indicator {
+        min-width: 200px;
+        max-width: none;
+    }
+
+    }
+
+    /* Accessibility and Reduced Motion */
+    @@media (prefers-reduced-motion: reduce) {
+        *
+
+    {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+
+    }
+
+    /* Focus States for Accessibility */
+    .btn:focus,
+    .form-control:focus,
+    .form-check-input:focus,
+    .matrix-radio:focus + .matrix-choice {
+        outline: 2px solid var(--accent-primary);
+        outline-offset: 2px;
+    }
+
+    /* High Contrast Mode Support */
+    @@media (prefers-contrast: high) {
+        : root
+
+    {
+        --border-subtle: rgba(255, 255, 255, 0.3);
+        --text-muted: #a0a0a0;
+    }
+
+    }
+
+    /* Dark Mode Enhancements */
+    @@media (prefers-color-scheme: dark) {
+        .hero.container.card
+
+    {
+        box-shadow: var(--shadow-strong), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+
+    }
+
+    /* Container sizing */
+    .container {
+        max-width: 1200px;
+    }
+
+    /* Hidden elements */
+    .hidden-textarea {
+        display: none;
+    }
+
+    .User-details {
+        display: none;
+    }
+
+    /* Error row styling */
+    #rowSectionError {
+        display: flex;
+        flex-wrap: nowrap;
+        justify-content: space-around;
+        align-items: center;
+        width: 100%;
+    }
 </style>
 
 <div class="QuestionContainer">
     <section class="hero container card">
         <form id="questionnaireForm" method="post" asp-action="DisplayQuestionnaire">
             <input type="hidden" name="Id" value="@Model.Id">
-    <input type="hidden" name="Title" value="@Model.Title">
-    <input type="hidden" name="Description" value="@Model.Description">
-    
-    <!-- Add these new hidden inputs for tracking -->
-    <input type="hidden" id="questionsShown" name="QuestionsShown" value="">
-    <input type="hidden" id="questionsSkipped" name="QuestionsSkipped" value="">
+            <input type="hidden" name="Title" value="@Model.Title">
+            <input type="hidden" name="Description" value="@Model.Description">
+
+            <!-- Tracking -->
+            <input type="hidden" id="questionsShown" name="QuestionsShown" value="">
+            <input type="hidden" id="questionsSkipped" name="QuestionsSkipped" value="">
+
+            <!-- (Duplicate hidden fields retained intentionally to avoid changing behavior) -->
             <input type="hidden" name="Id" value="@Model.Id">
             <input type="hidden" name="Title" value="@Model.Title">
             <input type="hidden" name="Description" value="@Model.Description">
 
-            <h4>@Model.Title</h4>
-            <p>@Html.Raw(Model.Description)</p>
-          
-           
-            <div class="container">
-                  <div class="continaer">
+            <h4 class="mb-2">@Model.Title</h4>
+            <p class="mb-4">@Html.Raw(Model.Description)</p>
+
+            <div class="container px-0">
                 <div class="row">
-                    <div class="col-md-6 col-lg-6 col-sm-12">
-                   <div class="mb-3">
-                <label for="userName">Your Name</label>
-                <input type="text" class="form-control" id="userName" name="UserName" placeholder="Enter your name">
-            </div>
-            <div class="mb-3">
-                <label for="Email">Email Address</label>
-                <input type="email" class="form-control" id="Email" name="Email" placeholder="Enter your email">
-            </div>
-               </div>
-                </div>
-            </div>
-                <div class="row align-items-center">
-                    <!-- Stepper -->
-                    <div class="col-md-3">
-                        <div class="stepper">
-                            @for (int i = 0; i < Model.Questions.Count; i++)
-                            {
-                                var question = Model.Questions[i];
-                                string stepClass = i == 0 ? "active" : ""; // Adjusted the index to start from the first question
-                                <div class="step-indicator @(stepClass)" data-step-index="@i">
-                                    <span class="step-number">@((i + 1)). </span>
-                                    <span class="step-label">@question.Type</span>
-                                </div>
-                            }
+                    <div class="col-12 col-md-6">
+                        <div class="mb-3">
+                            <label for="userName">Your Name</label>
+                            <input type="text" class="form-control" id="userName" name="UserName" placeholder="Enter your name" required aria-required="true" autocomplete="name">
                         </div>
                     </div>
-                    <!-- Form Content -->
-                    <div class="col-md-9">
-                        
+                    <div class="col-12 col-md-6">
+                        <div class="mb-3">
+                            <label for="Email">Email Address</label>
+                            <input type="email" class="form-control" id="Email" name="Email" placeholder="Enter your email" required aria-required="true" autocomplete="email">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row align-items-start">
+                <!-- Stepper -->
+                <div class="col-md-3 mb-4 mb-md-0 d-none d-md-block">
+                    <div class="stepper">
                         @for (int i = 0; i < Model.Questions.Count; i++)
                         {
                             var question = Model.Questions[i];
-                            <input type="hidden" name="Id" value="@question.Id">
-                            <input type="hidden" name="Questions[@i].Text" value="@question.Text">
-                            <input type="hidden" name="Questions[@i].Id" value="@question.Id">
-                            <input type="hidden" name="Questions[@i].Type" value="@((int)question.Type)">
-                            @for (int j = 0; j < question.Answers.Count; j++)
-                            {
-                                var answer = question.Answers[j];
-                                <input type="hidden" name="Questions[@i].Answers[@j].Id" value="@answer.Id">
-                                <input type="hidden" name="Questions[@i].Answers[@j].Text" value="@answer.Text">
-                                <!-- Add more hidden fields as needed for other properties of the answer -->
-                            }
-                            <div class="step @(i == 0 ? "active" : "")" data-question-id="@question.Id">
-
-                                <p class="font-weight-normal">@(i + 1). @question.Text</p>
-
-                                @switch (question.Type)
-                                {
-                                    case QuestionType.Text:
-                                        @foreach (var answer in question.Answers)
-                                        {
-                                            <input type="Text" class="form-control" id="question@(i + 1)" name="Questions[@i].SelectedText" rows="3" placeholder="Enter answer"></input>
-                                            <input class="form-control hidden-textarea" id="question@(i + 1)" name="Questions[@i].SelectedAnswerIds" value="@answer.Id" rows="3" placeholder="Enter answer" data-condition="@answer.ConditionJson"></input>
-                                        }
-                                        break;
-                                    case QuestionType.CheckBox:
-                                    case QuestionType.Multiple_choice:
-                                    case QuestionType.Demographic:
-
-                                        <div class="form-group">
-
-                                            @foreach (var answer in question.Answers)
-                                            {
-                                                <div class="form-check">
-                                                    <input class="form-check-input" id="question@(i)_answer@(answer.Id)" type="checkbox" name="Questions[@i].SelectedAnswerIds" value="@answer.Id" data-condition="@answer.ConditionJson">
-                                                    <label class="form-check-label" for="question@(i)_answer@(answer.Id)">
-                                                        @answer.Text
-                                                    </label>
-                                                </div>
-
-                                            }
-
-                                        </div>
-                                        break;
-                                    case QuestionType.TrueFalse:
-                                        <div class="form-check">
-
-                                            @foreach (var answer in question.Answers)
-                                            {
-                                                <div class="form-check">
-                                                    <input class="form-check-input answer-input" type="radio" id="question@(i)_answer@(answer.Id)" name="Questions[@i].SelectedAnswerIds" value="@answer.Id" data-condition="@answer.ConditionJson">
-
-                                                    <label class="form-check-label" for="question@(i)_answer@(answer.Id)">
-                                                        @answer.Text
-                                                    </label>
-                                                </div>
-
-                                            }
-
-                                        </div>
-
-                                        break;
-                                    case QuestionType.Open_ended:
-
-                                        @foreach (var answer in question.Answers)
-                                        {
-
-                                            <textarea type="Text" class="form-control" id="question@(i + 1)" name="Questions[@i].SelectedText" value="@answer.Text" rows="3" placeholder="Enter answer"></textarea>
-                                            <input type="hidden" class="form-control" id="question@(i + 1)" name="Questions[@i].SelectedAnswerIds" value="@answer.Id" rows="3" placeholder="Enter answer" data-condition="@answer.ConditionJson"></input>
-                                        }
-
-                                        break;
-
-                                    case QuestionType.Slider:
-
-                                        @foreach (var answer in question.Answers)
-                                        {
-                                            <input type="range" class="form-range " id="question@(i + 1)" name="Questions[@i].SelectedText" min="0" max="100" step="1">
-                                            <input type="hidden" class="form-range " id="question@(i + 1)" name="Questions[@i].SelectedAnswerIds" value="@answer.Id" min="0" max="100" step="1" data-condition="@answer.ConditionJson">
-
-                                            <output id="question@(i + 1)_output">50</output>
-                                            <script>
-                                                document.getElementById('question@(i + 1)').addEventListener('input', function () {
-                                                    document.getElementById('question@(i + 1)_output').value = this.value;
-                                                });
-                                            </script>
-                                        }
-
-                                        break;
-                                    case QuestionType.Rating:
-                                        <div class="rating" data-question="@i">
-
-                                            @foreach (var answer in question.Answers)
-                                            {
-                                                <div class="rating-item">
-                                                    <div class="rating-label">@answer.Text</div>
-                                                    <input type="radio" id="question@(i)_rating@(answer.Id)"
-                                                           name="Questions[@i].SelectedAnswerIds"
-                                                           value="@answer.Id" class="rating-input" hidden data-condition="@answer.ConditionJson">
-                                                    <label for="question@(i)_rating@(answer.Id)" class="bi bi-star-fill rating-star"></label>
-                                                </div>
-                                            }
-                                        </div>
-
-                                        break;
-                                    case QuestionType.Ranking:
-                                        
-                                                <div class="ranking-question">
-                                                    <p class="ml-3">drag and drop to move the answers</p>
-                                                    <ul class="sortable-list" id="ranking_@question.Id">
-                                                        @{
-                                                            int index = 1; // Initialize the index to start numbering from 1
-                                                        }
-                                                        @foreach (var answer in question.Answers)
-                                                        {
-                                                            <li class="draggable-item" draggable="true" id="@answer.Id" ondragstart="dragStart(event);" ondragover="allowDrop(event);" ondrop="drop(event);">
-                                                                <span class="answer-index">@index. </span> @answer.Text
-                                                                <i class="bi bi-grip-vertical mr-auto"></i>
-                                                                <input type="hidden" name="Questions[@i].SelectedAnswerIds" value="@answer.Id" data-condition="@answer.ConditionJson">
-                                                                <button type="button" class="up-button btn btn-primary btn-sm " onclick="moveUp(this.parentElement)">
-                                                                    <i class="bi bi-arrow-up"></i> Up
-                                                                </button>
-                                                                <button type="button" class="down-button btn btn-info btn-sm" onclick="moveDown(this.parentElement)">
-                                                                    <i class="bi bi-arrow-down"></i> Down
-                                                                </button>
-                                                               
-                                                            </li>
-                                                            index++; // Increment the index for the next item
-                                                        }
-                                                    </ul>
-                                                </div>
-                                           
-                                        
-
-
-                                        <script>
-                                            function allowDrop(ev) {
-                                                ev.preventDefault(); // Necessary to allow a drop event
-                                            }
-
-                                            function dragStart(ev) {
-                                                ev.dataTransfer.setData("text", ev.target.id); // Stores the id of the draggable item
-                                            }
-
-                                            function drop(ev) {
-                                                ev.preventDefault();
-                                                var data = ev.dataTransfer.getData("text");
-                                                var draggedElement = document.getElementById(data);
-                                                var dropTarget = ev.target.closest('.draggable-item');
-                                                if (dropTarget) {
-                                                    var targetRect = dropTarget.getBoundingClientRect();
-                                                    var midPoint = targetRect.top + (targetRect.height / 2); // Calculate the midpoint of the drop target
-
-                                                    var list = dropTarget.parentNode;
-                                                    if (ev.clientY < midPoint) {
-                                                        // Drop above the target
-                                                        list.insertBefore(draggedElement, dropTarget);
-                                                    } else {
-                                                        // Drop below the target
-                                                        if (dropTarget.nextSibling) {
-                                                            list.insertBefore(draggedElement, dropTarget.nextSibling);
-                                                        } else {
-                                                            list.appendChild(draggedElement); // In case the target is the last child
-                                                        }
-                                                    }
-                                                }
-                                            }
-
-
-                                            // Click to select item
-                                            document.querySelectorAll('.draggable-item').forEach(item => {
-                                                item.addEventListener('click', function () {
-                                                    // Remove previous selections
-                                                    removeSelected(this.parentNode);
-                                                    // Mark this as selected
-                                                    this.classList.add('selected');
-                                                });
-                                            });
-
-                                            // Function to remove selected class from siblings
-                                            function removeSelected(parent) {
-                                                parent.querySelectorAll('.draggable-item').forEach(sibling => {
-                                                    sibling.classList.remove('selected');
-                                                });
-                                            }
-                                        </script>
-
-                                        break;
-
-                                    case QuestionType.Likert:
-
-                                        <div class="likert">
-
-                                            <div class="statement">
-                                                <label>Please indicate your level of agreement with the following statements:</label>
-                                                <div class="responses">
-                                                    @foreach (var answer in question.Answers)
-                                                    {
-                                                        <label class="likert-option">
-                                                            <input class="form-check-input" type="radio" id="question@(i)_answer@(answer.Id)" name="Questions[@i].SelectedAnswerIds" value="@answer.Id" data-condition="@answer.ConditionJson">
-                                                            @answer.Text
-                                                        </label>
-                                                    }
-                                                </div>
-                                            </div>
-
-
-                                        </div>
-
-                                        break;
-                                    case QuestionType.Matrix:
-
-                                        <div class="matrix-question">
-                                            <table class="table table-responsive">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Question</th>
-                                                        @foreach (var option in question.Answers)  // Assuming these are the consistent answer options across all sub-questions
-                                                        {
-                                                            <th>@option.Text</th>
-                                                        }
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <tr>
-                                                        <td>@question.Text</td>
-                                                        @foreach (var option in question.Answers)  // Use consistent options for each sub-question
-                                                        {
-                                                            <td>
-                                                                <input type="radio" name="Questions[@i].SelectedAnswerIds" value="@option.Id" data-condition="@option.ConditionJson">
-                                                            </td>
-                                                        }
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
-
-                                        break;
-                                    case QuestionType.Image:
-
-                                        <script>
-
-                                            function selectImageCard(answerId, questionId) {
-                                                // Clear previously selected
-                                                var cards = document.querySelectorAll('.image-question[data-question-id="' + questionId + '"] .card');
-                                                cards.forEach(function (card) {
-                                                    card.classList.remove('selected');
-                                                });
-
-                                                // Set new selected
-                                                var selectedCard = document.getElementById('card_' + answerId);
-                                                selectedCard.classList.add('selected');
-
-                                                // Set the radio button as checked
-                                                var radioButton = document.getElementById('image_answer_' + answerId);
-                                                radioButton.checked = true;
-                                            }
-                                        </script>
-
-                                        <div class="image-question" data-question-id="@question.Id">
-                                            <div class="card-deck">
-                                                @foreach (var answer in question.Answers)
-                                                {
-                                                    <div class="card image-card" id="card_@answer.Id" onclick="selectImageCard('@answer.Id', '@question.Id')">
-                                                        <img src="@answer.Text" alt="Image option" class="img-fluid" />
-                                                        <input type="radio" id="image_answer_@answer.Id" name="Questions[@i].SelectedAnswerIds" value="@answer.Id" hidden data-condition="@answer.ConditionJson" />
-                                                    </div>
-                                                }
-                                            </div>
-                                        </div>
-
-
-                                        break;
-                                    default:
-                                        <div class="alert alert-danger" role="alert">
-                                            Unsupported question type.
-                                        </div>
-                                        break;
-                                }
-                               
-                                <div class="mt-3">
-                                    @if (i > 0)
-                                    {
-                                        <button type="button" class="btn btn-secondary btn-sm mr-3 prev" id="BannerButon"><i class="bi bi-arrow-left"></i> Previous </button>
-                                    }
-                                    @if (i < Model.Questions.Count - 1)
-                                    {
-                                        <button type="button" class="btn btn-primary btn-sm next" id="BannerButon">Next <i class="bi bi-arrow-right"></i></button>
-                                    }
-                                </div>
+                            string stepClass = i == 0 ? "active" : "";
+                            <div class="step-indicator @(stepClass)" data-step-index="@i">
+                                <span class="step-number">@((i + 1))</span>
+                                <span class="step-label">@question.Type</span>
                             </div>
                         }
-                        <div class="User-details" style="display:none;">
-                            <div class="form-group">
-                                <label for="userName">Your Name:</label>
-                                <input type="text" class="form-control" id="userName" name="UserName" placeholder="Enter your name" >
-                            </div>
-                            <div class="form-group">
-                                <label for="userEmail">Email Address:</label>
-                                <input type="email" class="form-control" id="userEmail" name="UserEmail" placeholder="Enter your email" >
+                    </div>
+                </div>
+
+                <!-- Form Content -->
+                <div class="col-12 col-md-9">
+                    @for (int i = 0; i < Model.Questions.Count; i++)
+                    {
+                        var question = Model.Questions[i];
+                        <input type="hidden" name="Id" value="@question.Id">
+                        <input type="hidden" name="Questions[@i].Text" value="@question.Text">
+                        <input type="hidden" name="Questions[@i].Id" value="@question.Id">
+                        <input type="hidden" name="Questions[@i].Type" value="@((int)question.Type)">
+                        @for (int j = 0; j < question.Answers.Count; j++)
+                        {
+                            var answer = question.Answers[j];
+                            <input type="hidden" name="Questions[@i].Answers[@j].Id" value="@answer.Id">
+                            <input type="hidden" name="Questions[@i].Answers[@j].Text" value="@answer.Text">
+                        }
+
+                        <div class="step @(i == 0 ? "active" : "")" data-question-id="@question.Id">
+                            <p class="font-weight-normal">@(i + 1). @question.Text</p>
+
+                            @switch (question.Type)
+                            {
+                                case QuestionType.Text:
+                                    @foreach (var answer in question.Answers)
+                                    {
+                                        <input type="Text" class="form-control" id="question@(i + 1)" name="Questions[@i].SelectedText" rows="3" placeholder="Enter answer"></input>
+                                        <input class="form-control hidden-textarea" id="question@(i + 1)" name="Questions[@i].SelectedAnswerIds" value="@answer.Id" rows="3" placeholder="Enter answer" data-condition="@answer.ConditionJson"></input>
+                                    }
+                                    break;
+
+                                case QuestionType.CheckBox:
+                                case QuestionType.Multiple_choice:
+                                case QuestionType.Demographic:
+                                    <div class="form-group">
+                                        @foreach (var answer in question.Answers)
+                                        {
+                                            <div class="form-check mb-2">
+                                                <input class="form-check-input" id="question@(i)_answer@(answer.Id)" type="checkbox" name="Questions[@i].SelectedAnswerIds" value="@answer.Id" data-condition="@answer.ConditionJson">
+                                                <label class="form-check-label" for="question@(i)_answer@(answer.Id)">@answer.Text</label>
+                                            </div>
+                                        }
+                                    </div>
+                                    break;
+
+                                case QuestionType.TrueFalse:
+                                    <div class="form-check">
+                                        @foreach (var answer in question.Answers)
+                                        {
+                                            <div class="form-check mb-2">
+                                                <input class="form-check-input answer-input" type="radio" id="question@(i)_answer@(answer.Id)" name="Questions[@i].SelectedAnswerIds" value="@answer.Id" data-condition="@answer.ConditionJson">
+                                                <label class="form-check-label" for="question@(i)_answer@(answer.Id)">@answer.Text</label>
+                                            </div>
+                                        }
+                                    </div>
+                                    break;
+
+                                case QuestionType.Open_ended:
+                                    @foreach (var answer in question.Answers)
+                                    {
+                                        <textarea type="Text" class="form-control" id="question@(i + 1)" name="Questions[@i].SelectedText" value="@answer.Text" rows="3" placeholder="Enter answer"></textarea>
+                                        <input type="hidden" class="form-control" id="question@(i + 1)" name="Questions[@i].SelectedAnswerIds" value="@answer.Id" rows="3" placeholder="Enter answer" data-condition="@answer.ConditionJson"></input>
+                                    }
+                                    break;
+
+                                case QuestionType.Slider:
+                                    @foreach (var answer in question.Answers)
+                                    {
+                                        <input type="range" class="form-range" id="question@(i + 1)" name="Questions[@i].SelectedText" min="0" max="100" step="1">
+                                        <input type="hidden" class="form-range" id="question@(i + 1)" name="Questions[@i].SelectedAnswerIds" value="@answer.Id" min="0" max="100" step="1" data-condition="@answer.ConditionJson">
+                                        <output id="question@(i + 1)_output">50</output>
+                                        <script>
+                                            document.getElementById('question@(i + 1)').addEventListener('input', function () {
+                                                document.getElementById('question@(i + 1)_output').value = this.value;
+                                            });
+                                        </script>
+                                    }
+                                    break;
+
+                                case QuestionType.Rating:
+                                    <div class="rating" data-question="@i">
+                                        @foreach (var answer in question.Answers)
+                                        {
+                                            <div class="rating-item">
+                                                <div class="rating-label">@answer.Text</div>
+                                                <input type="radio" id="question@(i)_rating@(answer.Id)" name="Questions[@i].SelectedAnswerIds" value="@answer.Id" class="rating-input" hidden data-condition="@answer.ConditionJson">
+                                                <label for="question@(i)_rating@(answer.Id)" class="bi bi-star-fill rating-star"></label>
+                                            </div>
+                                        }
+                                    </div>
+                                    break;
+
+                                case QuestionType.Ranking:
+                                    <div class="ranking-question">
+                                        <p class="ml-3">drag and drop to move the answers</p>
+                                        <ul class="sortable-list" id="ranking_@question.Id">
+                                            @{
+                                                int index = 1;
+                                            }
+                                            @foreach (var answer in question.Answers)
+                                            {
+                                                <li class="draggable-item" draggable="true" id="@answer.Id" ondragstart="dragStart(event);" ondragover="allowDrop(event);" ondrop="drop(event);">
+                                                    <span class="answer-index">@index. </span> @answer.Text
+                                                    <i class="bi bi-grip-vertical mr-auto"></i>
+                                                    <input type="hidden" name="Questions[@i].SelectedAnswerIds" value="@answer.Id" data-condition="@answer.ConditionJson">
+                                                    <button type="button" class="up-button btn btn-primary btn-sm" onclick="moveUp(this.parentElement)"><i class="bi bi-arrow-up"></i> Up</button>
+                                                    <button type="button" class="down-button btn btn-info btn-sm" onclick="moveDown(this.parentElement)"><i class="bi bi-arrow-down"></i> Down</button>
+                                                </li>
+                                                index++;
+                                            }
+                                        </ul>
+                                    </div>
+                                    <script>
+                                        function allowDrop(ev) { ev.preventDefault(); }
+                                        function dragStart(ev) { ev.dataTransfer.setData("text", ev.target.id); }
+                                        function drop(ev) {
+                                            ev.preventDefault();
+                                            var data = ev.dataTransfer.getData("text");
+                                            var draggedElement = document.getElementById(data);
+                                            var dropTarget = ev.target.closest('.draggable-item');
+                                            if (dropTarget) {
+                                                var targetRect = dropTarget.getBoundingClientRect();
+                                                var midPoint = targetRect.top + (targetRect.height / 2);
+                                                var list = dropTarget.parentNode;
+                                                if (ev.clientY < midPoint) {
+                                                    list.insertBefore(draggedElement, dropTarget);
+                                                } else {
+                                                    if (dropTarget.nextSibling) { list.insertBefore(draggedElement, dropTarget.nextSibling); }
+                                                    else { list.appendChild(draggedElement); }
+                                                }
+                                            }
+                                        }
+
+                                        document.querySelectorAll('.draggable-item').forEach(item => {
+                                            item.addEventListener('click', function () {
+                                                removeSelected(this.parentNode);
+                                                this.classList.add('selected');
+                                            });
+                                        });
+                                        function removeSelected(parent) { parent.querySelectorAll('.draggable-item').forEach(sibling => { sibling.classList.remove('selected'); }); }
+                                    </script>
+                                    break;
+
+                                case QuestionType.Likert:
+                                    <div class="likert">
+                                        <div class="statement">
+                                            <label>Please indicate your level of agreement with the following statements:</label>
+                                            <div class="responses">
+                                                @foreach (var answer in question.Answers)
+                                                {
+                                                    <label class="likert-option">
+                                                        <input class="form-check-input" type="radio" id="question@(i)_answer@(answer.Id)" name="Questions[@i].SelectedAnswerIds" value="@answer.Id" data-condition="@answer.ConditionJson"> @answer.Text
+                                                    </label>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                    break;
+
+                                case QuestionType.Matrix:
+                                    <div class="matrix-question">
+                                        <table class="table table-responsive">
+                                            <thead>
+                                                <tr>
+                                                    <th>Question</th>
+                                                    @foreach (var option in question.Answers)
+                                                    {
+                                                        <th>@option.Text</th>
+                                                    }
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td class="matrix-prompt">@question.Text</td>
+                                                    @foreach (var option in question.Answers)
+                                                    {
+                                                        <td class="matrix-cell">
+                                                            <input type="radio" class="matrix-radio" id="q@(i)_opt_@option.Id" name="Questions[@i].SelectedAnswerIds" value="@option.Id" data-condition="@option.ConditionJson">
+                                                            <label for="q@(i)_opt_@option.Id" class="matrix-choice"><span class="opt-text">@option.Text</span></label>
+                                                        </td>
+                                                    }
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    break;
+
+                                case QuestionType.Image:
+                                    <script>
+                                        function selectImageCard(answerId, questionId) {
+                                            var cards = document.querySelectorAll('.image-question[data-question-id="' + questionId + '"] .card');
+                                            cards.forEach(function (card) { card.classList.remove('selected'); });
+                                            var selectedCard = document.getElementById('card_' + answerId);
+                                            selectedCard.classList.add('selected');
+                                            var radioButton = document.getElementById('image_answer_' + answerId);
+                                            radioButton.checked = true;
+                                        }
+                                    </script>
+                                    <div class="image-question" data-question-id="@question.Id">
+                                        <div class="card-deck">
+                                            @foreach (var answer in question.Answers)
+                                            {
+                                                <div class="card image-card" id="card_@answer.Id" onclick="selectImageCard('@answer.Id', '@question.Id')">
+                                                    <img src="@answer.Text" alt="Image option" class="img-fluid" />
+                                                    <input type="radio" id="image_answer_@answer.Id" name="Questions[@i].SelectedAnswerIds" value="@answer.Id" hidden data-condition="@answer.ConditionJson" />
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                    break;
+
+                                default:
+                                    <div class="alert alert-danger" role="alert">Unsupported question type.</div>
+                                    break;
+                            }
+
+                            <div class="mt-3">
+                                @if (i > 0)
+                                {
+                                    <button type="button" class="btn btn-secondary btn-sm mr-3 prev" id="BannerButon"><i class="bi bi-arrow-left"></i> Previous</button>
+                                }
+                                @if (i < Model.Questions.Count - 1)
+                                {
+                                    <button type="button" class="btn btn-primary btn-sm next" id="BannerButon">Next <i class="bi bi-arrow-right"></i></button>
+                                }
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-primary submit btn-sm mt-4" id="BannerButon">Submit</button>
+                    }
 
+                    <div class="User-details" style="display:none;">
+                        <div class="form-group">
+                            <label for="userName">Your Name:</label>
+                            <input type="text" class="form-control" id="userName" name="UserName" placeholder="Enter your name">
+                        </div>
+                        <div class="form-group">
+                            <label for="userEmail">Email Address:</label>
+                            <input type="email" class="form-control" id="userEmail" name="UserEmail" placeholder="Enter your email">
+                        </div>
                     </div>
 
+                    <button type="submit" class="btn btn-primary submit btn-sm mt-4" id="BannerButon">Submit</button>
                 </div>
             </div>
         </form>
     </section>
 </div>
+
 @section Scripts {
     @{
         <partial name="_ValidationScriptsPartial" />
     }
 
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const form = document.getElementById('questionnaireForm');
-            if (!form) {
-                console.error('Form not found!');
-                return;
-            }
+            if (!form) { console.error('Form not found!'); return; }
 
-            // Track which questions were shown and skipped - FIXED VARIABLE NAMES
-            let questionsShownArray = [1]; // Start with question 1
+            // Tracking
+            let questionsShownArray = [1];
             let questionsSkippedArray = [];
-            let navigationPath = [0]; // Start with question 1 (index 0)
+            let navigationPath = [0];
 
             function trackQuestionShown(questionNumber) {
                 if (!questionsShownArray.includes(questionNumber)) {
                     questionsShownArray.push(questionNumber);
-                    console.log('Question shown:', questionNumber, 'Total shown:', questionsShownArray);
                 }
             }
-
             function trackQuestionSkipped(questionNumber, reason) {
-                const skipInfo = {
-                    questionNumber: questionNumber,
-                    reason: reason
-                };
+                const skipInfo = { questionNumber: questionNumber, reason: reason };
                 questionsSkippedArray.push(skipInfo);
-                console.log('Question skipped:', skipInfo);
             }
-
             function updateTrackingInputs() {
                 document.getElementById('questionsShown').value = JSON.stringify(questionsShownArray);
                 document.getElementById('questionsSkipped').value = JSON.stringify(questionsSkippedArray);
             }
 
-            // Get conditions from the CURRENT step only
             function getCurrentStepConditions() {
                 const currentStepElement = steps[currentStep];
                 const activeConditions = [];
-                
-                // Only check inputs in the current step
                 const currentStepInputs = currentStepElement.querySelectorAll('input:checked, input[type="text"]:not([value=""]), textarea:not([value=""])');
-                
                 currentStepInputs.forEach(input => {
                     const condition = input.getAttribute('data-condition');
                     if (condition && condition !== '' && condition !== 'null') {
-                        try {
-                            const conditionData = JSON.parse(condition);
-                            activeConditions.push(conditionData);
-                        } catch (e) {
-                            console.log('Invalid condition JSON:', condition);
-                        }
+                        try { activeConditions.push(JSON.parse(condition)); } catch (e) { console.log('Invalid condition JSON:', condition); }
                     }
                 });
-
                 return activeConditions;
             }
 
             function shouldApplyCondition() {
                 const conditions = getCurrentStepConditions();
-                
                 for (let condition of conditions) {
                     if (condition.ActionType === 1 && condition.TargetQuestionNumber) {
-                        // SkipToQuestion
                         return { action: 'jumpTo', target: condition.TargetQuestionNumber };
                     } else if (condition.ActionType === 2 && condition.SkipCount) {
-                        // SkipCount
                         return { action: 'skip', count: condition.SkipCount };
                     } else if (condition.ActionType === 3) {
-                        // EndSurvey
                         return { action: 'end', message: condition.EndMessage };
                     }
                 }
-                
                 return { action: 'continue' };
             }
 
-            function getCurrentStepNumber() {
-                return currentStep + 1; // Convert 0-based index to 1-based question number
-            }
+            function getCurrentStepNumber() { return currentStep + 1; }
 
             function jumpToQuestion(questionNumber) {
-                const targetStepIndex = questionNumber - 1; // Convert to 0-based index
+                const targetStepIndex = questionNumber - 1;
                 if (targetStepIndex >= 0 && targetStepIndex < steps.length) {
                     const currentQuestionNumber = getCurrentStepNumber();
-                    
-                    // Track skipped questions between current and target
                     for (let i = currentQuestionNumber + 1; i < questionNumber; i++) {
                         trackQuestionSkipped(i, `Skipped due to jump condition from question ${currentQuestionNumber}`);
                     }
-                    
                     currentStep = targetStepIndex;
-                    navigationPath.push(currentStep); // Track the path
-                    trackQuestionShown(questionNumber); // Track the target question as shown
+                    navigationPath.push(currentStep);
+                    trackQuestionShown(questionNumber);
                     showStep(currentStep);
                     updateStepper();
-                    console.log(`Jumped to question ${questionNumber}, path:`, navigationPath);
                 }
             }
 
             function skipQuestions(skipCount) {
                 const currentQuestionNumber = getCurrentStepNumber();
                 const newStepIndex = currentStep + skipCount + 1;
-                
-                // Track skipped questions
                 for (let i = 1; i <= skipCount; i++) {
                     const skippedQuestionNumber = currentQuestionNumber + i;
                     if (skippedQuestionNumber <= steps.length) {
                         trackQuestionSkipped(skippedQuestionNumber, `Skipped due to skip condition from question ${currentQuestionNumber}`);
                     }
                 }
-                
                 if (newStepIndex < steps.length) {
                     currentStep = newStepIndex;
-                    navigationPath.push(currentStep); // Track the path
-                    trackQuestionShown(getCurrentStepNumber()); // Track the new question as shown
+                    navigationPath.push(currentStep);
+                    trackQuestionShown(getCurrentStepNumber());
                     showStep(currentStep);
                     updateStepper();
                 } else {
-                    // If skip goes beyond last question, show submit
                     currentStep = steps.length - 1;
                     navigationPath.push(currentStep);
                     showStep(currentStep);
                     updateStepper();
                 }
-                console.log(`Skipped ${skipCount} questions, path:`, navigationPath);
             }
 
             function endSurvey(endMessage) {
                 const currentQuestionNumber = getCurrentStepNumber();
-                
-                // Track all remaining questions as skipped
                 for (let i = currentQuestionNumber + 1; i <= steps.length; i++) {
                     trackQuestionSkipped(i, `Survey ended early from question ${currentQuestionNumber}`);
                 }
-                
-                // Hide all steps and show end message
                 steps.forEach(step => step.style.display = 'none');
-                
                 const endMessageDiv = document.createElement('div');
                 endMessageDiv.className = 'alert alert-success text-center';
-                endMessageDiv.innerHTML = `
-                    <h4>Survey Completed</h4>
-                    <p>${endMessage || 'Thank you for completing the survey!'}</p>
-                `;
-                
+                endMessageDiv.innerHTML = `<h4>Survey Completed</h4><p>${endMessage || 'Thank you for completing the survey!'}</p>`;
                 const formContainer = document.querySelector('.col-md-9');
                 formContainer.appendChild(endMessageDiv);
-                
-                // Hide submit button
                 submitButton.style.display = 'none';
             }
 
-            // Rating functionality
+            // Rating - Enhanced with jQuery
             $(document).ready(function () {
                 $('.rating-item').on('click', function () {
-                    $(this).siblings().find('.rating-star').removeClass('selected');
-                    $(this).find('.rating-star').addClass('selected');
-                    $(this).prevAll().find('.rating-star').addClass('selected');
-                    $(this).find('.rating-star').toggleClass('bi-star-fill bi-star');
-                    $(this).find('.rating-input').prop('checked', true);
+                    const $this = $(this);
+                    const $siblings = $this.siblings('.rating-item');
+                    const $prevAll = $this.prevAll('.rating-item');
+
+                    // Reset all stars
+                    $siblings.add($this).find('.rating-star').removeClass('selected');
+
+                    // Add selected class to current and previous stars
+                    $prevAll.add($this).find('.rating-star').addClass('selected');
+
+                    // Check the radio input
+                    $this.find('.rating-input').prop('checked', true);
+
+                    // Add visual feedback
+                    $this.addClass('rating-selected');
+                    setTimeout(() => $this.removeClass('rating-selected'), 200);
+                });
+
+                // Hover effects
+                $('.rating-item').on('mouseenter', function () {
+                    const $this = $(this);
+                    $this.prevAll('.rating-item').add($this).find('.rating-star').addClass('rating-hover');
+                }).on('mouseleave', function () {
+                    $('.rating-star').removeClass('rating-hover');
                 });
             });
 
-            // Ranking functionality
+            // Enhanced CSS for rating interactions
+            const ratingStyles = `
+                .rating-star.rating-hover {
+                    color: #fbbf24 !important;
+                    transform: translateY(-2px) scale(1.1);
+                }
+                .rating-item.rating-selected {
+                    transform: scale(1.05);
+                }
+            `;
+
+            if (!document.getElementById('rating-styles')) {
+                const styleElement = document.createElement('style');
+                styleElement.id = 'rating-styles';
+                styleElement.textContent = ratingStyles;
+                document.head.appendChild(styleElement);
+            }
+
+            // Ranking
             if (!window.hasEventListenersAdded) {
                 const upButtons = document.querySelectorAll('.up-button');
                 const downButtons = document.querySelectorAll('.down-button');
-
-                upButtons.forEach(button => {
-                    button.addEventListener('click', function () {
-                        moveUp(this);
-                    });
-                });
-
-                downButtons.forEach(button => {
-                    button.addEventListener('click', function () {
-                        moveDown(this);
-                    });
-                });
-
+                upButtons.forEach(button => { button.addEventListener('click', function () { moveUp(this); }); });
+                downButtons.forEach(button => { button.addEventListener('click', function () { moveDown(this); }); });
                 window.hasEventListenersAdded = true;
             }
+            function moveUp(button) { var li = button.parentNode; if (li.previousElementSibling) { li.parentNode.insertBefore(li, li.previousElementSibling); } }
+            function moveDown(button) { var li = button.parentNode; if (li.nextElementSibling) { li.parentNode.insertBefore(li.nextElementSibling, li); } }
 
-            function moveUp(button) {
-                var li = button.parentNode;
-                if (li.previousElementSibling) {
-                    li.parentNode.insertBefore(li, li.previousElementSibling);
-                }
-            }
-
-            function moveDown(button) {
-                var li = button.parentNode;
-                if (li.nextElementSibling) {
-                    li.parentNode.insertBefore(li.nextElementSibling, li);
-                }
-            }
-
-            // Stepper functionality
+            // Stepper
             const steps = form.querySelectorAll('.step');
             const stepIndicators = document.querySelectorAll('.step-indicator');
             const submitButton = form.querySelector('.submit');
             let currentStep = 0;
 
-            form.addEventListener('submit', function (event) {
-                updateTrackingInputs();
-                console.log('Form submission with tracking data');
-                console.log('Questions shown:', questionsShownArray);
-                console.log('Questions skipped:', questionsSkippedArray);
-                const formData = new FormData(form);
-                formData.forEach((value, key) => {
-                    console.log(`${key}: ${value}`);
-                });
-            });
+            form.addEventListener('submit', function () { updateTrackingInputs(); });
 
             function showStep(index) {
                 steps.forEach((step, i) => {
-                    step.style.display = i === index ? 'block' : 'none';
+                    if (i === index) {
+                        step.style.display = 'block';
+                        step.style.animation = 'morphIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) both';
+                    } else {
+                        step.style.display = 'none';
+                    }
                 });
-
                 stepIndicators.forEach((indicator, i) => {
                     if (i === index) {
                         indicator.classList.add('active');
@@ -905,91 +1415,73 @@
                         indicator.classList.remove('active');
                     }
                 });
-
-                submitButton.style.display = index === steps.length - 1 ? 'block' : 'none';
+                submitButton.style.display = index === steps.length - 1 ? 'inline-flex' : 'none';
+                try {
+                    stepIndicators[index].scrollIntoView({
+                        behavior: 'smooth',
+                        inline: 'center',
+                        block: 'nearest'
+                    });
+                } catch(e) {}
+                if (progressEl) {
+                    const pct = Math.round(((index + 1) / steps.length) * 100);
+                    progressEl.style.width = pct + '%';
+                    progressEl.setAttribute('aria-valuenow', pct);
+                }
             }
 
-            // Fixed goToNextStep - only applies conditions from current step
             function goToNextStep() {
                 const conditionResult = shouldApplyCondition();
-                
                 switch (conditionResult.action) {
-                    case 'jumpTo':
-                        console.log(`Applying condition: Jump to question ${conditionResult.target}`);
-                        jumpToQuestion(conditionResult.target);
-                        break;
-                        
-                    case 'skip':
-                        console.log(`Applying condition: Skip ${conditionResult.count} questions`);
-                        skipQuestions(conditionResult.count);
-                        break;
-                        
-                    case 'end':
-                        console.log('Applying condition: End survey');
-                        endSurvey(conditionResult.message);
-                        break;
-                        
+                    case 'jumpTo': jumpToQuestion(conditionResult.target); break;
+                    case 'skip': skipQuestions(conditionResult.count); break;
+                    case 'end': endSurvey(conditionResult.message); break;
                     case 'continue':
                     default:
-                        // Normal next step
                         if (currentStep < steps.length - 1) {
                             currentStep++;
-                            navigationPath.push(currentStep); // Track normal navigation
-                            trackQuestionShown(getCurrentStepNumber()); // Track question as shown
+                            navigationPath.push(currentStep);
+                            trackQuestionShown(getCurrentStepNumber());
                             showStep(currentStep);
                             updateStepper();
-                            console.log(`Normal next to question ${currentStep + 1}, path:`, navigationPath);
                         }
                         break;
                 }
             }
 
-            // Fixed goToPrevStep - follows actual navigation path
             function goToPrevStep() {
                 if (navigationPath.length > 1) {
-                    // Remove current step from path
                     navigationPath.pop();
-                    // Go to previous step in the actual path
                     currentStep = navigationPath[navigationPath.length - 1];
                     showStep(currentStep);
                     updateStepper();
-                    console.log(`Previous to question ${currentStep + 1}, path:`, navigationPath);
-                } else {
-                    console.log('Already at the first question');
                 }
             }
 
             function updateStepper() {
                 const currentStepIndex = currentStep;
                 stepIndicators.forEach((indicator, i) => {
-                    indicator.style.backgroundColor = i === currentStepIndex ? '#33b3ae' : '';
+                    if (i === currentStepIndex) indicator.classList.add('active');
+                    else indicator.classList.remove('active');
                 });
+                if (progressEl) {
+                    const pct = Math.round(((currentStep + 1) / steps.length) * 100);
+                    progressEl.style.width = pct + '%';
+                    progressEl.setAttribute('aria-valuenow', pct);
+                }
             }
 
-            // Event listeners for next/previous buttons
             const nextButtons = form.querySelectorAll('.next');
-            nextButtons.forEach(button => {
-                button.addEventListener('click', goToNextStep);
-            });
-
+            nextButtons.forEach(button => { button.addEventListener('click', goToNextStep); });
             const prevButtons = form.querySelectorAll('.prev');
-            prevButtons.forEach(button => {
-                button.addEventListener('click', goToPrevStep);
-            });
+            prevButtons.forEach(button => { button.addEventListener('click', goToPrevStep); });
 
-            // Initialize the form at the first step
             showStep(currentStep);
         });
 
-        // Global functions
-        function allowDrop(ev) {
-            ev.preventDefault();
-        }
-
-        function dragStart(ev) {
-            ev.dataTransfer.setData("text", ev.target.id);
-        }
-
+        // Global helpers (kept for parity)
+        function allowDrop(ev) { ev.preventDefault(); }
+        function dragStart(ev) { ev.dataTransfer.setData("text", ev.target.id); }
         function drop(ev) {
             ev.preventDefault();
             var data = ev.dataTransfer.getData("text");
@@ -998,37 +1490,23 @@
             if (dropTarget) {
                 var targetRect = dropTarget.getBoundingClientRect();
                 var midPoint = targetRect.top + (targetRect.height / 2);
-
                 var list = dropTarget.parentNode;
-                if (ev.clientY < midPoint) {
-                    list.insertBefore(draggedElement, dropTarget);
-                } else {
-                    if (dropTarget.nextSibling) {
-                        list.insertBefore(draggedElement, dropTarget.nextSibling);
-                    } else {
-                        list.appendChild(draggedElement);
-                    }
-                }
+                if (ev.clientY < midPoint) { list.insertBefore(draggedElement, dropTarget); }
+                else { if (dropTarget.nextSibling) { list.insertBefore(draggedElement, dropTarget.nextSibling); } else { list.appendChild(draggedElement); } }
             }
         }
-
         function selectImageCard(answerId, questionId) {
             var cards = document.querySelectorAll('.image-question[data-question-id="' + questionId + '"] .card');
-            cards.forEach(function (card) {
-                card.classList.remove('selected');
-            });
-
+            cards.forEach(function (card) { card.classList.remove('selected'); });
             var selectedCard = document.getElementById('card_' + answerId);
-            selectedCard.classList.add('selected');
-
+            if (selectedCard) {
+                selectedCard.classList.add('selected');
+                // Add selection animation
+                selectedCard.style.animation = 'morphIn 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+            }
             var radioButton = document.getElementById('image_answer_' + answerId);
-            radioButton.checked = true;
+            if (radioButton) radioButton.checked = true;
         }
-
-        function removeSelected(parent) {
-            parent.querySelectorAll('.draggable-item').forEach(sibling => {
-                sibling.classList.remove('selected');
-            });
-        }
+        function removeSelected(parent) { parent.querySelectorAll('.draggable-item').forEach(sibling => { sibling.classList.remove('selected'); }); }
     </script>
 }

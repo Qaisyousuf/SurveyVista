@@ -36,8 +36,7 @@ namespace Web.Controllers
 
         public IActionResult Error()
         {
-            ViewBag.ErrorMessage = "The survey link has expired. request a new link.";
-
+            ViewBag.ErrorMessage = "Undersøgelseslinket er udløbet. Anmod om et nyt link.";
             return View();
         }
 
