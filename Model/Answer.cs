@@ -21,6 +21,7 @@ namespace Model
         [ForeignKey("QuestionId")]
         public Question? Question { get; set; }
 
+        public bool IsOtherOption { get; set; } = false;
         public string? ConditionJson { get; set; }
     }
 }

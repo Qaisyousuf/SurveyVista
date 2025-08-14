@@ -179,7 +179,6 @@ namespace Web.Controllers
             }
             catch (System.Text.Json.JsonException ex)
             {
-                // Log error if needed
                 Console.WriteLine($"Error parsing tracking data: {ex.Message}");
             }
 
@@ -209,7 +208,10 @@ namespace Web.Controllers
                                        : null,
                         ResponseAnswers = answeredQuestion.SelectedAnswerIds
                             .Select(aid => new ResponseAnswer { AnswerId = aid })
-                            .ToList()
+                            .ToList(),
+
+                        // ✅ NEW: Handle Other Text
+                        OtherText = GetOtherTextForQuestion(answeredQuestion, dbQuestion)
                     };
                 }
                 else if (skippedInfo != null)
@@ -252,6 +254,34 @@ namespace Web.Controllers
             return responseDetails;
         }
 
+        // ✅ NEW METHOD: Extract other text for a question
+        private string GetOtherTextForQuestion(ResponseQuestionViewModel answeredQuestion, Question dbQuestion)
+        {
+            if (answeredQuestion.OtherTexts == null || !answeredQuestion.OtherTexts.Any())
+                return null;
+
+            var otherTexts = new List<string>();
+
+            // Loop through selected answers and check if any are "other" options
+            foreach (var selectedAnswerId in answeredQuestion.SelectedAnswerIds)
+            {
+                // Find the corresponding answer in the database
+                var dbAnswer = dbQuestion.Answers.FirstOrDefault(a => a.Id == selectedAnswerId);
+
+                // If this answer is an "other" option and has custom text
+                if (dbAnswer != null && dbAnswer.IsOtherOption && answeredQuestion.OtherTexts.ContainsKey(selectedAnswerId))
+                {
+                    var customText = answeredQuestion.OtherTexts[selectedAnswerId];
+                    if (!string.IsNullOrWhiteSpace(customText))
+                    {
+                        otherTexts.Add($"{dbAnswer.Text}: {customText}");
+                    }
+                }
+            }
+
+            return otherTexts.Any() ? string.Join("; ", otherTexts) : null;
+        }
+
         private int GetQuestionNumber(int questionId, List<Question> allQuestions)
         {
             return allQuestions.FindIndex(q => q.Id == questionId) + 1;
@@ -265,7 +295,11 @@ namespace Web.Controllers
             bool hasAnswerResponse = question.SelectedAnswerIds != null &&
                                     question.SelectedAnswerIds.Any();
 
-            return hasTextResponse || hasAnswerResponse;
+            // ✅ NEW: Check for other text responses
+            bool hasOtherTextResponse = question.OtherTexts != null &&
+                                       question.OtherTexts.Any(kv => !string.IsNullOrWhiteSpace(kv.Value));
+
+            return hasTextResponse || hasAnswerResponse || hasOtherTextResponse;
         }
 
         // Add this class for JSON deserialization
@@ -438,7 +472,8 @@ namespace Web.Controllers
                     {
                         Id = a.Id,
                         Text = a.Text,
-                        ConditionJson = a.ConditionJson  // Add this line
+                        IsOtherOption = a.IsOtherOption,  // ← ADD THIS LINE!
+                        ConditionJson = a.ConditionJson
                     }).ToList()
                 }).ToList()
             };

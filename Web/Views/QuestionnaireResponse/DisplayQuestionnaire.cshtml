@@ -192,6 +192,59 @@
             opacity: 0.8;
         }
 
+    /* Other Option Styling */
+    .other-option-container {
+        position: relative;
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(217, 119, 6, 0.05) 100%);
+        border: 1px solid rgba(245, 158, 11, 0.2);
+        border-radius: 16px;
+        padding: 16px;
+        margin-bottom: 16px;
+    }
+
+    .other-option-badge {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+        padding: 4px 8px;
+        border-radius: 8px;
+        font-size: 11px;
+        font-weight: 600;
+        margin-left: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .other-text-container {
+        margin-top: 12px;
+        padding: 12px;
+        background: var(--surface-secondary);
+        border-radius: 12px;
+        border: 1px solid var(--border-accent);
+        animation: morphIn 0.3s ease;
+        display: none !important; /* Initially hidden */
+    }
+
+        .other-text-container.show {
+            display: block !important;
+        }
+
+    .other-text-input {
+        background: var(--surface-glass);
+        border: 1px solid var(--border-subtle);
+        color: var(--text-primary);
+        border-radius: 12px;
+        padding: 12px 16px;
+        font-size: 14px;
+        resize: vertical;
+        min-height: 80px;
+    }
+
+        .other-text-input:focus {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(74, 144, 164, 0.15);
+            background: rgba(26, 42, 64, 0.8);
+        }
+
     /* Next-Gen Buttons */
     .btn {
         border-radius: 16px;
@@ -1011,9 +1064,34 @@
                                     <div class="form-group">
                                         @foreach (var answer in question.Answers)
                                         {
-                                            <div class="form-check mb-2">
-                                                <input class="form-check-input" id="question@(i)_answer@(answer.Id)" type="checkbox" name="Questions[@i].SelectedAnswerIds" value="@answer.Id" data-condition="@answer.ConditionJson">
-                                                <label class="form-check-label" for="question@(i)_answer@(answer.Id)">@answer.Text</label>
+                                            <div class="form-check mb-2 @(answer.IsOtherOption ? "other-option-container" : "")">
+                                                <input class="form-check-input @(answer.IsOtherOption ? "other-option-input" : "")"
+                                                       id="question@(i)_answer@(answer.Id)"
+                                                       type="checkbox"
+                                                       name="Questions[@i].SelectedAnswerIds"
+                                                       value="@answer.Id"
+                                                       data-condition="@answer.ConditionJson"
+                                                       data-question-index="@i"
+                                                       data-answer-id="@answer.Id"
+                                                       data-is-other="@answer.IsOtherOption.ToString().ToLower()">
+                                                <label class="form-check-label" for="question@(i)_answer@(answer.Id)">
+                                                    @answer.Text
+                                                    @if (answer.IsOtherOption)
+                                                    {
+                                                        <span class="other-option-badge">Other Option</span>
+                                                    }
+                                                </label>
+
+                                                @if (answer.IsOtherOption)
+                                                {
+                                                    <div class="other-text-container" id="otherText_@(i)_@(answer.Id)" style="display: none;">
+                                                        <textarea class="form-control other-text-input"
+                                              name="Questions[@i].OtherTexts[@answer.Id]"
+                                              id="otherTextArea_@(i)_@(answer.Id)"
+                                              rows="3"
+                                              placeholder="Please specify..."></textarea>
+                                                    </div>
+                                                }
                                             </div>
                                         }
                                     </div>
@@ -1023,9 +1101,34 @@
                                     <div class="form-check">
                                         @foreach (var answer in question.Answers)
                                         {
-                                            <div class="form-check mb-2">
-                                                <input class="form-check-input answer-input" type="radio" id="question@(i)_answer@(answer.Id)" name="Questions[@i].SelectedAnswerIds" value="@answer.Id" data-condition="@answer.ConditionJson">
-                                                <label class="form-check-label" for="question@(i)_answer@(answer.Id)">@answer.Text</label>
+                                            <div class="form-check mb-2 @(answer.IsOtherOption ? "other-option-container" : "")">
+                                                <input class="form-check-input answer-input @(answer.IsOtherOption ? "other-option-input" : "")"
+                                                       type="radio"
+                                                       id="question@(i)_answer@(answer.Id)"
+                                                       name="Questions[@i].SelectedAnswerIds"
+                                                       value="@answer.Id"
+                                                       data-condition="@answer.ConditionJson"
+                                                       data-question-index="@i"
+                                                       data-answer-id="@answer.Id"
+                                                       data-is-other="@answer.IsOtherOption.ToString().ToLower()">
+                                                <label class="form-check-label" for="question@(i)_answer@(answer.Id)">
+                                                    @answer.Text
+                                                    @if (answer.IsOtherOption)
+                                                    {
+                                                        <span class="other-option-badge">Other Option</span>
+                                                    }
+                                                </label>
+
+                                                @if (answer.IsOtherOption)
+                                                {
+                                                    <div class="other-text-container" id="otherText_@(i)_@(answer.Id)" style="display: none;">
+                                                        <textarea class="form-control other-text-input"
+                                              name="Questions[@i].OtherTexts[@answer.Id]"
+                                              id="otherTextArea_@(i)_@(answer.Id)"
+                                              rows="3"
+                                              placeholder="Please specify..."></textarea>
+                                                    </div>
+                                                }
                                             </div>
                                         }
                                     </div>
@@ -1231,6 +1334,81 @@
         document.addEventListener("DOMContentLoaded", function () {
             const form = document.getElementById('questionnaireForm');
             if (!form) { console.error('Form not found!'); return; }
+
+            // ===== OTHER OPTION FUNCTIONALITY =====
+            // Handle showing/hiding text areas for "Other" options
+            function initializeOtherOptions() {
+                console.log('Initializing other options...');
+
+                // Handle checkbox other options
+                $(document).on('change', 'input[type="checkbox"]', function() {
+                    console.log('Checkbox changed:', this);
+                    const $checkbox = $(this);
+                    const isOther = $checkbox.attr('data-is-other') === 'true';
+
+                    if (isOther) {
+                        console.log('Other checkbox detected');
+                        const questionIndex = $checkbox.attr('data-question-index');
+                        const answerId = $checkbox.attr('data-answer-id');
+                        const $textContainer = $(`#otherText_${questionIndex}_${answerId}`);
+                        const $textArea = $(`#otherTextArea_${questionIndex}_${answerId}`);
+
+                        console.log('Looking for container:', `#otherText_${questionIndex}_${answerId}`);
+                        console.log('Container found:', $textContainer.length);
+
+                        if ($checkbox.is(':checked')) {
+                            console.log('Showing text container');
+                            $textContainer.addClass('show').slideDown(300);
+                            $textArea.focus();
+                            $textArea.prop('required', true);
+                        } else {
+                            console.log('Hiding text container');
+                            $textContainer.removeClass('show').slideUp(300);
+                            $textArea.val('');
+                            $textArea.prop('required', false);
+                        }
+                    }
+                });
+
+                // Handle radio button other options
+                $(document).on('change', 'input[type="radio"]', function() {
+                    console.log('Radio button changed:', this);
+                    const $radio = $(this);
+                    const questionIndex = $radio.attr('data-question-index');
+                    const isOther = $radio.attr('data-is-other') === 'true';
+
+                    // First, hide all other text containers for this question
+                    if (questionIndex) {
+                        console.log('Hiding all other containers for question:', questionIndex);
+                        $(`.other-text-container[id^="otherText_${questionIndex}_"]`).removeClass('show').slideUp(300);
+                        $(`.other-text-input[id^="otherTextArea_${questionIndex}_"]`).prop('required', false).val('');
+                    }
+
+                    // If this is an other option and it's selected, show its text container
+                    if (isOther && $radio.is(':checked')) {
+                        console.log('Other radio selected');
+                        const answerId = $radio.attr('data-answer-id');
+                        const $textContainer = $(`#otherText_${questionIndex}_${answerId}`);
+                        const $textArea = $(`#otherTextArea_${questionIndex}_${answerId}`);
+
+                        console.log('Showing text container for radio');
+                        $textContainer.addClass('show').slideDown(300);
+                        $textArea.focus();
+                        $textArea.prop('required', true);
+                    }
+                });
+
+                // Debug: List all other option inputs
+                console.log('Other option inputs found:', $('input[data-is-other="true"]').length);
+                $('input[data-is-other="true"]').each(function() {
+                    console.log('Other input:', this, 'Question:', $(this).attr('data-question-index'), 'Answer:', $(this).attr('data-answer-id'));
+                });
+            }
+
+            // Initialize other options functionality when DOM is ready
+            $(document).ready(function() {
+                initializeOtherOptions();
+            });
 
             // Tracking
             let questionsShownArray = [1];

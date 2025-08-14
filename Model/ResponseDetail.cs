@@ -23,7 +23,7 @@ namespace Model
         public QuestionType QuestionType { get; set; }
         public string? TextResponse { get; set; }
         public List<ResponseAnswer> ResponseAnswers { get; set; } = new List<ResponseAnswer>();
-
+        public string? OtherText { get; set; }
         public ResponseStatus Status { get; set; } = ResponseStatus.Shown;
         public string? SkipReason { get; set; } // Why it was skipped (JSON of condition)
     }

@@ -16,5 +16,7 @@ namespace Web.ViewModel.QuestionnaireVM
         public List<int> SelectedAnswerIds { get; set; } = new List<int>();
 
         public List<string> SelectedText { get; set; } = new List<string>();
+
+        public Dictionary<int, string> OtherTexts { get; set; } = new Dictionary<int, string>();
     }
 }

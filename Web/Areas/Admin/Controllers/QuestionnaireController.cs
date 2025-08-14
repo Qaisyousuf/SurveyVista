@@ -93,19 +93,14 @@ namespace Web.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(QuestionnaireViewModel viewmodel)
         {
-
-
-
             if (ModelState.IsValid)
             {
-
                 var questionnaire = new Questionnaire
                 {
                     Id = viewmodel.Id,
                     Title = viewmodel.Title,
                     Description = viewmodel.Description,
                 };
-
 
                 var questions = viewmodel.Questions;
 
@@ -121,29 +116,26 @@ namespace Web.Areas.Admin.Controllers
 
                     foreach (var answerViewModel in questionViewModel.Answers)
                     {
+                        // Skip empty answers
+                        if (string.IsNullOrWhiteSpace(answerViewModel.Text))
+                            continue;
+
                         var answer = new Answer
                         {
                             Text = answerViewModel.Text,
                             QuestionId = answerViewModel.QuestionId,
-
+                            IsOtherOption = answerViewModel.IsOtherOption // NEW: Handle IsOtherOption property
                         };
-
 
                         question.Answers.Add(answer);
                     }
 
-
                     questionnaire.Questions.Add(question);
                 }
-
-
-
 
                 _questionnaire.Add(questionnaire);
                 await _questionnaire.commitAsync();
                 TempData["Success"] = "Questionnaire created successfully";
-
-
 
                 return RedirectToAction("Index");
             }
@@ -201,10 +193,9 @@ namespace Web.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> Edit(EditQuestionnaireViewModel viewModel)
         {
-
             var questionTypes = Enum.GetValues(typeof(QuestionType))
-           .Cast<QuestionType>()
-           .Select(e => new SelectListItem { Value = e.ToString(), Text = e.ToString() });
+               .Cast<QuestionType>()
+               .Select(e => new SelectListItem { Value = e.ToString(), Text = e.ToString() });
             ViewBag.QuestionTypes = questionTypes;
 
             if (ModelState.IsValid)
@@ -214,7 +205,7 @@ namespace Web.Areas.Admin.Controllers
 
                 if (existingQuestionnaire == null)
                 {
-                    return NotFound(); // Or handle not found case appropriately
+                    return NotFound();
                 }
 
                 // Update the existing questionnaire with the data from the view model
@@ -226,21 +217,12 @@ namespace Web.Areas.Admin.Controllers
                 // Iterate through existing questions and remove those not found in the view model
                 foreach (var existingQuestion in existingQuestionnaire.Questions.ToList())
                 {
-                    // If the ID of the existing question is not found in the view model, remove it
                     if (!viewModel.Questions.Any(q => q.Id == existingQuestion.Id))
                     {
                         existingQuestionnaire.Questions.Remove(existingQuestion);
-
                     }
                     await _questionnaire.Update(existingQuestionnaire);
                 }
-
-                // Update the questionnaire with the modified list of questions
-
-
-
-
-
 
                 var newQuestions = new List<Question>();
 
@@ -253,10 +235,8 @@ namespace Web.Areas.Admin.Controllers
                     {
                         if (existingQuestion != null)
                         {
-                            var answersToRemove = new List<Answer>();
                             existingQuestion.Text = questionViewModel.Text;
                             existingQuestion.Type = questionViewModel.Type;
-
 
                             foreach (var answerViewModel in questionViewModel.Answers)
                             {
@@ -265,32 +245,27 @@ namespace Web.Areas.Admin.Controllers
 
                                 if (answerViewModel.Id == 0)
                                 {
-
-                                    existingQuestion.Answers.Add(new Answer { Text = answerViewModel.Text });
-
-
+                                    // NEW: Add IsOtherOption property when creating new answers
+                                    existingQuestion.Answers.Add(new Answer
+                                    {
+                                        Text = answerViewModel.Text,
+                                        IsOtherOption = answerViewModel.IsOtherOption
+                                    });
                                 }
                                 else if (answerViewModel.Text == null)
                                 {
                                     existingQuestion.Answers.Remove(existingAnswer);
                                     await _questionnaire.Update(existingQuestionnaire);
                                 }
-
-
                                 else if (existingAnswer != null)
                                 {
-
                                     existingAnswer.Text = answerViewModel.Text;
+                                    // NEW: Update IsOtherOption property for existing answers
+                                    existingAnswer.IsOtherOption = answerViewModel.IsOtherOption;
                                 }
-
                             }
-
-
-
                         }
                     }
-
-
                     else
                     {
                         // Create a new question
@@ -305,37 +280,20 @@ namespace Web.Areas.Admin.Controllers
                         {
                             if (!string.IsNullOrEmpty(answerViewModel.Text))
                             {
-                                // Add new answer if text is not null or empty
-                                newQuestion.Answers.Add(new Answer { Text = answerViewModel.Text });
+                                // NEW: Add IsOtherOption property when creating new answers
+                                newQuestion.Answers.Add(new Answer
+                                {
+                                    Text = answerViewModel.Text,
+                                    IsOtherOption = answerViewModel.IsOtherOption
+                                });
                             }
                         }
 
-                        // Add new question to the list of new questions
                         newQuestions.Add(newQuestion);
                     }
+
                     existingQuestionnaire.Questions.AddRange(newQuestions);
-                    //else
-                    //{
-                    //    // Add new question
-                    //    var newQuestion = new Question
-                    //    {
-                    //        Text = questionViewModel.Text, // Make sure question text is not null
-                    //        Type = questionViewModel.Type, // Make sure question type is not null
-                    //        Answers = new List<Answer>() // Initialize answers list
-                    //    };
-
-                    //    foreach (var answerViewModel in questionViewModel.Answers)
-                    //    {
-                    //        // Add new answer
-                    //        newQuestion.Answers.Add(new Answer { Text = answerViewModel.Text });
-                    //    }
-
-                    //    // Add new question to questionnaire
-                    //    existingQuestionnaire.Questions.Add(newQuestion);
-                    //}
-
                 }
-
 
                 await _questionnaire.Update(existingQuestionnaire);
 
@@ -343,14 +301,12 @@ namespace Web.Areas.Admin.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            // If ModelState is not valid, re-display the form with validation errors
             return View(viewModel);
         }
 
         [HttpGet]
         public IActionResult Delete(int id)
         {
-
             var questionTypes = Enum.GetValues(typeof(QuestionType)).Cast<QuestionType>();
 
             ViewBag.QuestionTypes = new SelectList(questionTypes);
@@ -358,7 +314,7 @@ namespace Web.Areas.Admin.Controllers
 
             if (questionnaire == null)
             {
-                return NotFound(); // Or handle not found case appropriately
+                return NotFound();
             }
 
             var viewModel = new QuestionnaireViewModel
@@ -375,7 +331,8 @@ namespace Web.Areas.Admin.Controllers
                         Answers = q.Answers.Select(a => new Answer
                         {
                             Id = a.Id,
-                            Text = a.Text
+                            Text = a.Text,
+                            IsOtherOption = a.IsOtherOption // NEW: Include IsOtherOption property
                         }).ToList()
                     }).ToList()
             };
@@ -422,7 +379,7 @@ namespace Web.Areas.Admin.Controllers
 
             if (questionnaire == null)
             {
-                return NotFound(); // Or handle not found case appropriately
+                return NotFound();
             }
 
             var viewModel = new QuestionnaireViewModel
@@ -439,7 +396,8 @@ namespace Web.Areas.Admin.Controllers
                         Answers = q.Answers.Select(a => new Answer
                         {
                             Id = a.Id,
-                            Text = a.Text
+                            Text = a.Text,
+                            IsOtherOption = a.IsOtherOption // NEW: Include IsOtherOption property
                         }).ToList()
                     }).ToList()
             };

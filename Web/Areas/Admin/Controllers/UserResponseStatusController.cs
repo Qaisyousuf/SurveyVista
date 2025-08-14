@@ -8,8 +8,6 @@ using OfficeOpenXml;
 using Services.Interaces;
 using Web.ViewModel.QuestionnaireVM;
 
-
-
 namespace Web.Areas.Admin.Controllers
 {
     public class UserResponseStatusController : Controller
@@ -17,7 +15,7 @@ namespace Web.Areas.Admin.Controllers
         private readonly SurveyContext _context;
         private readonly IUserResponseRepository _userResponse;
 
-        public UserResponseStatusController(SurveyContext context,IUserResponseRepository userResponse)
+        public UserResponseStatusController(SurveyContext context, IUserResponseRepository userResponse)
         {
             _context = context;
             _userResponse = userResponse;
@@ -40,7 +38,6 @@ namespace Web.Areas.Admin.Controllers
 
             return View(usersWithQuestionnaires);
         }
-
 
         public async Task<IActionResult> UserResponsesStatus(string userEmail)
         {
@@ -72,8 +69,6 @@ namespace Web.Areas.Admin.Controllers
             return View(viewModel);
         }
 
-
-
         [HttpPost]
         public async Task<IActionResult> DeleteSelected(string[] selectedEmails)
         {
@@ -94,8 +89,6 @@ namespace Web.Areas.Admin.Controllers
 
             return RedirectToAction(nameof(Index));
         }
-
-
 
         public async Task<IActionResult> GenerateReport(string userEmail, string format)
         {
@@ -124,7 +117,6 @@ namespace Web.Areas.Admin.Controllers
                     return BadRequest("Unsupported report format.");
             }
         }
-
 
         private IActionResult GeneratePdfReport(List<Response> responses)
         {
@@ -197,6 +189,15 @@ namespace Web.Areas.Admin.Controllers
                     {
                         table.AddCell(new PdfPCell(new Phrase("Answers:", cellFont)) { Padding = 5 });
                         var answers = string.Join(", ", detail.ResponseAnswers.Select(a => detail.Question.Answers.FirstOrDefault(ans => ans.Id == a.AnswerId)?.Text));
+
+                        // NEW: Include "Other" text if available
+                        if (!string.IsNullOrEmpty(detail.OtherText))
+                        {
+                            answers += string.IsNullOrEmpty(answers)
+                                ? $"Other: {detail.OtherText}"
+                                : $"; Other: {detail.OtherText}";
+                        }
+
                         table.AddCell(new PdfPCell(new Phrase(answers, cellFont)) { Padding = 5 });
                     }
                 }
@@ -210,8 +211,6 @@ namespace Web.Areas.Admin.Controllers
             stream.Position = 0;
             return File(stream, "application/pdf", $"{userName}_report.pdf");
         }
-
-
 
         private IActionResult GenerateExcelReport(List<Response> responses)
         {
@@ -272,6 +271,15 @@ namespace Web.Areas.Admin.Controllers
                         else
                         {
                             var answers = string.Join(", ", detail.ResponseAnswers.Select(a => detail.Question.Answers.FirstOrDefault(ans => ans.Id == a.AnswerId)?.Text));
+
+                            // NEW: Include "Other" text if available
+                            if (!string.IsNullOrEmpty(detail.OtherText))
+                            {
+                                answers += string.IsNullOrEmpty(answers)
+                                    ? $"Other: {detail.OtherText}"
+                                    : $"; Other: {detail.OtherText}";
+                            }
+
                             worksheet.Cells[row, 4].Value = answers;
                         }
                         row++;
@@ -288,11 +296,6 @@ namespace Web.Areas.Admin.Controllers
                 return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"{userName}_report.xlsx");
             }
         }
-
-
-
-
-
 
         public async Task<IActionResult> GenerateQuestionnairePdfReport(int questionnaireId)
         {
@@ -390,6 +393,15 @@ namespace Web.Areas.Admin.Controllers
                 {
                     table.AddCell(new PdfPCell(new Phrase("Answers:", cellFont)) { Padding = 5 });
                     var answers = string.Join(", ", detail.ResponseAnswers.Select(a => detail.Question.Answers.FirstOrDefault(ans => ans.Id == a.AnswerId)?.Text));
+
+                    // NEW: Include "Other" text if available
+                    if (!string.IsNullOrEmpty(detail.OtherText))
+                    {
+                        answers += string.IsNullOrEmpty(answers)
+                            ? $"Other: {detail.OtherText}"
+                            : $"; Other: {detail.OtherText}";
+                    }
+
                     table.AddCell(new PdfPCell(new Phrase(answers, cellFont)) { Padding = 5 });
                 }
             }
@@ -421,7 +433,6 @@ namespace Web.Areas.Admin.Controllers
             return GenerateExcelReportForQuestionnaire(response);
         }
 
-
         private IActionResult GenerateExcelReportForQuestionnaire(Response response)
         {
             var userName = response.UserName;
@@ -445,7 +456,7 @@ namespace Web.Areas.Admin.Controllers
                 worksheet.Cells[5, 1].Value = $"{userName} ({userEmail})";
                 worksheet.Cells[5, 1, 5, 4].Merge = true;
                 worksheet.Cells[5, 1, 5, 4].Style.Font.Size = 15;
-                worksheet.Cells[5, 1, 5, 4].Style.Font.Bold =true;
+                worksheet.Cells[5, 1, 5, 4].Style.Font.Bold = true;
                 worksheet.Cells[5, 1, 5, 4].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
 
                 // Add a title
@@ -486,6 +497,15 @@ namespace Web.Areas.Admin.Controllers
                     else
                     {
                         var answers = string.Join(", ", detail.ResponseAnswers.Select(a => detail.Question.Answers.FirstOrDefault(ans => ans.Id == a.AnswerId)?.Text));
+
+                        // NEW: Include "Other" text if available
+                        if (!string.IsNullOrEmpty(detail.OtherText))
+                        {
+                            answers += string.IsNullOrEmpty(answers)
+                                ? $"Other: {detail.OtherText}"
+                                : $"; Other: {detail.OtherText}";
+                        }
+
                         worksheet.Cells[row, 4].Value = answers;
                     }
                     row++;
@@ -500,81 +520,5 @@ namespace Web.Areas.Admin.Controllers
                 return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"{response.Questionnaire.Title}_{userEmail}.xlsx");
             }
         }
-
-        //private IActionResult GenerateExcelReportForQuestionnaire(Response response)
-        //{
-        //    var userName = response.UserName;
-        //    var userEmail = response.UserEmail;
-
-        //    using (var package = new ExcelPackage())
-        //    {
-        //        var worksheet = package.Workbook.Worksheets.Add("Report");
-
-        //        // Add a logo
-        //        var logoPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "logo.png");
-        //        if (System.IO.File.Exists(logoPath))
-        //        {
-        //            var logo = new FileInfo(logoPath);
-        //            var picture = worksheet.Drawings.AddPicture("Logo", logo);
-        //            picture.SetPosition(0, 0, 0, 0);
-        //            picture.SetSize(300, 70); // Adjust the size as needed
-        //        }
-
-        //        // Add a title
-        //        worksheet.Cells[6, 1].Value = $"Report for {response.Questionnaire.Title}";
-        //        worksheet.Cells[6, 1, 6, 4].Merge = true;
-        //        worksheet.Cells[6, 1, 6, 4].Style.Font.Size = 18;
-        //        worksheet.Cells[6, 1, 6, 4].Style.Font.Bold = true;
-        //        worksheet.Cells[6, 1, 6, 4].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
-
-        //        // Add headers
-        //        worksheet.Cells[7, 1].Value = "Survey";
-        //        worksheet.Cells[7, 2].Value = "Submitted on";
-        //        worksheet.Cells[7, 3].Value = "Question";
-        //        worksheet.Cells[7, 4].Value = "Response";
-
-        //        using (var range = worksheet.Cells[7, 1, 7, 4])
-        //        {
-        //            range.Style.Font.Bold = true;
-        //            range.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
-        //            range.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.LightGray);
-        //            range.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
-        //        }
-
-        //        // Add data
-        //        var row = 8;
-        //        worksheet.Cells[row, 1].Value = response.Questionnaire.Title;
-        //        worksheet.Cells[row, 2].Value = response.SubmissionDate.ToString();
-        //        row++;
-
-        //        foreach (var detail in response.ResponseDetails)
-        //        {
-        //            worksheet.Cells[row, 3].Value = detail.Question.Text;
-
-        //            if (detail.QuestionType == QuestionType.Text || detail.QuestionType == QuestionType.Slider || detail.QuestionType == QuestionType.Open_ended)
-        //            {
-        //                worksheet.Cells[row, 4].Value = detail.TextResponse;
-        //            }
-        //            else
-        //            {
-        //                var answers = string.Join(", ", detail.ResponseAnswers.Select(a => detail.Question.Answers.FirstOrDefault(ans => ans.Id == a.AnswerId)?.Text));
-        //                worksheet.Cells[row, 4].Value = answers;
-        //            }
-        //            row++;
-        //        }
-
-        //        worksheet.Cells.AutoFitColumns();
-
-        //        var stream = new MemoryStream();
-        //        package.SaveAs(stream);
-        //        stream.Position = 0;
-
-        //        return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"{response.Questionnaire.Title}_{userEmail}.xlsx");
-        //    }
-        //}
-
-
-
-
     }
 }
