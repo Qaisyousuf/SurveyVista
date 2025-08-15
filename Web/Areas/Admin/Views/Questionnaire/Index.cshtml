@@ -1,97 +1,836 @@
 ﻿@model IEnumerable<QuestionnaireViewModel>
 
 @{
-    ViewData["Title"] = "Questionnaire";
+    ViewData["Title"] = "Questionnaire Management";
 }
 
+<style>
+    /* Modern Design System */
+    @@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
-<div class="container-fluid mt-3">
+    :root {
+        --primary-color: #6366f1;
+        --primary-light: #8b5cf6;
+        --primary-dark: #4338ca;
+        --success-color: #10b981;
+        --success-light: #34d399;
+        --success-dark: #059669;
+        --info-color: #06b6d4;
+        --info-light: #22d3ee;
+        --info-dark: #0891b2;
+        --warning-color: #f59e0b;
+        --warning-light: #fbbf24;
+        --warning-dark: #d97706;
+        --danger-color: #ef4444;
+        --danger-light: #fca5a5;
+        --danger-dark: #dc2626;
+        --purple-color: #6f42c1;
+        --purple-light: #8b5cf6;
+        --purple-dark: #5a2d91;
+        --gray-50: #f8fafc;
+        --gray-100: #f1f5f9;
+        --gray-200: #e2e8f0;
+        --gray-300: #cbd5e1;
+        --gray-400: #94a3b8;
+        --gray-500: #64748b;
+        --gray-600: #475569;
+        --gray-700: #334155;
+        --gray-800: #1e293b;
+        --gray-900: #0f172a;
+        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+        --border-radius-sm: 8px;
+        --border-radius-md: 12px;
+        --border-radius-lg: 16px;
+        --border-radius-xl: 24px;
+    }
 
+    * {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+  
+
+  
+
+    /* Header Section */
+    .page-header {
+        background: white;
+        border-radius: var(--border-radius-xl);
+        box-shadow: var(--shadow-xl);
+        padding: 2.5rem;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .page-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--primary-light), var(--info-color), var(--success-color));
+        }
+
+    .header-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+    }
+
+    .header-info {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .header-icon {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+        color: white;
+        width: 64px;
+        height: 64px;
+        border-radius: var(--border-radius-lg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.75rem;
+        box-shadow: var(--shadow-lg);
+    }
+
+    .header-text h1 {
+        font-size: 2.25rem;
+        font-weight: 800;
+        color: var(--gray-800);
+        margin: 0 0 0.5rem;
+    }
+
+    .header-subtitle {
+        color: var(--gray-600);
+        font-size: 1.1rem;
+        font-weight: 500;
+    }
+
+    .create-button {
+        background: linear-gradient(135deg, var(--success-color) 0%, var(--success-dark) 100%);
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: var(--border-radius-md);
+        font-weight: 600;
+        font-size: 1rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        transition: all 0.3s ease;
+        box-shadow: var(--shadow-lg);
+        position: relative;
+        overflow: hidden;
+    }
+
+        .create-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .create-button:hover::before {
+            left: 100%;
+        }
+
+        .create-button:hover {
+            background: linear-gradient(135deg, var(--success-dark) 0%, #047857 100%);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-xl);
+            color: white;
+            text-decoration: none;
+        }
+
+    /* Stats Section */
+    .stats-section {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        color: white;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1.5rem;
+        text-align: center;
+    }
+
+    .stat-item {
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: var(--border-radius-md);
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+    }
+
+        .stat-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 800;
+        display: block;
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-label {
+        font-size: 0.875rem;
+        font-weight: 500;
+        opacity: 0.9;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* Questionnaire Grid */
+    .questionnaires-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    /* Questionnaire Card */
+    .questionnaire-card {
+        background: white;
+        border-radius: var(--border-radius-xl);
+        box-shadow: var(--shadow-lg);
+        overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        border: 1px solid var(--gray-200);
+    }
+
+        .questionnaire-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-2xl);
+            border-color: var(--primary-color);
+        }
+
+        .questionnaire-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--info-color), var(--success-color));
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+            transform-origin: left;
+        }
+
+        .questionnaire-card:hover::before {
+            transform: scaleX(1);
+        }
+
+    /* Card Header */
+    .card-header-custom {
+        background: linear-gradient(135deg, var(--gray-50) 0%, var(--gray-100) 100%);
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--gray-200);
+    }
+
+    .card-id-badge {
+        background: linear-gradient(135deg, var(--warning-color) 0%, var(--warning-dark) 100%);
+        color: white;
+        padding: 0.375rem 0.75rem;
+        border-radius: var(--border-radius-sm);
+        font-weight: 600;
+        font-size: 0.875rem;
+        float: right;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .card-title-custom {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--gray-800);
+        margin: 0;
+        line-height: 1.4;
+        word-break: break-word;
+        padding-right: 5rem;
+    }
+
+    /* Card Content */
+    .card-content {
+        padding: 1.5rem;
+    }
+
+    .questions-count-section {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+        color: white;
+        padding: 1rem;
+        border-radius: var(--border-radius-md);
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+
+    .questions-count-number {
+        font-size: 2rem;
+        font-weight: 800;
+        display: block;
+        margin-bottom: 0.25rem;
+    }
+
+    .questions-count-label {
+        font-size: 0.875rem;
+        font-weight: 500;
+        opacity: 0.9;
+    }
+
+    /* Preview Section */
+    .preview-section {
+        background: var(--gray-50);
+        border-radius: var(--border-radius-md);
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid var(--gray-200);
+    }
+
+    .preview-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .preview-icon {
+        background: var(--info-color);
+        color: white;
+        width: 24px;
+        height: 24px;
+        border-radius: var(--border-radius-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.875rem;
+    }
+
+    .preview-title {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--gray-700);
+        margin: 0;
+    }
+
+    .preview-content {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .preview-question {
+        background: white;
+        padding: 1rem;
+        border-radius: var(--border-radius-sm);
+        border: 1px solid var(--gray-200);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .question-badge {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: var(--border-radius-sm);
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: inline-block;
+    }
+
+    .type-badge {
+        background: linear-gradient(135deg, var(--info-color) 0%, var(--info-dark) 100%);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: var(--border-radius-sm);
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-left: 0.5rem;
+        display: inline-block;
+    }
+
+    .question-text {
+        font-size: 0.875rem;
+        color: var(--gray-700);
+        margin: 0.5rem 0;
+        font-weight: 500;
+        line-height: 1.4;
+    }
+
+    .answers-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 0.75rem;
+    }
+
+    .answer-badge {
+        background: linear-gradient(135deg, var(--success-color) 0%, var(--success-dark) 100%);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: var(--border-radius-sm);
+        font-size: 0.75rem;
+        font-weight: 500;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .more-questions-indicator {
+        background: var(--gray-200);
+        color: var(--gray-600);
+        padding: 0.75rem;
+        border-radius: var(--border-radius-sm);
+        text-align: center;
+        font-size: 0.875rem;
+        font-weight: 500;
+        font-style: italic;
+        border: 1px dashed var(--gray-300);
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+        padding: 1.5rem;
+        background: var(--gray-50);
+        border-top: 1px solid var(--gray-200);
+    }
+
+    .action-btn {
+        padding: 0.75rem 1rem;
+        border-radius: var(--border-radius-md);
+        font-weight: 600;
+        font-size: 0.875rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        border: none;
+        box-shadow: var(--shadow-sm);
+        position: relative;
+        overflow: hidden;
+    }
+
+        .action-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .action-btn:hover::before {
+            left: 100%;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            text-decoration: none;
+        }
+
+    .btn-delete {
+        background: linear-gradient(135deg, var(--danger-color) 0%, var(--danger-dark) 100%);
+        color: white;
+    }
+
+        .btn-delete:hover {
+            background: linear-gradient(135deg, var(--danger-dark) 0%, #b91c1c 100%);
+            color: white;
+        }
+
+    .btn-edit {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        color: white;
+    }
+
+        .btn-edit:hover {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, #3730a3 100%);
+            color: white;
+        }
+
+    .btn-details {
+        background: linear-gradient(135deg, var(--info-color) 0%, var(--info-dark) 100%);
+        color: white;
+    }
+
+        .btn-details:hover {
+            background: linear-gradient(135deg, var(--info-dark) 0%, #0e7490 100%);
+            color: white;
+        }
+
+    .btn-send {
+        background: linear-gradient(135deg, var(--success-color) 0%, var(--success-dark) 100%);
+        color: white;
+    }
+
+        .btn-send:hover {
+            background: linear-gradient(135deg, var(--success-dark) 0%, #047857 100%);
+            color: white;
+        }
+
+    .btn-logic {
+        background: linear-gradient(135deg, var(--purple-color) 0%, var(--purple-dark) 100%);
+        color: white;
+        grid-column: 1 / -1;
+    }
+
+        .btn-logic:hover {
+            background: linear-gradient(135deg, var(--purple-dark) 0%, #4c1d95 100%);
+            color: white;
+        }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: white;
+        border-radius: var(--border-radius-xl);
+        box-shadow: var(--shadow-lg);
+        border: 2px dashed var(--gray-300);
+    }
+
+    .empty-state-icon {
+        background: var(--gray-100);
+        color: var(--gray-400);
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        margin: 0 auto 1.5rem;
+    }
+
+    .empty-state h3 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--gray-700);
+        margin-bottom: 1rem;
+    }
+
+    .empty-state p {
+        color: var(--gray-500);
+        font-size: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    /* Responsive Design */
+    @@media (max-width: 1024px) {
+        .questionnaires-grid
+
+    {
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    }
+
+    }
+
+    @@media (max-width: 768px) {
+        .container-fluid
+
+    {
+        padding: 1rem;
+    }
+
+    .header-content {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .header-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .questionnaires-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .action-buttons {
+        grid-template-columns: 1fr;
+    }
+
+    .btn-logic {
+        grid-column: 1;
+    }
+
+    }
+
+    /* Animations */
+    .fade-in {
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    @@keyframes fadeIn {
+        from
+
+    {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+
+    .slide-in {
+        animation: slideIn 0.4s ease-out;
+    }
+
+    @@keyframes slideIn {
+        from
+
+    {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    }
+
+    .stagger-animation {
+        animation: fadeIn 0.6s ease-out;
+        animation-fill-mode: both;
+    }
+
+        .stagger-animation:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .stagger-animation:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .stagger-animation:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        .stagger-animation:nth-child(4) {
+            animation-delay: 0.4s;
+        }
+
+        .stagger-animation:nth-child(5) {
+            animation-delay: 0.5s;
+        }
+
+        .stagger-animation:nth-child(6) {
+            animation-delay: 0.6s;
+        }
+</style>
+
+<div class="container-fluid">
+    <!-- Notifications -->
     <partial name="_Notification" />
 
-    <div class="card bg-default shadow ">
-        <div class="card-header">Questionnaire</div>
-        <div class="card-body">
-            <h4 class="card-title">Questionnaire list</h4>
-            <p>
-                <a asp-action="Create" class="btn btn-primary"><span><i class="bi bi-plus-square-fill"></i></span> Create New</a>
-            </p>
-            <table class="table table-responsive w-100 d-block d-md-table table-hover">
-                <thead >
-                    <tr>
-
-                        <th>Id</th>
-                        <th>Title</th>
-                        <th>Total Questions</th>
-                        <th> <span class="badge badge-primary">Questions</span> | <span class="badge badge-info">Type</span> | <span class="badge badge-success">Answers </span></th>
-                       
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody class="w-100">
-                    @foreach (var item in Model)
-                    {
-                        <tr class="table-secondary">
-
-                            <td>@item.Id</td>
-
-                                <td>
-                                    @item.Title
-                                </td>
-                           
-
-                            <td>
-                               
-                                <span class="badge shadow rounded text-bg-primary p-2">
-                                    Questions <span class="badge text-bg-secondary shadow rounded p-1">@item.Questions?.Count()</span>
-                                </span>
-                               
-                            </td>
-                            <td class="h5">
-                                
-                                @foreach (var question in item.Questions.Take(1))
-                                {
-                                    
-                                     <span class="badge p-1 m-1 bg-primary shadow-sm"> Question:@question.Text</span>
-                                    <span class="badge p-1 m-1 bg-info shadow-sm">Type: @question.Type</span>
-                                    foreach (var answer in question.Answers)
-                                    {
-                                        <span class="badge p-1 m-1 bg-success shadow-sm"> Asnwer:@answer.Text</span>
-
-                                        
-                                    }
-                               
-                                }
-                              
-                            </td>
-
-                            <td>
-                                <!-- Your existing buttons -->
-                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm">
-                                    🗑️ DELETE
-                                </a>
-                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary btn-sm">
-                                    ✏️ EDIT
-                                </a>
-                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm">
-                                    👁️ DETAILS
-                                </a>
-                                <a asp-action="SendQuestionnaire" asp-route-id="@item.Id" class="btn btn-success btn-sm">
-                                    📧 SEND
-                                </a>
-
-                                <!-- NEW: SET LOGIC button with purple/orange styling -->
-                                <a asp-action="SetLogic" asp-route-id="@item.Id" class="btn btn-sm" style="background-color: #6f42c1; color: white;">
-                                    🔀 SET LOGIC
-                                </a>
-                            </td>
-                        </tr>
-                    }
-
-                </tbody>
-            </table>
-
+    <!-- Page Header -->
+    <div class="page-header fade-in">
+        <div class="header-content">
+            <div class="header-info">
+                <div class="header-icon">
+                    <i class="bi bi-clipboard-data-fill"></i>
+                </div>
+                <div class="header-text">
+                    <h1>Questionnaire Management</h1>
+                    <p class="header-subtitle">Create, manage, and analyze your questionnaires</p>
+                </div>
+            </div>
+            <a asp-action="Create" class="create-button">
+                <i class="bi bi-plus-circle-fill"></i>
+                Create New Questionnaire
+            </a>
         </div>
     </div>
-</div>
 
+    <!-- Statistics Section -->
+    @if (Model.Any())
+    {
+        <div class="stats-section fade-in">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-number">@Model.Count()</span>
+                    <span class="stat-label">Total Questionnaires</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">@Model.Sum(q => q.Questions?.Count ?? 0)</span>
+                    <span class="stat-label">Total Questions</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">@Model.Sum(q => q.Questions?.Sum(x => x.Answers?.Count ?? 0) ?? 0)</span>
+                    <span class="stat-label">Total Answers</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">@Model.SelectMany(q => q.Questions ?? new List<Question>()).Select(q => q.Type).Distinct().Count()</span>
+                    <span class="stat-label">Question Types</span>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Questionnaires Grid -->
+    @if (Model.Any())
+    {
+        <div class="questionnaires-grid">
+            @foreach (var item in Model.Select((questionnaire, index) => new { Questionnaire = questionnaire, Index = index }))
+            {
+                <div class="questionnaire-card stagger-animation">
+                    <!-- Card Header -->
+                    <div class="card-header-custom">
+                        <span class="card-id-badge">ID: @item.Questionnaire.Id</span>
+                        <h3 class="card-title-custom">@item.Questionnaire.Title</h3>
+                    </div>
+
+                    <!-- Card Content -->
+                    <div class="card-content">
+                        <!-- Questions Count -->
+                        <div class="questions-count-section">
+                            <span class="questions-count-number">@(item.Questionnaire.Questions?.Count ?? 0)</span>
+                            <span class="questions-count-label">Question@(item.Questionnaire.Questions?.Count != 1 ? "s" : "")</span>
+                        </div>
+
+                        <!-- Preview Section -->
+                        @if (item.Questionnaire.Questions?.Any() == true)
+                        {
+                            <div class="preview-section">
+                                <div class="preview-header">
+                                    <div class="preview-icon">
+                                        <i class="bi bi-eye"></i>
+                                    </div>
+                                    <h4 class="preview-title">Quick Preview</h4>
+                                </div>
+
+                                <div class="preview-content">
+                                    @{
+                                        var firstQuestion = item.Questionnaire.Questions.FirstOrDefault();
+                                        var totalQuestions = item.Questionnaire.Questions.Count;
+                                    }
+
+                                    @if (firstQuestion != null)
+                                    {
+                                        <div class="preview-question">
+                                            <div>
+                                                <span class="question-badge">Question: @firstQuestion.Text</span>
+                                                <span class="type-badge">Type: @firstQuestion.Type</span>
+                                            </div>
+
+                                            @if (firstQuestion.Answers?.Any() == true)
+                                            {
+                                                <div class="answers-container">
+                                                    @foreach (var answer in firstQuestion.Answers.Take(3))
+                                                    {
+                                                        <span class="answer-badge">@answer.Text</span>
+                                                    }
+                                                    @if (firstQuestion.Answers.Count > 3)
+                                                    {
+                                                        <span class="answer-badge" style="background: var(--gray-400);">+@(firstQuestion.Answers.Count - 3) more</span>
+                                                    }
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+
+                                    @if (totalQuestions > 1)
+                                    {
+                                        <div class="more-questions-indicator">
+                                            + @(totalQuestions - 1) more question@(totalQuestions - 1 != 1 ? "s" : "")
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="preview-section">
+                                <div class="preview-header">
+                                    <div class="preview-icon">
+                                        <i class="bi bi-info-circle"></i>
+                                    </div>
+                                    <h4 class="preview-title">No Questions Yet</h4>
+                                </div>
+                                <p style="color: var(--gray-500); font-style: italic; margin: 0;">This questionnaire doesn't have any questions yet.</p>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="action-buttons">
+                        <a asp-action="Edit" asp-route-id="@item.Questionnaire.Id" class="action-btn btn-edit">
+                            <i class="bi bi-pencil-fill"></i>
+                            Edit
+                        </a>
+                        <a asp-action="Details" asp-route-id="@item.Questionnaire.Id" class="action-btn btn-details">
+                            <i class="bi bi-eye-fill"></i>
+                            Details
+                        </a>
+                        <a asp-action="Delete" asp-route-id="@item.Questionnaire.Id" class="action-btn btn-delete">
+                            <i class="bi bi-trash3-fill"></i>
+                            Delete
+                        </a>
+                        <a asp-action="SendQuestionnaire" asp-route-id="@item.Questionnaire.Id" class="action-btn btn-send">
+                            <i class="bi bi-envelope-fill"></i>
+                            Send
+                        </a>
+                        <a asp-action="SetLogic" asp-route-id="@item.Questionnaire.Id" class="action-btn btn-logic">
+                            <i class="bi bi-diagram-3-fill"></i>
+                            Set Logic
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <!-- Empty State -->
+        <div class="empty-state fade-in">
+            <div class="empty-state-icon">
+                <i class="bi bi-clipboard-x"></i>
+            </div>
+            <h3>No Questionnaires Yet</h3>
+            <p>Get started by creating your first questionnaire to collect valuable insights.</p>
+            <a asp-action="Create" class="create-button">
+                <i class="bi bi-plus-circle-fill"></i>
+                Create Your First Questionnaire
+            </a>
+        </div>
+    }
+</div>

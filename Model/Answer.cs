@@ -23,5 +23,7 @@ namespace Model
 
         public bool IsOtherOption { get; set; } = false;
         public string? ConditionJson { get; set; }
+        [NotMapped] // This won't be stored in database
+        public bool IsDeleted { get; set; } = false;
     }
 }

@@ -1,70 +1,990 @@
 ﻿@model IEnumerable<Model.Response>
 
 @{
-    ViewData["Title"] = "Response";
+    ViewData["Title"] = "Response Management";
 }
 
+<style>
+    /* Modern Design System */
+    @@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
-<div class="container mt-5">
+    :root {
+        --primary-color: #6366f1;
+        --primary-light: #8b5cf6;
+        --primary-dark: #4338ca;
+        --success-color: #10b981;
+        --success-light: #34d399;
+        --success-dark: #059669;
+        --info-color: #06b6d4;
+        --info-light: #22d3ee;
+        --info-dark: #0891b2;
+        --warning-color: #f59e0b;
+        --warning-light: #fbbf24;
+        --warning-dark: #d97706;
+        --danger-color: #ef4444;
+        --danger-light: #fca5a5;
+        --danger-dark: #dc2626;
+        --gray-50: #f8fafc;
+        --gray-100: #f1f5f9;
+        --gray-200: #e2e8f0;
+        --gray-300: #cbd5e1;
+        --gray-400: #94a3b8;
+        --gray-500: #64748b;
+        --gray-600: #475569;
+        --gray-700: #334155;
+        --gray-800: #1e293b;
+        --gray-900: #0f172a;
+        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+        --border-radius-sm: 8px;
+        --border-radius-md: 12px;
+        --border-radius-lg: 16px;
+        --border-radius-xl: 24px;
+    }
 
+    * {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    body {
+        background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+        min-height: 100vh;
+    }
+
+    .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+    }
+
+    /* Header Section */
+    .page-header {
+        background: white;
+        border-radius: var(--border-radius-xl);
+        box-shadow: var(--shadow-xl);
+        padding: 2.5rem;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-color), var(--info-color), var(--success-color));
+    }
+
+    .header-content {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .header-icon {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+        color: white;
+        width: 64px;
+        height: 64px;
+        border-radius: var(--border-radius-lg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.75rem;
+        box-shadow: var(--shadow-lg);
+    }
+
+    .header-text h1 {
+        font-size: 2.25rem;
+        font-weight: 800;
+        color: var(--gray-800);
+        margin: 0 0 0.5rem;
+    }
+
+    .header-subtitle {
+        color: var(--gray-600);
+        font-size: 1.1rem;
+        font-weight: 500;
+    }
+
+    /* Statistics Section */
+    .stats-section {
+        background: linear-gradient(135deg, var(--info-color) 0%, var(--info-dark) 100%);
+        color: white;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1.5rem;
+        text-align: center;
+    }
+
+    .stat-item {
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: var(--border-radius-md);
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+    }
+
+    .stat-item:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-2px);
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 800;
+        display: block;
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-label {
+        font-size: 0.875rem;
+        font-weight: 500;
+        opacity: 0.9;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* Selection Controls */
+    .selection-controls {
+        background: white;
+        border-radius: var(--border-radius-lg);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--gray-200);
+        display: none;
+        transition: all 0.3s ease;
+    }
+
+    .selection-controls.show {
+        display: block;
+        animation: slideDown 0.3s ease;
+    }
+
+    @@keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .selection-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .selection-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .selection-icon {
+        background: var(--primary-color);
+        color: white;
+        width: 48px;
+        height: 48px;
+        border-radius: var(--border-radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    .selection-text h3 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--gray-800);
+        margin: 0 0 0.25rem;
+    }
+
+    .selection-count {
+        color: var(--gray-600);
+        font-weight: 500;
+    }
+
+    .selection-actions {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .master-checkbox-container {
+        background: white;
+        border-radius: var(--border-radius-md);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--gray-200);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .master-checkbox {
+        width: 28px;
+        height: 28px;
+        border: 2px solid var(--gray-300);
+        border-radius: 8px;
+        background: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .master-checkbox:hover {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    .master-checkbox.checked {
+        background: var(--primary-color);
+        border-color: var(--primary-color);
+        color: white;
+    }
+
+    .master-checkbox input {
+        display: none;
+    }
+
+    /* Response Cards Grid */
+    .responses-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    /* Response Card */
+    .response-card {
+        background: white;
+        border-radius: var(--border-radius-xl);
+        box-shadow: var(--shadow-lg);
+        overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        border: 1px solid var(--gray-200);
+    }
+
+    .response-card:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--shadow-2xl);
+        border-color: var(--primary-color);
+    }
+
+    .response-card.selected {
+        border-color: var(--primary-color);
+        background: linear-gradient(135deg, #fef2f2 0%, #fecaca 10%, white 100%);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1), var(--shadow-lg);
+    }
+
+    .response-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-color), var(--info-color), var(--success-color));
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+        transform-origin: left;
+    }
+
+    .response-card:hover::before {
+        transform: scaleX(1);
+    }
+
+    .response-card.selected::before {
+        transform: scaleX(1);
+        background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
+    }
+
+    /* Card Header */
+    .card-header-custom {
+        background: linear-gradient(135deg, var(--gray-50) 0%, var(--gray-100) 100%);
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--gray-200);
+        position: relative;
+    }
+
+    .response-checkbox {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        z-index: 10;
+    }
+
+    .custom-checkbox {
+        width: 24px;
+        height: 24px;
+        border: 2px solid var(--gray-300);
+        border-radius: 6px;
+        background: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .custom-checkbox:hover {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    .custom-checkbox.checked {
+        background: var(--primary-color);
+        border-color: var(--primary-color);
+        color: white;
+    }
+
+    .custom-checkbox input {
+        display: none;
+    }
+
+    .response-info {
+        padding-right: 3rem;
+    }
+
+    .response-id {
+        background: linear-gradient(135deg, var(--warning-color) 0%, var(--warning-dark) 100%);
+        color: white;
+        padding: 0.375rem 0.75rem;
+        border-radius: var(--border-radius-sm);
+        font-weight: 600;
+        font-size: 0.875rem;
+        display: inline-block;
+        margin-bottom: 1rem;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .questionnaire-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--gray-800);
+        margin: 0 0 1rem;
+        line-height: 1.4;
+    }
+
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .user-avatar {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+        color: white;
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        font-weight: 700;
+        box-shadow: var(--shadow-md);
+    }
+
+    .user-details h4 {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--gray-800);
+        margin: 0 0 0.25rem;
+    }
+
+    .user-email {
+        color: var(--gray-600);
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    /* Card Content */
+    .card-content {
+        padding: 1.5rem;
+    }
+
+    .submission-info {
+        background: var(--gray-50);
+        border-radius: var(--border-radius-md);
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid var(--gray-200);
+    }
+
+    .submission-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .submission-icon {
+        background: var(--success-color);
+        color: white;
+        width: 32px;
+        height: 32px;
+        border-radius: var(--border-radius-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+    }
+
+    .submission-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--gray-800);
+        margin: 0;
+    }
+
+    .submission-date {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--success-color);
+    }
+
+    /* Action Button */
+    .action-section {
+        background: var(--gray-50);
+        padding: 1.5rem;
+        border-top: 1px solid var(--gray-200);
+    }
+
+    .action-btn {
+        background: linear-gradient(135deg, var(--info-color) 0%, var(--info-dark) 100%);
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: var(--border-radius-md);
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        box-shadow: var(--shadow-md);
+        width: 100%;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .action-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .action-btn:hover::before {
+        left: 100%;
+    }
+
+    .action-btn:hover {
+        background: linear-gradient(135deg, var(--info-dark) 0%, #0e7490 100%);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+        color: white;
+        text-decoration: none;
+    }
+
+    /* Buttons */
+    .btn {
+        border-radius: var(--border-radius-md);
+        font-weight: 600;
+        padding: 0.75rem 1.5rem;
+        font-size: 0.875rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: none;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: var(--shadow-sm);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .btn:hover::before {
+        left: 100%;
+    }
+
+    .btn-danger {
+        background: linear-gradient(135deg, var(--danger-color) 0%, var(--danger-dark) 100%);
+        color: white;
+    }
+
+    .btn-danger:hover {
+        background: linear-gradient(135deg, var(--danger-dark) 0%, #b91c1c 100%);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+        color: white;
+    }
+
+    .btn-secondary {
+        background: linear-gradient(135deg, var(--gray-500) 0%, var(--gray-600) 100%);
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background: linear-gradient(135deg, var(--gray-600) 0%, var(--gray-700) 100%);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+        color: white;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: white;
+        border-radius: var(--border-radius-xl);
+        box-shadow: var(--shadow-lg);
+        border: 2px dashed var(--gray-300);
+    }
+
+    .empty-state-icon {
+        background: var(--gray-100);
+        color: var(--gray-400);
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        margin: 0 auto 1.5rem;
+    }
+
+    .empty-state h3 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--gray-700);
+        margin-bottom: 1rem;
+    }
+
+    .empty-state p {
+        color: var(--gray-500);
+        font-size: 1rem;
+    }
+
+    /* Loading States */
+    .btn.loading {
+        opacity: 0.7;
+        pointer-events: none;
+    }
+
+    .btn.loading::after {
+        content: "";
+        width: 18px;
+        height: 18px;
+        margin-left: 0.75rem;
+        border: 2px solid transparent;
+        border-top-color: currentColor;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @@keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* Responsive Design */
+    @@media (max-width: 1024px) {
+        .responses-grid {
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .container {
+            padding: 1rem;
+        }
+
+        .responses-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .selection-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .selection-actions {
+            width: 100%;
+        }
+
+        .selection-actions .btn {
+            flex: 1;
+        }
+
+        .user-info {
+            flex-direction: column;
+            text-align: center;
+            gap: 0.75rem;
+        }
+    }
+
+    /* Animations */
+    .fade-in {
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .stagger-animation {
+        animation: fadeIn 0.6s ease-out;
+        animation-fill-mode: both;
+    }
+
+    .stagger-animation:nth-child(1) { animation-delay: 0.1s; }
+    .stagger-animation:nth-child(2) { animation-delay: 0.2s; }
+    .stagger-animation:nth-child(3) { animation-delay: 0.3s; }
+    .stagger-animation:nth-child(4) { animation-delay: 0.4s; }
+    .stagger-animation:nth-child(5) { animation-delay: 0.5s; }
+    .stagger-animation:nth-child(6) { animation-delay: 0.6s; }
+</style>
+
+<div class="container">
+    <!-- Notifications -->
     <partial name="_Notification" />
-   
 
-    <div class="card bg-default mb-3 ">
-        <div class="card-header">User Reponse</div>
-        <div class="card-body">
-            <h4 class="card-title">User response list</h4>
-           
-
-            <form asp-action="DeleteMultiple" method="post">
-                
-                    <table class="table table-responsive w-100 d-block d-md-table ">
-                        <thead class="w-100">
-                            <tr>
-                                <th><input type="checkbox" onclick="selectAll(this)" /></th> <!-- Master checkbox -->
-                                <th>Id</th>
-                                <th>Questionnaire</th>
-                                <th>UserName</th>
-                                <th>UserEmail</th>
-                                <th>Submission Date</th>
-                            <th class="text-end">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody class="w-100">
-                            @foreach (var item in Model)
-                            {
-                                <tr>
-                                    <td><input type="checkbox" name="ids" value="@item.Id" /></td>
-                                    <td>@item.Id</td>
-                                    <td>@item.Questionnaire.Title</td>
-                                    <td>@item.UserName</td>
-                                    <td>@item.UserEmail</td>
-                                    <td>@item.SubmissionDate</td>
-                                <td class="text-end">
-                                    <a asp-action="ViewResponse" asp-route-id="@item.Id" class="btn btn-info btn-sm"><i class="bi bi-graph-up-arrow"></i> Details</a>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-               
-                <button type="submit" class="btn btn-danger">Delete Selected</button>
-            </form>
-
+    <!-- Page Header -->
+    <div class="page-header fade-in">
+        <div class="header-content">
+            <div class="header-icon">
+                <i class="bi bi-clipboard-data-fill"></i>
+            </div>
+            <div class="header-text">
+                <h1>Response Management</h1>
+                <p class="header-subtitle">Monitor and manage all survey responses from users</p>
+            </div>
         </div>
     </div>
+
+    <form asp-action="DeleteMultiple" method="post" id="responseForm">
+        @if (Model.Any())
+        {
+            <!-- Statistics Section -->
+            <div class="stats-section fade-in">
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-number">@Model.Count()</span>
+                        <span class="stat-label">Total Responses</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">@Model.Select(r => r.UserEmail).Distinct().Count()</span>
+                        <span class="stat-label">Unique Users</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">@Model.Select(r => r.Questionnaire?.Title).Distinct().Count()</span>
+                        <span class="stat-label">Questionnaires</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">@Model.Where(r => r.SubmissionDate.Date == DateTime.Today).Count()</span>
+                        <span class="stat-label">Today's Responses</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Master Checkbox -->
+            <div class="master-checkbox-container fade-in">
+                <div class="master-checkbox" id="selectAllCheckbox">
+                    <input type="checkbox" id="selectAllInput">
+                    <i class="bi bi-check" style="display: none;"></i>
+                </div>
+                <label for="selectAllInput" class="mb-0 font-weight-bold">
+                    <i class="bi bi-check-square me-2"></i>Select All Responses
+                </label>
+                <div class="ms-auto">
+                    <span id="selectedCount" class="badge bg-primary">0 selected</span>
+                </div>
+            </div>
+
+            <!-- Selection Controls -->
+            <div class="selection-controls" id="selectionControls">
+                <div class="selection-header">
+                    <div class="selection-info">
+                        <div class="selection-icon">
+                            <i class="bi bi-check-circle-fill"></i>
+                        </div>
+                        <div class="selection-text">
+                            <h3>Selection Active</h3>
+                            <p class="selection-count" id="selectionText">0 responses selected</p>
+                        </div>
+                    </div>
+                    <div class="selection-actions">
+                        <button type="submit" class="btn btn-danger" id="deleteSelectedBtn">
+                            <i class="bi bi-trash-fill"></i>
+                            Delete Selected
+                        </button>
+                        <button type="button" class="btn btn-secondary" id="deselectAllBtn">
+                            <i class="bi bi-x-circle"></i>
+                            Deselect All
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Responses Grid -->
+            <div class="responses-grid">
+                @foreach (var item in Model.Select((response, index) => new { Response = response, Index = index }))
+                {
+                    <div class="response-card stagger-animation" data-id="@item.Response.Id">
+                        <!-- Response Checkbox -->
+                        <div class="response-checkbox">
+                            <div class="custom-checkbox response-select-checkbox">
+                                <input type="checkbox" class="response-checkbox-input" name="ids" value="@item.Response.Id">
+                                <i class="bi bi-check" style="display: none;"></i>
+                            </div>
+                        </div>
+
+                        <!-- Card Header -->
+                        <div class="card-header-custom">
+                            <div class="response-info">
+                                <span class="response-id">ID: @item.Response.Id</span>
+                                <h3 class="questionnaire-title">@item.Response.Questionnaire?.Title</h3>
+                                <div class="user-info">
+                                    <div class="user-avatar">
+                                        @(item.Response.UserName?.Substring(0, 1).ToUpper() ?? "U")
+                                    </div>
+                                    <div class="user-details">
+                                        <h4>@item.Response.UserName</h4>
+                                        <p class="user-email">@item.Response.UserEmail</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card Content -->
+                        <div class="card-content">
+                            <div class="submission-info">
+                                <div class="submission-header">
+                                    <div class="submission-icon">
+                                        <i class="bi bi-calendar-check"></i>
+                                    </div>
+                                    <h4 class="submission-title">Submission Details</h4>
+                                </div>
+                                <div class="submission-date">
+                                    @item.Response.SubmissionDate.ToString("MMMM dd, yyyy 'at' HH:mm")
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Section -->
+                        <div class="action-section">
+                            <a asp-action="ViewResponse" asp-route-id="@item.Response.Id" class="action-btn">
+                                <i class="bi bi-graph-up-arrow"></i>
+                                View Response Details
+                            </a>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <!-- Empty State -->
+            <div class="empty-state fade-in">
+                <div class="empty-state-icon">
+                    <i class="bi bi-clipboard-x"></i>
+                </div>
+                <h3>No Responses Yet</h3>
+                <p>When users start submitting survey responses, they will appear here for you to manage and review.</p>
+            </div>
+        }
+    </form>
 </div>
 
-
-@section Scripts{
+@section Scripts {
     <script>
-        function selectAll(source) {
-            checkboxes = document.getElementsByName('ids');
-            for (var i = 0, n = checkboxes.length; i < n; i++) {
-                checkboxes[i].checked = source.checked;
+        $(document).ready(function () {
+            let selectedResponses = [];
+
+            // Update selection UI
+            function updateSelectionUI() {
+                const selectedCount = selectedResponses.length;
+                $('#selectedCount').text(selectedCount + ' selected');
+                $('#selectionText').text(selectedCount + ' response' + (selectedCount !== 1 ? 's' : '') + ' selected');
+                
+                if (selectedCount > 0) {
+                    $('#selectionControls').addClass('show');
+                } else {
+                    $('#selectionControls').removeClass('show');
+                }
+
+                // Update master checkbox state
+                const totalResponses = $('.response-checkbox-input').length;
+                const masterCheckbox = $('#selectAllCheckbox');
+                const masterInput = $('#selectAllInput');
+                
+                if (selectedCount === 0) {
+                    masterCheckbox.removeClass('checked');
+                    masterInput.prop('checked', false);
+                    masterCheckbox.find('i').hide();
+                } else if (selectedCount === totalResponses) {
+                    masterCheckbox.addClass('checked');
+                    masterInput.prop('checked', true);
+                    masterCheckbox.find('i').show();
+                } else {
+                    masterCheckbox.removeClass('checked');
+                    masterInput.prop('checked', false);
+                    masterCheckbox.find('i').hide();
+                }
             }
+
+            // Handle individual response checkbox clicks
+            $(document).on('change', '.response-checkbox-input', function() {
+                const responseCard = $(this).closest('.response-card');
+                const responseId = $(this).val();
+                const checkbox = $(this).closest('.custom-checkbox');
+                
+                if ($(this).is(':checked')) {
+                    if (!selectedResponses.includes(responseId)) {
+                        selectedResponses.push(responseId);
+                        responseCard.addClass('selected');
+                        checkbox.addClass('checked');
+                        checkbox.find('i').show();
+                    }
+                } else {
+                    selectedResponses = selectedResponses.filter(id => id !== responseId);
+                    responseCard.removeClass('selected');
+                    checkbox.removeClass('checked');
+                    checkbox.find('i').hide();
+                }
+                
+                updateSelectionUI();
+            });
+
+            // Handle checkbox visual clicks
+            $(document).on('click', '.response-select-checkbox', function() {
+                const input = $(this).find('input');
+                input.prop('checked', !input.is(':checked')).trigger('change');
+            });
+
+            // Handle master checkbox
+            $('#selectAllCheckbox').click(function() {
+                const shouldSelectAll = selectedResponses.length !== $('.response-checkbox-input').length;
+                
+                $('.response-checkbox-input').each(function() {
+                    const responseCard = $(this).closest('.response-card');
+                    const responseId = $(this).val();
+                    const checkbox = $(this).closest('.custom-checkbox');
+                    
+                    $(this).prop('checked', shouldSelectAll);
+                    
+                    if (shouldSelectAll) {
+                        if (!selectedResponses.includes(responseId)) {
+                            selectedResponses.push(responseId);
+                        }
+                        responseCard.addClass('selected');
+                        checkbox.addClass('checked');
+                        checkbox.find('i').show();
+                    } else {
+                        selectedResponses = [];
+                        responseCard.removeClass('selected');
+                        checkbox.removeClass('checked');
+                        checkbox.find('i').hide();
+                    }
+                });
+                
+                updateSelectionUI();
+            });
+
+            // Deselect all button
+            $('#deselectAllBtn').click(function() {
+                selectedResponses = [];
+                $('.response-checkbox-input').prop('checked', false);
+                $('.response-card').removeClass('selected');
+                $('.custom-checkbox').removeClass('checked');
+                $('.custom-checkbox i').hide();
+                updateSelectionUI();
+            });
+
+            // Delete selected button with confirmation
+            $('#deleteSelectedBtn').click(function(e) {
+                if (selectedResponses.length === 0) {
+                    e.preventDefault();
+                    alert('Please select at least one response to delete.');
+                    return;
+                }
+
+                const confirmMessage = `Are you sure you want to delete ${selectedResponses.length} response${selectedResponses.length !== 1 ? 's' : ''}? This action cannot be undone.`;
+                
+                if (!confirm(confirmMessage)) {
+                    e.preventDefault();
+                    return;
+                }
+
+                // Add loading state
+                $(this).addClass('loading').prop('disabled', true);
+            });
+
+            // Initialize UI
+            updateSelectionUI();
+        });
+
+        // Legacy function for backward compatibility
+        function selectAll(source) {
+            const event = new Event('click');
+            document.getElementById('selectAllCheckbox').dispatchEvent(event);
         }
     </script>
-
 }
-

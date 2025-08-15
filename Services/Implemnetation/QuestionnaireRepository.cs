@@ -47,7 +47,10 @@ namespace Services.Implemnetation
 
         public Questionnaire GetQuestionnaireWithQuestionAndAnswer(int? id)
         {
-            return _context.Questionnaires.AsNoTracking().Include(x => x.Questions).ThenInclude(x => x.Answers).FirstOrDefault(x=>x.Id==id);
+            return _context.Questionnaires  // ✅ No AsNoTracking for edit operations!
+                .Include(x => x.Questions)
+                .ThenInclude(x => x.Answers)
+                .FirstOrDefault(x => x.Id == id);
         }
 
         public async Task Update(Questionnaire questionnaire)

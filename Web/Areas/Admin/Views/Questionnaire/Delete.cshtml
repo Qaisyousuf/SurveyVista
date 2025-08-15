@@ -1,177 +1,749 @@
 ﻿@model QuestionnaireViewModel
 
 @{
-    ViewData["Title"] = "Delete";
+    ViewData["Title"] = "Delete Questionnaire";
 }
-<div class="container mt-4">
-    <div class="card justify-content-center p-4 shadow rounded">
-        <div class="card-body">
-            <h5 class="card-title">Delete questionnaire</h5>
-            @* <h6 class="text-danger">Are you sure you want to delete this questionnaire: <span class="badge bg-danger p-2 shadow rounded">@Model.Title</span></h6> *@
-            <h6 class="text-danger">
-                Are you sure you want to delete:
 
-                <span class="badge bg-danger p-2 shadow rounded">
-                    <span class="item-title ">@Html.Raw(Model.Title.Length >= 100 ? Model.Title.Substring(0, 100) : Model.Title)</span>
-                    <span class="more-title " style="display:none;">@(Model.Title.Length > 30 ? Model.Title.Substring(30) : "")</span>
-                </span>
-                <button type="button" class="btn btn-link readMoreBtn">Read More</button>
+<style>
+    /* Modern Design System */
+    @@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
-            </h6>
-      
+    :root {
+        --danger-color: #ef4444;
+        --danger-light: #fca5a5;
+        --danger-dark: #dc2626;
+        --warning-color: #f59e0b;
+        --info-color: #06b6d4;
+        --success-color: #10b981;
+        --gray-50: #f8fafc;
+        --gray-100: #f1f5f9;
+        --gray-200: #e2e8f0;
+        --gray-300: #cbd5e1;
+        --gray-400: #94a3b8;
+        --gray-500: #64748b;
+        --gray-600: #475569;
+        --gray-700: #334155;
+        --gray-800: #1e293b;
+        --gray-900: #0f172a;
+        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+        --border-radius-sm: 8px;
+        --border-radius-md: 12px;
+        --border-radius-lg: 16px;
+        --border-radius-xl: 24px;
+    }
 
-            <div class="row">
-                <!-- 12 columns for textboxes -->
+    * {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
 
-                <form asp-action="Delete" asp-controller="Questionnaire">
-                    <div asp-validation-summary="All" class="text-danger"></div>
-
-                    <div class="mb-3 col-12">
-                        <label asp-for="Title" class="control-label"></label>
-                        <input asp-for="Title" class="form-control" disabled />
-                        <span asp-validation-for="Title" class="text-danger"></span>
-                    </div>
-                    <div class="mb-3 col-12">
-                        <label asp-for="Description" class="control-label"></label>
-                        <textarea asp-for="Description" class="form-control" disabled></textarea>
-                        <span asp-validation-for="Description" class="text-danger"></span>
-                    </div>
-                    <div class="mb-3 col-12">
-                        <span class="h5">Total Number of questions:<span class="badge-info p-2 shadow rounded"> @Model.Questions.Count</span></span><br />
-                        @*  <span class="h5">Total Number of answer: @Model.Questions.Select(x=>x.Answers.Select(x=>x.Id)).Count()</span> *@
-                    </div>
-
-                    <!-- Add the delete confirmation modal trigger button -->
-                   
-
-                    <div class="mb-3 container">
-                        <hr class="border border-primary border-2 opacity-50">
-                        <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteModal">Delete</button>
-
-                        <button asp-action="Index" class="btn btn-info">Back to list <i class="bi bi-arrow-return-left"></i></button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
   
-    
-    <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="deleteModalLabel">Delete Confirmation</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+
+    .container {
+        max-width: 1000px;
+    }
+
+    /* Main Delete Card */
+    .delete-card {
+        background: white;
+        border-radius: var(--border-radius-xl);
+        box-shadow: var(--shadow-2xl);
+        border: 1px solid var(--gray-200);
+        overflow: hidden;
+        position: relative;
+    }
+
+        .delete-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, var(--danger-color), var(--danger-light), var(--danger-dark));
+        }
+
+    /* Header Section */
+    .delete-header {
+        background: linear-gradient(135deg, var(--danger-color) 0%, var(--danger-dark) 100%);
+        color: white;
+        padding: 3rem 2rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .delete-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20"><defs><radialGradient id="a" cx="50%" cy="0%" r="100%"><stop offset="0%" stop-color="white" stop-opacity="0.1"/><stop offset="100%" stop-color="white" stop-opacity="0"/></radialGradient></defs><rect width="100" height="20" fill="url(%23a)"/></svg>');
+            opacity: 0.3;
+        }
+
+    .delete-icon {
+        background: rgba(255, 255, 255, 0.2);
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        position: relative;
+        z-index: 1;
+    }
+
+        .delete-icon i {
+            font-size: 2.5rem;
+            color: white;
+        }
+
+    .delete-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin: 0 0 0.5rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        position: relative;
+        z-index: 1;
+    }
+
+    .delete-subtitle {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        font-weight: 500;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Content Section */
+    .delete-content {
+        padding: 3rem 2rem;
+    }
+
+    /* Warning Alert */
+    .warning-alert {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        border: 2px solid var(--warning-color);
+        border-radius: var(--border-radius-lg);
+        padding: 2rem;
+        margin-bottom: 2.5rem;
+        position: relative;
+    }
+
+        .warning-alert::before {
+            content: "⚠️";
+            position: absolute;
+            top: -15px;
+            left: 20px;
+            background: var(--warning-color);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius-md);
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+    .warning-content {
+        margin-top: 0.5rem;
+    }
+
+    .warning-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--gray-800);
+        margin-bottom: 1rem;
+    }
+
+    .warning-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+        .warning-list li {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.75rem;
+            font-weight: 500;
+            color: var(--gray-700);
+        }
+
+            .warning-list li i {
+                color: var(--danger-color);
+                margin-right: 0.75rem;
+                font-size: 1.1rem;
+            }
+
+    /* Questionnaire Info */
+    .questionnaire-info {
+        background: linear-gradient(135deg, var(--gray-50) 0%, var(--gray-100) 100%);
+        border-radius: var(--border-radius-lg);
+        padding: 2rem;
+        margin-bottom: 2.5rem;
+        border: 1px solid var(--gray-200);
+    }
+
+    .info-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .info-icon {
+        background: var(--info-color);
+        color: white;
+        width: 48px;
+        height: 48px;
+        border-radius: var(--border-radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        font-size: 1.5rem;
+    }
+
+    .info-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--gray-800);
+        margin: 0;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .info-item {
+        background: white;
+        padding: 1.25rem;
+        border-radius: var(--border-radius-md);
+        border: 1px solid var(--gray-200);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .info-label {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--gray-500);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.5rem;
+    }
+
+    .info-value {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--gray-800);
+        word-break: break-word;
+    }
+
+    .info-description {
+        background: white;
+        padding: 1.25rem;
+        border-radius: var(--border-radius-md);
+        border: 1px solid var(--gray-200);
+        box-shadow: var(--shadow-sm);
+        max-height: 120px;
+        overflow-y: auto;
+    }
+
+    .info-description-content {
+        color: var(--gray-700);
+        line-height: 1.6;
+        font-size: 0.95rem;
+    }
+
+    /* Stats Section */
+    .stats-section {
+        background: white;
+        border-radius: var(--border-radius-lg);
+        padding: 2rem;
+        margin-bottom: 2.5rem;
+        border: 1px solid var(--gray-200);
+        box-shadow: var(--shadow-md);
+    }
+
+    .stats-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--gray-800);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+    }
+
+        .stats-title i {
+            margin-right: 0.75rem;
+            color: var(--info-color);
+        }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+    }
+
+    .stat-card {
+        background: linear-gradient(135deg, var(--gray-50) 0%, var(--gray-100) 100%);
+        padding: 1.5rem;
+        border-radius: var(--border-radius-md);
+        text-align: center;
+        border: 1px solid var(--gray-200);
+        transition: all 0.3s ease;
+    }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--danger-color);
+        display: block;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--gray-600);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* Action Buttons */
+    .action-section {
+        background: var(--gray-50);
+        padding: 2.5rem 2rem;
+        border-top: 1px solid var(--gray-200);
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        border-radius: var(--border-radius-md);
+        font-weight: 600;
+        padding: 1rem 2rem;
+        font-size: 1rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: none;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        box-shadow: var(--shadow-md);
+        position: relative;
+        overflow: hidden;
+        min-width: 140px;
+        justify-content: center;
+    }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+    .btn-danger-custom {
+        background: linear-gradient(135deg, var(--danger-color) 0%, var(--danger-dark) 100%);
+        color: white;
+    }
+
+        .btn-danger-custom:hover {
+            background: linear-gradient(135deg, var(--danger-dark) 0%, #b91c1c 100%);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-xl);
+            color: white;
+        }
+
+    .btn-secondary-custom {
+        background: linear-gradient(135deg, var(--gray-500) 0%, var(--gray-600) 100%);
+        color: white;
+    }
+
+        .btn-secondary-custom:hover {
+            background: linear-gradient(135deg, var(--gray-600) 0%, var(--gray-700) 100%);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-xl);
+            color: white;
+        }
+
+    /* Enhanced Modal */
+    .modal-content {
+        border-radius: var(--border-radius-xl);
+        border: none;
+        box-shadow: var(--shadow-2xl);
+        overflow: hidden;
+    }
+
+    .modal-header-danger {
+        background: linear-gradient(135deg, var(--danger-color) 0%, var(--danger-dark) 100%);
+        color: white;
+        padding: 2rem 2.5rem;
+        border: none;
+        text-align: center;
+    }
+
+    .modal-title-custom {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+    }
+
+    .modal-body-custom {
+        padding: 2.5rem;
+        text-align: center;
+    }
+
+    .modal-message {
+        font-size: 1.25rem;
+        color: var(--gray-700);
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+    }
+
+    .modal-warning {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        border: 1px solid var(--warning-color);
+        border-radius: var(--border-radius-md);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .modal-footer-custom {
+        padding: 2rem 2.5rem;
+        border: none;
+        background: var(--gray-50);
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+    }
+
+    /* Success State */
+    .success-message {
+        color: var(--success-color);
+        font-size: 1.5rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+    }
+
+    /* Loading State */
+    .btn.loading {
+        opacity: 0.7;
+        pointer-events: none;
+    }
+
+        .btn.loading::after {
+            content: "";
+            width: 18px;
+            height: 18px;
+            margin-left: 0.75rem;
+            border: 2px solid transparent;
+            border-top-color: currentColor;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+    @@keyframes spin {
+        0%
+
+    {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+
+    }
+
+    /* Responsive Design */
+    @@media (max-width: 768px) {
+        .container
+
+    {
+        padding: 0 1rem;
+    }
+
+    .delete-content {
+        padding: 2rem 1.5rem;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .action-buttons {
+        flex-direction: column;
+    }
+
+    .btn {
+        width: 100%;
+    }
+
+    }
+
+    /* Animations */
+    .fade-in {
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    @@keyframes fadeIn {
+        from
+
+    {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+</style>
+
+<div class="container">
+    <div class="delete-card fade-in">
+        <!-- Header Section -->
+        <div class="delete-header">
+            <div class="delete-icon">
+                <i class="bi bi-trash3-fill"></i>
+            </div>
+            <h1 class="delete-title">Delete Questionnaire</h1>
+            <p class="delete-subtitle">This action will permanently remove this questionnaire and all associated data</p>
+        </div>
+
+        <!-- Content Section -->
+        <div class="delete-content">
+            <!-- Warning Alert -->
+            <div class="warning-alert">
+                <div class="warning-content">
+                    <h3 class="warning-title">⚠️ Critical Warning</h3>
+                    <ul class="warning-list">
+                        <li><i class="bi bi-x-circle-fill"></i>This action cannot be undone</li>
+                        <li><i class="bi bi-x-circle-fill"></i>All questions and answers will be permanently deleted</li>
+                        <li><i class="bi bi-x-circle-fill"></i>Any survey responses will be lost forever</li>
+                        <li><i class="bi bi-x-circle-fill"></i>Associated data and analytics will be removed</li>
+                    </ul>
                 </div>
-                <div class="modal-body">
-                    <p id="deleteMessage">Are you sure you want to delete this questionnaire</p>
-                    <p class="text-danger">If you delete, you can't recover it.</p>
-                    <input type="text" class="form-control" id="deleteConfirmation" placeholder="Type the questionnaire name to confirm">
+            </div>
+
+            <!-- Questionnaire Information -->
+            <div class="questionnaire-info">
+                <div class="info-header">
+                    <div class="info-icon">
+                        <i class="bi bi-file-text"></i>
+                    </div>
+                    <h2 class="info-title">Questionnaire Details</h2>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-danger" id="deleteButton" disabled>Delete</button>
+
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">Title</div>
+                        <div class="info-value">@Model.Title</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Questionnaire ID</div>
+                        <div class="info-value">#@Model.Id</div>
+                    </div>
+                </div>
+
+                <div class="info-description">
+                    <div class="info-label">Description</div>
+                    <div class="info-description-content">
+                        @if (!string.IsNullOrEmpty(Model.Description))
+                        {
+                            @Html.Raw(Model.Description)
+                        }
+                        else
+                        {
+                            <em class="text-muted">No description provided</em>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics -->
+            <div class="stats-section">
+                <h3 class="stats-title">
+                    <i class="bi bi-graph-up"></i>
+                    Content Statistics
+                </h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <span class="stat-number">@Model.Questions.Count</span>
+                        <span class="stat-label">Questions</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">@Model.Questions.Sum(q => q.Answers.Count)</span>
+                        <span class="stat-label">Total Answers</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">@Model.Questions.Count(q => q.Answers.Any(a => a.IsOtherOption))</span>
+                        <span class="stat-label">Other Options</span>
+                    </div>
                 </div>
             </div>
         </div>
+
+        <!-- Action Section -->
+        <div class="action-section">
+            <div class="action-buttons">
+                <button type="button" class="btn btn-danger-custom" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                    <i class="bi bi-trash3-fill"></i>
+                    Delete Questionnaire
+                </button>
+                <a asp-action="Index" class="btn btn-secondary-custom">
+                    <i class="bi bi-arrow-left"></i>
+                    Back to List
+                </a>
+            </div>
+        </div>
     </div>
+</div>
 
-
-   
-
-    <!-- Delete Confirmation Modal -->
-    
+<!-- Enhanced Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header-danger">
+                <h5 class="modal-title-custom" id="deleteModalLabel">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    Confirm Deletion
+                </h5>
+            </div>
+            <div class="modal-body-custom">
+                <p class="modal-message" id="deleteMessage">
+                    Are you absolutely sure you want to delete this questionnaire?
+                </p>
+                <div class="modal-warning">
+                    <i class="bi bi-shield-exclamation"></i>
+                    <strong>This action is irreversible!</strong> Once deleted, this questionnaire and all its data cannot be recovered.
+                </div>
+            </div>
+            <div class="modal-footer-custom">
+                <button type="button" class="btn btn-secondary-custom" data-bs-dismiss="modal">
+                    <i class="bi bi-x"></i>
+                    Cancel
+                </button>
+                <button type="button" class="btn btn-danger-custom" id="deleteButton">
+                    <i class="bi bi-trash3-fill"></i>
+                    Yes, Delete Forever
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
 @section Scripts {
-    
-
-      
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ckeditor/4.11.4/ckeditor.js"></script>
-        <!-- Add these links in the <head> section of your HTML file -->
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js" integrity="sha512-aVKKRRi/Q/YV+4mjoKBsE4x3H+BkegoM/em46NNlCqNTmUYADjBbeNefNxYV7giUp0VxICtqdrbqU7iVaeZNXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
 
     <script>
-        CKEDITOR.replace("Description");
-    </script>
-    @{
-            <partial name="_ValidationScriptsPartial" />
-    }
-    <script>
-    
-            $(document).ready(function () {
-                var itemId = @Model.Id; // Assuming you can get the item ID from the model
+        $(document).ready(function () {
+            var itemId = @Model.Id;
 
-                // Enable delete button when the input matches the item name
-                $('#deleteConfirmation').on('input', function () {
-                    var itemName = '@Model.Title'; // Item name from the model
-                    var inputText = $(this).val().trim().toLowerCase();
-                    var isMatch = inputText === itemName.toLowerCase();
-                    // var space = $(this).val.space();
-                    $('#deleteButton').prop('disabled', !isMatch);
-                });
+            // Enhanced delete button click event
+            $('#deleteButton').on('click', function () {
+                var $btn = $(this);
+                var $modal = $('#deleteModal');
 
-                // Clear input and disable button when modal is hidden
-                $('#deleteModal').on('hidden.bs.modal', function () {
-                    $('#deleteConfirmation').val('');
-                    $('#deleteButton').prop('disabled', true);
-                });
+                // Add loading state
+                $btn.addClass('loading').prop('disabled', true);
 
-                // Delete button click event
-                $('#deleteButton').on('click', function () {
-                    // Make an AJAX request to delete the item
-                    $.ajax({
-                        url: '/admin/Questionnaire/Delete/' + itemId,
-                        type: 'POST', // or 'DELETE' if you have a dedicated delete action
-                        success: function (result) {
-                            // Hide the confirmation details
-                            $('#deleteConfirmation, .text-danger').hide();
-                            $('#deleteButton').hide();
-                            // Show the success message
-                            $('#deleteMessage').text('Questionnaire deleted successfully.').addClass('text-success h4').show();
-                            // Show the modal
-                            $('#deleteModal').modal('show');
-                            // Automatically close the modal after 4 seconds
-                            setTimeout(function () {
-                                $('#deleteModal').modal('hide');
-                                // Redirect to the index action method after closing the modal
-                                window.location.href = '/admin/Questionnaire/Index';
-                            }, 1000);
-                        },
-                        error: function (error) {
-                            // Handle error
-                            $('#deleteMessage').text('Failed to delete item.').show();
-                            // Show the modal
-                            $('#deleteModal').modal('show');
-                            // Automatically close the modal after 4 seconds
-                            setTimeout(function () {
-                                $('#deleteModal').modal('hide');
-                            }, 1000);
-                        }
-                    });
-                });
-               
+                // Make AJAX request to delete the item
+                $.ajax({
+                    url: '/admin/Questionnaire/Delete/' + itemId,
+                    type: 'POST',
+                    success: function (result) {
+                        // Update modal content to show success
+                        $('.modal-header-danger').removeClass('modal-header-danger').css({
+                            'background': 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
+                        });
 
-            });
+                        $('.modal-title-custom').html('<i class="bi bi-check-circle-fill"></i> Success');
 
+                        $('#deleteMessage').html('<div class="success-message"><i class="bi bi-check-circle-fill"></i>Questionnaire deleted successfully!</div>');
 
-    </script> 
+                        $('.modal-warning').hide();
+                        $('.modal-footer-custom').hide();
 
-    <script>
-            $(document).ready(function () {
-                $(".readMoreBtn").click(function () {
-                    $(this).closest('.text-danger').find('.more-title').toggle();
-                    $(this).text(function (_, text) {
-                        return text === "Read More" ? "Read Less" : "Read More";
-                    });
+                        // Automatically redirect after showing success
+                        setTimeout(function () {
+                            $modal.modal('hide');
+                            window.location.href = '/admin/Questionnaire/Index';
+                        }, 2000);
+                    },
+                    error: function (xhr, status, error) {
+                        // Remove loading state
+                        $btn.removeClass('loading').prop('disabled', false);
+
+                        // Show error message
+                        $('#deleteMessage').html('<div class="text-danger"><i class="bi bi-exclamation-triangle-fill"></i> Failed to delete questionnaire. Please try again.</div>');
+
+                        // Auto-hide error message after 3 seconds
+                        setTimeout(function () {
+                            $modal.modal('hide');
+                        }, 3000);
+                    }
                 });
             });
 
+            // Reset modal when hidden
+            $('#deleteModal').on('hidden.bs.modal', function () {
+                // Reset button state
+                $('#deleteButton').removeClass('loading').prop('disabled', false);
 
+                // Reset modal content if needed
+                $('.modal-header-danger').css({
+                    'background': 'linear-gradient(135deg, var(--danger-color) 0%, var(--danger-dark) 100%)'
+                });
+
+                $('.modal-title-custom').html('<i class="bi bi-exclamation-triangle-fill"></i> Confirm Deletion');
+                $('#deleteMessage').text('Are you absolutely sure you want to delete this questionnaire?');
+                $('.modal-warning').show();
+                $('.modal-footer-custom').show();
+            });
+        });
     </script>
-
-}  
+}

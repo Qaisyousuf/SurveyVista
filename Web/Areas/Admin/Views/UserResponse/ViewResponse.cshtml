@@ -1,484 +1,1039 @@
 ﻿@model Response
 
 @{
-    ViewData["Title"] = "ViewResponses";
+    ViewData["Title"] = "Response Details";
 }
 
 <style>
-    <style>
-    
+    /* Modern Design System */
+    @@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
-    .font-weight-bold {
-        font-weight: bold;
+    :root {
+        --primary-color: #6366f1;
+        --primary-light: #8b5cf6;
+        --primary-dark: #4338ca;
+        --success-color: #10b981;
+        --success-light: #34d399;
+        --success-dark: #059669;
+        --info-color: #06b6d4;
+        --info-light: #22d3ee;
+        --info-dark: #0891b2;
+        --warning-color: #f59e0b;
+        --warning-light: #fbbf24;
+        --warning-dark: #d97706;
+        --danger-color: #ef4444;
+        --danger-light: #fca5a5;
+        --danger-dark: #dc2626;
+        --gray-50: #f8fafc;
+        --gray-100: #f1f5f9;
+        --gray-200: #e2e8f0;
+        --gray-300: #cbd5e1;
+        --gray-400: #94a3b8;
+        --gray-500: #64748b;
+        --gray-600: #475569;
+        --gray-700: #334155;
+        --gray-800: #1e293b;
+        --gray-900: #0f172a;
+        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+        --border-radius-sm: 8px;
+        --border-radius-md: 12px;
+        --border-radius-lg: 16px;
+        --border-radius-xl: 24px;
     }
 
-    .text-primary {
-        color: #121212; /* Bootstrap primary color */
+    * {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     }
 
-    .selected-answer {
-        color: #28a745; /* Bootstrap success color */
-    }
-    
-
-        .star-rating .text-primary {
-            color:goldenrod; /* Bootstrap primary blue */
-            font-weight: bold; /* Make text bold */
-        }
-
-        .star-rating .text-secondary {
-            color: #6c757d; /* Bootstrap secondary text color */
-        }
-
-        .star-rating .text-muted {
-            color: #6c757d; /* Muted text color for unselected star descriptions */
-        }
-
-    .color-1 {
-        color: #007bff;
-    }
-    /* Blue */
-    .color-2 {
-        color: #28a745;
-    }
-    /* Green */
-    .color-3 {
-        color: #ffc107;
-    }
-    /* Yellow */
-    .color-4 {
-        color: #dc3545;
-    }
-    /* Red */
-    .color-5 {
-        color: #17a2b8;
+    body {
+        background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+        min-height: 100vh;
     }
 
-    .color-6 {
-        color: #12b8;
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
     }
 
-    .color-7 {
-        color: #d92683;
-    }
-
-    .color-8 {
-        color: #f181b6;
-    }
-
-    .color-8 {
-        color: #035b19;
-    }
-
-    .grayscale {
-        filter: grayscale(100%); /* Grays out the image */
-    }
-
-    .selected-image-card {
-        border: 3px solid #28a745; /* Bootstrap 'success' green color */
-        position: relative; /* Needed for absolute positioning of the check icon */
-    }
-
-        .selected-image-card::after {
-            content: "\2713"; /* Unicode character for a check mark */
-            font-family: "Bootstrap Icons"; /* Ensure this matches the icon font being used */
-            color: #28a745; /* Match the border color or choose another */
-            font-size: 24px; /* Adjust size as needed */
-            position: absolute;
-            top: 191px;
-            right: 67px;
-            z-index: 1;
-        }
-
-
-    /* Ensure the cards are not too stretched vertically */
-    .card-img-top {
-        width: auto;
-        max-height: 150px; /* Adjust the max-height as needed */
-        object-fit: cover; /* This will cover the area without stretching */
-    }
-
-    .slider {
-        -webkit-appearance: none; /* Override default appearance */
-        width: 100%; /* Slider takes up full container width */
-        height: 15px; /* Slider thickness */
-        border-radius: 5px; /* Roundness of the slider */
-        background: #d3d3d3; /* Background of the slider */
-        outline: none; /* Removes the outline */
-        opacity: 0.7; /* Slider opacity */
-       
-      
-    }
-
-        .slider:disabled {
-            background: #e9ecef; /* Light grey background when slider is disabled */
-        }
-
-        .slider::-webkit-slider-thumb {
-            -webkit-appearance: none; /* Removes style of default thumb */
-            width: 25px; /* Thumb width */
-            height: 25px; /* Thumb height */
-            border-radius: 50%; /* Makes thumb circular */
-            background: #007bff; /* Thumb color */
-            cursor: pointer; /* Cursor appears as pointer */
-        }
-
-        .slider::-moz-range-thumb {
-            width: 25px; /* Thumb width for Mozilla */
-            height: 25px; /* Thumb height for Mozilla */
-            border-radius: 50%; /* Makes thumb circular for Mozilla */
-            background: #007bff; /* Thumb color for Mozilla */
-            cursor: pointer; /* Cursor appears as pointer for Mozilla */
-        }
-
-    #Errocard {
+    /* Response Header */
+    .response-header {
+        background: white;
+        border-radius: var(--border-radius-xl);
+        box-shadow: var(--shadow-xl);
+        overflow: hidden;
+        margin-bottom: 2rem;
         position: relative;
-        display: -webkit-box;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-box-orient: vertical;
-        -webkit-box-direction: normal;
-        -ms-flex-direction: column;
-        flex-direction: row;
-        word-wrap: break-word;
-        box-shadow: 0px 0px 13px 0px rgb(20 101 230 / 35%);
-        -webkit-box-shadow: 0px 0px 13px 0px rgb(20 101 230 / 35%);
-        border-radius: 5px;
-
-        border-radius: 10px;
-        background-color: transparent;
-        height: auto;
-        flex-wrap: nowrap;
-        align-items: center;
-        padding: 0 50px 0 50px;
-       
-       
-    }
-    .card{
-        margin-top:40px !important;
-        box-shadow: 0px 0px 13px 0px rgb(20 101 230 / 35%) !important;
-        -webkit-box-shadow: 0px 0px 13px 0px rgb(20 101 230 / 35%) !important;
-        border-radius: 5px;
-    }
-    
-   /*  main{
-       
-        background-attachment:fixed;
-        background-repeat: no-repeat;
-        background: linear-gradient(119deg, rgba(47, 82, 131, 1) 0%, rgba(29, 33, 59, 1) 34%, rgba(27, 54, 61, 1) 67%, rgba(58, 82, 116, 1) 100%) !important;
-    }
- */
-    .card-header {
-        padding: 0.75rem 1.25rem;
-        margin-bottom: 0;
-        background: #16283f;
-        color:white;
-       
     }
 
-    #HeaderForQuestionType{
-        padding: 0.75rem 1.25rem;
-        background: #16283f;
+        .response-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--info-color), var(--success-color));
+        }
+
+    .header-main {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
         color: white;
-        border-radius:5px;
-        box-shadow: 0px 0px 13px 0px rgb(20 101 230 / 35%) !important;
-        -webkit-box-shadow: 0px 0px 13px 0px rgb(20 101 230 / 35%) !important;
+        padding: 2.5rem;
+        position: relative;
+        overflow: hidden;
     }
 
-    .badge {
-        display: inline-block;
-        padding: 0.25em 0.4em;
-        font-size: 116%;
-        font-weight: 700;
-        line-height: 1;
-        text-align: center;
-        white-space: nowrap;
-        vertical-align: baseline;
-        border-radius: 0.25rem;
+        .header-main::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20"><defs><radialGradient id="a" cx="50%" cy="0%" r="100%"><stop offset="0%" stop-color="white" stop-opacity="0.1"/><stop offset="100%" stop-color="white" stop-opacity="0"/></radialGradient></defs><rect width="100" height="20" fill="url(%23a)"/></svg>');
+            opacity: 0.3;
+        }
+
+    .header-content {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+        position: relative;
+        z-index: 1;
     }
-    
+
+    .response-icon {
+        background: rgba(255, 255, 255, 0.2);
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        backdrop-filter: blur(10px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .header-text h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        margin: 0 0 0.5rem;
+    }
+
+    .user-badge {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 0.5rem 1rem;
+        border-radius: var(--border-radius-md);
+        backdrop-filter: blur(10px);
+        display: inline-block;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .header-meta {
+        background: var(--gray-50);
+        padding: 1.5rem 2.5rem;
+        border-top: 1px solid var(--gray-200);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .meta-icon {
+        background: var(--success-color);
+        color: white;
+        width: 32px;
+        height: 32px;
+        border-radius: var(--border-radius-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+    }
+
+    .meta-text {
+        font-weight: 600;
+        color: var(--gray-800);
+    }
+
+    /* Question Cards */
+    .question-card {
+        background: white;
+        border-radius: var(--border-radius-xl);
+        box-shadow: var(--shadow-lg);
+        overflow: hidden;
+        margin-bottom: 2rem;
+        border: 1px solid var(--gray-200);
+        transition: all 0.3s ease;
+    }
+
+        .question-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-2xl);
+        }
+
+    .question-header {
+        background: linear-gradient(135deg, var(--gray-700) 0%, var(--gray-800) 100%);
+        color: white;
+        padding: 1.5rem 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .question-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20"><defs><radialGradient id="a" cx="50%" cy="0%" r="100%"><stop offset="0%" stop-color="white" stop-opacity="0.1"/><stop offset="100%" stop-color="white" stop-opacity="0"/></radialGradient></defs><rect width="100" height="20" fill="url(%23a)"/></svg>');
+            opacity: 0.3;
+        }
+
+    .question-type {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 0.375rem 1rem;
+        border-radius: var(--border-radius-sm);
+        font-weight: 600;
+        font-size: 0.875rem;
+        display: inline-block;
+        margin-bottom: 1rem;
+        backdrop-filter: blur(10px);
+        position: relative;
+        z-index: 1;
+    }
+
+    .question-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin: 0;
+        position: relative;
+        z-index: 1;
+        line-height: 1.4;
+    }
+
+    .question-body {
+        padding: 2rem;
+    }
+
+    /* Response Types */
+    .text-response {
+        background: linear-gradient(135deg, var(--gray-50) 0%, var(--gray-100) 100%);
+        border: 1px solid var(--gray-200);
+        border-radius: var(--border-radius-lg);
+        padding: 1.5rem;
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--gray-800);
+        line-height: 1.6;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .text-response-label {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--gray-600);
+        margin-bottom: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* Choice Options */
+    .choices-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .choice-option {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem 1.25rem;
+        border-radius: var(--border-radius-md);
+        border: 2px solid var(--gray-200);
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+        .choice-option.selected {
+            border-color: var(--primary-color);
+            background: linear-gradient(135deg, #fef2f2 0%, #fecaca 10%, white 100%);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+    .choice-input {
+        width: 20px;
+        height: 20px;
+        border: 2px solid var(--gray-300);
+        border-radius: 4px;
+        position: relative;
+        flex-shrink: 0;
+    }
+
+        .choice-input.radio {
+            border-radius: 50%;
+        }
+
+        .choice-input.checked {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+            .choice-input.checked::after {
+                content: '✓';
+                position: absolute;
+                color: white;
+                font-weight: bold;
+                font-size: 12px;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+            }
+
+    .choice-label {
+        font-weight: 500;
+        color: var(--gray-700);
+    }
+
+    .choice-option.selected .choice-label {
+        font-weight: 600;
+        color: var(--primary-color);
+    }
+
+    /* Rating Stars */
+    .rating-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        justify-content: center;
+        padding: 2rem;
+        background: var(--gray-50);
+        border-radius: var(--border-radius-lg);
+    }
+
+    .rating-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem;
+        border-radius: var(--border-radius-md);
+        transition: all 0.3s ease;
+    }
+
+        .rating-item.selected {
+            background: linear-gradient(135deg, var(--warning-color) 0%, var(--warning-light) 100%);
+            color: white;
+            box-shadow: var(--shadow-md);
+            transform: scale(1.1);
+        }
+
+    .rating-star {
+        font-size: 2rem;
+        color: var(--gray-300);
+        transition: all 0.3s ease;
+    }
+
+    .rating-item.selected .rating-star {
+        color: white;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .rating-label {
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-align: center;
+        color: var(--gray-600);
+    }
+
+    .rating-item.selected .rating-label {
+        color: white;
+    }
+
+    /* Likert Scale */
+    .likert-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .likert-option {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem 1.25rem;
+        border-radius: var(--border-radius-md);
+        border: 2px solid var(--gray-200);
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+        .likert-option.selected {
+            border-color: var(--success-color);
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+
+    .likert-radio {
+        width: 20px;
+        height: 20px;
+        border: 2px solid var(--gray-300);
+        border-radius: 50%;
+        position: relative;
+        flex-shrink: 0;
+    }
+
+        .likert-radio.checked {
+            background: var(--success-color);
+            border-color: var(--success-color);
+        }
+
+            .likert-radio.checked::after {
+                content: '';
+                position: absolute;
+                width: 8px;
+                height: 8px;
+                background: white;
+                border-radius: 50%;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+            }
+
+    .likert-label {
+        font-weight: 500;
+        color: var(--gray-700);
+    }
+
+    .likert-option.selected .likert-label {
+        font-weight: 600;
+        color: var(--success-color);
+    }
+
+    /* Matrix Table */
+    .matrix-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border-radius: var(--border-radius-lg);
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+    }
+
+        .matrix-table th {
+            background: linear-gradient(135deg, var(--gray-600) 0%, var(--gray-700) 100%);
+            color: white;
+            padding: 1rem;
+            font-weight: 600;
+            text-align: left;
+        }
+
+        .matrix-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--gray-200);
+            vertical-align: middle;
+        }
+
+        .matrix-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .matrix-table tr:hover {
+            background: var(--gray-50);
+        }
+
+    .matrix-option {
+        font-weight: 500;
+        color: var(--gray-700);
+    }
+
+        .matrix-option.selected {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+    .matrix-radio {
+        width: 20px;
+        height: 20px;
+        border: 2px solid var(--gray-300);
+        border-radius: 50%;
+        position: relative;
+    }
+
+        .matrix-radio.checked {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+            .matrix-radio.checked::after {
+                content: '';
+                position: absolute;
+                width: 8px;
+                height: 8px;
+                background: white;
+                border-radius: 50%;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+            }
+
+    /* Ranking */
+    .ranking-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+    }
+
+    .ranking-section {
+        background: var(--gray-50);
+        border-radius: var(--border-radius-lg);
+        padding: 1.5rem;
+        border: 1px solid var(--gray-200);
+    }
+
+    .ranking-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--gray-800);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .ranking-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .ranking-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        background: white;
+        border-radius: var(--border-radius-md);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--gray-200);
+    }
+
+    .ranking-number {
+        background: var(--primary-color);
+        color: white;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 0.875rem;
+        flex-shrink: 0;
+    }
+
+    .ranking-text {
+        font-weight: 500;
+        color: var(--gray-700);
+    }
+
+    /* Image Selection */
+    .images-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        padding: 1rem;
+    }
+
+    .image-card {
+        background: white;
+        border-radius: var(--border-radius-lg);
+        overflow: hidden;
+        box-shadow: var(--shadow-md);
+        transition: all 0.3s ease;
+        border: 2px solid var(--gray-200);
+    }
+
+        .image-card.selected {
+            border-color: var(--success-color);
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1), var(--shadow-lg);
+            transform: scale(1.05);
+        }
+
+        .image-card.unselected {
+            filter: grayscale(100%);
+            opacity: 0.6;
+        }
+
+    .card-image {
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+    }
+
+    .image-card-body {
+        padding: 1rem;
+        text-align: center;
+    }
+
+    .view-image-btn {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: var(--border-radius-sm);
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.3s ease;
+        font-size: 0.875rem;
+    }
+
+        .view-image-btn:hover {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, #3730a3 100%);
+            transform: translateY(-1px);
+            color: white;
+            text-decoration: none;
+        }
+
+    .selected-indicator {
+        position: absolute;
+        top: 0.75rem;
+        right: 0.75rem;
+        background: var(--success-color);
+        color: white;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        box-shadow: var(--shadow-md);
+    }
+
+    /* Slider */
+    .slider-container {
+        background: var(--gray-50);
+        border-radius: var(--border-radius-lg);
+        padding: 2rem;
+        border: 1px solid var(--gray-200);
+    }
+
+    .slider-item {
+        margin-bottom: 2rem;
+    }
+
+        .slider-item:last-child {
+            margin-bottom: 0;
+        }
+
+    .slider-label {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--gray-800);
+        margin-bottom: 1rem;
+    }
+
+    .slider-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .slider-min, .slider-max {
+        background: var(--gray-600);
+        color: white;
+        padding: 0.375rem 0.75rem;
+        border-radius: var(--border-radius-sm);
+        font-weight: 600;
+        font-size: 0.875rem;
+        min-width: 40px;
+        text-align: center;
+    }
+
+    .custom-slider {
+        flex: 1;
+        height: 8px;
+        border-radius: 4px;
+        background: var(--gray-300);
+        outline: none;
+        -webkit-appearance: none;
+        position: relative;
+    }
+
+        .custom-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+            box-shadow: var(--shadow-md);
+        }
+
+        .custom-slider::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+            border: none;
+            box-shadow: var(--shadow-md);
+        }
+
+    .slider-value {
+        background: var(--primary-color);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: var(--border-radius-md);
+        font-weight: 600;
+        box-shadow: var(--shadow-sm);
+    }
+
+    /* Back Link */
+    .back-link {
+        background: linear-gradient(135deg, var(--gray-500) 0%, var(--gray-600) 100%);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: var(--border-radius-md);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: var(--shadow-md);
+        margin-top: 2rem;
+    }
+
+        .back-link:hover {
+            background: linear-gradient(135deg, var(--gray-600) 0%, var(--gray-700) 100%);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            color: white;
+            text-decoration: none;
+        }
+
+    /* Responsive Design */
+    @@media (max-width: 768px) {
+        .container
+
+    {
+        padding: 1rem;
+    }
+
+    .header-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+
+    .header-meta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .ranking-container {
+        grid-template-columns: 1fr;
+    }
+
+    .images-container {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
+
+    .rating-container {
+        gap: 1rem;
+    }
+
+    .slider-wrapper {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    }
+
+    /* Animations */
+    .fade-in {
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    @@keyframes fadeIn {
+        from
+
+    {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+
+    .stagger-animation {
+        animation: fadeIn 0.6s ease-out;
+        animation-fill-mode: both;
+    }
+
+        .stagger-animation:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .stagger-animation:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .stagger-animation:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        .stagger-animation:nth-child(4) {
+            animation-delay: 0.4s;
+        }
+
+        .stagger-animation:nth-child(5) {
+            animation-delay: 0.5s;
+        }
+
+        .stagger-animation:nth-child(6) {
+            animation-delay: 0.6s;
+        }
 </style>
 
-    @{
-        int numberindex = 0;
-    }
+@{
+    int numberindex = 0;
+}
 
-
-<div class="container pt-5">
-   @*  <h2>Questionnaire: @Model.Questionnaire.Title</h2> *@
-   <div class="card shadow-1">
-       <div class="card-header">
-           Respond from user
-       </div>
-       <div class="card-body">
-            <h6 class="font-weight-bold">Response Details for  <span class="badge badge-dark"> @Model.UserName (@Model.UserEmail)</span></h6>
-       </div>
-        <div class="card-header">
-            <strong class="">Submitted on: <span id="localTime">@Model.SubmissionDate.ToString("yyyy-MM-ddTHH:mm:ss")</span></strong>
-      </div>
-       
-   </div>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            var utcDate = document.getElementById('localTime').innerText;
-            var localDate = new Date(utcDate + 'Z'); // Add 'Z' to indicate UTC time
-            document.getElementById('localTime').innerText = localDate.toLocaleString();
-        });
-    </script>
-
-        @foreach (var detail in Model.ResponseDetails)
-        {
-        <div class="card mb-3" id="Errocard">
-            <div class="card-header" id="HeaderForQuestionType">
-                Question Type:@detail.QuestionType.ToString()
-            </div>
-            <div class="card-body">
-                <h6 class="card-title"><span class="font-weight-bold">Question @((numberindex = numberindex + 1)):</span> @detail.Question.Text</h6>
-                <div class="card-text ml-2">
-                        @switch (detail.QuestionType)
-                        {
-                            case QuestionType.Text:
-                            case QuestionType.Open_ended:
-                            <p><strong>Answer:</strong> @detail.TextResponse</p>
-                                break;
-                            case QuestionType.Multiple_choice:
-                            case QuestionType.CheckBox:
-                            case QuestionType.TrueFalse:
-                            <strong>Answer:</strong>
-                                @if (detail.Question.Type == QuestionType.TrueFalse)
-                                {
-                                <!-- Use radio buttons for True/False questions -->
-                                <div class="form-group">
-                                        @foreach (var answer in detail.Question.Answers)
-                                        {
-                                            // Ensuring each question has a unique group name by using the Question ID
-                                            string groupName = $"response{detail.Question.Id}";
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio"
-                                                   name="@groupName" 
-                                                   id="radio-@answer.Id"
-                                                   value="@answer.Id"
-                                                   disabled @(detail.ResponseAnswers.Any(ra => ra.AnswerId == answer.Id) ? "checked" : "")>
-                                            <label class="form-check-label @(detail.ResponseAnswers.Any(ra => ra.AnswerId == answer.Id) ? "font-weight-bold text-primary" : "text-muted")"
-                                                   for="radio-@answer.Id">
-                                                    @answer.Text
-                                            </label>
-                                        </div>
-                                        }
-                                </div>
-                                }
-                                else
-                                {
-                                <!-- Use checkboxes for Multiple Choice and Checkbox questions -->
-                                <div class="form-group">
-                                        @foreach (var answer in detail.Question.Answers)
-                                        {
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" name="response@answer.Id"
-                                                   id="checkbox-@answer.Id" value="@answer.Id"
-                                                   disabled @(detail.ResponseAnswers.Any(ra => ra.AnswerId == answer.Id) ? "checked" : "")>
-                                            <label class="form-check-label @(detail.ResponseAnswers.Any(ra => ra.AnswerId == answer.Id) ? "font-weight-bold text-primary" : "text-muted")"
-                                                   for="checkbox-@answer.Id">
-                                                    @answer.Text
-                                            </label>
-                                        </div>
-                                        }
-                                </div>
-                                }
-                                break;
-
-                            case QuestionType.Rating:
-                                @if (detail.QuestionType == QuestionType.Rating)
-                                {
-                                <strong>User Selected rate</strong>
-                                <ul class="list-inline">
-                                        @foreach (var answer in detail.Question.Answers.OrderBy(a => a.Id))
-                                        {
-                                        <li class="list-inline-item  p-3">
-                                            <!-- Display answer text above the star -->
-                                            <div class="@(detail.ResponseAnswers.Any(ra => ra.AnswerId == answer.Id) ? "text-primary" : "text-muted")">
-                                                <span class="d-flex justify-content-center">@answer.Text</span>
-                                            </div>
-                                            <!-- Display star icon -->
-                                            <span class="@(detail.ResponseAnswers.Any(ra => ra.AnswerId == answer.Id) ? "text-primary fw-bold fs-3" : "text-secondary")">
-                                                <i class="bi bi-star-fill"></i> <!-- Star icon -->
-                                            </span>
-                                        </li>
-                                        }
-                                </ul>
-                                }
-                                
-                                break;
-                            case QuestionType.Likert:
-                            <strong> Answer:</strong>
-                            <ul class="list-unstyled m-3">
-                                    @foreach (var answer in detail.Question.Answers.OrderBy(a => a.Id))
-                                    {
-                                        // Construct a unique name for each question-answer pair to ensure radio buttons are not linked.
-                                        var radioName = $"likertResponse{detail.Question.Id}-{answer.Id}";
-                                        var isAnswerSelected = detail.ResponseAnswers.Any(ra => ra.AnswerId == answer.Id);
-
-                                    <li>
-                                        <label class=" @(isAnswerSelected ? "font-weight-bold text-primary" : "text-muted")">
-                                            <input type="radio"
-                                                   class="form-check-input"
-                                                   name="@radioName"
-                                                   value="@answer.Id"
-                                                   disabled
-                                                @(isAnswerSelected ? "checked='checked'" : "") />
-                                                @answer.Text
-                                        </label>
-                                    </li>
-                                    }
-                            </ul>
-
-
-                                break;
-                            case QuestionType.Matrix:
-                            <table class="table">
-
-                                <strong> Answer:</strong>
-                               @*  <thead>
-                                    <tr>
-                                        <th>User response</th>
-                                        
-                                    </tr>
-                                </thead> *@
-                                <tbody>
-                                        @foreach (var answer in detail.Question.Answers)
-                                        {
-                                            var isSelected = detail.ResponseAnswers.Any(ra => ra.AnswerId == answer.Id);
-                                            <tr>
-                                            <td class="@(isSelected ? "font-weight-bold text-primary" : "text-muted")">
-                                                    @answer.Text
-                                            </td>
-                                            <td>
-                                                <input type="radio" class="form-check-input" name="@($"response{detail.Question.Id}_{answer.Id}")" value="@answer.Id"
-                                                       disabled @(isSelected ? "checked='checked'" : "") />
-                                            </td>
-                                        </tr>
-                                        }
-                                </tbody>
-                            </table>
-                                break;
-
-
-                            case QuestionType.Ranking:
-                            <div class="row">
-                                <!-- Original Order of Answers -->
-                                <div class="col-md-6">
-                                    <strong>Original Order of Answers:</strong>
-                                    <ul class="list-group mb-3">
-                                            @foreach (var answer in detail.Question.Answers)
-                                            {
-                                                var userIndex = detail.ResponseAnswers.FindIndex(ra => ra.AnswerId == answer.Id) + 1;
-                                            <li class="list-group-item @($"color-{userIndex}")">
-                                                <span class="badge text-bg-secondary badge-pill">@userIndex</span>
-                                                    @answer.Text
-                                            </li>
-                                            }
-                                    </ul>
-                                </div>
-
-                                <!-- User Ranked Order -->
-                                <div class="col-md-6">
-                                    <strong>User Order of answers:</strong>
-                                    <ul class="list-group">
-                                            @for (int i = 0; i < detail.ResponseAnswers.Count; i++)
-                                            {
-                                                var ra = detail.ResponseAnswers[i];
-                                                var answer = detail.Question.Answers.FirstOrDefault(a => a.Id == ra.AnswerId);
-                                            <li class="list-group-item @($"color-{i+1}")">
-                                                <span class="badge text-bg-secondary badge-pill">@(i + 1)</span>
-                                                    @answer.Text
-                                            </li>
-                                            }
-                                    </ul>
-                                </div>
-                            </div>
-                         
-                                break;
-                            case QuestionType.Image:
-                            <div class="container">
-                                <div class="row">
-                                    <!-- All Images -->
-                                    <div class="col-md-12">
-                                        <strong>answers:</strong>
-                                        <div class="row">
-                                                @foreach (var answer in detail.Question.Answers)
-                                                {
-                                                    var isSelected = detail.ResponseAnswers.Any(ra => ra.AnswerId == answer.Id);
-                                                <div class="col-md-3 col-sm-4 col-6">
-                                                    <!-- Adjust column sizes for various breakpoints -->
-                                                    <div class="card mb-3 @(isSelected ? "selected-image-card" : "grayscale")">
-                                                        <img src="@answer.Text" class="card-img-top" alt="@answer.Text">
-                                                        <div class="card-body">
-                                                            <a class="btn btn-primary btn-sm btn-block" href="@answer.Text" target="_blank">
-                                                                View Image
-                                                            </a>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                }
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                                break;
-                            case QuestionType.Slider:
-                            <div class="container">
-                                <div class="row">
-                                    <!-- Slider Responses -->
-                                    <div class="col-md-12">
-                                        <strong>Answer</strong>
-                                        <ul class="list-group mb-3">
-                                                @foreach (var answer in detail.Question.Answers)
-                                                {
-                                                    // Retrieve the response that corresponds to the current answer
-                                                    var responseAnswer = detail.ResponseAnswers.FirstOrDefault(ra => ra.AnswerId == answer.Id);
-                                                    // Parse the response text to an integer
-                                                    int sliderValue = 0;
-                                                    Int32.TryParse(responseAnswer?.ResponseDetail.TextResponse, out sliderValue);
-
-                                                <li class="list-group-item">
-                                                    <label>@answer.Text</label>
-                                                    <div class="d-flex align-items-center">
-                                                        <span class="badge badge-secondary mr-2">0</span> <!-- Min value label -->
-                                                        <input type="range" min="0" max="100"
-                                                               value="@sliderValue" class="slider" disabled>
-                                                        <span class="badge badge-secondary ml-2">100</span> <!-- Max value label -->
-                                                    </div>
-                                                    <div class="mt-2">
-                                                        <span class="badge badge-primary badge-pill">User Response: @sliderValue</span>
-                                                    </div>
-                                                </li>
-                                                }
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-
-                                break;
-                            // Handle other question types as previously detailed
-
-                            // Other cases as previously detailed
-                            default:
-                            <p>Unsupported question type.</p>
-                             break;
-                        }
+<div class="container">
+    <!-- Response Header -->
+    <div class="response-header fade-in">
+        <div class="header-main">
+            <div class="header-content">
+                <div class="response-icon">
+                    <i class="bi bi-clipboard-check-fill"></i>
+                </div>
+                <div class="header-text">
+                    <h1>Response Details</h1>
+                    <div class="user-badge">@Model.UserName (@Model.UserEmail)</div>
+                    <p style="margin: 0; opacity: 0.9; font-weight: 500;">Complete survey response review</p>
                 </div>
             </div>
         </div>
-        }
-    <div>
-
-        <a asp-action="Index">Back to List</a>
+        <div class="header-meta">
+            <div class="meta-icon">
+                <i class="bi bi-calendar-check"></i>
+            </div>
+            <span class="meta-text">Submitted on: <span id="localTime">@Model.SubmissionDate.ToString("yyyy-MM-ddTHH:mm:ss")</span></span>
+        </div>
     </div>
+
+    <!-- Questions and Responses -->
+    @foreach (var detail in Model.ResponseDetails)
+    {
+        <div class="question-card stagger-animation">
+            <div class="question-header">
+                <div class="question-type">@detail.QuestionType.ToString()</div>
+                <h3 class="question-title">Question @((numberindex = numberindex + 1)): @detail.Question.Text</h3>
+            </div>
+            <div class="question-body">
+                @switch (detail.QuestionType)
+                {
+                    case QuestionType.Text:
+                    case QuestionType.Open_ended:
+                        <div class="text-response-label">Response:</div>
+                        <div class="text-response">@detail.TextResponse</div>
+                        break;
+
+                    case QuestionType.Multiple_choice:
+                    case QuestionType.CheckBox:
+                    case QuestionType.TrueFalse:
+                        <div class="text-response-label">Selected Answer@(detail.ResponseAnswers.Count > 1 ? "s" : ""):</div>
+                        <div class="choices-container">
+                            @foreach (var answer in detail.Question.Answers)
+                            {
+                                var isSelected = detail.ResponseAnswers.Any(ra => ra.AnswerId == answer.Id);
+                                <div class="choice-option @(isSelected ? "selected" : "")">
+                                    <div class="choice-input @(detail.Question.Type == QuestionType.TrueFalse ? "radio" : "") @(isSelected ? "checked" : "")"></div>
+                                    <span class="choice-label">@answer.Text</span>
+                                </div>
+                            }
+                        </div>
+                        break;
+
+                    case QuestionType.Rating:
+                        <div class="text-response-label">User Selected Rating:</div>
+                        <div class="rating-container">
+                            @foreach (var answer in detail.Question.Answers.OrderBy(a => a.Id))
+                            {
+                                var isSelected = detail.ResponseAnswers.Any(ra => ra.AnswerId == answer.Id);
+                                <div class="rating-item @(isSelected ? "selected" : "")">
+                                    <div class="rating-star">
+                                        <i class="bi bi-star-fill"></i>
+                                    </div>
+                                    <div class="rating-label">@answer.Text</div>
+                                </div>
+                            }
+                        </div>
+                        break;
+
+                    case QuestionType.Likert:
+                        <div class="text-response-label">Selected Response:</div>
+                        <div class="likert-container">
+                            @foreach (var answer in detail.Question.Answers.OrderBy(a => a.Id))
+                            {
+                                var isSelected = detail.ResponseAnswers.Any(ra => ra.AnswerId == answer.Id);
+                                <div class="likert-option @(isSelected ? "selected" : "")">
+                                    <div class="likert-radio @(isSelected ? "checked" : "")"></div>
+                                    <span class="likert-label">@answer.Text</span>
+                                </div>
+                            }
+                        </div>
+                        break;
+
+                    case QuestionType.Matrix:
+                        <div class="text-response-label">Selected Response:</div>
+                        <table class="matrix-table">
+                            <thead>
+                                <tr>
+                                    <th>Option</th>
+                                    <th style="width: 100px; text-align: center;">Selected</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var answer in detail.Question.Answers)
+                                {
+                                    var isSelected = detail.ResponseAnswers.Any(ra => ra.AnswerId == answer.Id);
+                                    <tr>
+                                        <td class="matrix-option @(isSelected ? "selected" : "")">@answer.Text</td>
+                                        <td style="text-align: center;">
+                                            <div class="matrix-radio @(isSelected ? "checked" : "")"></div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                        break;
+
+                    case QuestionType.Ranking:
+                        <div class="ranking-container">
+                            <div class="ranking-section">
+                                <div class="ranking-title">
+                                    <i class="bi bi-list-ol"></i>
+                                    Original Order
+                                </div>
+                                <div class="ranking-list">
+                                    @foreach (var answer in detail.Question.Answers)
+                                    {
+                                        var userIndex = detail.ResponseAnswers.FindIndex(ra => ra.AnswerId == answer.Id) + 1;
+                                        <div class="ranking-item">
+                                            <div class="ranking-number">@userIndex</div>
+                                            <div class="ranking-text">@answer.Text</div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                            <div class="ranking-section">
+                                <div class="ranking-title">
+                                    <i class="bi bi-arrow-up-down"></i>
+                                    User's Ranking
+                                </div>
+                                <div class="ranking-list">
+                                    @for (int i = 0; i < detail.ResponseAnswers.Count; i++)
+                                    {
+                                        var ra = detail.ResponseAnswers[i];
+                                        var answer = detail.Question.Answers.FirstOrDefault(a => a.Id == ra.AnswerId);
+                                        <div class="ranking-item">
+                                            <div class="ranking-number">@(i + 1)</div>
+                                            <div class="ranking-text">@answer.Text</div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        break;
+
+                    case QuestionType.Image:
+                        <div class="text-response-label">Image Selection:</div>
+                        <div class="images-container">
+                            @foreach (var answer in detail.Question.Answers)
+                            {
+                                var isSelected = detail.ResponseAnswers.Any(ra => ra.AnswerId == answer.Id);
+                                <div class="image-card @(isSelected ? "selected" : "unselected")" style="position: relative;">
+                                    @if (isSelected)
+                                    {
+                                        <div class="selected-indicator">
+                                            <i class="bi bi-check"></i>
+                                        </div>
+                                    }
+                                    <img src="@answer.Text" class="card-image" alt="Response Image">
+                                    <div class="image-card-body">
+                                        <a href="@answer.Text" target="_blank" class="view-image-btn">
+                                            <i class="bi bi-eye"></i>
+                                            View Image
+                                        </a>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        break;
+
+                    case QuestionType.Slider:
+                        <div class="text-response-label">Slider Response:</div>
+                        <div class="slider-container">
+                            @foreach (var answer in detail.Question.Answers)
+                            {
+                                var responseAnswer = detail.ResponseAnswers.FirstOrDefault(ra => ra.AnswerId == answer.Id);
+                                int sliderValue = 0;
+                                Int32.TryParse(responseAnswer?.ResponseDetail.TextResponse, out sliderValue);
+
+                                <div class="slider-item">
+                                    <div class="slider-label">@answer.Text</div>
+                                    <div class="slider-wrapper">
+                                        <span class="slider-min">0</span>
+                                        <input type="range" min="0" max="100" value="@sliderValue" class="custom-slider" disabled>
+                                        <span class="slider-max">100</span>
+                                    </div>
+                                    <div class="slider-value">User Response: @sliderValue</div>
+                                </div>
+                            }
+                        </div>
+                        break;
+
+                    default:
+                        <div class="text-response">
+                            <div class="text-response-label">Unsupported Question Type</div>
+                            <p>This question type is not yet supported in the response viewer.</p>
+                        </div>
+                        break;
+                }
+            </div>
+        </div>
+    }
+
+    <!-- Back Link -->
+    <a asp-action="Index" class="back-link">
+        <i class="bi bi-arrow-left"></i>
+        Back to List
+    </a>
 </div>
 
-
-
-
-
-
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var utcDate = document.getElementById('localTime').innerText;
+        var localDate = new Date(utcDate + 'Z'); // Add 'Z' to indicate UTC time
+        document.getElementById('localTime').innerText = localDate.toLocaleString();
+    });
+</script>

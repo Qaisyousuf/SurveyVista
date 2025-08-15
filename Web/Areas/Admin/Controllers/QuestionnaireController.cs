@@ -200,110 +200,130 @@ namespace Web.Areas.Admin.Controllers
 
             if (ModelState.IsValid)
             {
-                // Retrieve the existing questionnaire from the database
-                var existingQuestionnaire = _questionnaire.GetQuestionnaireWithQuestionAndAnswer(viewModel.Id);
-
-                if (existingQuestionnaire == null)
+                try
                 {
-                    return NotFound();
-                }
+                    using var transaction = await _context.Database.BeginTransactionAsync();
 
-                // Update the existing questionnaire with the data from the view model
-                existingQuestionnaire.Title = viewModel.Title;
-                existingQuestionnaire.Description = viewModel.Description;
-
-                var existingQuestionIds = existingQuestionnaire.Questions.Select(q => q.Id).ToList();
-
-                // Iterate through existing questions and remove those not found in the view model
-                foreach (var existingQuestion in existingQuestionnaire.Questions.ToList())
-                {
-                    if (!viewModel.Questions.Any(q => q.Id == existingQuestion.Id))
+                    try
                     {
-                        existingQuestionnaire.Questions.Remove(existingQuestion);
-                    }
-                    await _questionnaire.Update(existingQuestionnaire);
-                }
+                        // Step 1: Update the questionnaire basic info
+                        var existingQuestionnaire = await _context.Questionnaires
+                            .FirstOrDefaultAsync(q => q.Id == viewModel.Id);
 
-                var newQuestions = new List<Question>();
-
-                // Update or add new questions
-                foreach (var questionViewModel in viewModel.Questions)
-                {
-                    var existingQuestion = existingQuestionnaire.Questions.FirstOrDefault(q => q.Id == questionViewModel.Id);
-
-                    if (questionViewModel.Id != 0)
-                    {
-                        if (existingQuestion != null)
+                        if (existingQuestionnaire == null)
                         {
-                            existingQuestion.Text = questionViewModel.Text;
-                            existingQuestion.Type = questionViewModel.Type;
+                            return NotFound();
+                        }
 
-                            foreach (var answerViewModel in questionViewModel.Answers)
+                        existingQuestionnaire.Title = viewModel.Title;
+                        existingQuestionnaire.Description = viewModel.Description;
+
+                        // Step 2: Get all existing questions for this questionnaire
+                        var existingQuestions = await _context.Questions
+                            .Where(q => q.QuestionnaireId == viewModel.Id)
+                            .ToListAsync();
+
+                        // Step 3: Delete ALL answers first (foreign key constraint)
+                        if (existingQuestions.Any())
+                        {
+                            var questionIds = existingQuestions.Select(q => q.Id).ToList();
+                            var existingAnswers = await _context.Answers
+                                .Where(a => questionIds.Contains(a.QuestionId))
+                                .ToListAsync();
+
+                            _context.Answers.RemoveRange(existingAnswers);
+                            await _context.SaveChangesAsync();
+                        }
+
+                        // Step 4: Delete ALL questions
+                        _context.Questions.RemoveRange(existingQuestions);
+                        await _context.SaveChangesAsync();
+
+                        // Step 5: Add new questions (only if provided and valid)
+                        int newQuestionsAdded = 0;
+                        if (viewModel.Questions != null && viewModel.Questions.Count > 0)
+                        {
+                            var validQuestions = viewModel.Questions
+                                .Where(q => !string.IsNullOrWhiteSpace(q.Text))
+                                .ToList();
+
+                            foreach (var questionViewModel in validQuestions)
                             {
-                                // Check if the answer already exists
-                                var existingAnswer = existingQuestion.Answers.FirstOrDefault(a => a.Id == answerViewModel.Id);
-
-                                if (answerViewModel.Id == 0)
+                                var newQuestion = new Question
                                 {
-                                    // NEW: Add IsOtherOption property when creating new answers
-                                    existingQuestion.Answers.Add(new Answer
+                                    Text = questionViewModel.Text.Trim(),
+                                    Type = questionViewModel.Type,
+                                    QuestionnaireId = viewModel.Id
+                                };
+
+                                _context.Questions.Add(newQuestion);
+                                await _context.SaveChangesAsync(); // Save to get the ID
+
+                                // Add answers for this question
+                                if (questionViewModel.Answers != null)
+                                {
+                                    var validAnswers = questionViewModel.Answers
+                                        .Where(a => !string.IsNullOrWhiteSpace(a.Text))
+                                        .ToList();
+
+                                    foreach (var answerViewModel in validAnswers)
                                     {
-                                        Text = answerViewModel.Text,
-                                        IsOtherOption = answerViewModel.IsOtherOption
-                                    });
+                                        var newAnswer = new Answer
+                                        {
+                                            Text = answerViewModel.Text.Trim(),
+                                            IsOtherOption = answerViewModel.IsOtherOption,
+                                            QuestionId = newQuestion.Id
+                                        };
+
+                                        _context.Answers.Add(newAnswer);
+                                    }
+
+                                    if (validAnswers.Any())
+                                    {
+                                        await _context.SaveChangesAsync();
+                                    }
                                 }
-                                else if (answerViewModel.Text == null)
-                                {
-                                    existingQuestion.Answers.Remove(existingAnswer);
-                                    await _questionnaire.Update(existingQuestionnaire);
-                                }
-                                else if (existingAnswer != null)
-                                {
-                                    existingAnswer.Text = answerViewModel.Text;
-                                    // NEW: Update IsOtherOption property for existing answers
-                                    existingAnswer.IsOtherOption = answerViewModel.IsOtherOption;
-                                }
+
+                                newQuestionsAdded++;
                             }
                         }
+
+                        // Step 6: Final save and commit
+                        await _context.SaveChangesAsync();
+                        await transaction.CommitAsync();
+
+                        // Step 7: Get final count for success message
+                        var finalQuestionCount = await _context.Questions
+                            .Where(q => q.QuestionnaireId == viewModel.Id)
+                            .CountAsync();
+
+                        // Success message
+                        if (finalQuestionCount == 0)
+                        {
+                            TempData["Success"] = "Questionnaire updated successfully. All questions have been removed.";
+                        }
+                        else
+                        {
+                            TempData["Success"] = $"Questionnaire updated successfully with {finalQuestionCount} question(s).";
+                        }
+
+                        return RedirectToAction(nameof(Index));
                     }
-                    else
+                    catch (Exception)
                     {
-                        // Create a new question
-                        var newQuestion = new Question
-                        {
-                            Text = questionViewModel.Text,
-                            Type = questionViewModel.Type,
-                            Answers = new List<Answer>()
-                        };
-
-                        foreach (var answerViewModel in questionViewModel.Answers)
-                        {
-                            if (!string.IsNullOrEmpty(answerViewModel.Text))
-                            {
-                                // NEW: Add IsOtherOption property when creating new answers
-                                newQuestion.Answers.Add(new Answer
-                                {
-                                    Text = answerViewModel.Text,
-                                    IsOtherOption = answerViewModel.IsOtherOption
-                                });
-                            }
-                        }
-
-                        newQuestions.Add(newQuestion);
+                        await transaction.RollbackAsync();
+                        throw;
                     }
-
-                    existingQuestionnaire.Questions.AddRange(newQuestions);
                 }
-
-                await _questionnaire.Update(existingQuestionnaire);
-
-                TempData["Success"] = "Questionnaire updated successfully";
-                return RedirectToAction(nameof(Index));
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", "An error occurred while updating the questionnaire. Please try again.");
+                    return View(viewModel);
+                }
             }
 
             return View(viewModel);
         }
-
         [HttpGet]
         public IActionResult Delete(int id)
         {

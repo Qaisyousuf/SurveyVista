@@ -2,322 +2,1040 @@
 @model UserResponsesViewModel
 
 @{
-    ViewData["Title"] = "User Responses";
+    ViewData["Title"] = "User Response Details";
 }
 
 <style>
-    .stepper-wrapper {
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-        position: relative;
+    /* Modern Design System */
+    @@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+    :root {
+        --primary-color: #6366f1;
+        --primary-light: #8b5cf6;
+        --primary-dark: #4338ca;
+        --success-color: #10b981;
+        --success-light: #34d399;
+        --success-dark: #059669;
+        --info-color: #06b6d4;
+        --info-light: #22d3ee;
+        --info-dark: #0891b2;
+        --warning-color: #f59e0b;
+        --warning-light: #fbbf24;
+        --warning-dark: #d97706;
+        --danger-color: #ef4444;
+        --danger-light: #fca5a5;
+        --danger-dark: #dc2626;
+        --gray-50: #f8fafc;
+        --gray-100: #f1f5f9;
+        --gray-200: #e2e8f0;
+        --gray-300: #cbd5e1;
+        --gray-400: #94a3b8;
+        --gray-500: #64748b;
+        --gray-600: #475569;
+        --gray-700: #334155;
+        --gray-800: #1e293b;
+        --gray-900: #0f172a;
+        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+        --border-radius-sm: 8px;
+        --border-radius-md: 12px;
+        --border-radius-lg: 16px;
+        --border-radius-xl: 24px;
     }
 
-    .stepper-item {
-        display: flex;
-        align-items: flex-start;
-        position: relative;
-        padding-left: 120px;
+    * {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     }
 
-        .stepper-item::before {
-            content: '';
-            position: absolute;
-            left: 20px;
-            top: 0;
-            bottom: 0;
-            width: 2px;
-            background-color: #007bff;
+    body {
+        background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+        min-height: 100vh;
+    }
+
+    .container-fluid {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+    }
+
+    /* Back Button */
+    .back-button {
+        background: linear-gradient(135deg, var(--gray-500) 0%, var(--gray-600) 100%);
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: var(--border-radius-md);
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        box-shadow: var(--shadow-md);
+        margin-bottom: 2rem;
+    }
+
+        .back-button:hover {
+            background: linear-gradient(135deg, var(--gray-600) 0%, var(--gray-700) 100%);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            color: white;
+            text-decoration: none;
         }
 
-    .step-counter {
-        position: absolute;
-        left: 0;
-        top: 0;
+    /* Header Section */
+    .user-header {
+        background: white;
+        border-radius: var(--border-radius-xl);
+        box-shadow: var(--shadow-xl);
+        overflow: hidden;
+        margin-bottom: 2rem;
+        position: relative;
+    }
+
+        .user-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--info-color), var(--success-color));
+        }
+
+    .user-info-section {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        color: white;
+        padding: 2.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .user-info-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20"><defs><radialGradient id="a" cx="50%" cy="0%" r="100%"><stop offset="0%" stop-color="white" stop-opacity="0.1"/><stop offset="100%" stop-color="white" stop-opacity="0"/></radialGradient></defs><rect width="100" height="20" fill="url(%23a)"/></svg>');
+            opacity: 0.3;
+        }
+
+    .user-info-content {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        gap: 2rem;
+        align-items: center;
+        position: relative;
+        z-index: 1;
+    }
+
+    .user-avatar {
+        background: rgba(255, 255, 255, 0.2);
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 40px;
-        height: 40px;
-        background-color: #aed5ff;
-        color: white;
-        border-radius: 50%;
-        font-size: 14px;
-        font-weight: bold;
+        font-size: 2rem;
+        font-weight: 800;
+        backdrop-filter: blur(10px);
+        box-shadow: var(--shadow-lg);
     }
+
+    .user-details h2 {
+        font-size: 1.75rem;
+        font-weight: 800;
+        margin: 0 0 0.5rem;
+    }
+
+    .user-email {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        font-weight: 500;
+        margin: 0 0 1rem;
+    }
+
+    .response-count {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 0.75rem 1.25rem;
+        border-radius: var(--border-radius-md);
+        backdrop-filter: blur(10px);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 600;
+    }
+
+    .export-buttons {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .export-btn {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        padding: 0.75rem 1.25rem;
+        border-radius: var(--border-radius-md);
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+    }
+
+        .export-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            color: white;
+            text-decoration: none;
+            box-shadow: var(--shadow-md);
+        }
+
+    /* Charts Section */
+    .charts-section {
+        background: white;
+        padding: 2rem;
+        border-top: 1px solid var(--gray-200);
+    }
+
+    .charts-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .chart-container {
+        background: var(--gray-50);
+        border-radius: var(--border-radius-lg);
+        padding: 1.5rem;
+        border: 1px solid var(--gray-200);
+    }
+
+    .chart-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--gray-800);
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+
+    .main-chart {
+        background: white;
+        border-radius: var(--border-radius-lg);
+        padding: 1.5rem;
+        border: 1px solid var(--gray-200);
+        box-shadow: var(--shadow-sm);
+    }
+
+    /* Timeline/Stepper Design */
+    .responses-timeline {
+        margin-top: 2rem;
+    }
+
+    .timeline-header {
+        background: white;
+        padding: 2rem;
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow-lg);
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+        .timeline-header h3 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--gray-800);
+            margin: 0 0 0.5rem;
+        }
+
+    .timeline-subtitle {
+        color: var(--gray-600);
+        font-weight: 500;
+    }
+
+    .stepper-wrapper {
+        position: relative;
+        padding-left: 3rem;
+    }
+
+        .stepper-wrapper::before {
+            content: '';
+            position: absolute;
+            left: 2rem;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(180deg, var(--primary-color), var(--info-color), var(--success-color));
+            border-radius: 2px;
+        }
+
+    .stepper-item {
+        position: relative;
+        margin-bottom: 3rem;
+    }
+
+    .step-counter {
+        position: absolute;
+        left: -3rem;
+        top: 1.5rem;
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: var(--shadow-lg);
+        border: 4px solid white;
+        z-index: 2;
+    }
+
+        .step-counter i {
+            color: white;
+            font-size: 1.5rem;
+        }
 
     .step-content {
-        flex-grow: 1;
+        margin-left: 1rem;
     }
 
-    .step-header {
-        margin-bottom: 10px;
+    /* Response Card */
+    .response-card {
+        background: white;
+        border-radius: var(--border-radius-xl);
+        box-shadow: var(--shadow-xl);
+        overflow: hidden;
+        border: 1px solid var(--gray-200);
+        transition: all 0.3s ease;
     }
 
-    #QuestionnairCard {
+        .response-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-2xl);
+        }
+
+    .response-header {
+        background: linear-gradient(135deg, var(--gray-50) 0%, var(--gray-100) 100%);
         padding: 2rem;
-        border: 0.5px solid #e7e7e7;
-        border-radius: 3px;
-        -webkit-box-shadow: 0px 0px 14px -7px rgba(0,0,0,0.75);
-        -moz-box-shadow: 0px 0px 14px -7px rgba(0,0,0,0.75);
-        box-shadow: 0px 0px 14px -7px rgba(0,0,0,0.75);
+        border-bottom: 1px solid var(--gray-200);
+    }
+
+    .response-info {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 2rem;
+        align-items: start;
+    }
+
+    .response-details h4 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--gray-800);
+        margin: 0 0 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .response-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 500;
+    }
+
+        .meta-item i {
+            color: var(--primary-color);
+            font-size: 1.1rem;
+        }
+
+    .submission-date {
+        color: var(--success-color);
+    }
+
+    .question-count {
+        color: var(--info-color);
+    }
+
+    .chart-mini {
+        width: 200px;
+        height: 120px;
+        background: white;
+        border-radius: var(--border-radius-md);
+        border: 1px solid var(--gray-200);
+    }
+
+    .response-actions {
+        background: var(--gray-50);
+        padding: 1.5rem 2rem;
+        border-top: 1px solid var(--gray-200);
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .action-btn {
+        padding: 0.75rem 1.25rem;
+        border-radius: var(--border-radius-md);
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        border: none;
+        box-shadow: var(--shadow-sm);
+        font-size: 0.875rem;
+    }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            text-decoration: none;
+        }
+
+    .btn-pdf {
+        background: linear-gradient(135deg, var(--danger-color) 0%, var(--danger-dark) 100%);
+        color: white;
+    }
+
+        .btn-pdf:hover {
+            background: linear-gradient(135deg, var(--danger-dark) 0%, #b91c1c 100%);
+            color: white;
+        }
+
+    .btn-excel {
+        background: linear-gradient(135deg, var(--success-color) 0%, var(--success-dark) 100%);
+        color: white;
+    }
+
+        .btn-excel:hover {
+            background: linear-gradient(135deg, var(--success-dark) 0%, #047857 100%);
+            color: white;
+        }
+
+    .btn-toggle {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        color: white;
+        cursor: pointer;
+    }
+
+        .btn-toggle:hover {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, #3730a3 100%);
+            color: white;
+        }
+
+        .btn-toggle.expanded {
+            background: linear-gradient(135deg, var(--info-color) 0%, var(--info-dark) 100%);
+        }
+
+            .btn-toggle.expanded:hover {
+                background: linear-gradient(135deg, var(--info-dark) 0%, #0e7490 100%);
+                color: white;
+            }
+
+    /* Response Details Table */
+    .response-details-section {
+        padding: 0;
+        background: white;
+    }
+
+    .details-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 0;
+    }
+
+        .details-table th {
+            background: linear-gradient(135deg, var(--gray-700) 0%, var(--gray-800) 100%);
+            color: white;
+            padding: 1.25rem;
+            font-weight: 600;
+            text-align: left;
+            border: none;
+        }
+
+        .details-table td {
+            padding: 1.5rem 1.25rem;
+            border-bottom: 1px solid var(--gray-200);
+            vertical-align: top;
+        }
+
+        .details-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .details-table tr:hover {
+            background: var(--gray-50);
+        }
+
+    .question-cell {
+        max-width: 300px;
+    }
+
+    .question-text {
+        font-weight: 600;
+        color: var(--gray-800);
+        margin-bottom: 0.5rem;
+        line-height: 1.4;
+    }
+
+    .question-type {
+        background: var(--gray-100);
+        color: var(--gray-600);
+        padding: 0.25rem 0.75rem;
+        border-radius: var(--border-radius-sm);
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* Status Indicators */
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1rem;
+        border-radius: var(--border-radius-md);
+        font-weight: 600;
+        font-size: 0.875rem;
+        box-shadow: var(--shadow-sm);
     }
 
     .status-answered {
-        background-color: #d4edda;
-        border-color: #c3e6cb;
-        color: #155724;
-        padding: 8px;
-        border-radius: 4px;
-        margin-bottom: 5px;
+        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+        color: #065f46;
+        border: 1px solid #34d399;
     }
 
     .status-shown {
-        background-color: #fff3cd;
-        border-color: #ffeaa7;
-        color: #856404;
-        padding: 8px;
-        border-radius: 4px;
-        margin-bottom: 5px;
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        color: #92400e;
+        border: 1px solid #fbbf24;
     }
 
     .status-skipped {
-        background-color: #d1ecf1;
-        border-color: #bee5eb;
-        color: #0c5460;
-        padding: 8px;
-        border-radius: 4px;
-        margin-bottom: 5px;
+        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+        color: #1e40af;
+        border: 1px solid #60a5fa;
     }
 
     .status-unknown {
-        background-color: #f8f9fa;
-        border-color: #dee2e6;
-        color: #6c757d;
-        padding: 8px;
-        border-radius: 4px;
-        margin-bottom: 5px;
+        background: linear-gradient(135deg, var(--gray-100) 0%, var(--gray-200) 100%);
+        color: var(--gray-700);
+        border: 1px solid var(--gray-300);
     }
 
-    /* NEW: Styles for "Other" text responses */
-    .other-text-response {
-        background-color: #fff3cd;
-        border: 1px solid #ffeaa7;
-        border-radius: 6px;
-        padding: 10px 12px;
-        margin-top: 8px;
-        font-size: 0.9em;
+    .status-description {
+        font-size: 0.75rem;
+        opacity: 0.8;
+        margin-top: 0.25rem;
     }
 
-    .other-text-label {
-        font-weight: bold;
-        color: #856404;
-        margin-bottom: 5px;
+    /* Response Display */
+    .response-display {
+        min-width: 250px;
+    }
+
+    .answer-container {
         display: flex;
-        align-items: center;
-        font-size: 0.85em;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
     }
 
-    .other-text-content {
-        color: #495057;
-        font-style: italic;
-        line-height: 1.3;
-        background-color: #fff;
-        padding: 6px 10px;
-        border-radius: 4px;
-        border-left: 3px solid #ffc107;
+    .answer-badge {
+        background: linear-gradient(135deg, var(--success-color) 0%, var(--success-dark) 100%);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: var(--border-radius-md);
+        font-weight: 600;
+        font-size: 0.875rem;
+        box-shadow: var(--shadow-sm);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
     }
 
     .other-option-badge {
-        background-color: #ffc107;
-        color: #212529;
-        font-size: 0.7em;
-        padding: 2px 6px;
-        border-radius: 3px;
-        margin-left: 5px;
+        background: var(--warning-color);
+        color: var(--gray-900);
+        font-size: 0.7rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: var(--border-radius-sm);
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
+
+    .text-response {
+        background: linear-gradient(135deg, var(--gray-50) 0%, var(--gray-100) 100%);
+        border: 1px solid var(--gray-200);
+        border-radius: var(--border-radius-md);
+        padding: 1rem;
+        font-weight: 500;
+        color: var(--gray-800);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .text-response-label {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--gray-600);
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* Other Text Response */
+    .other-text-response {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        border: 2px solid var(--warning-color);
+        border-radius: var(--border-radius-lg);
+        padding: 1.25rem;
+        margin-top: 1rem;
+        position: relative;
+    }
+
+        .other-text-response::before {
+            content: "CUSTOM RESPONSE";
+            position: absolute;
+            top: -12px;
+            left: 20px;
+            background: var(--warning-color);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--border-radius-sm);
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+    .other-text-label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 600;
+        color: #92400e;
+        margin-bottom: 0.75rem;
+        font-size: 0.875rem;
+    }
+
+    .other-text-content {
+        background: white;
+        padding: 1rem;
+        border-radius: var(--border-radius-md);
+        border-left: 4px solid var(--warning-color);
+        color: var(--gray-800);
+        font-style: italic;
+        line-height: 1.5;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .no-response {
+        color: var(--gray-500);
+        font-style: italic;
+        padding: 1rem;
+        text-align: center;
+        background: var(--gray-50);
+        border-radius: var(--border-radius-md);
+        border: 1px dashed var(--gray-300);
+    }
+
+    /* Responsive Design */
+    @@media (max-width: 1024px) {
+        .charts-grid
+
+    {
+        grid-template-columns: 1fr;
+    }
+
+    .user-info-content {
+        grid-template-columns: 1fr;
+        text-align: center;
+        gap: 1.5rem;
+    }
+
+    .response-info {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    }
+
+    @@media (max-width: 768px) {
+        .container-fluid
+
+    {
+        padding: 1rem;
+    }
+
+    .stepper-wrapper {
+        padding-left: 1.5rem;
+    }
+
+        .stepper-wrapper::before {
+            left: 1rem;
+        }
+
+    .step-counter {
+        left: -2rem;
+        width: 48px;
+        height: 48px;
+    }
+
+        .step-counter i {
+            font-size: 1.25rem;
+        }
+
+    .response-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .action-btn {
+        justify-content: center;
+    }
+
+    .export-buttons {
+        flex-direction: column;
+    }
+
+    .details-table {
+        font-size: 0.875rem;
+    }
+
+        .details-table th,
+        .details-table td {
+            padding: 1rem 0.75rem;
+        }
+
+    }
+
+    /* Animations */
+    .fade-in {
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    @@keyframes fadeIn {
+        from
+
+    {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+
+    .slide-in {
+        animation: slideIn 0.4s ease-out;
+    }
+
+    @@keyframes slideIn {
+        from
+
+    {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    }
+
+    .stagger-animation {
+        animation: fadeIn 0.6s ease-out;
+        animation-fill-mode: both;
+    }
+
+        .stagger-animation:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .stagger-animation:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .stagger-animation:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        .stagger-animation:nth-child(4) {
+            animation-delay: 0.4s;
+        }
+
+        .stagger-animation:nth-child(5) {
+            animation-delay: 0.5s;
+        }
+
+        .stagger-animation:nth-child(6) {
+            animation-delay: 0.6s;
+        }
 </style>
 
-<div class="container-fluid mt-3">
-    <p>
-        <a asp-action="Index" class="btn btn-primary btn-sm">Back to list</a>
-    </p>
+<div class="container-fluid">
+    <!-- Back Button -->
+    <a asp-action="Index" class="back-button fade-in">
+        <i class="bi bi-arrow-left"></i>
+        Back to List
+    </a>
 
-    <div class="card p-5 m-3">
-        <div class="bd-callout bd-callout-primary shadow">
-
-            <div class="row p-4">
-                <div class="col-md-3 mt-5">
-                    <h6 class="text-primary font-weight-bold"><i class="bi bi-person"></i> @Model.UserName (@Model.UserEmail)</h6>
-                    <p class="text-info font-weight-bold"><i class="bi bi-calculator"></i> Total responses: @Model.Responses.Count()</p>
-
-                    <a asp-action="GenerateReport" asp-route-userEmail="@Model.UserEmail" asp-route-format="pdf" class="btn btn-info btn-sm">
-                        <i class="bi bi-filetype-pdf"></i> PDF Reports
+    <!-- User Header Section -->
+    <div class="user-header fade-in">
+        <div class="user-info-section">
+            <div class="user-info-content">
+                <div class="user-avatar">
+                    @(Model.UserName?.Substring(0, 1).ToUpper() ?? "U")
+                </div>
+                <div class="user-details">
+                    <h2>@Model.UserName</h2>
+                    <p class="user-email">@Model.UserEmail</p>
+                    <div class="response-count">
+                        <i class="bi bi-clipboard-data"></i>
+                        Total Responses: @Model.Responses.Count()
+                    </div>
+                </div>
+                <div class="export-buttons">
+                    <a asp-action="GenerateReport" asp-route-userEmail="@Model.UserEmail" asp-route-format="pdf" class="export-btn">
+                        <i class="bi bi-filetype-pdf"></i>
+                        PDF Report
                     </a>
-                    <a asp-action="GenerateReport" asp-route-userEmail="@Model.UserEmail" asp-route-format="excel" class="btn btn-info btn-sm">
-                        <i class="bi bi-file-excel"></i> Excel Reports
+                    <a asp-action="GenerateReport" asp-route-userEmail="@Model.UserEmail" asp-route-format="excel" class="export-btn">
+                        <i class="bi bi-file-excel"></i>
+                        Excel Report
                     </a>
                 </div>
-
-                <div class="col-md-9">
-                    <div id="user_survey_summary_chart_div" style=" width: auto; height: 200px;"></div>
-                </div>
-
-            </div>
-            <hr class="border border-info border-1 opacity-50">
-            <div class="col-md-12 ">
-                <div id="chart_div" style="width: 100%; height: 400px;"></div>
             </div>
         </div>
 
-        <!-- Stepper -->
+        <!-- Charts Section -->
+        <div class="charts-section">
+            <div class="charts-grid">
+                <div class="chart-container">
+                    <h4 class="chart-title">Survey Summary</h4>
+                    <div id="user_survey_summary_chart_div" style="width: 100%; height: 200px;"></div>
+                </div>
+                <div class="chart-container">
+                    <h4 class="chart-title">Progress Overview</h4>
+                    <div style="height: 200px; display: flex; align-items: center; justify-content: center; color: var(--gray-500);">
+                        <i class="bi bi-graph-up" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="main-chart">
+                <h4 class="chart-title">User Progress Timeline</h4>
+                <div id="chart_div" style="width: 100%; height: 400px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Responses Timeline -->
+    <div class="responses-timeline">
+        <div class="timeline-header fade-in">
+            <h3>Response Timeline</h3>
+            <p class="timeline-subtitle">Detailed view of all survey responses and interactions</p>
+        </div>
+
         <div class="stepper-wrapper">
-            @foreach (var response in Model.Responses)
+            @foreach (var response in Model.Responses.Select((r, index) => new { Response = r, Index = index }))
             {
-                <div class="stepper-item">
+                <div class="stepper-item stagger-animation">
                     <div class="step-counter">
-                        <span class="badge bg-primary p-2 shadow">@response.Questionnaire.Title  <i class="bi bi-arrow-right-circle-fill"></i></span>
+                        <i class="bi bi-clipboard-check-fill"></i>
                     </div>
                     <div class="step-content">
-
-                        <div id="QuestionnairCard">
-
-                            <div class="row">
-                                <div class="col-md-7 p-4">
-
-                                    <div class="step-header">
-                                        <h6 class="text-primary font-weight-bold"><i class="bi bi-ui-checks"></i> @response.Questionnaire.Title</h6>
-                                        <h6 class="text-success font-weight-bold"><i class="bi bi-calendar2-week"></i> Submitted on: @response.SubmissionDate</h6>
-                                        <p class="text-info font-weight-bold"><i class="bi bi-question-square"></i> Total questions: @response.Questionnaire.Questions.Count()</p>
+                        <div class="response-card">
+                            <!-- Response Header -->
+                            <div class="response-header">
+                                <div class="response-info">
+                                    <div class="response-details">
+                                        <h4>
+                                            <i class="bi bi-clipboard-data"></i>
+                                            @response.Response.Questionnaire.Title
+                                        </h4>
+                                        <div class="response-meta">
+                                            <div class="meta-item submission-date">
+                                                <i class="bi bi-calendar-check"></i>
+                                                Submitted: @response.Response.SubmissionDate.ToString("MMMM dd, yyyy 'at' HH:mm")
+                                            </div>
+                                            <div class="meta-item question-count">
+                                                <i class="bi bi-question-circle"></i>
+                                                Questions: @response.Response.Questionnaire.Questions.Count()
+                                            </div>
+                                        </div>
                                     </div>
-
-                                    <!-- Buttons to generate individual reports -->
-                                    <a asp-action="GenerateQuestionnairePdfReport" asp-route-questionnaireId="@response.Questionnaire.Id" class="btn btn-info btn-sm ">
-                                        <i class="bi bi-filetype-pdf"></i> PDF report
-                                    </a>
-                                    <a asp-action="GenerateQuestionnaireExcelReport" asp-route-questionnaireId="@response.Questionnaire.Id" class="btn btn-info btn-sm">
-                                        <i class="bi bi-file-excel"></i> Excel report
-                                    </a><br />
-                                    <!-- Buttons to generate individual reports -->
-                                    <!-- Collapsible button -->
-                                    <button class="btn btn-primary btn-sm mt-2" type="button" data-bs-toggle="collapse" data-bs-target="#collapseResponse-@response.Id" aria-expanded="false" aria-controls="collapseResponse-@response.Id">
-                                        View Responses
-                                    </button>
-                                </div>
-
-                                <div class="col-md-5">
-                                    <div id="survey_questions_answers_summary_chart_div_@response.Questionnaire.Id" style="width: 100%; height: 200px;"></div>
+                                    <div class="chart-mini">
+                                        <div id="survey_questions_answers_summary_chart_div_@response.Response.Questionnaire.Id" style="width: 100%; height: 100%;"></div>
+                                    </div>
                                 </div>
                             </div>
 
-                            <!-- Collapsible content -->
-                            <div class="collapse mt-3" id="collapseResponse-@response.Id">
-                                <table class="table table-responsive w-100 d-block d-md-table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>Question</th>
-                                            <th>Status</th>
-                                            <th>Response</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach (var question in response.Questionnaire.Questions.OrderBy(q => q.Id))
-                                        {
-                                            var responseDetail = response.ResponseDetails.FirstOrDefault(rd => rd.QuestionId == question.Id);
+                            <!-- Response Actions -->
+                            <div class="response-actions">
+                                <a asp-action="GenerateQuestionnairePdfReport" asp-route-questionnaireId="@response.Response.Questionnaire.Id" class="action-btn btn-pdf">
+                                    <i class="bi bi-filetype-pdf"></i>
+                                    PDF Report
+                                </a>
+                                <a asp-action="GenerateQuestionnaireExcelReport" asp-route-questionnaireId="@response.Response.Questionnaire.Id" class="action-btn btn-excel">
+                                    <i class="bi bi-file-excel"></i>
+                                    Excel Report
+                                </a>
+                                <button class="action-btn btn-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#collapseResponse-@response.Response.Id" aria-expanded="false" aria-controls="collapseResponse-@response.Response.Id">
+                                    <i class="bi bi-eye"></i>
+                                    <span class="toggle-text">View Details</span>
+                                </button>
+                            </div>
 
+                            <!-- Collapsible Response Details -->
+                            <div class="collapse" id="collapseResponse-@response.Response.Id">
+                                <div class="response-details-section">
+                                    <table class="details-table">
+                                        <thead>
                                             <tr>
-                                                <td>
-                                                    <strong>@question.Text</strong>
-                                                    <br />
-                                                    <small class="text-muted">Type: @question.Type</small>
-                                                </td>
-                                                <td>
-                                                    @if (responseDetail != null)
-                                                    {
-                                                        @switch (responseDetail.Status)
-                                                        {
-                                                            case ResponseStatus.Answered:
-                                                                <div class="status-answered">
-                                                                    <strong>✅ Answered</strong>
-                                                                </div>
-                                                                break;
-
-                                                            case ResponseStatus.Shown:
-                                                                <div class="status-shown">
-                                                                    <strong>⚠️ Shown but not answered</strong>
-                                                                    <br />
-                                                                    <small>Question was displayed but left blank</small>
-                                                                </div>
-                                                                break;
-
-                                                            case ResponseStatus.Skipped:
-                                                                <div class="status-skipped">
-                                                                    <strong>⏭️ Skipped</strong>
-                                                                    <br />
-                                                                    <small>@responseDetail.SkipReason</small>
-                                                                </div>
-                                                                break;
-                                                        }
-                                                    }
-                                                    else
-                                                    {
-                                                        <div class="status-unknown">
-                                                            <strong>❓ No response data</strong>
-                                                            <br />
-                                                            <small>Status unknown</small>
-                                                        </div>
-                                                    }
-                                                </td>
-                                                <td>
-                                                    @if (responseDetail != null && responseDetail.Status == ResponseStatus.Answered)
-                                                    {
-                                                        @if (responseDetail.QuestionType == QuestionType.Text || responseDetail.QuestionType == QuestionType.Slider || responseDetail.QuestionType == QuestionType.Open_ended)
-                                                        {
-                                                            <div class="alert alert-light">
-                                                                <strong>Answer:</strong> @responseDetail.TextResponse
-                                                            </div>
-                                                        }
-                                                        else if (responseDetail.ResponseAnswers.Any())
-                                                        {
-                                                            <div class="d-flex flex-wrap gap-1">
-                                                                @foreach (var answer in responseDetail.ResponseAnswers)
-                                                                {
-                                                                    var answerObj = question.Answers.FirstOrDefault(a => a.Id == answer.AnswerId);
-                                                                    var answerText = answerObj?.Text;
-                                                                    <span class="badge bg-success">
-                                                                        @answerText
-                                                                        @if (answerObj?.IsOtherOption == true)
-                                                                        {
-                                                                            <span class="other-option-badge">Other</span>
-                                                                        }
-                                                                    </span>
-                                                                }
-                                                            </div>
-                                                        }
-
-                                                        @* NEW: Display "Other" text if available *@
-                                                        @if (!string.IsNullOrEmpty(responseDetail.OtherText))
-                                                        {
-                                                            <div class="other-text-response">
-                                                                <div class="other-text-label">
-                                                                    <i class="bi bi-pencil-square me-1"></i>
-                                                                    Custom "Other" Response:
-                                                                </div>
-                                                                <div class="other-text-content">
-                                                                    @responseDetail.OtherText
-                                                                </div>
-                                                            </div>
-                                                        }
-                                                    }
-                                                    else
-                                                    {
-                                                        <span class="text-muted">No response provided</span>
-                                                    }
-                                                </td>
+                                                <th style="width: 30%;">Question</th>
+                                                <th style="width: 25%;">Status</th>
+                                                <th style="width: 45%;">Response</th>
                                             </tr>
-                                        }
-                                    </tbody>
-                                </table>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var question in response.Response.Questionnaire.Questions.OrderBy(q => q.Id))
+                                            {
+                                                var responseDetail = response.Response.ResponseDetails.FirstOrDefault(rd => rd.QuestionId == question.Id);
+
+                                                <tr>
+                                                    <td class="question-cell">
+                                                        <div class="question-text">@question.Text</div>
+                                                        <span class="question-type">@question.Type</span>
+                                                    </td>
+                                                    <td>
+                                                        @if (responseDetail != null)
+                                                        {
+                                                            @switch (responseDetail.Status)
+                                                            {
+                                                                case ResponseStatus.Answered:
+                                                                    <div class="status-badge status-answered">
+                                                                        <i class="bi bi-check-circle-fill"></i>
+                                                                        <div>
+                                                                            <div>Answered</div>
+                                                                            <div class="status-description">Completed successfully</div>
+                                                                        </div>
+                                                                    </div>
+                                                                    break;
+
+                                                                case ResponseStatus.Shown:
+                                                                    <div class="status-badge status-shown">
+                                                                        <i class="bi bi-exclamation-triangle-fill"></i>
+                                                                        <div>
+                                                                            <div>Shown</div>
+                                                                            <div class="status-description">Displayed but not answered</div>
+                                                                        </div>
+                                                                    </div>
+                                                                    break;
+
+                                                                case ResponseStatus.Skipped:
+                                                                    <div class="status-badge status-skipped">
+                                                                        <i class="bi bi-skip-forward-fill"></i>
+                                                                        <div>
+                                                                            <div>Skipped</div>
+                                                                            <div class="status-description">@responseDetail.SkipReason</div>
+                                                                        </div>
+                                                                    </div>
+                                                                    break;
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            <div class="status-badge status-unknown">
+                                                                <i class="bi bi-question-circle-fill"></i>
+                                                                <div>
+                                                                    <div>Unknown</div>
+                                                                    <div class="status-description">No response data</div>
+                                                                </div>
+                                                            </div>
+                                                        }
+                                                    </td>
+                                                    <td class="response-display">
+                                                        @if (responseDetail != null && responseDetail.Status == ResponseStatus.Answered)
+                                                        {
+                                                            @if (responseDetail.QuestionType == QuestionType.Text || responseDetail.QuestionType == QuestionType.Slider || responseDetail.QuestionType == QuestionType.Open_ended)
+                                                            {
+                                                                <div class="text-response">
+                                                                    <div class="text-response-label">Text Response</div>
+                                                                    @responseDetail.TextResponse
+                                                                </div>
+                                                            }
+                                                            else if (responseDetail.ResponseAnswers.Any())
+                                                            {
+                                                                <div class="answer-container">
+                                                                    @foreach (var answer in responseDetail.ResponseAnswers)
+                                                                    {
+                                                                        var answerObj = question.Answers.FirstOrDefault(a => a.Id == answer.AnswerId);
+                                                                        var answerText = answerObj?.Text;
+                                                                        <span class="answer-badge">
+                                                                            @answerText
+                                                                            @if (answerObj?.IsOtherOption == true)
+                                                                            {
+                                                                                <span class="other-option-badge">Other</span>
+                                                                            }
+                                                                        </span>
+                                                                    }
+                                                                </div>
+                                                            }
+
+                                                            @* Display "Other" text if available *@
+                                                            @if (!string.IsNullOrEmpty(responseDetail.OtherText))
+                                                            {
+                                                                <div class="other-text-response">
+                                                                    <div class="other-text-label">
+                                                                        <i class="bi bi-pencil-square"></i>
+                                                                        Custom Response:
+                                                                    </div>
+                                                                    <div class="other-text-content">
+                                                                        @responseDetail.OtherText
+                                                                    </div>
+                                                                </div>
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            <div class="no-response">
+                                                                <i class="bi bi-dash-circle"></i>
+                                                                No response provided
+                                                            </div>
+                                                        }
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -330,7 +1048,6 @@
 @section Scripts {
     <!-- Include Bootstrap 5 JS for collapse functionality -->
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-
 
     <script type="text/javascript">
         google.charts.load('current', { packages: ['corechart', 'line'] });
@@ -370,10 +1087,10 @@
             var responsesData = [
         @foreach (var response in Model.Responses)
         {
-                    @foreach (var detail in response.ResponseDetails.Where(d => d.QuestionType == QuestionType.Slider))
-                    {
-                                @:['@response.Questionnaire.Title - @response.SubmissionDate.ToString("yyyy-MMMM-dd HH:mm")', getDescriptiveValue(@(detail.TextResponse != null ? int.Parse(detail.TextResponse) : 0))],
-                    }
+                        @foreach (var detail in response.ResponseDetails.Where(d => d.QuestionType == QuestionType.Slider))
+                        {
+                                        @:['@response.Questionnaire.Title - @response.SubmissionDate.ToString("yyyy-MMMM-dd HH:mm")', getDescriptiveValue(@(detail.TextResponse != null ? int.Parse(detail.TextResponse) : 0))],
+                        }
         }
              ];
 
@@ -382,12 +1099,14 @@
             });
 
             var options = {
-                title: 'User Progress',
+                title: 'User Progress Over Time',
                 hAxis: {
-                    title: 'Questionnaire and Submission Date'
+                    title: 'Questionnaire and Submission Date',
+                    titleTextStyle: { color: '#475569', fontSize: 12, bold: true }
                 },
                 vAxis: {
-                    title: 'Status',
+                    title: 'Progress Level',
+                    titleTextStyle: { color: '#475569', fontSize: 12, bold: true },
                     ticks: [
                         { v: 0, f: 'Unknown' },
                         { v: 1, f: 'Normal' },
@@ -402,7 +1121,11 @@
                         { v: 10, f: 'Perfect' }
                     ]
                 },
-                'titleTextStyle': { color: '#17a2b8', fontSize: 16, bold: true },
+                titleTextStyle: { color: '#1e293b', fontSize: 16, bold: true },
+                backgroundColor: 'transparent',
+                colors: ['#6366f1'],
+                lineWidth: 3,
+                pointSize: 6
             };
 
             var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
@@ -411,89 +1134,98 @@
     </script>
 
     <script type="text/javascript">
-        google.charts.load('current', { packages: ['corechart', 'bar'] });
-        google.charts.setOnLoadCallback(drawUserSurveySummaryChart);
+            google.charts.load('current', { packages: ['corechart', 'bar'] });
+            google.charts.setOnLoadCallback(drawUserSurveySummaryChart);
 
-        function drawUserSurveySummaryChart() {
-            var data = new google.visualization.DataTable();
-            data.addColumn('string', 'User');
-            data.addColumn('number', 'Total Surveys');
-            data.addColumn('number', 'Total Questions');
-            data.addColumn('number', 'Total Answers');
+            function drawUserSurveySummaryChart() {
+                var data = new google.visualization.DataTable();
+                data.addColumn('string', 'Metric');
+                data.addColumn('number', 'Count');
 
-            var userSurveySummaryData = @Html.Raw(JsonConvert.SerializeObject(
-                                    Model.Responses
-                                    .GroupBy(response => response.UserEmail)
-                                    .Select(g => new
-                                    {
-                                                UserName = g.First().UserName,
-                                                TotalSurveys = g.Count(),
-                                                TotalQuestions = g.SelectMany(r => r.ResponseDetails).Count(),
-                                                TotalAnswers = g.SelectMany(r => r.ResponseDetails.SelectMany(rd => rd.ResponseAnswers)).Count()
-                                    })
-                                    .ToList()
-                                    ));
+                var userSurveySummaryData = @Html.Raw(JsonConvert.SerializeObject(
+                                                                            Model.Responses
+                                                                            .GroupBy(response => response.UserEmail)
+                                                                            .Select(g => new
+                                                                            {
+                                                                                            TotalSurveys = g.Count(),
+                                                                                            TotalQuestions = g.SelectMany(r => r.ResponseDetails).Count(),
+                                                                                            TotalAnswers = g.SelectMany(r => r.ResponseDetails.SelectMany(rd => rd.ResponseAnswers)).Count()
+                                                                            })
+                                                                            .FirstOrDefault()
+                                                                            ));
 
-    userSurveySummaryData.forEach(function (row) {
-        data.addRow([row.UserName, row.TotalSurveys, row.TotalQuestions, row.TotalAnswers]);
-    });
+    if (userSurveySummaryData) {
+        data.addRow(['Surveys', userSurveySummaryData.TotalSurveys]);
+        data.addRow(['Questions', userSurveySummaryData.TotalQuestions]);
+        data.addRow(['Answers', userSurveySummaryData.TotalAnswers]);
+    }
 
-            var options = {
-                title: 'User Survey Summary',
-                hAxis: {
-                    title: 'Count'
-                },
-                vAxis: {
-                    title: 'User'
-                },
-                        'titleTextStyle': { color: '#17a2b8', fontSize: 16, bold: true },
-            };
+                var options = {
+                    title: 'Response Summary',
+                    titleTextStyle: { color: '#1e293b', fontSize: 14, bold: true },
+                    backgroundColor: 'transparent',
+                    colors: ['#06b6d4', '#10b981', '#f59e0b'],
+                    legend: { position: 'none' },
+                    hAxis: {
+                        titleTextStyle: { color: '#475569', fontSize: 11 }
+                    },
+                    vAxis: {
+                        titleTextStyle: { color: '#475569', fontSize: 11 }
+                    }
+                };
 
-            var chart = new google.visualization.BarChart(document.getElementById('user_survey_summary_chart_div'));
-            chart.draw(data, options);
-        }
+                var chart = new google.visualization.ColumnChart(document.getElementById('user_survey_summary_chart_div'));
+                chart.draw(data, options);
+            }
     </script>
-    <script type="text/javascript">
-            google.charts.load('current', { packages: ['corechart'] });
-            google.charts.setOnLoadCallback(drawSurveyQuestionsAnswersSummaryCharts);
 
-            function drawSurveyQuestionsAnswersSummaryCharts() {
-                var surveyQuestionsSummaryData = @Html.Raw(JsonConvert.SerializeObject(
-                                Model.Responses
-                                .GroupBy(response => response.Questionnaire.Title)
-                                .Select(g => new
-                                {
-                                            SurveyTitle = g.Key,
-                                            SurveyId = g.First().Questionnaire.Id,
-                                            TotalQuestions = g.SelectMany(r => r.ResponseDetails).Count(),
-                                            TotalAnswers = g.SelectMany(r => r.ResponseDetails.SelectMany(rd => rd.ResponseAnswers)).Count()
-                                })
-                                .ToList()
-                                ));
+    <script type="text/javascript">
+                google.charts.load('current', { packages: ['corechart'] });
+                google.charts.setOnLoadCallback(drawSurveyQuestionsAnswersSummaryCharts);
+
+                function drawSurveyQuestionsAnswersSummaryCharts() {
+                    var surveyQuestionsSummaryData = @Html.Raw(JsonConvert.SerializeObject(
+                                                                Model.Responses
+                                                                .GroupBy(response => response.Questionnaire.Title)
+                                                                .Select(g => new
+                                                                {
+                                                                                SurveyTitle = g.Key,
+                                                                                SurveyId = g.First().Questionnaire.Id,
+                                                                                TotalQuestions = g.SelectMany(r => r.ResponseDetails).Count(),
+                                                                                TotalAnswers = g.SelectMany(r => r.ResponseDetails.SelectMany(rd => rd.ResponseAnswers)).Count()
+                                                                })
+                                                                .ToList()
+                                                                ));
 
         surveyQuestionsSummaryData.forEach(function (row) {
             drawSingleSurveyChart(row.SurveyTitle, row.SurveyId, row.TotalQuestions, row.TotalAnswers);
         });
     }
 
-            function drawSingleSurveyChart(surveyTitle, surveyId, totalQuestions, totalAnswers) {
-                var data = new google.visualization.DataTable();
-                data.addColumn('string', 'Category');
-                data.addColumn('number', 'Count');
+                function drawSingleSurveyChart(surveyTitle, surveyId, totalQuestions, totalAnswers) {
+                    var data = new google.visualization.DataTable();
+                    data.addColumn('string', 'Category');
+                    data.addColumn('number', 'Count');
 
-                data.addRow(['Questions', totalQuestions]);
-                data.addRow(['Answers', totalAnswers]);
+                    data.addRow(['Questions', totalQuestions]);
+                    data.addRow(['Answers', totalAnswers]);
 
-                var options = {
+                    var options = {
+                        backgroundColor: 'transparent',
+                        is3D: false,
+                        colors: ['#6366f1', '#10b981'],
+                        legend: {
+                            position: 'bottom',
+                            textStyle: { fontSize: 10 }
+                        },
+                        chartArea: { width: '90%', height: '70%' }
+                    };
 
-                    is3D: true,
-                    titleTextStyle: { color: '#17a2b8', fontSize: 16, bold: true },
-                };
-
-                var chart = new google.visualization.PieChart(document.getElementById('survey_questions_answers_summary_chart_div_' + surveyId));
-                chart.draw(data, options);
-            }
+                    var chart = new google.visualization.PieChart(document.getElementById('survey_questions_answers_summary_chart_div_' + surveyId));
+                    chart.draw(data, options);
+                }
     </script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             var collapseElements = document.querySelectorAll('[data-bs-toggle="collapse"]');
@@ -501,28 +1233,30 @@
             collapseElements.forEach(function (element) {
                 var targetId = element.getAttribute('data-bs-target');
                 var targetElement = document.querySelector(targetId);
+                var toggleText = element.querySelector('.toggle-text');
+                var icon = element.querySelector('i');
 
-                // Initialize button text and color based on current state
+                // Initialize button state
                 if (targetElement.classList.contains('show')) {
-                    element.textContent = 'Hide Responses';
-                    element.classList.remove('btn-primary');
-                    element.classList.add('btn-info');
+                    toggleText.textContent = 'Hide Details';
+                    element.classList.add('expanded');
+                    icon.className = 'bi bi-eye-slash';
                 } else {
-                    element.textContent = 'View Responses';
-                    element.classList.remove('btn-info');
-                    element.classList.add('btn-primary');
+                    toggleText.textContent = 'View Details';
+                    element.classList.remove('expanded');
+                    icon.className = 'bi bi-eye';
                 }
 
                 targetElement.addEventListener('shown.bs.collapse', function () {
-                    element.textContent = 'Hide Responses';
-                    element.classList.remove('btn-primary');
-                    element.classList.add('btn-info');
+                    toggleText.textContent = 'Hide Details';
+                    element.classList.add('expanded');
+                    icon.className = 'bi bi-eye-slash';
                 });
 
                 targetElement.addEventListener('hidden.bs.collapse', function () {
-                    element.textContent = 'View Responses';
-                    element.classList.remove('btn-info');
-                    element.classList.add('btn-primary');
+                    toggleText.textContent = 'View Details';
+                    element.classList.remove('expanded');
+                    icon.className = 'bi bi-eye';
                 });
             });
         });

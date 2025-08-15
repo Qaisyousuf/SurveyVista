@@ -263,6 +263,50 @@
             color: white;
         }
 
+    /* Bulk Selection Controls */
+    .bulk-selection-controls {
+        background: white;
+        border-radius: var(--border-radius-lg);
+        padding: 2rem;
+        margin: 2rem 0;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--gray-200);
+        display: none;
+        transition: all 0.3s ease;
+    }
+
+        .bulk-selection-controls.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+    @@keyframes slideDown {
+        from
+
+    {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+
+    .selection-summary {
+        background: linear-gradient(135deg, var(--info-color) 0%, #0891b2 100%);
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: var(--border-radius-md);
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
     /* Question Container Enhancements */
     #customCard {
         background: white;
@@ -328,6 +372,96 @@
                 transform: scaleY(1);
             }
 
+        .question.selected {
+            border-color: var(--danger-color);
+            background: linear-gradient(135deg, #fef2f2 0%, #fecaca 10%, white 100%);
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1), var(--shadow-lg);
+        }
+
+            .question.selected::before {
+                background: linear-gradient(135deg, var(--danger-color), #dc2626);
+                transform: scaleY(1);
+            }
+
+    /* Question Checkbox Styling */
+    .question-checkbox {
+        position: absolute;
+        top: 1.5rem;
+        right: 1.5rem;
+        z-index: 10;
+    }
+
+    .custom-checkbox {
+        width: 24px;
+        height: 24px;
+        border: 2px solid var(--gray-300);
+        border-radius: 6px;
+        background: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: var(--shadow-sm);
+    }
+
+        .custom-checkbox:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .custom-checkbox.checked {
+            background: var(--danger-color);
+            border-color: var(--danger-color);
+            color: white;
+        }
+
+        .custom-checkbox input {
+            display: none;
+        }
+
+    /* Master checkbox styling */
+    .master-checkbox-container {
+        background: white;
+        border-radius: var(--border-radius-md);
+        padding: 1.5rem;
+        margin: 2rem 0;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--gray-200);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .master-checkbox {
+        width: 28px;
+        height: 28px;
+        border: 2px solid var(--gray-300);
+        border-radius: 8px;
+        background: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: var(--shadow-sm);
+    }
+
+        .master-checkbox:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .master-checkbox.checked {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+
+        .master-checkbox input {
+            display: none;
+        }
+
     /* Question Separator */
     .question-separator {
         display: flex;
@@ -366,11 +500,12 @@
     /* Question Title Styling */
     .question-title {
         background: linear-gradient(135deg, var(--gray-50) 0%, var(--gray-100) 100%);
-        padding: 2rem;
+        padding: 2rem 2rem 2rem 3rem;
         border-radius: var(--border-radius-md);
         border: 1px solid var(--gray-200);
         margin-bottom: 1.5rem;
         transition: all 0.3s ease;
+        position: relative;
     }
 
         .question-title:hover {
@@ -689,7 +824,7 @@
 
                 <!-- Basic Information -->
                 <div class="row">
-                    <div class="col-md-6">
+                    <div class="col-md-12">
                         <div class="form-group">
                             <label asp-for="Title" class="control-label">
                                 <i class="bi bi-card-heading me-2"></i>Survey Title
@@ -698,7 +833,7 @@
                             <span asp-validation-for="Title" class="text-danger"></span>
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-12">
                         <div class="form-group">
                             <label asp-for="Description" class="control-label">
                                 <i class="bi bi-card-text me-2"></i>Description
@@ -715,10 +850,48 @@
                         <h4><i class="bi bi-question-circle me-2"></i>Edit Questions or Add New Questions</h4>
                     </div>
 
+                    <!-- Master Checkbox for Select All -->
+                    <div class="master-checkbox-container">
+                        <div class="master-checkbox" id="selectAllCheckbox">
+                            <input type="checkbox" id="selectAllInput">
+                            <i class="bi bi-check" style="display: none;"></i>
+                        </div>
+                        <label for="selectAllInput" class="mb-0 font-weight-bold">
+                            <i class="bi bi-check-square me-2"></i>Select All Questions
+                        </label>
+                        <div class="ms-auto">
+                            <span id="selectedCount" class="badge bg-primary">0 selected</span>
+                        </div>
+                    </div>
+
+                    <!-- Bulk Selection Controls -->
+                    <div class="bulk-selection-controls" id="bulkControls">
+                        <div class="selection-summary">
+                            <i class="bi bi-info-circle"></i>
+                            <span id="bulkSelectionText">0 questions selected</span>
+                        </div>
+                        <div class="d-flex gap-3 flex-wrap">
+                            <button type="button" class="btn btn-danger" id="deleteSelectedQuestions">
+                                <i class="bi bi-trash-fill"></i> Delete Selected Questions
+                            </button>
+                            <button type="button" class="btn btn-secondary" id="deselectAll">
+                                <i class="bi bi-x-circle"></i> Deselect All
+                            </button>
+                        </div>
+                    </div>
+
                     <div id="questionsContainer">
                         @for (int i = 0; i < Model.Questions.Count; i++)
                         {
-                            <div class="question fade-in">
+                            <div class="question fade-in" data-question-index="@i">
+                                <!-- Question Checkbox -->
+                                <div class="question-checkbox">
+                                    <div class="custom-checkbox question-select-checkbox">
+                                        <input type="checkbox" class="question-checkbox-input">
+                                        <i class="bi bi-check" style="display: none;"></i>
+                                    </div>
+                                </div>
+
                                 <div class="question-separator">
                                     <div class="line-container">
                                         <hr class="line-start">
@@ -837,7 +1010,7 @@
     </div>
 </div>
 
-<!-- Enhanced Confirmation Modal -->
+<!-- Enhanced Confirmation Modal for Single Question -->
 <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -866,6 +1039,50 @@
     </div>
 </div>
 
+<!-- Enhanced Bulk Delete Confirmation Modal -->
+<div class="modal fade" id="confirmBulkDeleteModal" tabindex="-1" aria-labelledby="confirmBulkDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmBulkDeleteModalLabel">
+                    <i class="bi bi-exclamation-triangle me-2"></i>Confirm Multiple Deletion
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    <strong>Critical Warning:</strong> You are about to delete <span id="deletionCount" class="fw-bold">0</span> question(s).
+                </div>
+                <p class="mb-3">This action will permanently remove:</p>
+                <ul class="list-unstyled">
+                    <li class="mb-2"><i class="bi bi-check text-danger me-2"></i><span id="questionCount">0</span> questions</li>
+                    <li class="mb-2"><i class="bi bi-check text-danger me-2"></i>All associated answers</li>
+                    <li class="mb-2"><i class="bi bi-check text-danger me-2"></i>All related user responses</li>
+                </ul>
+                <div class="alert alert-warning">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <strong>Note:</strong> This action cannot be undone. Please ensure you want to proceed with this bulk deletion.
+                </div>
+                <div class="preview-container" id="deletionPreview">
+                    <h6 class="fw-bold mb-3">Questions to be deleted:</h6>
+                    <div class="preview-list" style="max-height: 200px; overflow-y: auto; background: #f8f9fa; padding: 1rem; border-radius: 8px;">
+                        <!-- Preview questions will be populated here -->
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x"></i> Cancel
+                </button>
+                <button type="button" class="btn btn-danger" id="confirmBulkDelete">
+                    <i class="bi bi-trash"></i> Delete All Selected Questions
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ckeditor/4.11.4/ckeditor.js"></script>
     <script>
@@ -879,11 +1096,250 @@
     <script>
         $(document).ready(function () {
             let questionToDelete = null;
+            let selectedQuestions = [];
+
+            // Update selection UI
+            function updateSelectionUI() {
+                const selectedCount = selectedQuestions.length;
+                $('#selectedCount').text(selectedCount + ' selected');
+                $('#bulkSelectionText').text(selectedCount + ' question' + (selectedCount !== 1 ? 's' : '') + ' selected');
+
+                if (selectedCount > 0) {
+                    $('#bulkControls').addClass('show');
+                } else {
+                    $('#bulkControls').removeClass('show');
+                }
+
+                // Update master checkbox state
+                const totalQuestions = $('.question-checkbox-input').length;
+                const masterCheckbox = $('#selectAllCheckbox');
+                const masterInput = $('#selectAllInput');
+
+                if (selectedCount === 0) {
+                    masterCheckbox.removeClass('checked');
+                    masterInput.prop('checked', false);
+                    masterCheckbox.find('i').hide();
+                } else if (selectedCount === totalQuestions) {
+                    masterCheckbox.addClass('checked');
+                    masterInput.prop('checked', true);
+                    masterCheckbox.find('i').show();
+                } else {
+                    masterCheckbox.removeClass('checked');
+                    masterInput.prop('checked', false);
+                    masterCheckbox.find('i').hide();
+                }
+            }
+
+            // Handle individual question checkbox clicks
+            $(document).on('change', '.question-checkbox-input', function() {
+                const questionContainer = $(this).closest('.question');
+                const questionIndex = questionContainer.data('question-index');
+                const checkbox = $(this).closest('.custom-checkbox');
+
+                if ($(this).is(':checked')) {
+                    if (!selectedQuestions.includes(questionIndex)) {
+                        selectedQuestions.push(questionIndex);
+                        questionContainer.addClass('selected');
+                        checkbox.addClass('checked');
+                        checkbox.find('i').show();
+                    }
+                } else {
+                    selectedQuestions = selectedQuestions.filter(q => q !== questionIndex);
+                    questionContainer.removeClass('selected');
+                    checkbox.removeClass('checked');
+                    checkbox.find('i').hide();
+                }
+
+                updateSelectionUI();
+            });
+
+            // Handle checkbox visual clicks
+            $(document).on('click', '.question-select-checkbox', function() {
+                const input = $(this).find('input');
+                input.prop('checked', !input.is(':checked')).trigger('change');
+            });
+
+            // Handle master checkbox
+            $('#selectAllCheckbox').click(function() {
+                const shouldSelectAll = selectedQuestions.length !== $('.question-checkbox-input').length;
+
+                $('.question-checkbox-input').each(function() {
+                    const questionContainer = $(this).closest('.question');
+                    const questionIndex = questionContainer.data('question-index');
+                    const checkbox = $(this).closest('.custom-checkbox');
+
+                    $(this).prop('checked', shouldSelectAll);
+
+                    if (shouldSelectAll) {
+                        if (!selectedQuestions.includes(questionIndex)) {
+                            selectedQuestions.push(questionIndex);
+                        }
+                        questionContainer.addClass('selected');
+                        checkbox.addClass('checked');
+                        checkbox.find('i').show();
+                    } else {
+                        selectedQuestions = [];
+                        questionContainer.removeClass('selected');
+                        checkbox.removeClass('checked');
+                        checkbox.find('i').hide();
+                    }
+                });
+
+                updateSelectionUI();
+            });
+
+            // Deselect all button
+            $('#deselectAll').click(function() {
+                selectedQuestions = [];
+                $('.question-checkbox-input').prop('checked', false);
+                $('.question').removeClass('selected');
+                $('.custom-checkbox').removeClass('checked');
+                $('.custom-checkbox i').hide();
+                updateSelectionUI();
+            });
+
+            // Handle bulk delete button
+            $('#deleteSelectedQuestions').click(function() {
+                if (selectedQuestions.length === 0) {
+                    alert('Please select at least one question to delete.');
+                    return;
+                }
+
+                // Update modal content
+                $('#deletionCount, #questionCount').text(selectedQuestions.length);
+
+                // Populate preview
+                const previewContainer = $('#deletionPreview .preview-list');
+                previewContainer.empty();
+
+                selectedQuestions.forEach(function(questionIndex) {
+                    const questionContainer = $(`.question[data-question-index="${questionIndex}"]`);
+                    const questionText = questionContainer.find('.item-question').text().trim();
+                    const truncatedText = questionText.length > 80 ? questionText.substring(0, 80) + '...' : questionText;
+
+                    previewContainer.append(`
+                        <div class="mb-2 p-2 bg-white rounded border">
+                            <strong>Question ${questionIndex + 1}:</strong> ${truncatedText}
+                        </div>
+                    `);
+                });
+
+                $('#confirmBulkDeleteModal').modal('show');
+            });
+
+            // Confirm bulk deletion
+            $('#confirmBulkDelete').click(function() {
+                const $btn = $(this);
+                $btn.addClass('loading').prop('disabled', true);
+
+                // Sort in descending order to avoid index issues when removing
+                selectedQuestions.sort((a, b) => b - a);
+
+                // Remove selected questions with animation
+                let delay = 0;
+                selectedQuestions.forEach(function(questionIndex) {
+                    setTimeout(function() {
+                        const questionContainer = $(`.question[data-question-index="${questionIndex}"]`);
+                        questionContainer.fadeOut(300, function() {
+                            $(this).remove();
+                        });
+                    }, delay);
+                    delay += 100;
+                });
+
+                // Reset selection state and re-index form after all deletions
+                setTimeout(function() {
+                    selectedQuestions = [];
+                    updateSelectionUI();
+
+                    // Re-index all remaining questions and their form fields
+                    reindexAllQuestions();
+
+                    $('#confirmBulkDeleteModal').modal('hide');
+                    $btn.removeClass('loading').prop('disabled', false);
+
+                    // Show success message
+                    const successMessage = $('<div class="alert alert-success fade-in" role="alert"><i class="bi bi-check-circle me-2"></i>Selected questions deleted successfully!</div>');
+                    $('#customCard').prepend(successMessage);
+
+                    setTimeout(function() {
+                        successMessage.fadeOut(300, function() {
+                            $(this).remove();
+                        });
+                    }, 3000);
+                }, delay + 500);
+            });
+
+            // Function to update question numbers after deletion
+            function updateQuestionNumbers() {
+                $('.question').each(function(index) {
+                    $(this).find('.badge').text('Question ' + (index + 1));
+                    $(this).attr('data-question-index', index);
+                });
+            }
+
+            // Function to properly re-index all form fields after question deletion
+            function reindexAllQuestions() {
+                $('.question').each(function(questionIndex) {
+                    const questionContainer = $(this);
+
+                    // Update data attribute and badge
+                    questionContainer.attr('data-question-index', questionIndex);
+                    questionContainer.find('.badge').text('Question ' + (questionIndex + 1));
+
+                    // Update question form fields
+                    questionContainer.find('input[name*="Questions["]').each(function() {
+                        const name = $(this).attr('name');
+                        if (name) {
+                            const newName = name.replace(/Questions\[\d+\]/, `Questions[${questionIndex}]`);
+                            $(this).attr('name', newName);
+                        }
+                    });
+
+                    questionContainer.find('select[name*="Questions["]').each(function() {
+                        const name = $(this).attr('name');
+                        if (name) {
+                            const newName = name.replace(/Questions\[\d+\]/, `Questions[${questionIndex}]`);
+                            $(this).attr('name', newName);
+                        }
+                    });
+
+                    questionContainer.find('textarea[name*="Questions["]').each(function() {
+                        const name = $(this).attr('name');
+                        if (name) {
+                            const newName = name.replace(/Questions\[\d+\]/, `Questions[${questionIndex}]`);
+                            $(this).attr('name', newName);
+                        }
+                    });
+
+                    // Update answer form fields
+                    questionContainer.find('.answer-group').each(function(answerIndex) {
+                        $(this).find('input[name*="Answers["]').each(function() {
+                            const name = $(this).attr('name');
+                            if (name) {
+                                const newName = name.replace(/Questions\[\d+\]\.Answers\[\d+\]/, `Questions[${questionIndex}].Answers[${answerIndex}]`);
+                                $(this).attr('name', newName);
+                            }
+                        });
+
+                        // Update answer labels
+                        const label = $(this).find('label.control-label').first();
+                        if (label.length) {
+                            const labelText = label.text();
+                            if (labelText.includes('Answer ')) {
+                                const otherContent = label.find('.other-option-badge').length > 0 ?
+                                    ' <span class="other-option-badge">Other Option</span>' : '';
+                                label.html(`Answer ${answerIndex + 1}${otherContent}`);
+                            }
+                        }
+                    });
+                });
+            }
 
             // Function to add a new regular answer
             $(document).on('click', '.addAnswer', function () {
                 var questionContainer = $(this).closest('.question');
-                var newQuestionIndex = questionContainer.index();
+                var questionIndex = questionContainer.attr('data-question-index');
                 var newAnswerIndex = questionContainer.find('.answers .answer-group').length;
 
                 var answerHtml = `
@@ -891,8 +1347,8 @@
                         <div class="form-group mb-0">
                             <label class="control-label">Answer ${newAnswerIndex + 1}</label>
                             <div class="d-flex gap-2">
-                                <input type="text" name="Questions[${newQuestionIndex}].Answers[${newAnswerIndex}].Text" class="form-control" placeholder="Enter answer text" />
-                                <input type="hidden" name="Questions[${newQuestionIndex}].Answers[${newAnswerIndex}].IsOtherOption" value="false" />
+                                <input type="text" name="Questions[${questionIndex}].Answers[${newAnswerIndex}].Text" class="form-control" placeholder="Enter answer text" />
+                                <input type="hidden" name="Questions[${questionIndex}].Answers[${newAnswerIndex}].IsOtherOption" value="false" />
                                 <button type="button" class="btn btn-danger btn-sm removeAnswer">
                                     <i class="bi bi-trash3"></i>
                                 </button>
@@ -906,7 +1362,7 @@
             // Function to add "Other" option
             $(document).on('click', '.addOtherOption', function () {
                 var questionContainer = $(this).closest('.question');
-                var newQuestionIndex = questionContainer.index();
+                var questionIndex = questionContainer.attr('data-question-index');
                 var newAnswerIndex = questionContainer.find('.answers .answer-group').length;
 
                 // Check if "Other" option already exists
@@ -924,8 +1380,8 @@
                                 <span class="other-option-badge">Other Option</span>
                             </label>
                             <div class="d-flex gap-2">
-                                <input type="text" name="Questions[${newQuestionIndex}].Answers[${newAnswerIndex}].Text" class="form-control" placeholder="Other (please specify)" value="Other (please specify)" />
-                                <input type="hidden" name="Questions[${newQuestionIndex}].Answers[${newAnswerIndex}].IsOtherOption" value="true" />
+                                <input type="text" name="Questions[${questionIndex}].Answers[${newAnswerIndex}].Text" class="form-control" placeholder="Other (please specify)" value="Other (please specify)" />
+                                <input type="hidden" name="Questions[${questionIndex}].Answers[${newAnswerIndex}].IsOtherOption" value="true" />
                                 <button type="button" class="btn btn-warning btn-sm removeAnswer">
                                     <i class="bi bi-trash3"></i> Remove Other
                                 </button>
@@ -942,8 +1398,28 @@
 
             // Function to remove an answer
             $(document).on('click', '.removeAnswer', function () {
+                const questionContainer = $(this).closest('.question');
                 $(this).closest('.answer-group').fadeOut(300, function() {
                     $(this).remove();
+                    // Re-index answers in this question
+                    const questionIndex = questionContainer.attr('data-question-index');
+                    questionContainer.find('.answer-group').each(function(answerIndex) {
+                        $(this).find('input[name*="Answers["]').each(function() {
+                            const name = $(this).attr('name');
+                            if (name) {
+                                const newName = name.replace(/Questions\[\d+\]\.Answers\[\d+\]/, `Questions[${questionIndex}].Answers[${answerIndex}]`);
+                                $(this).attr('name', newName);
+                            }
+                        });
+
+                        // Update answer labels
+                        const label = $(this).find('label.control-label').first();
+                        if (label.length) {
+                            const otherContent = label.find('.other-option-badge').length > 0 ?
+                                ' <span class="other-option-badge">Other Option</span>' : '';
+                            label.html(`Answer ${answerIndex + 1}${otherContent}`);
+                        }
+                    });
                 });
             });
 
@@ -1002,8 +1478,16 @@
             // Confirm deletion
             $('.confirm-delete').click(function () {
                 if (questionToDelete) {
+                    const questionIndex = questionToDelete.data('question-index');
+
+                    // Remove from selection if it was selected
+                    selectedQuestions = selectedQuestions.filter(q => q !== questionIndex);
+                    updateSelectionUI();
+
                     questionToDelete.fadeOut(300, function() {
                         $(this).remove();
+                        // Re-index all remaining questions and their form fields
+                        reindexAllQuestions();
                     });
                     $('#confirmDeleteModal').modal('hide');
                     questionToDelete = null;
@@ -1019,7 +1503,15 @@
                     var newQuestionIndex = $('.question').length;
 
                     var questionHtml = `
-                        <div class="question fade-in">
+                        <div class="question fade-in" data-question-index="${newQuestionIndex}">
+                            <!-- Question Checkbox -->
+                            <div class="question-checkbox">
+                                <div class="custom-checkbox question-select-checkbox">
+                                    <input type="checkbox" class="question-checkbox-input">
+                                    <i class="bi bi-check" style="display: none;"></i>
+                                </div>
+                            </div>
+
                             <div class="question-separator">
                                 <div class="line-container">
                                     <hr class="line-start">
@@ -1101,6 +1593,9 @@
                     $btn.removeClass('loading').prop('disabled', false);
                 }, 300);
             });
+
+            // Initialize UI
+            updateSelectionUI();
         });
     </script>
 }
