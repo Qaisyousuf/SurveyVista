@@ -1,4 +1,5 @@
-﻿using Model;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,5 +20,13 @@ namespace Services.Interaces
         Task Delete(int? id);
 
         Task commitAsync();
+
+        // ADD THESE NEW METHOD SIGNATURES:
+        List<Questionnaire> GetQuestionnairesByStatus(QuestionnaireStatus status);
+        List<Questionnaire> GetAllQuestionnairesWithStatus();
+        Task<bool> HasResponses(int questionnaireId);
+        Task UpdateStatus(int questionnaireId, QuestionnaireStatus newStatus);
     }
+
+  
 }

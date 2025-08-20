@@ -333,40 +333,101 @@
         position: relative;
     }
 
+    /* Response Checkbox - Simplified and Reliable */
     .response-checkbox {
         position: absolute;
         top: 1rem;
         right: 1rem;
-        z-index: 10;
+        z-index: 20;
     }
 
-    .custom-checkbox {
-        width: 24px;
-        height: 24px;
-        border: 2px solid var(--gray-300);
-        border-radius: 6px;
+    .checkbox-label {
+        cursor: pointer;
+        margin: 0;
+        padding: 0;
+        display: block;
+    }
+
+    .response-checkbox-input {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+        margin: 0;
+        padding: 0;
+    }
+
+    .checkbox-custom {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border: 3px solid var(--gray-300);
+        border-radius: 8px;
+        background: white;
+        transition: all 0.2s ease;
+        box-shadow: var(--shadow-md);
+        cursor: pointer;
+    }
+
+    .checkbox-custom:hover {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+        transform: scale(1.05);
+    }
+
+    .checkbox-custom i {
+        font-size: 18px;
+        font-weight: bold;
+        color: white;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+    }
+
+    .response-checkbox-input:checked + .checkbox-custom {
+        background: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    .response-checkbox-input:checked + .checkbox-custom i {
+        opacity: 1;
+    }
+
+    /* Master Checkbox - Updated to match */
+    .master-checkbox {
+        width: 32px;
+        height: 32px;
+        border: 3px solid var(--gray-300);
+        border-radius: 8px;
         background: white;
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
         transition: all 0.2s ease;
-        box-shadow: var(--shadow-sm);
+        box-shadow: var(--shadow-md);
     }
 
-    .custom-checkbox:hover {
+    .master-checkbox:hover {
         border-color: var(--primary-color);
-        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+        transform: scale(1.05);
     }
 
-    .custom-checkbox.checked {
+    .master-checkbox.checked {
         background: var(--primary-color);
         border-color: var(--primary-color);
         color: white;
     }
 
-    .custom-checkbox input {
+    .master-checkbox input {
         display: none;
+    }
+
+    .master-checkbox i {
+        font-size: 18px;
+        font-weight: bold;
     }
 
     .response-info {
@@ -535,6 +596,7 @@
         box-shadow: var(--shadow-sm);
         position: relative;
         overflow: hidden;
+        cursor: pointer;
     }
 
     .btn::before {
@@ -571,6 +633,18 @@
 
     .btn-secondary:hover {
         background: linear-gradient(135deg, var(--gray-600) 0%, var(--gray-700) 100%);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+        color: white;
+    }
+
+    .btn-warning {
+        background: linear-gradient(135deg, var(--warning-color) 0%, var(--warning-dark) 100%);
+        color: white;
+    }
+
+    .btn-warning:hover {
+        background: linear-gradient(135deg, var(--warning-dark) 0%, #b45309 100%);
         transform: translateY(-2px);
         box-shadow: var(--shadow-lg);
         color: white;
@@ -673,6 +747,264 @@
         }
     }
 
+    /* Confirmation Modal Styles */
+    .confirmation-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.75);
+        backdrop-filter: blur(8px);
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+        .confirmation-modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+    .modal-content {
+        background: white;
+        border-radius: var(--border-radius-xl);
+        box-shadow: var(--shadow-2xl);
+        max-width: 500px;
+        width: 90%;
+        max-height: 90vh;
+        overflow: hidden;
+        transform: translateY(20px) scale(0.95);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+    }
+
+        .confirmation-modal.show .modal-content {
+            transform: translateY(0) scale(1);
+        }
+
+    .modal-header {
+        padding: 3rem 2rem 2rem 2rem;
+        text-align: center;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    /* Icon Row */
+    .modal-icon-row {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        margin-bottom: 3rem;
+    }
+
+    .modal-icon {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .modal-icon::before {
+        content: '';
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        right: -2px;
+        bottom: -2px;
+        border-radius: 50%;
+        z-index: -1;
+        opacity: 0.3;
+    }
+
+    .modal-icon.delete-selected {
+        background: linear-gradient(135deg, var(--danger-color) 0%, var(--danger-light) 50%, var(--danger-dark) 100%);
+        color: white;
+        box-shadow: 0 20px 40px rgba(239, 68, 68, 0.4), 0 8px 16px rgba(239, 68, 68, 0.2);
+    }
+
+    .modal-icon.delete-selected::before {
+        background: linear-gradient(135deg, var(--danger-light) 0%, var(--danger-color) 100%);
+    }
+
+    .modal-icon.delete-all {
+        background: linear-gradient(135deg, var(--danger-dark) 0%, var(--danger-color) 50%, #b91c1c 100%);
+        color: white;
+        box-shadow: 0 20px 40px rgba(220, 38, 38, 0.5), 0 8px 16px rgba(220, 38, 38, 0.3);
+    }
+
+    .modal-icon.delete-all::before {
+        background: linear-gradient(135deg, var(--danger-color) 0%, var(--danger-dark) 100%);
+    }
+
+    /* Icon symbol styling */
+    .modal-icon i {
+        position: relative;
+        z-index: 1;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+    }
+
+    /* Title Row */
+    .modal-title-row {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        margin-bottom: 2rem;
+    }
+
+    .modal-title {
+        font-size: 1.875rem;
+        font-weight: 800;
+        color: var(--gray-800);
+        margin: 0;
+        line-height: 1.2;
+        text-align: center;
+    }
+
+    /* Subtitle Row */
+    .modal-subtitle-row {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        margin-bottom: 0;
+    }
+
+    .modal-subtitle {
+        color: var(--gray-600);
+        font-size: 1.1rem;
+        font-weight: 500;
+        margin: 0;
+        line-height: 1.4;
+        text-align: center;
+        max-width: 400px;
+    }
+
+    .modal-body {
+        padding: 1.5rem 2rem;
+    }
+
+    .modal-description {
+        background: var(--gray-50);
+        border-radius: var(--border-radius-md);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid var(--gray-200);
+    }
+
+    .modal-description h4 {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--gray-800);
+        margin: 0 0 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .modal-description ul {
+        margin: 0;
+        padding-left: 1.25rem;
+        color: var(--gray-600);
+    }
+
+    .modal-description li {
+        margin-bottom: 0.5rem;
+        font-size: 0.875rem;
+        line-height: 1.5;
+    }
+
+    .selection-info {
+        background: linear-gradient(135deg, var(--danger-color) 0%, var(--danger-light) 100%);
+        color: white;
+        padding: 1rem;
+        border-radius: var(--border-radius-md);
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+
+    .selection-count {
+        font-size: 1.125rem;
+        font-weight: 700;
+        margin: 0 0 0.5rem;
+    }
+
+    .selection-meta {
+        font-size: 0.875rem;
+        opacity: 0.9;
+        margin: 0;
+    }
+
+    .modal-actions {
+        display: flex;
+        gap: 1rem;
+        padding: 2rem;
+        background: var(--gray-50);
+        border-top: 1px solid var(--gray-200);
+    }
+
+    .modal-btn {
+        flex: 1;
+        padding: 1rem 1.5rem;
+        border-radius: var(--border-radius-md);
+        font-weight: 700;
+        font-size: 1rem;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        box-shadow: var(--shadow-md);
+    }
+
+        .modal-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+    .modal-btn-cancel {
+        background: white;
+        color: var(--gray-700);
+        border: 2px solid var(--gray-300);
+    }
+
+        .modal-btn-cancel:hover {
+            background: var(--gray-50);
+            border-color: var(--gray-400);
+        }
+
+    .modal-btn-confirm {
+        color: white;
+    }
+
+    .modal-btn-confirm.delete-selected {
+        background: linear-gradient(135deg, var(--danger-color) 0%, var(--danger-dark) 100%);
+    }
+
+        .modal-btn-confirm.delete-selected:hover {
+            background: linear-gradient(135deg, var(--danger-dark) 0%, #b91c1c 100%);
+        }
+
+    .modal-btn-confirm.delete-all {
+        background: linear-gradient(135deg, var(--danger-dark) 0%, #b91c1c 100%);
+    }
+
+        .modal-btn-confirm.delete-all:hover {
+            background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+        }
+
     /* Animations */
     .fade-in {
         animation: fadeIn 0.6s ease-out;
@@ -702,9 +1034,34 @@
     .stagger-animation:nth-child(6) { animation-delay: 0.6s; }
 </style>
 
-<div class="container">
+<div class="container-fluid">
     <!-- Notifications -->
     <partial name="_Notification" />
+
+    <!-- Success/Error Messages -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Warning"] != null)
+    {
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-circle"></i> @TempData["Warning"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
 
     <!-- Page Header -->
     <div class="page-header fade-in">
@@ -719,272 +1076,542 @@
         </div>
     </div>
 
-    <form asp-action="DeleteMultiple" method="post" id="responseForm">
-        @if (Model.Any())
-        {
-            <!-- Statistics Section -->
-            <div class="stats-section fade-in">
-                <div class="stats-grid">
-                    <div class="stat-item">
-                        <span class="stat-number">@Model.Count()</span>
-                        <span class="stat-label">Total Responses</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number">@Model.Select(r => r.UserEmail).Distinct().Count()</span>
-                        <span class="stat-label">Unique Users</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number">@Model.Select(r => r.Questionnaire?.Title).Distinct().Count()</span>
-                        <span class="stat-label">Questionnaires</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number">@Model.Where(r => r.SubmissionDate.Date == DateTime.Today).Count()</span>
-                        <span class="stat-label">Today's Responses</span>
-                    </div>
+    @if (Model.Any())
+    {
+        <!-- Statistics Section -->
+        <div class="stats-section fade-in">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-number">@Model.Count()</span>
+                    <span class="stat-label">Total Responses</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">@Model.Select(r => r.UserEmail).Distinct().Count()</span>
+                    <span class="stat-label">Unique Users</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">@Model.Select(r => r.Questionnaire?.Title).Distinct().Count()</span>
+                    <span class="stat-label">Questionnaires</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">@Model.Where(r => r.SubmissionDate.Date == DateTime.Today).Count()</span>
+                    <span class="stat-label">Today's Responses</span>
                 </div>
             </div>
+        </div>
 
-            <!-- Master Checkbox -->
-            <div class="master-checkbox-container fade-in">
-                <div class="master-checkbox" id="selectAllCheckbox">
-                    <input type="checkbox" id="selectAllInput">
-                    <i class="bi bi-check" style="display: none;"></i>
-                </div>
-                <label for="selectAllInput" class="mb-0 font-weight-bold">
-                    <i class="bi bi-check-square me-2"></i>Select All Responses
-                </label>
-                <div class="ms-auto">
-                    <span id="selectedCount" class="badge bg-primary">0 selected</span>
-                </div>
+        <!-- Master Checkbox -->
+        <div class="master-checkbox-container fade-in">
+            <div class="master-checkbox" id="selectAllCheckbox">
+                <input type="checkbox" id="selectAllInput">
+                <i class="bi bi-check" style="display: none;"></i>
             </div>
+            <label for="selectAllInput" class="mb-0 font-weight-bold">
+                <i class="bi bi-check-square me-2"></i>Select All Responses
+            </label>
+            <div class="ms-auto">
+                <span id="selectedCount" class="badge bg-primary">0 selected</span>
+            </div>
+        </div>
 
-            <!-- Selection Controls -->
-            <div class="selection-controls" id="selectionControls">
-                <div class="selection-header">
-                    <div class="selection-info">
-                        <div class="selection-icon">
-                            <i class="bi bi-check-circle-fill"></i>
-                        </div>
-                        <div class="selection-text">
-                            <h3>Selection Active</h3>
-                            <p class="selection-count" id="selectionText">0 responses selected</p>
-                        </div>
+        <!-- Selection Controls -->
+        <div class="selection-controls" id="selectionControls">
+            <div class="selection-header">
+                <div class="selection-info">
+                    <div class="selection-icon">
+                        <i class="bi bi-check-circle-fill"></i>
                     </div>
-                    <div class="selection-actions">
-                        <button type="submit" class="btn btn-danger" id="deleteSelectedBtn">
-                            <i class="bi bi-trash-fill"></i>
-                            Delete Selected
-                        </button>
-                        <button type="button" class="btn btn-secondary" id="deselectAllBtn">
-                            <i class="bi bi-x-circle"></i>
-                            Deselect All
-                        </button>
+                    <div class="selection-text">
+                        <h3>Selection Active</h3>
+                        <p class="selection-count" id="selectionText">0 responses selected</p>
                     </div>
                 </div>
+                <div class="selection-actions">
+                    <button type="button" class="btn btn-danger" id="deleteSelectedBtn">
+                        <i class="bi bi-trash-fill"></i>
+                        Delete Selected
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="deselectAllBtn">
+                        <i class="bi bi-x-circle"></i>
+                        Deselect All
+                    </button>
+                    <button type="button" class="btn btn-warning" id="deleteAllBtn">
+                        <i class="bi bi-trash3-fill"></i>
+                        Delete All
+                    </button>
+                </div>
             </div>
+        </div>
 
-            <!-- Responses Grid -->
-            <div class="responses-grid">
-                @foreach (var item in Model.Select((response, index) => new { Response = response, Index = index }))
-                {
-                    <div class="response-card stagger-animation" data-id="@item.Response.Id">
-                        <!-- Response Checkbox -->
-                        <div class="response-checkbox">
-                            <div class="custom-checkbox response-select-checkbox">
-                                <input type="checkbox" class="response-checkbox-input" name="ids" value="@item.Response.Id">
-                                <i class="bi bi-check" style="display: none;"></i>
-                            </div>
-                        </div>
+        <!-- Hidden Forms for Actions -->
+        <form asp-action="DeleteMultiple" method="post" id="deleteMultipleForm" style="display: none;">
+            @Html.AntiForgeryToken()
+            <div id="selectedResponsesContainer"></div>
+        </form>
 
-                        <!-- Card Header -->
-                        <div class="card-header-custom">
-                            <div class="response-info">
-                                <span class="response-id">ID: @item.Response.Id</span>
-                                <h3 class="questionnaire-title">@item.Response.Questionnaire?.Title</h3>
-                                <div class="user-info">
-                                    <div class="user-avatar">
-                                        @(item.Response.UserName?.Substring(0, 1).ToUpper() ?? "U")
-                                    </div>
-                                    <div class="user-details">
-                                        <h4>@item.Response.UserName</h4>
-                                        <p class="user-email">@item.Response.UserEmail</p>
-                                    </div>
+        <form asp-action="DeleteAll" method="post" id="deleteAllForm" style="display: none;">
+            @Html.AntiForgeryToken()
+        </form>
+
+        <!-- Responses Grid -->
+        <div class="responses-grid">
+            @foreach (var item in Model.Select((response, index) => new { Response = response, Index = index }))
+            {
+                <div class="response-card stagger-animation" data-id="@item.Response.Id">
+                    <!-- Response Checkbox - Simplified -->
+                    <div class="response-checkbox">
+                        <label class="checkbox-label" for="checkbox_@item.Response.Id">
+                            <input type="checkbox" 
+                                   id="checkbox_@item.Response.Id" 
+                                   class="response-checkbox-input" 
+                                   value="@item.Response.Id"
+                                   data-response-id="@item.Response.Id">
+                            <span class="checkbox-custom">
+                                <i class="bi bi-check"></i>
+                            </span>
+                        </label>
+                    </div>
+
+                    <!-- Card Header -->
+                    <div class="card-header-custom">
+                        <div class="response-info">
+                            <span class="response-id">ID: @item.Response.Id</span>
+                            <h3 class="questionnaire-title">@(item.Response.Questionnaire?.Title ?? "Unknown Questionnaire")</h3>
+                            <div class="user-info">
+                                <div class="user-avatar">
+                                    @(item.Response.UserName?.Substring(0, 1).ToUpper() ?? "U")
+                                </div>
+                                <div class="user-details">
+                                    <h4>@(item.Response.UserName ?? "Unknown User")</h4>
+                                    <p class="user-email">@(item.Response.UserEmail ?? "No email")</p>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Card Content -->
-                        <div class="card-content">
-                            <div class="submission-info">
-                                <div class="submission-header">
-                                    <div class="submission-icon">
-                                        <i class="bi bi-calendar-check"></i>
-                                    </div>
-                                    <h4 class="submission-title">Submission Details</h4>
+                    <!-- Card Content -->
+                    <div class="card-content">
+                        <div class="submission-info">
+                            <div class="submission-header">
+                                <div class="submission-icon">
+                                    <i class="bi bi-calendar-check"></i>
                                 </div>
-                                <div class="submission-date">
-                                    @item.Response.SubmissionDate.ToString("MMMM dd, yyyy 'at' HH:mm")
-                                </div>
+                                <h4 class="submission-title">Submission Details</h4>
+                            </div>
+                            <div class="submission-date">
+                                @item.Response.SubmissionDate.ToString("MMMM dd, yyyy 'at' HH:mm")
                             </div>
                         </div>
-
-                        <!-- Action Section -->
-                        <div class="action-section">
-                            <a asp-action="ViewResponse" asp-route-id="@item.Response.Id" class="action-btn">
-                                <i class="bi bi-graph-up-arrow"></i>
-                                View Response Details
-                            </a>
-                        </div>
                     </div>
-                }
-            </div>
-        }
-        else
-        {
-            <!-- Empty State -->
-            <div class="empty-state fade-in">
-                <div class="empty-state-icon">
-                    <i class="bi bi-clipboard-x"></i>
+
+                    <!-- Action Section -->
+                    <div class="action-section">
+                        <a asp-action="ViewResponse" asp-route-id="@item.Response.Id" class="action-btn">
+                            <i class="bi bi-graph-up-arrow"></i>
+                            View Response Details
+                        </a>
+                    </div>
                 </div>
-                <h3>No Responses Yet</h3>
-                <p>When users start submitting survey responses, they will appear here for you to manage and review.</p>
+            }
+        </div>
+    }
+    else
+    {
+        <!-- Empty State -->
+        <div class="empty-state fade-in">
+            <div class="empty-state-icon">
+                <i class="bi bi-clipboard-x"></i>
             </div>
-        }
-    </form>
+            <h3>No Responses Yet</h3>
+            <p>When users start submitting survey responses, they will appear here for you to manage and review.</p>
+        </div>
+    }
+</div>
+
+<!-- Confirmation Modal -->
+<div id="confirmationModal" class="confirmation-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <!-- Icon Row -->
+            <div class="modal-icon-row">
+                <div id="modalIcon" class="modal-icon">
+                    <i id="modalIconSymbol" class="bi"></i>
+                </div>
+            </div>
+            
+            <!-- Title Row -->
+            <div class="modal-title-row">
+                <h2 id="modalTitle" class="modal-title"></h2>
+            </div>
+            
+            <!-- Subtitle Row -->
+            <div class="modal-subtitle-row">
+                <p id="modalSubtitle" class="modal-subtitle"></p>
+            </div>
+        </div>
+        
+        <div class="modal-body">
+            <div id="selectionInfo" class="selection-info">
+                <div id="selectionCount" class="selection-count"></div>
+                <div id="selectionMeta" class="selection-meta"></div>
+            </div>
+            
+            <div id="modalDescription" class="modal-description">
+                <h4 id="descriptionTitle"></h4>
+                <ul id="descriptionList"></ul>
+            </div>
+        </div>
+        
+        <div class="modal-actions">
+            <button type="button" id="cancelBtn" class="modal-btn modal-btn-cancel">
+                <i class="bi bi-x-circle"></i>
+                Cancel
+            </button>
+            <button type="button" id="confirmBtn" class="modal-btn modal-btn-confirm">
+                <i id="confirmIcon" class="bi"></i>
+                <span id="confirmText"></span>
+            </button>
+        </div>
+    </div>
 </div>
 
 @section Scripts {
     <script>
-        $(document).ready(function () {
+        document.addEventListener('DOMContentLoaded', function () {
             let selectedResponses = [];
+
+            console.log('Response Management JS Loaded');
+
+            // Modal elements
+            const modal = document.getElementById('confirmationModal');
+            const modalIcon = document.getElementById('modalIcon');
+            const modalIconSymbol = document.getElementById('modalIconSymbol');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalSubtitle = document.getElementById('modalSubtitle');
+            const selectionInfo = document.getElementById('selectionInfo');
+            const selectionCount = document.getElementById('selectionCount');
+            const selectionMeta = document.getElementById('selectionMeta');
+            const modalDescription = document.getElementById('modalDescription');
+            const descriptionTitle = document.getElementById('descriptionTitle');
+            const descriptionList = document.getElementById('descriptionList');
+            const cancelBtn = document.getElementById('cancelBtn');
+            const confirmBtn = document.getElementById('confirmBtn');
+            const confirmIcon = document.getElementById('confirmIcon');
+            const confirmText = document.getElementById('confirmText');
+
+            let currentAction = '';
+
+            // Modal configurations
+            const modalConfigs = {
+                deleteSelected: {
+                    icon: 'bi-trash-fill',
+                    iconClass: 'delete-selected',
+                    title: 'Delete Selected Responses',
+                    subtitle: 'Permanently remove the selected survey responses',
+                    confirmText: 'Delete Selected',
+                    confirmIcon: 'bi-trash-fill',
+                    confirmClass: 'delete-selected',
+                    descriptionTitle: '<i class="bi bi-exclamation-triangle"></i> What will be deleted:',
+                    descriptionItems: [
+                        'All selected response records will be permanently removed',
+                        'Associated response details and answers will be deleted',
+                        'This action cannot be undone or recovered',
+                        'Response statistics will be updated automatically'
+                    ]
+                },
+                deleteAll: {
+                    icon: 'bi-trash3-fill',
+                    iconClass: 'delete-all',
+                    title: 'Delete All Responses',
+                    subtitle: 'Permanently remove every survey response in the system',
+                    confirmText: 'Delete Everything',
+                    confirmIcon: 'bi-trash3-fill',
+                    confirmClass: 'delete-all',
+                    descriptionTitle: '<i class="bi bi-exclamation-triangle-fill"></i> This will delete:',
+                    descriptionItems: [
+                        'ALL response records in the entire system',
+                        'ALL associated response details and answers',
+                        'ALL response statistics and data',
+                        'This action cannot be undone - everything will be lost permanently'
+                    ]
+                }
+            };
+
+            function showConfirmationModal(action, count = 0) {
+                currentAction = action;
+                const config = modalConfigs[action];
+                
+                // Set modal icon and styling
+                modalIcon.className = `modal-icon ${config.iconClass}`;
+                modalIconSymbol.className = `bi ${config.icon}`;
+                
+                // Set modal content
+                modalTitle.textContent = config.title;
+                modalSubtitle.textContent = config.subtitle;
+                
+                // Set selection info
+                if (action === 'deleteSelected') {
+                    selectionCount.textContent = `${count} Response${count !== 1 ? 's' : ''} Selected`;
+                    selectionMeta.textContent = 'These responses will be permanently deleted';
+                } else if (action === 'deleteAll') {
+                    selectionCount.textContent = `${count} Total Responses`;
+                    selectionMeta.textContent = 'Every response in the system will be deleted';
+                }
+                
+                // Set description
+                descriptionTitle.innerHTML = config.descriptionTitle;
+                descriptionList.innerHTML = config.descriptionItems.map(item => `<li>${item}</li>`).join('');
+                
+                // Set confirm button
+                confirmBtn.className = `modal-btn modal-btn-confirm ${config.confirmClass}`;
+                confirmIcon.className = `bi ${config.confirmIcon}`;
+                confirmText.textContent = config.confirmText;
+                
+                // Show modal with animation
+                modal.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function hideConfirmationModal() {
+                modal.classList.remove('show');
+                document.body.style.overflow = '';
+                
+                // Reset after animation
+                setTimeout(() => {
+                    currentAction = '';
+                }, 300);
+            }
+
+            // Modal event listeners
+            cancelBtn.addEventListener('click', hideConfirmationModal);
+
+            confirmBtn.addEventListener('click', function() {
+                if (currentAction === 'deleteSelected') {
+                    // Add loading state
+                    this.classList.add('loading');
+                    this.disabled = true;
+
+                    // Create form with selected IDs
+                    const form = document.getElementById('deleteMultipleForm');
+                    const container = document.getElementById('selectedResponsesContainer');
+                    container.innerHTML = '';
+
+                    selectedResponses.forEach(function(id) {
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = 'ids';
+                        input.value = id;
+                        container.appendChild(input);
+                    });
+
+                    console.log('Submitting delete selected form with IDs:', selectedResponses);
+                    form.submit();
+                } else if (currentAction === 'deleteAll') {
+                    // Add loading state
+                    this.classList.add('loading');
+                    this.disabled = true;
+
+                    const form = document.getElementById('deleteAllForm');
+                    console.log('Submitting delete all form');
+                    form.submit();
+                }
+                
+                hideConfirmationModal();
+            });
+
+            // Close modal when clicking outside
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    hideConfirmationModal();
+                }
+            });
+
+            // Close modal with Escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && modal.classList.contains('show')) {
+                    hideConfirmationModal();
+                }
+            });
+
+            // Prevent modal content clicks from closing modal
+            modal.querySelector('.modal-content').addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
 
             // Update selection UI
             function updateSelectionUI() {
                 const selectedCount = selectedResponses.length;
-                $('#selectedCount').text(selectedCount + ' selected');
-                $('#selectionText').text(selectedCount + ' response' + (selectedCount !== 1 ? 's' : '') + ' selected');
-                
-                if (selectedCount > 0) {
-                    $('#selectionControls').addClass('show');
-                } else {
-                    $('#selectionControls').removeClass('show');
+                const selectedCountElement = document.getElementById('selectedCount');
+                const selectionTextElement = document.getElementById('selectionText');
+                const selectionControlsElement = document.getElementById('selectionControls');
+
+                console.log('Updating UI, selected count:', selectedCount);
+
+                if (selectedCountElement) {
+                    selectedCountElement.textContent = selectedCount + ' selected';
+                }
+
+                if (selectionTextElement) {
+                    selectionTextElement.textContent = selectedCount + ' response' + (selectedCount !== 1 ? 's' : '') + ' selected';
+                }
+
+                if (selectionControlsElement) {
+                    if (selectedCount > 0) {
+                        selectionControlsElement.classList.add('show');
+                    } else {
+                        selectionControlsElement.classList.remove('show');
+                    }
                 }
 
                 // Update master checkbox state
-                const totalResponses = $('.response-checkbox-input').length;
-                const masterCheckbox = $('#selectAllCheckbox');
-                const masterInput = $('#selectAllInput');
-                
-                if (selectedCount === 0) {
-                    masterCheckbox.removeClass('checked');
-                    masterInput.prop('checked', false);
-                    masterCheckbox.find('i').hide();
-                } else if (selectedCount === totalResponses) {
-                    masterCheckbox.addClass('checked');
-                    masterInput.prop('checked', true);
-                    masterCheckbox.find('i').show();
-                } else {
-                    masterCheckbox.removeClass('checked');
-                    masterInput.prop('checked', false);
-                    masterCheckbox.find('i').hide();
+                const totalResponses = document.querySelectorAll('.response-checkbox-input').length;
+                const masterCheckbox = document.getElementById('selectAllCheckbox');
+                const masterInput = document.getElementById('selectAllInput');
+                const masterIcon = masterCheckbox ? masterCheckbox.querySelector('i') : null;
+
+                if (masterCheckbox && masterInput && masterIcon) {
+                    if (selectedCount === 0) {
+                        masterCheckbox.classList.remove('checked');
+                        masterInput.checked = false;
+                        masterIcon.style.display = 'none';
+                    } else if (selectedCount === totalResponses) {
+                        masterCheckbox.classList.add('checked');
+                        masterInput.checked = true;
+                        masterIcon.style.display = 'block';
+                    } else {
+                        masterCheckbox.classList.remove('checked');
+                        masterInput.checked = false;
+                        masterIcon.style.display = 'none';
+                    }
                 }
             }
 
-            // Handle individual response checkbox clicks
-            $(document).on('change', '.response-checkbox-input', function() {
-                const responseCard = $(this).closest('.response-card');
-                const responseId = $(this).val();
-                const checkbox = $(this).closest('.custom-checkbox');
-                
-                if ($(this).is(':checked')) {
-                    if (!selectedResponses.includes(responseId)) {
-                        selectedResponses.push(responseId);
-                        responseCard.addClass('selected');
-                        checkbox.addClass('checked');
-                        checkbox.find('i').show();
-                    }
-                } else {
-                    selectedResponses = selectedResponses.filter(id => id !== responseId);
-                    responseCard.removeClass('selected');
-                    checkbox.removeClass('checked');
-                    checkbox.find('i').hide();
-                }
-                
-                updateSelectionUI();
-            });
+            // Handle individual checkbox changes
+            document.addEventListener('change', function(e) {
+                if (e.target.classList.contains('response-checkbox-input')) {
+                    const responseId = parseInt(e.target.value);
+                    const responseCard = e.target.closest('.response-card');
+                    
+                    console.log('Checkbox changed:', responseId, 'checked:', e.target.checked);
 
-            // Handle checkbox visual clicks
-            $(document).on('click', '.response-select-checkbox', function() {
-                const input = $(this).find('input');
-                input.prop('checked', !input.is(':checked')).trigger('change');
+                    if (e.target.checked) {
+                        if (!selectedResponses.includes(responseId)) {
+                            selectedResponses.push(responseId);
+                            if (responseCard) {
+                                responseCard.classList.add('selected');
+                            }
+                        }
+                    } else {
+                        selectedResponses = selectedResponses.filter(id => id !== responseId);
+                        if (responseCard) {
+                            responseCard.classList.remove('selected');
+                        }
+                    }
+
+                    updateSelectionUI();
+                    console.log('Selected responses:', selectedResponses);
+                }
             });
 
             // Handle master checkbox
-            $('#selectAllCheckbox').click(function() {
-                const shouldSelectAll = selectedResponses.length !== $('.response-checkbox-input').length;
-                
-                $('.response-checkbox-input').each(function() {
-                    const responseCard = $(this).closest('.response-card');
-                    const responseId = $(this).val();
-                    const checkbox = $(this).closest('.custom-checkbox');
+            const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+            if (selectAllCheckbox) {
+                selectAllCheckbox.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
                     
-                    $(this).prop('checked', shouldSelectAll);
+                    const allInputs = document.querySelectorAll('.response-checkbox-input');
+                    const shouldSelectAll = selectedResponses.length !== allInputs.length;
                     
+                    console.log('Master checkbox clicked, shouldSelectAll:', shouldSelectAll);
+
                     if (shouldSelectAll) {
-                        if (!selectedResponses.includes(responseId)) {
+                        selectedResponses = [];
+                        allInputs.forEach(function(input) {
+                            const responseId = parseInt(input.value);
+                            const responseCard = input.closest('.response-card');
+                            
+                            input.checked = true;
                             selectedResponses.push(responseId);
-                        }
-                        responseCard.addClass('selected');
-                        checkbox.addClass('checked');
-                        checkbox.find('i').show();
+                            if (responseCard) {
+                                responseCard.classList.add('selected');
+                            }
+                        });
                     } else {
                         selectedResponses = [];
-                        responseCard.removeClass('selected');
-                        checkbox.removeClass('checked');
-                        checkbox.find('i').hide();
+                        allInputs.forEach(function(input) {
+                            const responseCard = input.closest('.response-card');
+                            
+                            input.checked = false;
+                            if (responseCard) {
+                                responseCard.classList.remove('selected');
+                            }
+                        });
                     }
+
+                    updateSelectionUI();
+                    console.log('Updated selected responses:', selectedResponses);
                 });
-                
-                updateSelectionUI();
-            });
+            }
 
             // Deselect all button
-            $('#deselectAllBtn').click(function() {
-                selectedResponses = [];
-                $('.response-checkbox-input').prop('checked', false);
-                $('.response-card').removeClass('selected');
-                $('.custom-checkbox').removeClass('checked');
-                $('.custom-checkbox i').hide();
-                updateSelectionUI();
-            });
+            const deselectAllBtn = document.getElementById('deselectAllBtn');
+            if (deselectAllBtn) {
+                deselectAllBtn.addEventListener('click', function() {
+                    console.log('Deselect all clicked');
+                    selectedResponses = [];
+                    
+                    document.querySelectorAll('.response-checkbox-input').forEach(function(input) {
+                        const responseCard = input.closest('.response-card');
+                        input.checked = false;
+                        if (responseCard) {
+                            responseCard.classList.remove('selected');
+                        }
+                    });
+                    
+                    updateSelectionUI();
+                });
+            }
 
-            // Delete selected button with confirmation
-            $('#deleteSelectedBtn').click(function(e) {
-                if (selectedResponses.length === 0) {
-                    e.preventDefault();
-                    alert('Please select at least one response to delete.');
-                    return;
-                }
+            // Delete selected button with beautiful modal
+            const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
+            if (deleteSelectedBtn) {
+                deleteSelectedBtn.addEventListener('click', function() {
+                    console.log('Delete selected clicked. Selected responses:', selectedResponses);
+                    
+                    if (selectedResponses.length === 0) {
+                        alert('Please select at least one response to delete.');
+                        return;
+                    }
 
-                const confirmMessage = `Are you sure you want to delete ${selectedResponses.length} response${selectedResponses.length !== 1 ? 's' : ''}? This action cannot be undone.`;
-                
-                if (!confirm(confirmMessage)) {
-                    e.preventDefault();
-                    return;
-                }
+                    showConfirmationModal('deleteSelected', selectedResponses.length);
+                });
+            }
 
-                // Add loading state
-                $(this).addClass('loading').prop('disabled', true);
-            });
+            // Delete all button with beautiful modal
+            const deleteAllBtn = document.getElementById('deleteAllBtn');
+            if (deleteAllBtn) {
+                deleteAllBtn.addEventListener('click', function() {
+                    const totalResponses = document.querySelectorAll('.response-checkbox-input').length;
+                    showConfirmationModal('deleteAll', totalResponses);
+                });
+            }
 
             // Initialize UI
             updateSelectionUI();
+            
+            // Debug info
+            const checkboxes = document.querySelectorAll('.response-checkbox-input');
+            console.log('Total checkboxes found:', checkboxes.length);
+            
+            // Test each checkbox
+            checkboxes.forEach((checkbox, index) => {
+                console.log(`Checkbox ${index}:`, {
+                    id: checkbox.id,
+                    value: checkbox.value,
+                    visible: checkbox.offsetParent !== null
+                });
+            });
         });
-
-        // Legacy function for backward compatibility
-        function selectAll(source) {
-            const event = new Event('click');
-            document.getElementById('selectAllCheckbox').dispatchEvent(event);
-        }
     </script>
 }

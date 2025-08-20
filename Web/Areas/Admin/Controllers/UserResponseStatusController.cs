@@ -14,77 +14,198 @@ namespace Web.Areas.Admin.Controllers
     {
         private readonly SurveyContext _context;
         private readonly IUserResponseRepository _userResponse;
+        private readonly ILogger<UserResponseStatusController> _logger;
 
-        public UserResponseStatusController(SurveyContext context, IUserResponseRepository userResponse)
+        public UserResponseStatusController(
+            SurveyContext context,
+            IUserResponseRepository userResponse,
+            ILogger<UserResponseStatusController> logger)
         {
             _context = context;
             _userResponse = userResponse;
+            _logger = logger;
         }
+
         public async Task<IActionResult> Index()
         {
-            var usersWithQuestionnaires = await _context.Responses
-            .Include(r => r.Questionnaire)
-            .GroupBy(r => r.UserEmail)
-            .Select(g => new UserResponsesViewModel
+            try
             {
-                UserName = g.FirstOrDefault().UserName, // Display the first username found for the email
-                UserEmail = g.Key,
-                Responses = g.Select(r => new Response
-                {
-                    Questionnaire = r.Questionnaire
-                }).Distinct().ToList()
-            })
-            .ToListAsync();
+                var usersWithQuestionnaires = await _context.Responses
+                    .Include(r => r.Questionnaire)
+                    .GroupBy(r => r.UserEmail)
+                    .Select(g => new UserResponsesViewModel
+                    {
+                        UserName = g.FirstOrDefault().UserName,
+                        UserEmail = g.Key,
+                        Responses = g.Select(r => new Response
+                        {
+                            Questionnaire = r.Questionnaire
+                        }).Distinct().ToList()
+                    })
+                    .ToListAsync();
 
-            return View(usersWithQuestionnaires);
+                return View(usersWithQuestionnaires);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving user responses");
+                TempData["Error"] = "Error loading user responses. Please try again.";
+                return View(new List<UserResponsesViewModel>());
+            }
         }
 
         public async Task<IActionResult> UserResponsesStatus(string userEmail)
         {
-            var responses = await _context.Responses
-                .Include(r => r.Questionnaire)
-                    .ThenInclude(q => q.Questions.OrderBy(qu => qu.Id))
-                .Include(r => r.ResponseDetails)
-                    .ThenInclude(rd => rd.Question)
-                        .ThenInclude(q => q.Answers)
-                .Include(r => r.ResponseDetails)
-                    .ThenInclude(rd => rd.ResponseAnswers)
-                .Where(r => r.UserEmail == userEmail)
-                .ToListAsync();
-
-            if (responses == null || !responses.Any())
+            try
             {
-                return NotFound();
+                var responses = await _context.Responses
+                    .Include(r => r.Questionnaire)
+                        .ThenInclude(q => q.Questions.OrderBy(qu => qu.Id))
+                    .Include(r => r.ResponseDetails)
+                        .ThenInclude(rd => rd.Question)
+                            .ThenInclude(q => q.Answers)
+                    .Include(r => r.ResponseDetails)
+                        .ThenInclude(rd => rd.ResponseAnswers)
+                    .Where(r => r.UserEmail == userEmail)
+                    .ToListAsync();
+
+                if (responses == null || !responses.Any())
+                {
+                    TempData["Warning"] = "No responses found for this user.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                var userName = responses.First().UserName;
+
+                var viewModel = new UserResponsesViewModel
+                {
+                    UserName = userName,
+                    UserEmail = userEmail,
+                    Responses = responses
+                };
+
+                return View(viewModel);
             }
-
-            var userName = responses.First().UserName;
-
-            var viewModel = new UserResponsesViewModel
+            catch (Exception ex)
             {
-                UserName = userName,
-                UserEmail = userEmail,
-                Responses = responses
-            };
-
-            return View(viewModel);
+                _logger.LogError(ex, "Error retrieving user responses for {UserEmail}", userEmail);
+                TempData["Error"] = "Error loading user response details.";
+                return RedirectToAction(nameof(Index));
+            }
         }
 
         [HttpPost]
-        public async Task<IActionResult> DeleteSelected(string[] selectedEmails)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteSelected(List<string> selectedEmails)
         {
-            if (selectedEmails == null || selectedEmails.Length == 0)
+            if (selectedEmails == null || !selectedEmails.Any())
             {
+                TempData["Warning"] = "No users selected for deletion.";
                 return RedirectToAction(nameof(Index));
             }
 
-            var responsesToDelete = await _context.Responses
-                .Where(r => selectedEmails.Contains(r.UserEmail))
-                .ToListAsync();
-
-            if (responsesToDelete.Any())
+            try
             {
+                _logger.LogInformation("Attempting to delete responses for {Count} users: {Emails}",
+                    selectedEmails.Count, string.Join(", ", selectedEmails));
+
+                var responsesToDelete = await _context.Responses
+                    .Include(r => r.ResponseDetails)
+                        .ThenInclude(rd => rd.ResponseAnswers)
+                    .Where(r => selectedEmails.Contains(r.UserEmail))
+                    .ToListAsync();
+
+                if (!responsesToDelete.Any())
+                {
+                    TempData["Warning"] = "No responses found for the selected users.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                // Remove related data first to avoid foreign key constraints
+                foreach (var response in responsesToDelete)
+                {
+                    if (response.ResponseDetails != null)
+                    {
+                        foreach (var detail in response.ResponseDetails)
+                        {
+                            if (detail.ResponseAnswers != null)
+                            {
+                                _context.ResponseAnswers.RemoveRange(detail.ResponseAnswers);
+                            }
+                        }
+                        _context.ResponseDetails.RemoveRange(response.ResponseDetails);
+                    }
+                }
+
                 _context.Responses.RemoveRange(responsesToDelete);
                 await _context.SaveChangesAsync();
+
+                _logger.LogInformation("Successfully deleted {Count} responses for {UserCount} users",
+                    responsesToDelete.Count, selectedEmails.Count);
+
+                TempData["Success"] = $"Successfully deleted responses for {selectedEmails.Count} user{(selectedEmails.Count > 1 ? "s" : "")} ({responsesToDelete.Count} response{(responsesToDelete.Count > 1 ? "s" : "")} total).";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting responses for users: {Emails}", string.Join(", ", selectedEmails));
+                TempData["Error"] = "Error deleting user responses. Please try again.";
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteUserResponses(string userEmail)
+        {
+            if (string.IsNullOrEmpty(userEmail))
+            {
+                TempData["Error"] = "User email is required.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            try
+            {
+                var responsesToDelete = await _context.Responses
+                    .Include(r => r.ResponseDetails)
+                        .ThenInclude(rd => rd.ResponseAnswers)
+                    .Where(r => r.UserEmail == userEmail)
+                    .ToListAsync();
+
+                if (!responsesToDelete.Any())
+                {
+                    TempData["Warning"] = "No responses found for this user.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                // Remove related data first
+                foreach (var response in responsesToDelete)
+                {
+                    if (response.ResponseDetails != null)
+                    {
+                        foreach (var detail in response.ResponseDetails)
+                        {
+                            if (detail.ResponseAnswers != null)
+                            {
+                                _context.ResponseAnswers.RemoveRange(detail.ResponseAnswers);
+                            }
+                        }
+                        _context.ResponseDetails.RemoveRange(response.ResponseDetails);
+                    }
+                }
+
+                _context.Responses.RemoveRange(responsesToDelete);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("Successfully deleted {Count} responses for user {UserEmail}",
+                    responsesToDelete.Count, userEmail);
+
+                TempData["Success"] = $"Successfully deleted all responses for user {userEmail}.";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting responses for user {UserEmail}", userEmail);
+                TempData["Error"] = "Error deleting user responses. Please try again.";
             }
 
             return RedirectToAction(nameof(Index));
@@ -92,29 +213,40 @@ namespace Web.Areas.Admin.Controllers
 
         public async Task<IActionResult> GenerateReport(string userEmail, string format)
         {
-            var responses = await _context.Responses
-                .Include(r => r.Questionnaire)
-                .Include(r => r.ResponseDetails)
-                    .ThenInclude(rd => rd.Question)
-                        .ThenInclude(q => q.Answers)
-                .Include(r => r.ResponseDetails)
-                    .ThenInclude(rd => rd.ResponseAnswers)
-                .Where(r => r.UserEmail == userEmail)
-                .ToListAsync();
-
-            if (responses == null || !responses.Any())
+            try
             {
-                return NotFound();
+                var responses = await _context.Responses
+                    .Include(r => r.Questionnaire)
+                    .Include(r => r.ResponseDetails)
+                        .ThenInclude(rd => rd.Question)
+                            .ThenInclude(q => q.Answers)
+                    .Include(r => r.ResponseDetails)
+                        .ThenInclude(rd => rd.ResponseAnswers)
+                    .Where(r => r.UserEmail == userEmail)
+                    .ToListAsync();
+
+                if (responses == null || !responses.Any())
+                {
+                    TempData["Warning"] = "No responses found for this user.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                switch (format.ToLower())
+                {
+                    case "pdf":
+                        return GeneratePdfReport(responses);
+                    case "excel":
+                        return GenerateExcelReport(responses);
+                    default:
+                        TempData["Error"] = "Unsupported report format.";
+                        return RedirectToAction(nameof(Index));
+                }
             }
-
-            switch (format.ToLower())
+            catch (Exception ex)
             {
-                case "pdf":
-                    return GeneratePdfReport(responses);
-                case "excel":
-                    return GenerateExcelReport(responses);
-                default:
-                    return BadRequest("Unsupported report format.");
+                _logger.LogError(ex, "Error generating report for user {UserEmail}", userEmail);
+                TempData["Error"] = "Error generating report. Please try again.";
+                return RedirectToAction(nameof(Index));
             }
         }
 
@@ -126,7 +258,7 @@ namespace Web.Areas.Admin.Controllers
             var stream = new MemoryStream();
             var document = new Document(PageSize.A4, 50, 50, 25, 25);
             var writer = PdfWriter.GetInstance(document, stream);
-            writer.CloseStream = false; // Prevent the stream from being closed when the document is closed
+            writer.CloseStream = false;
 
             document.Open();
 
@@ -190,7 +322,7 @@ namespace Web.Areas.Admin.Controllers
                         table.AddCell(new PdfPCell(new Phrase("Answers:", cellFont)) { Padding = 5 });
                         var answers = string.Join(", ", detail.ResponseAnswers.Select(a => detail.Question.Answers.FirstOrDefault(ans => ans.Id == a.AnswerId)?.Text));
 
-                        // NEW: Include "Other" text if available
+                        // Include "Other" text if available
                         if (!string.IsNullOrEmpty(detail.OtherText))
                         {
                             answers += string.IsNullOrEmpty(answers)
@@ -228,7 +360,7 @@ namespace Web.Areas.Admin.Controllers
                     var logo = new FileInfo(logoPath);
                     var picture = worksheet.Drawings.AddPicture("Logo", logo);
                     picture.SetPosition(0, 0, 0, 0);
-                    picture.SetSize(300, 70); // Adjust the size as needed
+                    picture.SetSize(300, 70);
                 }
 
                 // Add a title
@@ -272,7 +404,7 @@ namespace Web.Areas.Admin.Controllers
                         {
                             var answers = string.Join(", ", detail.ResponseAnswers.Select(a => detail.Question.Answers.FirstOrDefault(ans => ans.Id == a.AnswerId)?.Text));
 
-                            // NEW: Include "Other" text if available
+                            // Include "Other" text if available
                             if (!string.IsNullOrEmpty(detail.OtherText))
                             {
                                 answers += string.IsNullOrEmpty(answers)
@@ -299,21 +431,31 @@ namespace Web.Areas.Admin.Controllers
 
         public async Task<IActionResult> GenerateQuestionnairePdfReport(int questionnaireId)
         {
-            var response = await _context.Responses
-                .Include(r => r.Questionnaire)
-                .Include(r => r.ResponseDetails)
-                    .ThenInclude(rd => rd.Question)
-                        .ThenInclude(q => q.Answers)
-                .Include(r => r.ResponseDetails)
-                    .ThenInclude(rd => rd.ResponseAnswers)
-                .FirstOrDefaultAsync(r => r.QuestionnaireId == questionnaireId);
-
-            if (response == null)
+            try
             {
-                return NotFound();
-            }
+                var response = await _context.Responses
+                    .Include(r => r.Questionnaire)
+                    .Include(r => r.ResponseDetails)
+                        .ThenInclude(rd => rd.Question)
+                            .ThenInclude(q => q.Answers)
+                    .Include(r => r.ResponseDetails)
+                        .ThenInclude(rd => rd.ResponseAnswers)
+                    .FirstOrDefaultAsync(r => r.QuestionnaireId == questionnaireId);
 
-            return GeneratePdfReportForQuestionnaire(response);
+                if (response == null)
+                {
+                    TempData["Warning"] = "No response found for this questionnaire.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                return GeneratePdfReportForQuestionnaire(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error generating questionnaire PDF report for {QuestionnaireId}", questionnaireId);
+                TempData["Error"] = "Error generating PDF report. Please try again.";
+                return RedirectToAction(nameof(Index));
+            }
         }
 
         private IActionResult GeneratePdfReportForQuestionnaire(Response response)
@@ -324,7 +466,7 @@ namespace Web.Areas.Admin.Controllers
             var stream = new MemoryStream();
             var document = new Document(PageSize.A4, 50, 50, 25, 25);
             var writer = PdfWriter.GetInstance(document, stream);
-            writer.CloseStream = false; // Prevent the stream from being closed when the document is closed
+            writer.CloseStream = false;
 
             document.Open();
 
@@ -394,7 +536,7 @@ namespace Web.Areas.Admin.Controllers
                     table.AddCell(new PdfPCell(new Phrase("Answers:", cellFont)) { Padding = 5 });
                     var answers = string.Join(", ", detail.ResponseAnswers.Select(a => detail.Question.Answers.FirstOrDefault(ans => ans.Id == a.AnswerId)?.Text));
 
-                    // NEW: Include "Other" text if available
+                    // Include "Other" text if available
                     if (!string.IsNullOrEmpty(detail.OtherText))
                     {
                         answers += string.IsNullOrEmpty(answers)
@@ -416,21 +558,31 @@ namespace Web.Areas.Admin.Controllers
 
         public async Task<IActionResult> GenerateQuestionnaireExcelReport(int questionnaireId)
         {
-            var response = await _context.Responses
-                .Include(r => r.Questionnaire)
-                .Include(r => r.ResponseDetails)
-                    .ThenInclude(rd => rd.Question)
-                        .ThenInclude(q => q.Answers)
-                .Include(r => r.ResponseDetails)
-                    .ThenInclude(rd => rd.ResponseAnswers)
-                .FirstOrDefaultAsync(r => r.QuestionnaireId == questionnaireId);
-
-            if (response == null)
+            try
             {
-                return NotFound();
-            }
+                var response = await _context.Responses
+                    .Include(r => r.Questionnaire)
+                    .Include(r => r.ResponseDetails)
+                        .ThenInclude(rd => rd.Question)
+                            .ThenInclude(q => q.Answers)
+                    .Include(r => r.ResponseDetails)
+                        .ThenInclude(rd => rd.ResponseAnswers)
+                    .FirstOrDefaultAsync(r => r.QuestionnaireId == questionnaireId);
 
-            return GenerateExcelReportForQuestionnaire(response);
+                if (response == null)
+                {
+                    TempData["Warning"] = "No response found for this questionnaire.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                return GenerateExcelReportForQuestionnaire(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error generating questionnaire Excel report for {QuestionnaireId}", questionnaireId);
+                TempData["Error"] = "Error generating Excel report. Please try again.";
+                return RedirectToAction(nameof(Index));
+            }
         }
 
         private IActionResult GenerateExcelReportForQuestionnaire(Response response)
@@ -449,7 +601,7 @@ namespace Web.Areas.Admin.Controllers
                     var logo = new FileInfo(logoPath);
                     var picture = worksheet.Drawings.AddPicture("Logo", logo);
                     picture.SetPosition(0, 0, 2, 0);
-                    picture.SetSize(300, 60); // Adjust the size as needed
+                    picture.SetSize(300, 60);
                 }
 
                 // Add user details
@@ -498,7 +650,7 @@ namespace Web.Areas.Admin.Controllers
                     {
                         var answers = string.Join(", ", detail.ResponseAnswers.Select(a => detail.Question.Answers.FirstOrDefault(ans => ans.Id == a.AnswerId)?.Text));
 
-                        // NEW: Include "Other" text if available
+                        // Include "Other" text if available
                         if (!string.IsNullOrEmpty(detail.OtherText))
                         {
                             answers += string.IsNullOrEmpty(answers)
@@ -519,6 +671,22 @@ namespace Web.Areas.Admin.Controllers
 
                 return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"{response.Questionnaire.Title}_{userEmail}.xlsx");
             }
+        }
+
+        // API endpoint to check if user responses exist
+        [HttpGet]
+        public async Task<IActionResult> CheckUserResponsesExist(string userEmail)
+        {
+            var exists = await _context.Responses.AnyAsync(r => r.UserEmail == userEmail);
+            return Json(new { exists });
+        }
+
+        // API endpoint to get user response count
+        [HttpGet]
+        public async Task<IActionResult> GetUserResponseCount()
+        {
+            var count = await _context.Responses.GroupBy(r => r.UserEmail).CountAsync();
+            return Json(new { count });
         }
     }
 }

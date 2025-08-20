@@ -1,0 +1,574 @@
+﻿@{
+    ViewData["Title"] = "Questionnaire Status Guide";
+   
+}
+
+<style>
+    .status-guide-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+
+    .guide-header {
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        color: white;
+        padding: 2rem;
+        text-align: center;
+    }
+
+        .guide-header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 800;
+        }
+
+        .guide-header p {
+            margin: 0.5rem 0 0;
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+    .status-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 0;
+    }
+
+    .status-card {
+        padding: 2rem;
+        border-right: 1px solid #e2e8f0;
+        position: relative;
+    }
+
+        .status-card:last-child {
+            border-right: none;
+        }
+
+        .status-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+        }
+
+    .draft-card::before {
+        background: linear-gradient(90deg, #6b7280, #9ca3af);
+    }
+
+    .published-card::before {
+        background: linear-gradient(90deg, #10b981, #34d399);
+    }
+
+    .archived-card::before {
+        background: linear-gradient(90deg, #1f2937, #374151);
+    }
+
+    .status-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .status-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: white;
+    }
+
+    .draft-icon {
+        background: linear-gradient(135deg, #6b7280, #9ca3af);
+    }
+
+    .published-icon {
+        background: linear-gradient(135deg, #10b981, #34d399);
+    }
+
+    .archived-icon {
+        background: linear-gradient(135deg, #1f2937, #374151);
+    }
+
+    .status-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .status-subtitle {
+        color: #6b7280;
+        font-size: 0.9rem;
+        margin: 0;
+    }
+
+    .capabilities-section {
+        margin-bottom: 2rem;
+    }
+
+    .section-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .capability-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .capability-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+        .capability-item:last-child {
+            border-bottom: none;
+        }
+
+    .capability-icon {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: bold;
+        flex-shrink: 0;
+    }
+
+    .can-do {
+        background: #10b981;
+        color: white;
+    }
+
+    .cannot-do {
+        background: #ef4444;
+        color: white;
+    }
+
+    .limited {
+        background: #f59e0b;
+        color: white;
+    }
+
+    .capability-text {
+        font-size: 0.9rem;
+        color: #374151;
+    }
+
+    .workflow-section {
+        background: #f8fafc;
+        padding: 2rem;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .workflow-title {
+        text-align: center;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #374151;
+        margin-bottom: 2rem;
+    }
+
+    .workflow-steps {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .workflow-step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .workflow-arrow {
+        font-size: 2rem;
+        color: #6b7280;
+    }
+
+    .step-icon {
+        width: 64px;
+        height: 64px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.75rem;
+        color: white;
+        margin-bottom: 0.5rem;
+    }
+
+    .step-title {
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 0.25rem;
+    }
+
+    .step-description {
+        font-size: 0.8rem;
+        color: #6b7280;
+        max-width: 120px;
+    }
+
+    .tips-section {
+        background: #f0f9ff;
+        border: 1px solid #bae6fd;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-top: 2rem;
+    }
+
+    .tips-title {
+        color: #0369a1;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .tip-item {
+        color: #0c4a6e;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .back-button {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1000;
+    }
+
+    @@media (max-width: 768px) {
+        .status-grid
+
+    {
+        grid-template-columns: 1fr;
+    }
+
+    .status-card {
+        border-right: none;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+        .status-card:last-child {
+            border-bottom: none;
+        }
+
+    .workflow-steps {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .workflow-arrow {
+        transform: rotate(90deg);
+    }
+
+    }
+</style>
+
+<!-- Back Button -->
+
+
+<div class="container mt-4">
+    <div class="status-guide-container">
+        <div class="guide-header">
+            <h1><i class="bi bi-clipboard-check"></i> Questionnaire Status Guide</h1>
+            <p>Complete breakdown of what you can do in each status</p>
+        </div>
+
+        <div class="status-grid">
+            <!-- DRAFT STATUS -->
+            <div class="status-card draft-card">
+                <div class="status-header">
+                    <div class="status-icon draft-icon"><i class="bi bi-pencil"></i></div>
+                    <div>
+                        <h2 class="status-title">Draft</h2>
+                        <p class="status-subtitle">Full editing freedom</p>
+                    </div>
+                </div>
+
+                <div class="capabilities-section">
+                    <h3 class="section-title"><i class="bi bi-check-circle text-success"></i> What You CAN Do</h3>
+                    <ul class="capability-list">
+                        <li class="capability-item">
+                            <div class="capability-icon can-do">✓</div>
+                            <span class="capability-text">Edit questionnaire title and description</span>
+                        </li>
+                        <li class="capability-item">
+                            <div class="capability-icon can-do">✓</div>
+                            <span class="capability-text">Add new questions</span>
+                        </li>
+                        <li class="capability-item">
+                            <div class="capability-icon can-do">✓</div>
+                            <span class="capability-text">Edit existing questions (text, type)</span>
+                        </li>
+                        <li class="capability-item">
+                            <div class="capability-icon can-do">✓</div>
+                            <span class="capability-text">Delete questions completely</span>
+                        </li>
+                        <li class="capability-item">
+                            <div class="capability-icon can-do">✓</div>
+                            <span class="capability-text">Add/edit/delete answers</span>
+                        </li>
+                        <li class="capability-item">
+                            <div class="capability-icon can-do">✓</div>
+                            <span class="capability-text">Reorder questions</span>
+                        </li>
+                        <li class="capability-item">
+                            <div class="capability-icon can-do">✓</div>
+                            <span class="capability-text">Delete entire questionnaire</span>
+                        </li>
+                        <li class="capability-item">
+                            <div class="capability-icon can-do">✓</div>
+                            <span class="capability-text">Publish questionnaire</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="capabilities-section">
+                    <h3 class="section-title"><i class="bi bi-x-circle text-danger"></i> What You CANNOT Do</h3>
+                    <ul class="capability-list">
+                        <li class="capability-item">
+                            <div class="capability-icon cannot-do">✗</div>
+                            <span class="capability-text">Send to respondents (must publish first)</span>
+                        </li>
+                        <li class="capability-item">
+                            <div class="capability-icon cannot-do">✗</div>
+                            <span class="capability-text">Collect responses (not live yet)</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="tips-section">
+                    <h4 class="tips-title"><i class="bi bi-lightbulb"></i> Best Practices</h4>
+                    <div class="tip-item">• Perfect your questions before publishing</div>
+                    <div class="tip-item">• Test question flow and logic</div>
+                    <div class="tip-item">• Review with team members</div>
+                    <div class="tip-item">• Preview how it looks to respondents</div>
+                </div>
+            </div>
+
+            <!-- PUBLISHED STATUS -->
+            <div class="status-card published-card">
+                <div class="status-header">
+                    <div class="status-icon published-icon"><i class="bi bi-broadcast"></i></div>
+                    <div>
+                        <h2 class="status-title">Published</h2>
+                        <p class="status-subtitle">Live & accepting responses</p>
+                    </div>
+                </div>
+
+                <div class="capabilities-section">
+                    <h3 class="section-title"><i class="bi bi-check-circle text-success"></i> What You CAN Do</h3>
+                    <ul class="capability-list">
+                        <li class="capability-item">
+                            <div class="capability-icon can-do">✓</div>
+                            <span class="capability-text">Edit questionnaire title and description</span>
+                        </li>
+                        <li class="capability-item">
+                            <div class="capability-icon can-do">✓</div>
+                            <span class="capability-text">Edit question text (preserve meaning)</span>
+                        </li>
+                        <li class="capability-item">
+                            <div class="capability-icon can-do">✓</div>
+                            <span class="capability-text">Add new questions</span>
+                        </li>
+                        <li class="capability-item">
+                            <div class="capability-icon can-do">✓</div>
+                            <span class="capability-text">Send questionnaire to respondents</span>
+                        </li>
+                        <li class="capability-item">
+                            <div class="capability-icon can-do">✓</div>
+                            <span class="capability-text">View responses and analytics</span>
+                        </li>
+                        <li class="capability-item">
+                            <div class="capability-icon can-do">✓</div>
+                            <span class="capability-text">Archive questionnaire</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="capabilities-section">
+                    <h3 class="section-title"><i class="bi bi-exclamation-triangle text-warning"></i> Limited Actions</h3>
+                    <ul class="capability-list">
+                        <li class="capability-item">
+                            <div class="capability-icon limited">⚠</div>
+                            <span class="capability-text">Remove questions (hidden, not deleted)</span>
+                        </li>
+                        <li class="capability-item">
+                            <div class="capability-icon limited">⚠</div>
+                            <span class="capability-text">Edit answers (only for questions without responses)</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="capabilities-section">
+                    <h3 class="section-title"><i class="bi bi-x-circle text-danger"></i> What You CANNOT Do</h3>
+                    <ul class="capability-list">
+                        <li class="capability-item">
+                            <div class="capability-icon cannot-do">✗</div>
+                            <span class="capability-text">Delete questionnaire (has responses)</span>
+                        </li>
+                        <li class="capability-item">
+                            <div class="capability-icon cannot-do">✗</div>
+                            <span class="capability-text">Permanently delete questions with responses</span>
+                        </li>
+                        <li class="capability-item">
+                            <div class="capability-icon cannot-do">✗</div>
+                            <span class="capability-text">Change answers for questions with responses</span>
+                        </li>
+                        <li class="capability-item">
+                            <div class="capability-icon cannot-do">✗</div>
+                            <span class="capability-text">Change question types that affect existing responses</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="tips-section">
+                    <h4 class="tips-title"><i class="bi bi-lightbulb"></i> Best Practices</h4>
+                    <div class="tip-item">• Make only essential text changes</div>
+                    <div class="tip-item">• Add new questions at the end</div>
+                    <div class="tip-item">• Monitor response data regularly</div>
+                    <div class="tip-item">• Consider creating a new version for major changes</div>
+                </div>
+            </div>
+
+            <!-- ARCHIVED STATUS -->
+            <div class="status-card archived-card">
+                <div class="status-header">
+                    <div class="status-icon archived-icon"><i class="bi bi-archive"></i></div>
+                    <div>
+                        <h2 class="status-title">Archived</h2>
+                        <p class="status-subtitle">Read-only & complete</p>
+                    </div>
+                </div>
+
+                <div class="capabilities-section">
+                    <h3 class="section-title"><i class="bi bi-check-circle text-success"></i> What You CAN Do</h3>
+                    <ul class="capability-list">
+                        <li class="capability-item">
+                            <div class="capability-icon can-do">✓</div>
+                            <span class="capability-text">View questionnaire details</span>
+                        </li>
+                        <li class="capability-item">
+                            <div class="capability-icon can-do">✓</div>
+                            <span class="capability-text">View all responses and data</span>
+                        </li>
+                        <li class="capability-item">
+                            <div class="capability-icon can-do">✓</div>
+                            <span class="capability-text">Export response data</span>
+                        </li>
+                        <li class="capability-item">
+                            <div class="capability-icon can-do">✓</div>
+                            <span class="capability-text">Generate reports and analytics</span>
+                        </li>
+                        <li class="capability-item">
+                            <div class="capability-icon can-do">✓</div>
+                            <span class="capability-text">Duplicate questionnaire as new draft</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="capabilities-section">
+                    <h3 class="section-title"><i class="bi bi-exclamation-triangle text-warning"></i> Limited Actions</h3>
+                    <ul class="capability-list">
+                        <li class="capability-item">
+                            <div class="capability-icon limited">⚠</div>
+                            <span class="capability-text">Revert to draft (only if no responses)</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="capabilities-section">
+                    <h3 class="section-title"><i class="bi bi-x-circle text-danger"></i> What You CANNOT Do</h3>
+                    <ul class="capability-list">
+                        <li class="capability-item">
+                            <div class="capability-icon cannot-do">✗</div>
+                            <span class="capability-text">Edit any questionnaire content</span>
+                        </li>
+                        <li class="capability-item">
+                            <div class="capability-icon cannot-do">✗</div>
+                            <span class="capability-text">Add or remove questions</span>
+                        </li>
+                        <li class="capability-item">
+                            <div class="capability-icon cannot-do">✗</div>
+                            <span class="capability-text">Send to new respondents</span>
+                        </li>
+                        <li class="capability-item">
+                            <div class="capability-icon cannot-do">✗</div>
+                            <span class="capability-text">Collect new responses</span>
+                        </li>
+                        <li class="capability-item">
+                            <div class="capability-icon cannot-do">✗</div>
+                            <span class="capability-text">Delete questionnaire (permanent archive)</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="tips-section">
+                    <h4 class="tips-title"><i class="bi bi-lightbulb"></i> Best Practices</h4>
+                    <div class="tip-item">• Export all data before long-term storage</div>
+                    <div class="tip-item">• Create final analysis reports</div>
+                    <div class="tip-item">• Document key insights and findings</div>
+                    <div class="tip-item">• Use as template for future questionnaires</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="workflow-section">
+            <h2 class="workflow-title"><i class="bi bi-arrow-repeat"></i> Status Workflow</h2>
+            <div class="workflow-steps">
+                <div class="workflow-step">
+                    <div class="step-icon draft-icon"><i class="bi bi-pencil"></i></div>
+                    <div class="step-title">Draft</div>
+                    <div class="step-description">Create & perfect your questionnaire</div>
+                </div>
+                <div class="workflow-arrow">→</div>
+                <div class="workflow-step">
+                    <div class="step-icon published-icon"><i class="bi bi-broadcast"></i></div>
+                    <div class="step-title">Published</div>
+                    <div class="step-description">Live & collecting responses</div>
+                </div>
+                <div class="workflow-arrow">→</div>
+                <div class="workflow-step">
+                    <div class="step-icon archived-icon"><i class="bi bi-archive"></i></div>
+                    <div class="step-title">Archived</div>
+                    <div class="step-description">Complete & preserved</div>
+                </div>
+            </div>
+
+            <div class="mt-4 text-center">
+                <div class="alert alert-info d-inline-block">
+                    <i class="bi bi-info-circle"></i>
+                    <strong>Key Benefit:</strong> This status system completely eliminates foreign key constraint errors while providing professional survey management!
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

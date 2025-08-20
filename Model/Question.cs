@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Model
 {
@@ -27,6 +21,9 @@ namespace Model
         [ForeignKey("QuestionnaireId")]
         public Questionnaire? Questionnaire { get; set; }
 
-        public List<Answer> Answers { get; set; } 
+        public List<Answer> Answers { get; set; }
+
+        public bool IsActive { get; set; } = true;                    // Default to active
+        public DateTime CreatedDate { get; set; } = DateTime.UtcNow; // Default to now
     }
 }

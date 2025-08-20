@@ -5,7 +5,7 @@
 }
 
 <style>
-    /* Modern Design System */
+    /* Modern Design System - Your existing styles */
     @@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
     :root {
@@ -51,10 +51,6 @@
     * {
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     }
-
-  
-
-  
 
     /* Header Section */
     .page-header {
@@ -135,21 +131,6 @@
         overflow: hidden;
     }
 
-        .create-button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.5s;
-        }
-
-        .create-button:hover::before {
-            left: 100%;
-        }
-
         .create-button:hover {
             background: linear-gradient(135deg, var(--success-dark) 0%, #047857 100%);
             transform: translateY(-2px);
@@ -157,6 +138,82 @@
             color: white;
             text-decoration: none;
         }
+
+    /* Status Badge Styles */
+    .status-badge {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        padding: 0.5rem 1rem;
+        border-radius: var(--border-radius-md);
+        font-weight: 700;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        box-shadow: var(--shadow-md);
+        z-index: 10;
+    }
+
+    .status-draft {
+        background: linear-gradient(135deg, var(--gray-500) 0%, var(--gray-600) 100%);
+        color: white;
+    }
+
+    .status-published {
+        background: linear-gradient(135deg, var(--success-color) 0%, var(--success-dark) 100%);
+        color: white;
+    }
+
+    .status-archived {
+        background: linear-gradient(135deg, var(--gray-800) 0%, var(--gray-900) 100%);
+        color: white;
+    }
+
+    /* Status Info Section */
+    .status-info-section {
+        background: linear-gradient(135deg, var(--gray-50) 0%, var(--gray-100) 100%);
+        padding: 1rem;
+        border-radius: var(--border-radius-md);
+        margin-bottom: 1rem;
+        border: 1px solid var(--gray-200);
+    }
+
+    .status-info-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        text-align: center;
+    }
+
+    .status-info-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .status-info-icon {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .status-info-label {
+        font-size: 0.75rem;
+        color: var(--gray-600);
+        font-weight: 500;
+    }
+
+    .status-info-value {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--gray-800);
+    }
 
     /* Stats Section */
     .stats-section {
@@ -228,28 +285,12 @@
             border-color: var(--primary-color);
         }
 
-        .questionnaire-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, var(--primary-color), var(--info-color), var(--success-color));
-            transform: scaleX(0);
-            transition: transform 0.3s ease;
-            transform-origin: left;
-        }
-
-        .questionnaire-card:hover::before {
-            transform: scaleX(1);
-        }
-
     /* Card Header */
     .card-header-custom {
         background: linear-gradient(135deg, var(--gray-50) 0%, var(--gray-100) 100%);
         padding: 1.5rem;
         border-bottom: 1px solid var(--gray-200);
+        position: relative;
     }
 
     .card-id-badge {
@@ -259,7 +300,9 @@
         border-radius: var(--border-radius-sm);
         font-weight: 600;
         font-size: 0.875rem;
-        float: right;
+        position: absolute;
+        top: 1rem;
+        left: 1.5rem;
         box-shadow: var(--shadow-sm);
     }
 
@@ -270,7 +313,7 @@
         margin: 0;
         line-height: 1.4;
         word-break: break-word;
-        padding-right: 5rem;
+        padding-top: 2.5rem;
     }
 
     /* Card Content */
@@ -371,14 +414,6 @@
         display: inline-block;
     }
 
-    .question-text {
-        font-size: 0.875rem;
-        color: var(--gray-700);
-        margin: 0.5rem 0;
-        font-weight: 500;
-        line-height: 1.4;
-    }
-
     .answers-container {
         display: flex;
         flex-wrap: wrap;
@@ -433,22 +468,8 @@
         box-shadow: var(--shadow-sm);
         position: relative;
         overflow: hidden;
+        cursor: pointer;
     }
-
-        .action-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.5s;
-        }
-
-        .action-btn:hover::before {
-            left: 100%;
-        }
 
         .action-btn:hover {
             transform: translateY(-2px);
@@ -507,6 +528,345 @@
             color: white;
         }
 
+    /* Status Management Button Styles */
+    .btn-publish {
+        background: linear-gradient(135deg, var(--success-color) 0%, var(--success-dark) 100%);
+        color: white;
+    }
+
+        .btn-publish:hover {
+            background: linear-gradient(135deg, var(--success-dark) 0%, #047857 100%);
+            color: white;
+        }
+
+    .btn-archive {
+        background: linear-gradient(135deg, var(--gray-600) 0%, var(--gray-700) 100%);
+        color: white;
+    }
+
+        .btn-archive:hover {
+            background: linear-gradient(135deg, var(--gray-700) 0%, var(--gray-800) 100%);
+            color: white;
+        }
+
+    .btn-revert {
+        background: linear-gradient(135deg, var(--warning-color) 0%, var(--warning-dark) 100%);
+        color: white;
+    }
+
+        .btn-revert:hover {
+            background: linear-gradient(135deg, var(--warning-dark) 0%, #b45309 100%);
+            color: white;
+        }
+
+    .btn-disabled {
+        background: var(--gray-300);
+        color: var(--gray-500);
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+
+        .btn-disabled:hover {
+            transform: none;
+            box-shadow: var(--shadow-sm);
+            background: var(--gray-300);
+            color: var(--gray-500);
+        }
+
+    /* Modal Styles */
+    .confirmation-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.75);
+        backdrop-filter: blur(8px);
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+        .confirmation-modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+    .modal-content {
+        background: white;
+        border-radius: var(--border-radius-xl);
+        box-shadow: var(--shadow-2xl);
+        max-width: 500px;
+        width: 90%;
+        max-height: 90vh;
+        overflow: hidden;
+        transform: translateY(20px) scale(0.95);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+    }
+
+        .confirmation-modal.show .modal-content {
+            transform: translateY(0) scale(1);
+        }
+
+    .modal-header {
+        padding: 3rem 2rem 2rem 2rem;
+        text-align: center;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    /* Icon Row */
+    .modal-icon-row {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        margin-bottom: 3rem;
+    }
+
+    .modal-icon {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .modal-icon::before {
+        content: '';
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        right: -2px;
+        bottom: -2px;
+        border-radius: 50%;
+        z-index: -1;
+        opacity: 0.3;
+    }
+
+    .modal-icon.publish {
+        background: linear-gradient(135deg, var(--success-color) 0%, var(--success-light) 50%, var(--success-dark) 100%);
+        color: white;
+        box-shadow: 0 20px 40px rgba(16, 185, 129, 0.4), 0 8px 16px rgba(16, 185, 129, 0.2);
+    }
+
+    .modal-icon.publish::before {
+        background: linear-gradient(135deg, var(--success-light) 0%, var(--success-color) 100%);
+    }
+
+    .modal-icon.archive {
+        background: linear-gradient(135deg, var(--gray-600) 0%, var(--gray-500) 50%, var(--gray-700) 100%);
+        color: white;
+        box-shadow: 0 20px 40px rgba(71, 85, 105, 0.4), 0 8px 16px rgba(71, 85, 105, 0.2);
+    }
+
+    .modal-icon.archive::before {
+        background: linear-gradient(135deg, var(--gray-500) 0%, var(--gray-600) 100%);
+    }
+
+    .modal-icon.revert {
+        background: linear-gradient(135deg, var(--warning-color) 0%, var(--warning-light) 50%, var(--warning-dark) 100%);
+        color: white;
+        box-shadow: 0 20px 40px rgba(245, 158, 11, 0.4), 0 8px 16px rgba(245, 158, 11, 0.2);
+    }
+
+    .modal-icon.revert::before {
+        background: linear-gradient(135deg, var(--warning-light) 0%, var(--warning-color) 100%);
+    }
+
+    .modal-icon.delete {
+        background: linear-gradient(135deg, var(--danger-color) 0%, var(--danger-light) 50%, var(--danger-dark) 100%);
+        color: white;
+        box-shadow: 0 20px 40px rgba(239, 68, 68, 0.4), 0 8px 16px rgba(239, 68, 68, 0.2);
+    }
+
+    .modal-icon.delete::before {
+        background: linear-gradient(135deg, var(--danger-light) 0%, var(--danger-color) 100%);
+    }
+
+    /* Icon symbol styling */
+    .modal-icon i {
+        position: relative;
+        z-index: 1;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+    }
+
+    /* Title Row */
+    .modal-title-row {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        margin-bottom: 2rem;
+    }
+
+    .modal-title {
+        font-size: 1.875rem;
+        font-weight: 800;
+        color: var(--gray-800);
+        margin: 0;
+        line-height: 1.2;
+        text-align: center;
+    }
+
+    /* Subtitle Row */
+    .modal-subtitle-row {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        margin-bottom: 0;
+    }
+
+    .modal-subtitle {
+        color: var(--gray-600);
+        font-size: 1.1rem;
+        font-weight: 500;
+        margin: 0;
+        line-height: 1.4;
+        text-align: center;
+        max-width: 400px;
+    }
+
+    .modal-body {
+        padding: 1.5rem 2rem;
+    }
+
+    .modal-description {
+        background: var(--gray-50);
+        border-radius: var(--border-radius-md);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid var(--gray-200);
+    }
+
+    .modal-description h4 {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--gray-800);
+        margin: 0 0 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .modal-description ul {
+        margin: 0;
+        padding-left: 1.25rem;
+        color: var(--gray-600);
+    }
+
+    .modal-description li {
+        margin-bottom: 0.5rem;
+        font-size: 0.875rem;
+        line-height: 1.5;
+    }
+
+    .questionnaire-info {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+        color: white;
+        padding: 1rem;
+        border-radius: var(--border-radius-md);
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+
+    .questionnaire-title {
+        font-size: 1.125rem;
+        font-weight: 700;
+        margin: 0 0 0.5rem;
+    }
+
+    .questionnaire-meta {
+        font-size: 0.875rem;
+        opacity: 0.9;
+        margin: 0;
+    }
+
+    .modal-actions {
+        display: flex;
+        gap: 1rem;
+        padding: 2rem;
+        background: var(--gray-50);
+        border-top: 1px solid var(--gray-200);
+    }
+
+    .modal-btn {
+        flex: 1;
+        padding: 1rem 1.5rem;
+        border-radius: var(--border-radius-md);
+        font-weight: 700;
+        font-size: 1rem;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        box-shadow: var(--shadow-md);
+    }
+
+        .modal-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+    .modal-btn-cancel {
+        background: white;
+        color: var(--gray-700);
+        border: 2px solid var(--gray-300);
+    }
+
+        .modal-btn-cancel:hover {
+            background: var(--gray-50);
+            border-color: var(--gray-400);
+        }
+
+    .modal-btn-confirm {
+        color: white;
+    }
+
+    .modal-btn-confirm.publish {
+        background: linear-gradient(135deg, var(--success-color) 0%, var(--success-dark) 100%);
+    }
+
+        .modal-btn-confirm.publish:hover {
+            background: linear-gradient(135deg, var(--success-dark) 0%, #047857 100%);
+        }
+
+    .modal-btn-confirm.archive {
+        background: linear-gradient(135deg, var(--gray-600) 0%, var(--gray-700) 100%);
+    }
+
+        .modal-btn-confirm.archive:hover {
+            background: linear-gradient(135deg, var(--gray-700) 0%, var(--gray-800) 100%);
+        }
+
+    .modal-btn-confirm.revert {
+        background: linear-gradient(135deg, var(--warning-color) 0%, var(--warning-dark) 100%);
+    }
+
+        .modal-btn-confirm.revert:hover {
+            background: linear-gradient(135deg, var(--warning-dark) 0%, #b45309 100%);
+        }
+
+    .modal-btn-confirm.delete {
+        background: linear-gradient(135deg, var(--danger-color) 0%, var(--danger-dark) 100%);
+    }
+
+        .modal-btn-confirm.delete:hover {
+            background: linear-gradient(135deg, var(--danger-dark) 0%, #b91c1c 100%);
+        }
+
     /* Empty State */
     .empty-state {
         text-align: center;
@@ -543,89 +903,21 @@
         margin-bottom: 2rem;
     }
 
-    /* Responsive Design */
-    @@media (max-width: 1024px) {
-        .questionnaires-grid
-
-    {
-        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    }
-
-    }
-
-    @@media (max-width: 768px) {
-        .container-fluid
-
-    {
-        padding: 1rem;
-    }
-
-    .header-content {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .header-info {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 1rem;
-    }
-
-    .questionnaires-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    .action-buttons {
-        grid-template-columns: 1fr;
-    }
-
-    .btn-logic {
-        grid-column: 1;
-    }
-
-    }
-
     /* Animations */
     .fade-in {
         animation: fadeIn 0.6s ease-out;
     }
 
     @@keyframes fadeIn {
-        from
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
 
-    {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-
-    }
-
-    .slide-in {
-        animation: slideIn 0.4s ease-out;
-    }
-
-    @@keyframes slideIn {
-        from
-
-    {
-        opacity: 0;
-        transform: translateX(-20px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 
     .stagger-animation {
@@ -633,34 +925,71 @@
         animation-fill-mode: both;
     }
 
-        .stagger-animation:nth-child(1) {
-            animation-delay: 0.1s;
+        .stagger-animation:nth-child(1) { animation-delay: 0.1s; }
+        .stagger-animation:nth-child(2) { animation-delay: 0.2s; }
+        .stagger-animation:nth-child(3) { animation-delay: 0.3s; }
+        .stagger-animation:nth-child(4) { animation-delay: 0.4s; }
+        .stagger-animation:nth-child(5) { animation-delay: 0.5s; }
+        .stagger-animation:nth-child(6) { animation-delay: 0.6s; }
+
+    /* Responsive Design */
+    @@media (max-width: 768px) {
+        .questionnaires-grid {
+            grid-template-columns: 1fr;
         }
 
-        .stagger-animation:nth-child(2) {
-            animation-delay: 0.2s;
+        .action-buttons {
+            grid-template-columns: 1fr;
         }
 
-        .stagger-animation:nth-child(3) {
-            animation-delay: 0.3s;
+        .btn-logic {
+            grid-column: 1;
         }
 
-        .stagger-animation:nth-child(4) {
-            animation-delay: 0.4s;
+        .modal-content {
+            width: 95%;
         }
 
-        .stagger-animation:nth-child(5) {
-            animation-delay: 0.5s;
+        .modal-header,
+        .modal-body,
+        .modal-actions {
+            padding: 1.5rem;
         }
 
-        .stagger-animation:nth-child(6) {
-            animation-delay: 0.6s;
+        .modal-actions {
+            flex-direction: column;
         }
+    }
 </style>
 
 <div class="container-fluid">
     <!-- Notifications -->
     <partial name="_Notification" />
+
+    <!-- Success/Error Messages -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Warning"] != null)
+    {
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-circle"></i> @TempData["Warning"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
 
     <!-- Page Header -->
     <div class="page-header fade-in">
@@ -678,10 +1007,15 @@
                 <i class="bi bi-plus-circle-fill"></i>
                 Create New Questionnaire
             </a>
+            <br />
+             <a asp-action="StatusGuide" class="create-button" target="_blank">
+                <i class="bi bi-plus-circle-fill"></i>
+                Status Guide
+            </a>
         </div>
     </div>
 
-    <!-- Statistics Section -->
+    <!-- Enhanced Statistics Section -->
     @if (Model.Any())
     {
         <div class="stats-section fade-in">
@@ -691,16 +1025,24 @@
                     <span class="stat-label">Total Questionnaires</span>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-number">@Model.Sum(q => q.Questions?.Count ?? 0)</span>
+                    <span class="stat-number">@Model.Count(q => q.Status == QuestionnaireStatus.Draft)</span>
+                    <span class="stat-label">Draft</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">@Model.Count(q => q.Status == QuestionnaireStatus.Published)</span>
+                    <span class="stat-label">Published</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">@Model.Count(q => q.Status == QuestionnaireStatus.Archived)</span>
+                    <span class="stat-label">Archived</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">@Model.Sum(q => q.ActiveQuestionCount)</span>
                     <span class="stat-label">Total Questions</span>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-number">@Model.Sum(q => q.Questions?.Sum(x => x.Answers?.Count ?? 0) ?? 0)</span>
-                    <span class="stat-label">Total Answers</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number">@Model.SelectMany(q => q.Questions ?? new List<Question>()).Select(q => q.Type).Distinct().Count()</span>
-                    <span class="stat-label">Question Types</span>
+                    <span class="stat-number">@Model.Count(q => q.HasResponses)</span>
+                    <span class="stat-label">With Responses</span>
                 </div>
             </div>
         </div>
@@ -713,6 +1055,26 @@
             @foreach (var item in Model.Select((questionnaire, index) => new { Questionnaire = questionnaire, Index = index }))
             {
                 <div class="questionnaire-card stagger-animation">
+                    <!-- Status Badge -->
+                    @switch (item.Questionnaire.Status)
+                    {
+                        case QuestionnaireStatus.Draft:
+                            <div class="status-badge status-draft">
+                                <i class="bi bi-pencil"></i> Draft
+                            </div>
+                            break;
+                        case QuestionnaireStatus.Published:
+                            <div class="status-badge status-published">
+                                <i class="bi bi-broadcast"></i> Live
+                            </div>
+                            break;
+                        case QuestionnaireStatus.Archived:
+                            <div class="status-badge status-archived">
+                                <i class="bi bi-archive"></i> Archived
+                            </div>
+                            break;
+                    }
+
                     <!-- Card Header -->
                     <div class="card-header-custom">
                         <span class="card-id-badge">ID: @item.Questionnaire.Id</span>
@@ -721,6 +1083,39 @@
 
                     <!-- Card Content -->
                     <div class="card-content">
+                        <!-- Status Information -->
+                        <div class="status-info-section">
+                            <div class="status-info-grid">
+                                <div class="status-info-item">
+                                    <div class="status-info-icon" style="background: var(--info-color); color: white;">
+                                        <i class="bi bi-calendar3"></i>
+                                    </div>
+                                    <div class="status-info-label">Created</div>
+                                    <div class="status-info-value">@item.Questionnaire.CreatedDate.ToString("MMM dd")</div>
+                                </div>
+                                <div class="status-info-item">
+                                    <div class="status-info-icon" style="background: var(--primary-color); color: white;">
+                                        <i class="bi bi-question-circle"></i>
+                                    </div>
+                                    <div class="status-info-label">Questions</div>
+                                    <div class="status-info-value">@item.Questionnaire.ActiveQuestionCount</div>
+                                </div>
+                                <div class="status-info-item">
+                                    <div class="status-info-icon" style="background: @(item.Questionnaire.HasResponses ? "var(--success-color)" : "var(--gray-400)"); color: white;">
+                                        <i class="bi bi-people"></i>
+                                    </div>
+                                    <div class="status-info-label">Responses</div>
+                                    <div class="status-info-value">@(item.Questionnaire.HasResponses ? "Yes" : "None")</div>
+                                </div>
+                            </div>
+                            @if (item.Questionnaire.PublishedDate.HasValue)
+                            {
+                                <div class="mt-2 text-center">
+                                    <small><i class="bi bi-broadcast"></i> Published: @item.Questionnaire.PublishedDate.Value.ToString("MMM dd, yyyy")</small>
+                                </div>
+                            }
+                        </div>
+
                         <!-- Questions Count -->
                         <div class="questions-count-section">
                             <span class="questions-count-number">@(item.Questionnaire.Questions?.Count ?? 0)</span>
@@ -791,29 +1186,117 @@
                         }
                     </div>
 
-                    <!-- Action Buttons -->
+                    <!-- Status-Based Action Buttons -->
                     <div class="action-buttons">
-                        <a asp-action="Edit" asp-route-id="@item.Questionnaire.Id" class="action-btn btn-edit">
-                            <i class="bi bi-pencil-fill"></i>
-                            Edit
-                        </a>
+                        <!-- Always Available Actions -->
                         <a asp-action="Details" asp-route-id="@item.Questionnaire.Id" class="action-btn btn-details">
                             <i class="bi bi-eye-fill"></i>
                             Details
                         </a>
-                        <a asp-action="Delete" asp-route-id="@item.Questionnaire.Id" class="action-btn btn-delete">
-                            <i class="bi bi-trash3-fill"></i>
-                            Delete
-                        </a>
-                        <a asp-action="SendQuestionnaire" asp-route-id="@item.Questionnaire.Id" class="action-btn btn-send">
-                            <i class="bi bi-envelope-fill"></i>
-                            Send
-                        </a>
-                        <a asp-action="SetLogic" asp-route-id="@item.Questionnaire.Id" class="action-btn btn-logic">
-                            <i class="bi bi-diagram-3-fill"></i>
-                            Set Logic
-                        </a>
+
+                        @switch (item.Questionnaire.Status)
+                        {
+                            case QuestionnaireStatus.Draft:
+                                <!-- Draft: Full Edit + Publish + Delete -->
+                                <a asp-action="Edit" asp-route-id="@item.Questionnaire.Id" class="action-btn btn-edit">
+                                    <i class="bi bi-pencil-fill"></i>
+                                    Edit
+                                </a>
+                                
+                                @if (item.Questionnaire.ActiveQuestionCount > 0)
+                                {
+                                    <button type="button" class="action-btn btn-publish" 
+                                            onclick="showConfirmationModal('publish', '@item.Questionnaire.Id', '@Html.Raw(Html.Encode(item.Questionnaire.Title))', '@item.Questionnaire.ActiveQuestionCount')">
+                                        <i class="bi bi-broadcast"></i>
+                                        Publish
+                                    </button>
+                                }
+                                else
+                                {
+                                    <div class="action-btn btn-disabled" title="Add questions before publishing">
+                                        <i class="bi bi-broadcast"></i>
+                                        Publish
+                                    </div>
+                                }
+
+                                <a asp-action="Delete" asp-route-id="@item.Questionnaire.Id" class="action-btn btn-delete">
+                                    <i class="bi bi-trash3-fill"></i>
+                                    Delete
+                                </a>
+
+                                <a asp-action="SetLogic" asp-route-id="@item.Questionnaire.Id" class="action-btn btn-logic">
+                                    <i class="bi bi-diagram-3-fill"></i>
+                                    Set Logic
+                                </a>
+                                break;
+
+                            case QuestionnaireStatus.Published:
+                                <!-- Published: Limited Edit + Send + Archive -->
+                                <a asp-action="Edit" asp-route-id="@item.Questionnaire.Id" class="action-btn btn-edit" 
+                                   title="Limited editing mode - preserves response data">
+                                    <i class="bi bi-pencil-square"></i>
+                                    Edit*
+                                </a>
+
+                                <a asp-action="SendQuestionnaire" asp-route-id="@item.Questionnaire.Id" class="action-btn btn-send">
+                                    <i class="bi bi-envelope-fill"></i>
+                                    Send
+                                </a>
+
+                                <button type="button" class="action-btn btn-archive"
+                                        onclick="showConfirmationModal('archive', '@item.Questionnaire.Id', '@Html.Raw(Html.Encode(item.Questionnaire.Title))', '@item.Questionnaire.ActiveQuestionCount', @item.Questionnaire.HasResponses.ToString().ToLower())">
+                                    <i class="bi bi-archive"></i>
+                                    Archive
+                                </button>
+
+                                <a asp-action="SetLogic" asp-route-id="@item.Questionnaire.Id" class="action-btn btn-logic">
+                                    <i class="bi bi-diagram-3-fill"></i>
+                                    Set Logic
+                                </a>
+                                break;
+
+                            case QuestionnaireStatus.Archived:
+                                <!-- Archived: Read-only + Optional Revert -->
+                                <div class="action-btn btn-disabled" title="Archived questionnaires are read-only">
+                                    <i class="bi bi-lock"></i>
+                                    Read Only
+                                </div>
+
+                                @if (!item.Questionnaire.HasResponses)
+                                {
+                                    <button type="button" class="action-btn btn-revert"
+                                            onclick="showConfirmationModal('revert', '@item.Questionnaire.Id', '@Html.Raw(Html.Encode(item.Questionnaire.Title))', '@item.Questionnaire.ActiveQuestionCount')">
+                                        <i class="bi bi-arrow-counterclockwise"></i>
+                                        Revert
+                                    </button>
+                                }
+                                else
+                                {
+                                    <div class="action-btn btn-disabled" title="Cannot revert questionnaires with responses">
+                                        <i class="bi bi-arrow-counterclockwise"></i>
+                                        Revert
+                                    </div>
+                                }
+
+                                <div class="action-btn btn-disabled">
+                                    <i class="bi bi-envelope"></i>
+                                    Send
+                                </div>
+
+                                <div class="action-btn btn-disabled">
+                                    <i class="bi bi-diagram-3"></i>
+                                    Set Logic
+                                </div>
+                                break;
+                        }
                     </div>
+
+                    @if (item.Questionnaire.Status == QuestionnaireStatus.Published)
+                    {
+                        <div class="text-center p-2" style="background: var(--warning-light); color: var(--warning-dark); font-size: 0.75rem;">
+                            * Limited editing - questions with responses cannot be fully modified
+                        </div>
+                    }
                 </div>
             }
         </div>
@@ -834,3 +1317,227 @@
         </div>
     }
 </div>
+
+<!-- Confirmation Modal -->
+<div id="confirmationModal" class="confirmation-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <!-- Icon Row -->
+            <div class="modal-icon-row">
+                <div id="modalIcon" class="modal-icon">
+                    <i id="modalIconSymbol" class="bi"></i>
+                </div>
+            </div>
+            
+            <!-- Title Row -->
+            <div class="modal-title-row">
+                <h2 id="modalTitle" class="modal-title"></h2>
+            </div>
+            
+            <!-- Subtitle Row -->
+            <div class="modal-subtitle-row">
+                <p id="modalSubtitle" class="modal-subtitle"></p>
+            </div>
+        </div>
+        
+        <div class="modal-body">
+            <div class="questionnaire-info">
+                <div id="questionnaireTitle" class="questionnaire-title"></div>
+                <div id="questionnaireMeta" class="questionnaire-meta"></div>
+            </div>
+            
+            <div id="modalDescription" class="modal-description">
+                <h4 id="descriptionTitle"></h4>
+                <ul id="descriptionList"></ul>
+            </div>
+        </div>
+        
+        <div class="modal-actions">
+            <button type="button" id="cancelBtn" class="modal-btn modal-btn-cancel">
+                <i class="bi bi-x-circle"></i>
+                Cancel
+            </button>
+            <button type="button" id="confirmBtn" class="modal-btn modal-btn-confirm">
+                <i id="confirmIcon" class="bi"></i>
+                <span id="confirmText"></span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden Forms for Status Changes -->
+<form id="publishForm" asp-action="PublishQuestionnaire" method="post" style="display: none;">
+    <input type="hidden" name="id" id="publishId" />
+</form>
+
+<form id="archiveForm" asp-action="ArchiveQuestionnaire" method="post" style="display: none;">
+    <input type="hidden" name="id" id="archiveId" />
+</form>
+
+<form id="revertForm" asp-action="RevertToDraft" method="post" style="display: none;">
+    <input type="hidden" name="id" id="revertId" />
+</form>
+
+<script>
+// Modal functionality
+const modal = document.getElementById('confirmationModal');
+const modalIcon = document.getElementById('modalIcon');
+const modalIconSymbol = document.getElementById('modalIconSymbol');
+const modalTitle = document.getElementById('modalTitle');
+const modalSubtitle = document.getElementById('modalSubtitle');
+const questionnaireTitle = document.getElementById('questionnaireTitle');
+const questionnaireMeta = document.getElementById('questionnaireMeta');
+const modalDescription = document.getElementById('modalDescription');
+const descriptionTitle = document.getElementById('descriptionTitle');
+const descriptionList = document.getElementById('descriptionList');
+const cancelBtn = document.getElementById('cancelBtn');
+const confirmBtn = document.getElementById('confirmBtn');
+const confirmIcon = document.getElementById('confirmIcon');
+const confirmText = document.getElementById('confirmText');
+
+// Forms
+const publishForm = document.getElementById('publishForm');
+const archiveForm = document.getElementById('archiveForm');
+const revertForm = document.getElementById('revertForm');
+
+let currentAction = '';
+let currentId = '';
+
+// Modal configurations
+const modalConfigs = {
+    publish: {
+        icon: 'bi-broadcast',
+        iconClass: 'publish',
+        title: 'Publish Questionnaire',
+        subtitle: 'Make your questionnaire live and ready to collect responses',
+        confirmText: 'Publish Now',
+        confirmIcon: 'bi-broadcast',
+        confirmClass: 'publish',
+        descriptionTitle: '<i class="bi bi-info-circle"></i> What happens when you publish:',
+        descriptionItems: [
+            'The questionnaire becomes publicly accessible',
+            'You can share it with participants to collect responses',
+            'Editing capabilities become limited to preserve data integrity',
+            'Response collection begins immediately'
+        ]
+    },
+    archive: {
+        icon: 'bi-archive',
+        iconClass: 'archive',
+        title: 'Archive Questionnaire',
+        subtitle: 'Stop collecting responses and preserve current data',
+        confirmText: 'Archive Now',
+        confirmIcon: 'bi-archive',
+        confirmClass: 'archive',
+        descriptionTitle: '<i class="bi bi-exclamation-triangle"></i> What happens when you archive:',
+        descriptionItems: [
+            'The questionnaire stops accepting new responses',
+            'All existing response data is preserved',
+            'The questionnaire becomes read-only',
+            'You can still view and export response data'
+        ]
+    },
+    revert: {
+        icon: 'bi-arrow-counterclockwise',
+        iconClass: 'revert',
+        title: 'Revert to Draft',
+        subtitle: 'Return questionnaire to draft status for further editing',
+        confirmText: 'Revert to Draft',
+        confirmIcon: 'bi-arrow-counterclockwise',
+        confirmClass: 'revert',
+        descriptionTitle: '<i class="bi bi-pencil"></i> What happens when you revert:',
+        descriptionItems: [
+            'The questionnaire returns to draft status',
+            'Full editing capabilities are restored',
+            'You can modify questions, answers, and structure',
+            'The questionnaire will need to be republished'
+        ]
+    }
+};
+
+function showConfirmationModal(action, id, title, questionCount, hasResponses = false) {
+    currentAction = action;
+    currentId = id;
+    
+    const config = modalConfigs[action];
+    
+    // Set modal icon and styling
+    modalIcon.className = `modal-icon ${config.iconClass}`;
+    modalIconSymbol.className = `bi ${config.icon}`;
+    
+    // Set modal content
+    modalTitle.textContent = config.title;
+    modalSubtitle.textContent = config.subtitle;
+    
+    // Set questionnaire info
+    questionnaireTitle.textContent = title;
+    questionnaireMeta.textContent = `${questionCount} question${questionCount !== '1' ? 's' : ''}${hasResponses ? ' • Has responses' : ''}`;
+    
+    // Set description
+    descriptionTitle.innerHTML = config.descriptionTitle;
+    descriptionList.innerHTML = config.descriptionItems.map(item => `<li>${item}</li>`).join('');
+    
+    // Set confirm button
+    confirmBtn.className = `modal-btn modal-btn-confirm ${config.confirmClass}`;
+    confirmIcon.className = `bi ${config.confirmIcon}`;
+    confirmText.textContent = config.confirmText;
+    
+    // Show modal with animation
+    modal.classList.add('show');
+    document.body.style.overflow = 'hidden';
+}
+
+function hideConfirmationModal() {
+    modal.classList.remove('show');
+    document.body.style.overflow = '';
+    
+    // Reset after animation
+    setTimeout(() => {
+        currentAction = '';
+        currentId = '';
+    }, 300);
+}
+
+// Event listeners
+cancelBtn.addEventListener('click', hideConfirmationModal);
+
+confirmBtn.addEventListener('click', function() {
+    if (currentAction && currentId) {
+        // Set the appropriate form ID and submit
+        switch (currentAction) {
+            case 'publish':
+                document.getElementById('publishId').value = currentId;
+                publishForm.submit();
+                break;
+            case 'archive':
+                document.getElementById('archiveId').value = currentId;
+                archiveForm.submit();
+                break;
+            case 'revert':
+                document.getElementById('revertId').value = currentId;
+                revertForm.submit();
+                break;
+        }
+    }
+    hideConfirmationModal();
+});
+
+// Close modal when clicking outside
+modal.addEventListener('click', function(e) {
+    if (e.target === modal) {
+        hideConfirmationModal();
+    }
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && modal.classList.contains('show')) {
+        hideConfirmationModal();
+    }
+});
+
+// Prevent modal content clicks from closing modal
+modal.querySelector('.modal-content').addEventListener('click', function(e) {
+    e.stopPropagation();
+});
+</script>

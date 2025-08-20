@@ -39,33 +39,62 @@ namespace Web.Areas.Admin.Controllers
             _configuration = configuration;
             _emailServices = emailServices;
         }
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-
-            var questionnaire = _questionnaire.GetQuestionnairesWithQuestion();
-
-            var question = _question.GetQuestionsWithAnswers();
-
-
+            var questionnaire = _questionnaire.GetAllQuestionnairesWithStatus(); // Use new method
+            var question = _question.GetQuestionsWithAnswers(); // Keep your existing line
 
             List<QuestionnaireViewModel> viewmodel = new List<QuestionnaireViewModel>();
 
-
             foreach (var item in questionnaire)
             {
+                // Check if this questionnaire has responses
+                var hasResponses = await _questionnaire.HasResponses(item.Id);
+
                 viewmodel.Add(new QuestionnaireViewModel
                 {
+                    // EXISTING MAPPING (keep exactly as-is):
                     Id = item.Id,
                     Description = item.Description,
                     Title = item.Title,
                     Questions = item.Questions,
 
-
-
+                    // ADD NEW STATUS MAPPING:
+                    Status = item.Status,
+                    CreatedDate = item.CreatedDate,
+                    PublishedDate = item.PublishedDate,
+                    ArchivedDate = item.ArchivedDate,
+                    HasResponses = hasResponses
                 });
             }
 
             return View(viewmodel);
+        }
+
+        [HttpGet]
+        public IActionResult StatusGuide()
+        {
+            // Simple documentation page - no model needed
+            return View();
+        }
+        // Add this to your controller
+        public async Task<JsonResult> GetQuestionnaireStats(int id)
+        {
+            var responseCount = await _context.Responses
+                .CountAsync(r => r.QuestionnaireId == id);
+
+            var questionCount = await _context.Questions
+                .CountAsync(q => q.QuestionnaireId == id && q.IsActive);
+
+            var questionnaire = await _context.Questionnaires.FindAsync(id);
+
+            return Json(new
+            {
+                responseCount,
+                questionCount,
+                status = questionnaire?.Status.ToString(),
+                hasResponses = responseCount > 0
+            });
         }
         [HttpGet]
         public IActionResult Create()
@@ -143,27 +172,28 @@ namespace Web.Areas.Admin.Controllers
         }
 
         [HttpGet]
-        public IActionResult Edit(int? id)
+        public IActionResult Edit(int id)
         {
             var questionTypes = Enum.GetValues(typeof(QuestionType))
-                           .Cast<QuestionType>()
-                           .Select(e => new SelectListItem { Value = e.ToString(), Text = e.ToString() });
+                .Cast<QuestionType>()
+                .Select(e => new SelectListItem { Value = e.ToString(), Text = e.ToString() });
             ViewBag.QuestionTypes = questionTypes;
 
             var questionnaire = _questionnaire.GetQuestionnaireWithQuestionAndAnswer(id);
 
             if (questionnaire == null)
             {
-                return NotFound(); // Or handle not found case appropriately
+                return NotFound();
             }
+
+            // ADD THIS LINE: Pass questionnaire to view for status checking
+            ViewBag.Questionnaire = questionnaire;
 
             var viewModel = new EditQuestionnaireViewModel
             {
                 Id = questionnaire.Id,
                 Title = questionnaire.Title,
                 Description = questionnaire.Description,
-
-
                 Questions = questionnaire.Questions
                     .Select(q => new Question
                     {
@@ -171,18 +201,13 @@ namespace Web.Areas.Admin.Controllers
                         Text = q.Text,
                         Type = q.Type,
                         QuestionnaireId = q.QuestionnaireId,
-
-
                         Answers = q.Answers.Select(a => new Answer
                         {
                             Id = a.Id,
                             Text = a.Text,
                             Question = a.Question,
-                            QuestionId = a.QuestionId
-
-
-
-
+                            QuestionId = a.QuestionId,
+                            IsOtherOption = a.IsOtherOption
                         }).ToList()
                     }).ToList()
             };
@@ -193,9 +218,13 @@ namespace Web.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> Edit(EditQuestionnaireViewModel viewModel)
         {
+            Console.WriteLine("=== STATUS-AWARE EDIT POST METHOD CALLED ===");
+            Console.WriteLine($"Questionnaire ID: {viewModel?.Id}");
+            Console.WriteLine($"Questions count: {viewModel?.Questions?.Count ?? 0}");
+
             var questionTypes = Enum.GetValues(typeof(QuestionType))
-               .Cast<QuestionType>()
-               .Select(e => new SelectListItem { Value = e.ToString(), Text = e.ToString() });
+                .Cast<QuestionType>()
+                .Select(e => new SelectListItem { Value = e.ToString(), Text = e.ToString() });
             ViewBag.QuestionTypes = questionTypes;
 
             if (ModelState.IsValid)
@@ -203,10 +232,11 @@ namespace Web.Areas.Admin.Controllers
                 try
                 {
                     using var transaction = await _context.Database.BeginTransactionAsync();
+                    Console.WriteLine("Database transaction started");
 
                     try
                     {
-                        // Step 1: Update the questionnaire basic info
+                        // Step 1: Get the questionnaire with its current status
                         var existingQuestionnaire = await _context.Questionnaires
                             .FirstOrDefaultAsync(q => q.Id == viewModel.Id);
 
@@ -215,114 +245,269 @@ namespace Web.Areas.Admin.Controllers
                             return NotFound();
                         }
 
+                        Console.WriteLine($"Questionnaire Status: {existingQuestionnaire.Status}");
+
+                        // Step 2: Check if questionnaire can be edited
+                        if (existingQuestionnaire.Status == QuestionnaireStatus.Archived)
+                        {
+                            TempData["Error"] = "Archived questionnaires cannot be edited. Please revert to draft status first.";
+                            await transaction.RollbackAsync();
+                            return RedirectToAction(nameof(Index));
+                        }
+
+                        // Step 3: Update basic questionnaire info (always allowed)
                         existingQuestionnaire.Title = viewModel.Title;
                         existingQuestionnaire.Description = viewModel.Description;
 
-                        // Step 2: Get all existing questions for this questionnaire
+                        // Step 4: Get existing questions
                         var existingQuestions = await _context.Questions
-                            .Where(q => q.QuestionnaireId == viewModel.Id)
+                            .Include(q => q.Answers)
+                            .Where(q => q.QuestionnaireId == viewModel.Id && q.IsActive)
                             .ToListAsync();
 
-                        // Step 3: Delete ALL answers first (foreign key constraint)
-                        if (existingQuestions.Any())
+                        Console.WriteLine($"Found {existingQuestions.Count} existing active questions");
+
+                        // Step 5: Handle editing based on questionnaire status
+                        switch (existingQuestionnaire.Status)
                         {
-                            var questionIds = existingQuestions.Select(q => q.Id).ToList();
-                            var existingAnswers = await _context.Answers
-                                .Where(a => questionIds.Contains(a.QuestionId))
-                                .ToListAsync();
+                            case QuestionnaireStatus.Draft:
+                                Console.WriteLine("DRAFT MODE: Full editing allowed");
+                                await HandleDraftQuestionnaire(viewModel, existingQuestions, existingQuestionnaire.Id);
+                                break;
 
-                            _context.Answers.RemoveRange(existingAnswers);
-                            await _context.SaveChangesAsync();
-                        }
-
-                        // Step 4: Delete ALL questions
-                        _context.Questions.RemoveRange(existingQuestions);
-                        await _context.SaveChangesAsync();
-
-                        // Step 5: Add new questions (only if provided and valid)
-                        int newQuestionsAdded = 0;
-                        if (viewModel.Questions != null && viewModel.Questions.Count > 0)
-                        {
-                            var validQuestions = viewModel.Questions
-                                .Where(q => !string.IsNullOrWhiteSpace(q.Text))
-                                .ToList();
-
-                            foreach (var questionViewModel in validQuestions)
-                            {
-                                var newQuestion = new Question
-                                {
-                                    Text = questionViewModel.Text.Trim(),
-                                    Type = questionViewModel.Type,
-                                    QuestionnaireId = viewModel.Id
-                                };
-
-                                _context.Questions.Add(newQuestion);
-                                await _context.SaveChangesAsync(); // Save to get the ID
-
-                                // Add answers for this question
-                                if (questionViewModel.Answers != null)
-                                {
-                                    var validAnswers = questionViewModel.Answers
-                                        .Where(a => !string.IsNullOrWhiteSpace(a.Text))
-                                        .ToList();
-
-                                    foreach (var answerViewModel in validAnswers)
-                                    {
-                                        var newAnswer = new Answer
-                                        {
-                                            Text = answerViewModel.Text.Trim(),
-                                            IsOtherOption = answerViewModel.IsOtherOption,
-                                            QuestionId = newQuestion.Id
-                                        };
-
-                                        _context.Answers.Add(newAnswer);
-                                    }
-
-                                    if (validAnswers.Any())
-                                    {
-                                        await _context.SaveChangesAsync();
-                                    }
-                                }
-
-                                newQuestionsAdded++;
-                            }
+                            case QuestionnaireStatus.Published:
+                                Console.WriteLine("PUBLISHED MODE: Limited editing (preserves response data)");
+                                await HandlePublishedQuestionnaire(viewModel, existingQuestions, existingQuestionnaire.Id);
+                                break;
                         }
 
                         // Step 6: Final save and commit
                         await _context.SaveChangesAsync();
                         await transaction.CommitAsync();
+                        Console.WriteLine("Transaction committed successfully");
 
-                        // Step 7: Get final count for success message
+                        // Step 7: Success message
                         var finalQuestionCount = await _context.Questions
-                            .Where(q => q.QuestionnaireId == viewModel.Id)
-                            .CountAsync();
+                            .CountAsync(q => q.QuestionnaireId == viewModel.Id && q.IsActive);
 
-                        // Success message
-                        if (finalQuestionCount == 0)
+                        TempData["Success"] = $"Questionnaire updated successfully with {finalQuestionCount} question(s)!";
+
+                        if (existingQuestionnaire.Status == QuestionnaireStatus.Published)
                         {
-                            TempData["Success"] = "Questionnaire updated successfully. All questions have been removed.";
-                        }
-                        else
-                        {
-                            TempData["Success"] = $"Questionnaire updated successfully with {finalQuestionCount} question(s).";
+                            TempData["Info"] = "Limited editing was applied to preserve response data integrity.";
                         }
 
                         return RedirectToAction(nameof(Index));
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
+                        Console.WriteLine($"ERROR in transaction: {ex.Message}");
                         await transaction.RollbackAsync();
                         throw;
                     }
                 }
                 catch (Exception ex)
                 {
-                    ModelState.AddModelError("", "An error occurred while updating the questionnaire. Please try again.");
+                    Console.WriteLine($"ERROR in Edit method: {ex.Message}");
+                    ModelState.AddModelError("", $"An error occurred while updating the questionnaire: {ex.Message}");
                     return View(viewModel);
+                }
+            }
+            else
+            {
+                Console.WriteLine("ModelState is NOT valid");
+                foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    Console.WriteLine($"Validation error: {error.ErrorMessage}");
                 }
             }
 
             return View(viewModel);
+        }
+
+        // Handle Draft Questionnaires (Full Editing Allowed)
+        private async Task HandleDraftQuestionnaire(EditQuestionnaireViewModel viewModel,
+            List<Question> existingQuestions, int questionnaireId)
+        {
+            Console.WriteLine("Processing DRAFT questionnaire - full editing allowed");
+
+            var incomingQuestionIds = viewModel.Questions?
+                .Where(q => q.Id > 0 && !string.IsNullOrWhiteSpace(q.Text))
+                .Select(q => q.Id)
+                .ToList() ?? new List<int>();
+
+            // HARD DELETE is safe for draft questionnaires (no responses exist)
+            var questionsToDelete = existingQuestions
+                .Where(eq => !incomingQuestionIds.Contains(eq.Id))
+                .ToList();
+
+            if (questionsToDelete.Any())
+            {
+                Console.WriteLine($"Hard deleting {questionsToDelete.Count} questions from draft");
+
+                // Delete answers first
+                var questionIdsToDelete = questionsToDelete.Select(q => q.Id).ToList();
+                var answersToDelete = await _context.Answers
+                    .Where(a => questionIdsToDelete.Contains(a.QuestionId))
+                    .ToListAsync();
+
+                _context.Answers.RemoveRange(answersToDelete);
+                await _context.SaveChangesAsync();
+
+                // Delete questions
+                _context.Questions.RemoveRange(questionsToDelete);
+                await _context.SaveChangesAsync();
+            }
+
+            // Process remaining questions (full editing allowed)
+            await ProcessQuestions(viewModel, existingQuestions, questionnaireId, allowFullEditing: true);
+        }
+
+        // Handle Published Questionnaires (Limited Editing)
+        private async Task HandlePublishedQuestionnaire(EditQuestionnaireViewModel viewModel,
+            List<Question> existingQuestions, int questionnaireId)
+        {
+            Console.WriteLine("Processing PUBLISHED questionnaire - limited editing");
+
+            var incomingQuestionIds = viewModel.Questions?
+                .Where(q => q.Id > 0 && !string.IsNullOrWhiteSpace(q.Text))
+                .Select(q => q.Id)
+                .ToList() ?? new List<int>();
+
+            // SOFT DELETE for published questionnaires (preserve response relationships)
+            var questionsToSoftDelete = existingQuestions
+                .Where(eq => !incomingQuestionIds.Contains(eq.Id))
+                .ToList();
+
+            foreach (var question in questionsToSoftDelete)
+            {
+                question.IsActive = false;
+                Console.WriteLine($"Soft deleted question: {question.Text}");
+            }
+
+            // Process remaining questions (limited editing)
+            await ProcessQuestions(viewModel, existingQuestions, questionnaireId, allowFullEditing: false);
+        }
+
+        // Common Question Processing Logic
+        private async Task ProcessQuestions(EditQuestionnaireViewModel viewModel,
+            List<Question> existingQuestions, int questionnaireId, bool allowFullEditing)
+        {
+            if (viewModel.Questions == null) return;
+
+            var validQuestions = viewModel.Questions
+                .Where(q => !string.IsNullOrWhiteSpace(q.Text))
+                .ToList();
+
+            Console.WriteLine($"Processing {validQuestions.Count} valid questions");
+
+            foreach (var questionViewModel in validQuestions)
+            {
+                if (questionViewModel.Id > 0)
+                {
+                    // UPDATE existing question
+                    var existingQuestion = existingQuestions.FirstOrDefault(eq => eq.Id == questionViewModel.Id && eq.IsActive);
+                    if (existingQuestion != null)
+                    {
+                        Console.WriteLine($"Updating question {existingQuestion.Id}: '{questionViewModel.Text}'");
+
+                        // Always allow text and type updates
+                        existingQuestion.Text = questionViewModel.Text.Trim();
+                        existingQuestion.Type = questionViewModel.Type;
+
+                        // Answer editing depends on questionnaire status and response data
+                        if (allowFullEditing)
+                        {
+                            // Full answer editing (Draft mode)
+                            Console.WriteLine($"Full answer editing for question {existingQuestion.Id}");
+                            await UpdateQuestionAnswers(existingQuestion, questionViewModel);
+                        }
+                        else
+                        {
+                            // Limited answer editing (Published mode) - only if no responses
+                            var hasResponses = await _context.ResponseDetails
+                                .AnyAsync(rd => rd.QuestionId == existingQuestion.Id);
+
+                            if (!hasResponses)
+                            {
+                                Console.WriteLine($"No responses found - updating answers for question {existingQuestion.Id}");
+                                await UpdateQuestionAnswers(existingQuestion, questionViewModel);
+                            }
+                            else
+                            {
+                                Console.WriteLine($"Question {existingQuestion.Id} has responses - preserving answers");
+                                TempData["Warning"] = "Some questions have responses, so their answer options were preserved to maintain data integrity.";
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    // CREATE new question (always allowed)
+                    Console.WriteLine($"Creating new question: '{questionViewModel.Text}'");
+
+                    var newQuestion = new Question
+                    {
+                        Text = questionViewModel.Text.Trim(),
+                        Type = questionViewModel.Type,
+                        QuestionnaireId = questionnaireId,
+                        IsActive = true,
+                        CreatedDate = DateTime.UtcNow
+                    };
+
+                    _context.Questions.Add(newQuestion);
+                    await _context.SaveChangesAsync(); // Save to get the ID
+
+                    Console.WriteLine($"New question created with ID: {newQuestion.Id}");
+
+                    // Add answers for the new question
+                    await AddAnswersToQuestion(newQuestion, questionViewModel);
+                }
+            }
+        }
+
+        // Helper: Update Question Answers
+        private async Task UpdateQuestionAnswers(Question question, Question questionViewModel)
+        {
+            // Remove existing answers
+            var existingAnswers = question.Answers.ToList();
+            if (existingAnswers.Any())
+            {
+                _context.Answers.RemoveRange(existingAnswers);
+                await _context.SaveChangesAsync();
+            }
+
+            // Add new answers
+            await AddAnswersToQuestion(question, questionViewModel);
+        }
+
+        // Helper: Add Answers to Question
+        private async Task AddAnswersToQuestion(Question question, Question questionViewModel)
+        {
+            if (questionViewModel.Answers != null && questionViewModel.Answers.Any())
+            {
+                var validAnswers = questionViewModel.Answers
+                    .Where(a => !string.IsNullOrWhiteSpace(a.Text))
+                    .ToList();
+
+                Console.WriteLine($"Adding {validAnswers.Count} answers to question {question.Id}");
+
+                foreach (var answerViewModel in validAnswers)
+                {
+                    var newAnswer = new Answer
+                    {
+                        Text = answerViewModel.Text.Trim(),
+                        IsOtherOption = answerViewModel.IsOtherOption,
+                        QuestionId = question.Id
+                    };
+                    _context.Answers.Add(newAnswer);
+                }
+
+                if (validAnswers.Any())
+                {
+                    await _context.SaveChangesAsync();
+                }
+            }
         }
         [HttpGet]
         public IActionResult Delete(int id)
@@ -911,6 +1096,161 @@ namespace Web.Areas.Admin.Controllers
                 return "Continue to the next question normally";
             }
         }
+
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> PublishQuestionnaire(int id)
+        {
+            try
+            {
+                var questionnaire = await _context.Questionnaires.FindAsync(id);
+                if (questionnaire == null)
+                {
+                    TempData["Error"] = "Questionnaire not found.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                if (questionnaire.Status != QuestionnaireStatus.Draft)
+                {
+                    TempData["Error"] = "Only draft questionnaires can be published.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                // Check if questionnaire has questions
+                var hasQuestions = await _context.Questions
+                    .AnyAsync(q => q.QuestionnaireId == id && q.IsActive);
+
+                if (!hasQuestions)
+                {
+                    TempData["Error"] = "Cannot publish questionnaire without questions.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                await _questionnaire.UpdateStatus(id, QuestionnaireStatus.Published);
+                TempData["Success"] = $"Questionnaire '{questionnaire.Title}' has been published successfully!";
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error publishing questionnaire {id}: {ex.Message}");
+                TempData["Error"] = "An error occurred while publishing the questionnaire.";
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        // ==================================================
+        // NEW METHOD 2: Archive Questionnaire
+        // ==================================================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ArchiveQuestionnaire(int id)
+        {
+            try
+            {
+                var questionnaire = await _context.Questionnaires.FindAsync(id);
+                if (questionnaire == null)
+                {
+                    TempData["Error"] = "Questionnaire not found.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                if (questionnaire.Status != QuestionnaireStatus.Published)
+                {
+                    TempData["Error"] = "Only published questionnaires can be archived.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                await _questionnaire.UpdateStatus(id, QuestionnaireStatus.Archived);
+                TempData["Success"] = $"Questionnaire '{questionnaire.Title}' has been archived successfully.";
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error archiving questionnaire {id}: {ex.Message}");
+                TempData["Error"] = "An error occurred while archiving the questionnaire.";
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        // ==================================================
+        // NEW METHOD 3: Revert to Draft
+        // ==================================================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RevertToDraft(int id)
+        {
+            try
+            {
+                var questionnaire = await _context.Questionnaires.FindAsync(id);
+                if (questionnaire == null)
+                {
+                    TempData["Error"] = "Questionnaire not found.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                if (questionnaire.Status == QuestionnaireStatus.Draft)
+                {
+                    TempData["Warning"] = "Questionnaire is already in draft status.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                var hasResponses = await _questionnaire.HasResponses(id);
+                if (hasResponses)
+                {
+                    TempData["Error"] = "Cannot revert questionnaire to draft status because it has survey responses.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                await _questionnaire.UpdateStatus(id, QuestionnaireStatus.Draft);
+                TempData["Success"] = $"Questionnaire '{questionnaire.Title}' has been reverted to draft status.";
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error reverting questionnaire {id}: {ex.Message}");
+                TempData["Error"] = "An error occurred while reverting the questionnaire.";
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        // ==================================================
+        // NEW METHOD 4: Get Status Info (Helper for Views)
+        // ==================================================
+        [HttpGet]
+        public async Task<IActionResult> GetQuestionnaireStatus(int id)
+        {
+            try
+            {
+                var questionnaire = await _context.Questionnaires.FindAsync(id);
+                if (questionnaire == null)
+                {
+                    return Json(new { success = false, message = "Questionnaire not found" });
+                }
+
+                var hasResponses = await _questionnaire.HasResponses(id);
+                var questionCount = await _context.Questions
+                    .CountAsync(q => q.QuestionnaireId == id && q.IsActive);
+
+                return Json(new
+                {
+                    success = true,
+                    status = questionnaire.Status.ToString(),
+                    hasResponses = hasResponses,
+                    questionCount = questionCount,
+                    createdDate = questionnaire.CreatedDate,
+                    publishedDate = questionnaire.PublishedDate,
+                    archivedDate = questionnaire.ArchivedDate
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error getting status for questionnaire {id}: {ex.Message}");
+                return Json(new { success = false, message = "Error retrieving status" });
+            }
+        }
+
 
         // Request models - Add these classes to your project
         public class SaveAnswerConditionRequest

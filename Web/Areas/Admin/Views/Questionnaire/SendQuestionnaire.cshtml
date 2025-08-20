@@ -1,48 +1,905 @@
 ﻿@model SendQuestionnaireViewModel
-
 @{
-    ViewData["Title"] = "Send";
+    ViewData["Title"] = "Send Questionnaire";
 }
 
+<style>
+    /* Modern Design System with Advanced Visual Effects */
+    @@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+    :root {
+        --primary-color: #6366f1;
+        --primary-light: #8b5cf6;
+        --primary-dark: #4338ca;
+        --primary-ultra: #3730a3;
+        --success-color: #10b981;
+        --success-light: #34d399;
+        --success-dark: #059669;
+        --info-color: #06b6d4;
+        --info-light: #22d3ee;
+        --info-dark: #0891b2;
+        --warning-color: #f59e0b;
+        --warning-light: #fbbf24;
+        --warning-dark: #d97706;
+        --danger-color: #ef4444;
+        --danger-light: #fca5a5;
+        --danger-dark: #dc2626;
+        --gray-50: #f8fafc;
+        --gray-100: #f1f5f9;
+        --gray-200: #e2e8f0;
+        --gray-300: #cbd5e1;
+        --gray-400: #94a3b8;
+        --gray-500: #64748b;
+        --gray-600: #475569;
+        --gray-700: #334155;
+        --gray-800: #1e293b;
+        --gray-900: #0f172a;
+        /* Advanced Shadows */
+        --shadow-glow: 0 0 40px rgba(99, 102, 241, 0.15);
+        --shadow-ultra: 0 32px 64px -12px rgba(0, 0, 0, 0.25);
+        --shadow-floating: 0 20px 40px -8px rgba(99, 102, 241, 0.2);
+        --shadow-premium: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 80px rgba(99, 102, 241, 0.1);
+        /* Border Radius */
+        --border-radius-sm: 12px;
+        --border-radius-md: 16px;
+        --border-radius-lg: 24px;
+        --border-radius-xl: 32px;
+        --border-radius-2xl: 40px;
+        /* Animations */
+        --ease-premium: cubic-bezier(0.23, 1, 0.32, 1);
+        --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+
+    * {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        box-sizing: border-box;
+    }
+
+    body {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        min-height: 100vh;
+        margin: 0;
+        padding: 0;
+        position: relative;
+    }
+
+    .container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 3rem 1rem;
+        position: relative;
+        z-index: 1;
+    }
 
 
-<div class="container mt-4">
-    <div class="card justify-content-center p-4 shadow rounded">
-        <div class="card-body">
-            <h5 class="card-title h5">Send the questionnaire</h5>
 
-            <div class="row">
-                <form asp-action="SendQuestionnaire">
-                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                    <div class="form-group">
-                        <label asp-for="QuestionnaireId" class="control-label">Questionnaire</label> <!-- Display ViewBag data in the label -->
-                        <input type="text" class="form-control" value="@ViewBag.questionnaireName" disabled /> <!-- Display ViewBag data in the disabled textbox -->
-                        <span asp-validation-for="QuestionnaireId" class="text-danger"></span>
+    /* Premium Glass Morphism Header */
+    .page-header {
+        background: rgba(255, 255, 255, 0.25);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: var(--border-radius-2xl);
+        box-shadow: var(--shadow-premium);
+        padding: 3rem;
+        margin-bottom: 3rem;
+        position: relative;
+        overflow: hidden;
+        animation: slideDown 0.8s var(--ease-premium);
+    }
 
-                    </div>
-                   
-                    <div class="form-group">
-                        <label asp-for="Emails" class="control-label">Email Addresses (separate with commas)</label>
-                        <textarea asp-for="Emails" class="form-control"></textarea>
-                        <span asp-validation-for="Emails" class="text-danger"></span>
-                    </div>
+        .page-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, var(--primary-color), var(--info-color), var(--success-color), var(--warning-color), var(--primary-light) );
+            background-size: 200% 100%;
+            animation: gradientFlow 3s ease-in-out infinite;
+        }
 
-                    <div class="form-group">
-                        <label asp-for="ExpirationDateTime" class="control-label"></label>
-                        <input asp-for="ExpirationDateTime" class="form-control"/>
-                        <span asp-validation-for="ExpirationDateTime" class="text-danger"></span>
-                    </div>
-                    <div class="form-group">
-                        <input type="hidden" asp-for="QuestionnaireId" /> <!-- Use hidden input for QuestionnaireId -->
-                    </div>
-                    <div class="form-group">
-                        <input type="submit" value="Send" class="btn btn-primary" />
-                    </div>
-                </form>
+    @@keyframes gradientFlow {
+        0%, 100%
+
+    {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    }
+
+    .page-header::after {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+        animation: shimmer 4s ease-in-out infinite;
+        pointer-events: none;
+    }
+
+    @@keyframes shimmer {
+        0%, 100%
+
+    {
+        transform: rotate(0deg) scale(0.8);
+        opacity: 0.3;
+    }
+
+    50% {
+        transform: rotate(180deg) scale(1.2);
+        opacity: 0.6;
+    }
+
+    }
+
+    .header-content {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    .header-icon {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 50%, var(--info-color) 100%);
+        color: white;
+        width: 80px;
+        height: 80px;
+        border-radius: var(--border-radius-lg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.25rem;
+        box-shadow: var(--shadow-floating);
+        position: relative;
+        animation: iconPulse 3s ease-in-out infinite;
+    }
+
+        .header-icon::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, var(--primary-color), var(--info-color), var(--success-color), var(--primary-color));
+            border-radius: var(--border-radius-lg);
+            z-index: -1;
+            background-size: 300% 300%;
+            animation: borderFlow 3s ease infinite;
+        }
+
+    @@keyframes iconPulse {
+        0%, 100%
+
+    {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+
+    }
+
+    @@keyframes borderFlow {
+        0%, 100%
+
+    {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    }
+
+    .header-text h1 {
+        font-size: 3rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, var(--gray-800) 0%, var(--primary-color) 50%, var(--info-color) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0 0 0.75rem;
+        line-height: 1.2;
+        animation: textShimmer 4s ease-in-out infinite;
+    }
+
+    @@keyframes textShimmer {
+        0%, 100%
+
+    {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    }
+
+    .header-subtitle {
+        color: var(--gray-700);
+        font-size: 1.25rem;
+        font-weight: 500;
+        line-height: 1.6;
+        opacity: 0.9;
+    }
+
+    /* Premium Info Cards */
+    .info-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+
+    .info-card {
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: var(--border-radius-xl);
+        padding: 2rem;
+        box-shadow: var(--shadow-floating);
+        position: relative;
+        overflow: hidden;
+        transition: all 0.4s var(--ease-premium);
+        animation: slideUp 0.8s var(--ease-premium);
+    }
+
+        .info-card:nth-child(1) {
+            animation-delay: 0.2s;
+            animation-fill-mode: both;
+        }
+
+        .info-card:nth-child(2) {
+            animation-delay: 0.4s;
+            animation-fill-mode: both;
+        }
+
+        .info-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--info-color), var(--success-color));
+            transition: all 0.3s ease;
+        }
+
+        .info-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: var(--shadow-ultra);
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+            .info-card:hover::before {
+                height: 6px;
+                background: linear-gradient(90deg, var(--primary-color), var(--info-color), var(--success-color));
+            }
+
+        .info-card h4 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--gray-800);
+            margin: 0 0 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+    .info-card-icon {
+        background: linear-gradient(135deg, var(--info-color), var(--info-light));
+        color: white;
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.125rem;
+        box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
+    }
+
+    /* Ultra-Premium Form Card */
+    .form-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(30px);
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        border-radius: var(--border-radius-2xl);
+        box-shadow: var(--shadow-premium);
+        overflow: hidden;
+        position: relative;
+        animation: slideUp 0.8s var(--ease-premium) 0.6s both;
+    }
+
+        .form-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, var(--success-color), var(--info-color), var(--primary-color), var(--warning-color), var(--success-color) );
+            background-size: 200% 100%;
+            animation: gradientFlow 4s ease-in-out infinite;
+        }
+
+    .form-header {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 50%, rgba(6, 182, 212, 0.05) 100% );
+        padding: 3rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        position: relative;
+    }
+
+    .form-title {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        margin: 0;
+    }
+
+    .form-icon {
+        background: linear-gradient(135deg, var(--success-color) 0%, var(--success-light) 100%);
+        color: white;
+        width: 60px;
+        height: 60px;
+        border-radius: var(--border-radius-lg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.75rem;
+        box-shadow: var(--shadow-floating);
+        position: relative;
+        animation: iconBounce 2s ease-in-out infinite;
+    }
+
+    @@keyframes iconBounce {
+        0%, 100%
+
+    {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-4px);
+    }
+
+    }
+
+    .form-title h2 {
+        font-size: 2rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--gray-800), var(--primary-color));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0;
+    }
+
+    .form-body {
+        padding: 3rem;
+        background: rgba(255, 255, 255, 0.5);
+    }
+
+    /* Ultra-Premium Form Groups */
+    .form-group {
+        margin-bottom: 2.5rem;
+        position: relative;
+    }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+    /* Beautiful Labels */
+    .control-label {
+        display: block;
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: var(--gray-800);
+        margin-bottom: 1rem;
+        position: relative;
+        padding-left: 2.5rem;
+    }
+
+        .control-label i {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .control-label::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 2.5rem;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-color), var(--info-color));
+            border-radius: 2px;
+            opacity: 0.7;
+        }
+
+    /* Premium Form Controls */
+    .form-control {
+        width: 100%;
+        padding: 1.25rem 1.5rem;
+        border: 2px solid rgba(203, 213, 225, 0.6);
+        border-radius: var(--border-radius-lg);
+        font-size: 1.125rem;
+        font-weight: 500;
+        color: var(--gray-800);
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(10px);
+        transition: all 0.3s var(--ease-premium);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15), 0 8px 25px rgba(99, 102, 241, 0.2), inset 0 1px 3px rgba(0, 0, 0, 0.05);
+            transform: translateY(-2px) scale(1.01);
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .form-control:disabled {
+            background: linear-gradient(135deg, var(--info-color), var(--info-light));
+            color: white;
+            border: none;
+            cursor: not-allowed;
+            font-weight: 700;
+            text-align: center;
+            box-shadow: var(--shadow-floating);
+        }
+
+            .form-control:disabled:focus {
+                transform: none;
+                box-shadow: var(--shadow-floating);
+            }
+
+    /* Special Textarea */
+    textarea.form-control {
+        min-height: 140px;
+        resize: vertical;
+        line-height: 1.7;
+        font-family: 'JetBrains Mono', 'Monaco', monospace;
+        background: linear-gradient(135deg, rgba(248, 250, 252, 0.9), rgba(241, 245, 249, 0.9));
+        border-color: var(--info-color);
+    }
+
+        textarea.form-control:focus {
+            border-color: var(--info-dark);
+            box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.15), 0 8px 25px rgba(6, 182, 212, 0.2);
+        }
+
+    /* DateTime Input */
+    .datetime-input {
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.05), rgba(251, 191, 36, 0.05));
+        border-color: var(--warning-color);
+    }
+
+        .datetime-input:focus {
+            border-color: var(--warning-dark);
+            box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.15), 0 8px 25px rgba(245, 158, 11, 0.2);
+        }
+
+    /* Ultra-Premium Submit Button */
+    .btn-submit {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 50%, var(--info-color) 100%);
+        color: white;
+        border: none;
+        padding: 1.5rem 3rem;
+        border-radius: var(--border-radius-xl);
+        font-weight: 800;
+        font-size: 1.25rem;
+        transition: all 0.4s var(--ease-premium);
+        box-shadow: var(--shadow-floating);
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 1rem;
+        min-width: 250px;
+        justify-content: center;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+        .btn-submit::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent );
+            transition: left 0.6s ease;
+        }
+
+        .btn-submit::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease, height 0.6s ease;
+        }
+
+        .btn-submit:hover::before {
+            left: 100%;
+        }
+
+        .btn-submit:hover::after {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-submit:hover {
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--info-color) 50%, var(--success-color) 100%);
+            transform: translateY(-6px) scale(1.05);
+            box-shadow: var(--shadow-ultra);
+        }
+
+        .btn-submit:active {
+            transform: translateY(-2px) scale(1.02);
+        }
+
+        .btn-submit i {
+            font-size: 1.5rem;
+            z-index: 1;
+            position: relative;
+        }
+
+        .btn-submit span {
+            z-index: 1;
+            position: relative;
+        }
+
+    /* Validation Styling */
+    .text-danger {
+        color: var(--danger-color);
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin-top: 0.75rem;
+        display: block;
+        background: rgba(239, 68, 68, 0.1);
+        padding: 0.5rem 0.75rem;
+        border-radius: var(--border-radius-sm);
+        border-left: 4px solid var(--danger-color);
+    }
+
+    .input-validation-error {
+        border-color: var(--danger-color) !important;
+        box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.15) !important;
+        animation: shake 0.5s ease-in-out;
+    }
+
+    @@keyframes shake {
+        0%, 100%
+
+    {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-5px);
+    }
+
+    75% {
+        transform: translateX(5px);
+    }
+
+    }
+
+    /* Helper Text */
+    .helper-text {
+        margin-top: 0.75rem;
+        font-size: 0.875rem;
+        color: var(--gray-600);
+        background: rgba(248, 250, 252, 0.8);
+        padding: 0.75rem 1rem;
+        border-radius: var(--border-radius-sm);
+        border-left: 3px solid var(--info-color);
+        backdrop-filter: blur(5px);
+    }
+
+    /* Animations */
+    @@keyframes slideDown {
+        from
+
+    {
+        opacity: 0;
+        transform: translateY(-50px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+    }
+
+    @@keyframes slideUp {
+        from
+
+    {
+        opacity: 0;
+        transform: translateY(50px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+    }
+
+    /* Alert Styling */
+    .alert {
+        border-radius: var(--border-radius-lg);
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 2rem;
+        border: none;
+        box-shadow: var(--shadow-floating);
+        animation: slideDown 0.6s var(--ease-premium);
+        backdrop-filter: blur(10px);
+    }
+
+    .alert-success {
+        background: linear-gradient(135deg, var(--success-color) 0%, var(--success-light) 100%);
+        color: white;
+    }
+
+    .alert-danger {
+        background: linear-gradient(135deg, var(--danger-color) 0%, var(--danger-light) 100%);
+        color: white;
+    }
+
+    /* Responsive Design */
+    @@media (max-width: 768px) {
+        .container
+
+    {
+        padding: 2rem 1rem;
+    }
+
+    .page-header {
+        padding: 2rem;
+    }
+
+    .header-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 1.5rem;
+    }
+
+    .header-text h1 {
+        font-size: 2.5rem;
+    }
+
+    .form-body {
+        padding: 2rem;
+    }
+
+    .form-header {
+        padding: 2rem;
+    }
+
+    .btn-submit {
+        width: 100%;
+    }
+
+    .info-cards {
+        grid-template-columns: 1fr;
+    }
+
+    }
+
+    /* Loading States */
+    .btn-submit.loading {
+        background: var(--gray-400);
+        cursor: not-allowed;
+        transform: none;
+    }
+
+        .btn-submit.loading::after {
+            content: "";
+            width: 20px;
+            height: 20px;
+            border: 2px solid transparent;
+            border-top-color: currentColor;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 0.75rem;
+        }
+
+    @@keyframes spin {
+        0%
+
+    {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+
+    }
+</style>
+
+<div class="container">
+
+
+    <!-- Success/Error Messages -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">×</button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">×</button>
+        </div>
+    }
+
+    <!-- Premium Page Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <div class="header-icon">
+                <i class="bi bi-rocket-takeoff-fill"></i>
             </div>
+            <div class="header-text">
+                <h1>Send Questionnaire</h1>
+                <p class="header-subtitle">Distribute your questionnaire with style and precision to multiple recipients</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Premium Info Cards -->
+   
+
+    <!-- Ultra-Premium Form -->
+    <div class="form-card">
+        <div class="form-header">
+            <div class="form-title">
+                <div class="form-icon">
+                    <i class="bi bi-envelope-paper-heart-fill"></i>
+                </div>
+                <h2>Questionnaire Distribution Center</h2>
+            </div>
+        </div>
+
+        <div class="form-body">
+            <form asp-action="SendQuestionnaire">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <!-- Questionnaire Selection -->
+                <div class="form-group">
+                    <label asp-for="QuestionnaireId" class="control-label">
+                        <i class="bi bi-clipboard-data-fill"></i>
+                        Selected Questionnaire
+                    </label>
+                    <input type="text" class="form-control" value="@ViewBag.questionnaireName" disabled />
+                    
+                </div>
+
+                <!-- Email Addresses -->
+                <div class="form-group">
+                    <label asp-for="Emails" class="control-label">
+                        <i class="bi bi-people-fill"></i>
+                        Email Recipients
+                    </label>
+                    <textarea asp-for="Emails"
+                              class="form-control"
+                              placeholder="Enter email addresses separated by commas
+
+Example:
+john.doe@company.com, jane.smith@organization.org, user@domain.com
+
+💡 Tip: You can paste from Excel, CSV, or any text format"
+                              rows="5"></textarea>
+                 
+                    <div class="helper-text">
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        <strong>Pro Tip:</strong> Copy and paste email lists from Excel, Google Sheets, or any text document. The system will automatically format them correctly.
+                    </div>
+                </div>
+
+                <!-- Expiration Date -->
+                <div class="form-group">
+                    <label asp-for="ExpirationDateTime" class="control-label">
+                        <i class="bi bi-calendar-event-fill"></i>
+                        Survey Expiration
+                    </label>
+                    <input asp-for="ExpirationDateTime"
+                           class="form-control datetime-input"
+                           type="datetime-local"
+                           min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
+                  
+                 
+                </div>
+
+                <!-- Hidden Fields -->
+                <input type="hidden" asp-for="QuestionnaireId" />
+
+                <!-- Ultra-Premium Submit Button -->
+                <div class="form-group text-center">
+                    <button type="submit" class="btn-submit">
+                        <i class="bi bi-send-fill"></i>
+                        <span>Send Survey</span>
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
 
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Basic form interactions
+        const form = document.querySelector('form');
+        const submitBtn = document.querySelector('.btn-submit');
+        const expirationInput = document.querySelector('input[name="ExpirationDateTime"]');
 
+        // Auto-dismiss alerts
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => {
+            setTimeout(() => {
+                alert.style.opacity = '0';
+                alert.style.transform = 'translateY(-30px) scale(0.95)';
+                setTimeout(() => alert.remove(), 400);
+            }, 6000);
+        });
 
+        // Form submission with loading state
+        if (form && submitBtn) {
+            form.addEventListener('submit', function() {
+                submitBtn.disabled = true;
+                submitBtn.classList.add('loading');
+                submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i><span>Sending...</span>';
+            });
+        }
+
+        // Set default expiration (30 days from now)
+        if (expirationInput && !expirationInput.value) {
+            const defaultDate = new Date();
+            defaultDate.setDate(defaultDate.getDate() + 30);
+            defaultDate.setHours(9, 0, 0, 0);
+            expirationInput.value = defaultDate.toISOString().slice(0, 16);
+        }
+    });
+</script>

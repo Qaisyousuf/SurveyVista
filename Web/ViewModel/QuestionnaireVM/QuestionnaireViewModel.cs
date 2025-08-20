@@ -24,7 +24,15 @@ namespace Web.ViewModel.QuestionnaireVM
         public List<Answer>? Answers { get; set; }
 
 
+        // ADD THESE NEW PROPERTIES (for status management):
+        public QuestionnaireStatus Status { get; set; } = QuestionnaireStatus.Draft;
+        public DateTime CreatedDate { get; set; }
+        public DateTime? PublishedDate { get; set; }
+        public DateTime? ArchivedDate { get; set; }
 
+        // Helper properties for the view
+        public int ActiveQuestionCount => Questions?.Count(q => q.IsActive) ?? 0;
+        public bool HasResponses { get; set; } // We'll set this in the controller
 
 
     }
