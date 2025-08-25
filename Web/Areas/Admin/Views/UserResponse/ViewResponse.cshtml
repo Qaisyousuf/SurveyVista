@@ -308,6 +308,37 @@
         color: var(--primary-color);
     }
 
+    /* Other option specific styling */
+    .choice-option .choice-label strong {
+        color: var(--warning-dark);
+        margin-right: 0.5rem;
+    }
+
+    /* Make other responses more visually distinct */
+    .choice-option.other-option {
+        background: linear-gradient(135deg, #fef3c7 0%, #fef3c7 10%, white 100%);
+        border-color: var(--warning-color);
+    }
+
+        .choice-option.other-option.selected {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            border-color: var(--warning-dark);
+        }
+
+            .choice-option.other-option.selected .choice-label {
+                color: white;
+                font-weight: 600;
+            }
+
+                .choice-option.other-option.selected .choice-label strong {
+                    color: white;
+                }
+
+            .choice-option.other-option.selected .choice-input.checked {
+                background: var(--warning-dark);
+                border-color: var(--warning-dark);
+            }
+
     /* Rating Stars */
     .rating-container {
         display: flex;
@@ -868,6 +899,17 @@
                                 <div class="choice-option @(isSelected ? "selected" : "")">
                                     <div class="choice-input @(detail.Question.Type == QuestionType.TrueFalse ? "radio" : "") @(isSelected ? "checked" : "")"></div>
                                     <span class="choice-label">@answer.Text</span>
+                                </div>
+                            }
+
+                            @* Display "Other" text response if it exists *@
+                            @if (!string.IsNullOrEmpty(detail.TextResponse))
+                            {
+                                <div class="choice-option other-option selected">
+                                    <div class="choice-input checked"></div>
+                                    <span class="choice-label">
+                                        <strong>Other:</strong> @detail.TextResponse
+                                    </span>
                                 </div>
                             }
                         </div>

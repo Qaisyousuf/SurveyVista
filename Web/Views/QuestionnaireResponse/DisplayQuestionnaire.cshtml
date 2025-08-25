@@ -34,59 +34,47 @@
 
     /* Advanced Keyframes */
     @@keyframes morphIn {
-        0%
+        0% {
+            opacity: 0;
+            transform: translateY(20px) scale(0.95);
+            filter: blur(8px);
+        }
 
-    {
-        opacity: 0;
-        transform: translateY(20px) scale(0.95);
-        filter: blur(8px);
-    }
-
-    100% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-        filter: blur(0);
-    }
-
+        100% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            filter: blur(0);
+        }
     }
 
     @@keyframes glowPulse {
-        0%, 100%
+        0%, 100% {
+            box-shadow: var(--glow-accent);
+        }
 
-    {
-        box-shadow: var(--glow-accent);
-    }
-
-    50% {
-        box-shadow: 0 0 45px rgba(74, 144, 164, 0.18);
-    }
-
+        50% {
+            box-shadow: 0 0 45px rgba(74, 144, 164, 0.18);
+        }
     }
 
     @@keyframes floatUp {
-        0%, 100%
+        0%, 100% {
+            transform: translateY(0px);
+        }
 
-    {
-        transform: translateY(0px);
-    }
-
-    50% {
-        transform: translateY(-4px);
-    }
-
+        50% {
+            transform: translateY(-4px);
+        }
     }
 
     @@keyframes shimmer {
-        0%
+        0% {
+            background-position: -200% center;
+        }
 
-    {
-        background-position: -200% center;
-    }
-
-    100% {
-        background-position: 200% center;
-    }
-
+        100% {
+            background-position: 200% center;
+        }
     }
 
     /* Base Styles */
@@ -192,17 +180,10 @@
             opacity: 0.8;
         }
 
-    /* Other Option Styling */
-   
-
-   
-
+    /* Other Option Styling - Enhanced with conditional visibility */
     .other-text-container {
         margin-top: 12px;
-        padding: 12px;
-        background: var(--surface-secondary);
-        border-radius: 12px;
-        border: 1px solid var(--border-accent);
+     
         animation: morphIn 0.3s ease;
         display: none !important; /* Initially hidden */
     }
@@ -226,6 +207,24 @@
             border-color: var(--accent-primary);
             box-shadow: 0 0 0 3px rgba(74, 144, 164, 0.15);
             background: rgba(26, 42, 64, 0.8);
+        }
+
+    /* Enhanced styling for other option indicators */
+  
+
+        .other-option-container::before {
+            content: "OTHER";
+            position: absolute;
+            top: -8px;
+            right: 12px;
+            background: var(--warning-color);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            box-shadow: var(--shadow-sm);
         }
 
     /* Next-Gen Buttons */
@@ -821,89 +820,80 @@
 
     /* Enhanced Mobile Responsiveness */
     @@media (max-width: 576px) {
-        .stepper
+        .stepper {
+            display: none;
+        }
 
-    {
-        display: none;
-    }
+        .step {
+            padding: 24px 20px;
+            border-radius: 20px;
+        }
 
-    .step {
-        padding: 24px 20px;
-        border-radius: 20px;
-    }
+        .hero.container.card {
+            padding: 24px 20px;
+            border-radius: 20px;
+        }
 
-    .hero.container.card {
-        padding: 24px 20px;
-        border-radius: 20px;
-    }
+        .card-deck {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
 
-    .card-deck {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 16px;
-    }
+        .matrix-question .table {
+            display: block;
+            overflow-x: auto;
+        }
 
-    .matrix-question .table {
-        display: block;
-        overflow-x: auto;
-    }
+        .likert .responses {
+            flex-direction: column;
+        }
 
-    .likert .responses {
-        flex-direction: column;
-    }
+        .rating .rating-item {
+            flex: 1 1 calc(50% - 8px);
+        }
 
-    .rating .rating-item {
-        flex: 1 1 calc(50% - 8px);
-    }
+        .step .mt-3 {
+            position: sticky;
+            bottom: 0;
+            background: linear-gradient(180deg, transparent 0%, var(--bg-secondary) 85%);
+            padding: 16px 0 0;
+            backdrop-filter: var(--blur-heavy);
+            border-radius: 16px 16px 0 0;
+            margin: 0 -20px;
+            padding-left: 20px;
+            padding-right: 20px;
+        }
 
-    .step .mt-3 {
-        position: sticky;
-        bottom: 0;
-        background: linear-gradient(180deg, transparent 0%, var(--bg-secondary) 85%);
-        padding: 16px 0 0;
-        backdrop-filter: var(--blur-heavy);
-        border-radius: 16px 16px 0 0;
-        margin: 0 -20px;
-        padding-left: 20px;
-        padding-right: 20px;
-    }
-
-    .draggable-item {
-        padding: 16px 20px;
-    }
-
+        .draggable-item {
+            padding: 16px 20px;
+        }
     }
 
     @@media (max-width: 991px) {
-        .stepper
+        .stepper {
+            position: relative;
+            top: 0;
+            flex-direction: row;
+            flex-wrap: wrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 8px;
+            gap: 12px;
+        }
 
-    {
-        position: relative;
-        top: 0;
-        flex-direction: row;
-        flex-wrap: wrap;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        padding-bottom: 8px;
-        gap: 12px;
-    }
-
-    .step-indicator {
-        min-width: 200px;
-        max-width: none;
-    }
-
+        .step-indicator {
+            min-width: 200px;
+            max-width: none;
+        }
     }
 
     /* Accessibility and Reduced Motion */
     @@media (prefers-reduced-motion: reduce) {
-        *
-
-    {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-    }
-
+        * {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+        }
     }
 
     /* Focus States for Accessibility */
@@ -917,23 +907,17 @@
 
     /* High Contrast Mode Support */
     @@media (prefers-contrast: high) {
-        : root
-
-    {
-        --border-subtle: rgba(255, 255, 255, 0.3);
-        --text-muted: #a0a0a0;
-    }
-
+        : root {
+            --border-subtle: rgba(255, 255, 255, 0.3);
+            --text-muted: #a0a0a0;
+        }
     }
 
     /* Dark Mode Enhancements */
     @@media (prefers-color-scheme: dark) {
-        .hero.container.card
-
-    {
-        box-shadow: var(--shadow-strong), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    }
-
+        .hero.container.card {
+            box-shadow: var(--shadow-strong), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
     }
 
     /* Container sizing */
@@ -1017,6 +1001,9 @@
                     @for (int i = 0; i < Model.Questions.Count; i++)
                     {
                         var question = Model.Questions[i];
+                        // Check if this question has any other options
+                        var hasOtherOptions = question.Answers?.Any(a => a.IsOtherOption == true) ?? false;
+
                         <input type="hidden" name="Id" value="@question.Id">
                         <input type="hidden" name="Questions[@i].Text" value="@question.Text">
                         <input type="hidden" name="Questions[@i].Id" value="@question.Id">
@@ -1028,7 +1015,7 @@
                             <input type="hidden" name="Questions[@i].Answers[@j].Text" value="@answer.Text">
                         }
 
-                        <div class="step @(i == 0 ? "active" : "")" data-question-id="@question.Id">
+                        <div class="step @(i == 0 ? "active" : "")" data-question-id="@question.Id" data-has-other="@hasOtherOptions.ToString().ToLower()">
                             <p class="font-weight-normal">@(i + 1). @question.Text</p>
 
                             @switch (question.Type)
@@ -1059,12 +1046,9 @@
                                                        data-is-other="@answer.IsOtherOption.ToString().ToLower()">
                                                 <label class="form-check-label" for="question@(i)_answer@(answer.Id)">
                                                     @answer.Text
-                                                    @if (answer.IsOtherOption)
-                                                    {
-                                                       
-                                                    }
                                                 </label>
 
+                                                @* Only show other text container if this answer is actually an other option *@
                                                 @if (answer.IsOtherOption)
                                                 {
                                                     <div class="other-text-container" id="otherText_@(i)_@(answer.Id)" style="display: none;">
@@ -1096,12 +1080,9 @@
                                                        data-is-other="@answer.IsOtherOption.ToString().ToLower()">
                                                 <label class="form-check-label" for="question@(i)_answer@(answer.Id)">
                                                     @answer.Text
-                                                    @if (answer.IsOtherOption)
-                                                    {
-                                                       
-                                                    }
                                                 </label>
 
+                                                @* Only show other text container if this answer is actually an other option *@
                                                 @if (answer.IsOtherOption)
                                                 {
                                                     <div class="other-text-container" id="otherText_@(i)_@(answer.Id)" style="display: none;">
@@ -1210,9 +1191,29 @@
                                             <div class="responses">
                                                 @foreach (var answer in question.Answers)
                                                 {
-                                                    <label class="likert-option">
-                                                        <input class="form-check-input" type="radio" id="question@(i)_answer@(answer.Id)" name="Questions[@i].SelectedAnswerIds" value="@answer.Id" data-condition="@answer.ConditionJson"> @answer.Text
+                                                    <label class="likert-option @(answer.IsOtherOption ? "other-option-container" : "")">
+                                                        <input class="form-check-input @(answer.IsOtherOption ? "other-option-input" : "")"
+                                                               type="radio"
+                                                               id="question@(i)_answer@(answer.Id)"
+                                                               name="Questions[@i].SelectedAnswerIds"
+                                                               value="@answer.Id"
+                                                               data-condition="@answer.ConditionJson"
+                                                               data-question-index="@i"
+                                                               data-answer-id="@answer.Id"
+                                                               data-is-other="@answer.IsOtherOption.ToString().ToLower()"> @answer.Text
                                                     </label>
+
+                                                    @* Only show other text container if this answer is actually an other option *@
+                                                    @if (answer.IsOtherOption)
+                                                    {
+                                                        <div class="other-text-container" id="otherText_@(i)_@(answer.Id)" style="display: none;">
+                                                            <textarea class="form-control other-text-input"
+                                                  name="Questions[@i].OtherTexts[@answer.Id]"
+                                                  id="otherTextArea_@(i)_@(answer.Id)"
+                                                  rows="2"
+                                                  placeholder="Please specify..."></textarea>
+                                                        </div>
+                                                    }
                                                 }
                                             </div>
                                         </div>
@@ -1227,7 +1228,7 @@
                                                     <th>Question</th>
                                                     @foreach (var option in question.Answers)
                                                     {
-                                                        <th>@option.Text</th>
+                                                        <th class="@(option.IsOtherOption ? "other-option-container" : "")">@option.Text</th>
                                                     }
                                                 </tr>
                                             </thead>
@@ -1236,9 +1237,31 @@
                                                     <td class="matrix-prompt">@question.Text</td>
                                                     @foreach (var option in question.Answers)
                                                     {
-                                                        <td class="matrix-cell">
-                                                            <input type="radio" class="matrix-radio" id="q@(i)_opt_@option.Id" name="Questions[@i].SelectedAnswerIds" value="@option.Id" data-condition="@option.ConditionJson">
-                                                            <label for="q@(i)_opt_@option.Id" class="matrix-choice"><span class="opt-text">@option.Text</span></label>
+                                                        <td class="matrix-cell @(option.IsOtherOption ? "other-option-container" : "")">
+                                                            <input type="radio"
+                                                                   class="matrix-radio @(option.IsOtherOption ? "other-option-input" : "")"
+                                                                   id="q@(i)_opt_@option.Id"
+                                                                   name="Questions[@i].SelectedAnswerIds"
+                                                                   value="@option.Id"
+                                                                   data-condition="@option.ConditionJson"
+                                                                   data-question-index="@i"
+                                                                   data-answer-id="@option.Id"
+                                                                   data-is-other="@option.IsOtherOption.ToString().ToLower()">
+                                                            <label for="q@(i)_opt_@option.Id" class="matrix-choice">
+                                                                <span class="opt-text">@option.Text</span>
+                                                            </label>
+
+                                                            @* Only show other text container if this answer is actually an other option *@
+                                                            @if (option.IsOtherOption)
+                                                            {
+                                                                <div class="other-text-container" id="otherText_@(i)_@(option.Id)" style="display: none;">
+                                                                    <textarea class="form-control other-text-input"
+                                                          name="Questions[@i].OtherTexts[@option.Id]"
+                                                          id="otherTextArea_@(i)_@(option.Id)"
+                                                          rows="2"
+                                                          placeholder="Please specify..."></textarea>
+                                                                </div>
+                                                            }
                                                         </td>
                                                     }
                                                 </tr>
@@ -1262,9 +1285,39 @@
                                         <div class="card-deck">
                                             @foreach (var answer in question.Answers)
                                             {
-                                                <div class="card image-card" id="card_@answer.Id" onclick="selectImageCard('@answer.Id', '@question.Id')">
-                                                    <img src="@answer.Text" alt="Image option" class="img-fluid" />
-                                                    <input type="radio" id="image_answer_@answer.Id" name="Questions[@i].SelectedAnswerIds" value="@answer.Id" hidden data-condition="@answer.ConditionJson" />
+                                                <div class="card image-card @(answer.IsOtherOption ? "other-option-container" : "")" id="card_@answer.Id" onclick="selectImageCard('@answer.Id', '@question.Id')">
+                                                    @if (answer.IsOtherOption)
+                                                    {
+                                                        <!-- Special styling for other option image cards -->
+                                                        <div style="padding: 20px; text-align: center; background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(251, 191, 36, 0.1)); height: 160px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                                                            <i class="bi bi-plus-circle" style="font-size: 2rem; color: var(--warning-color); margin-bottom: 8px;"></i>
+                                                            <span style="color: var(--text-primary); font-weight: 600;">@answer.Text</span>
+                                                        </div>
+                                                        <input type="radio"
+                                                               id="image_answer_@answer.Id"
+                                                               name="Questions[@i].SelectedAnswerIds"
+                                                               value="@answer.Id"
+                                                               hidden
+                                                               data-condition="@answer.ConditionJson"
+                                                               class="other-option-input"
+                                                               data-question-index="@i"
+                                                               data-answer-id="@answer.Id"
+                                                               data-is-other="true" />
+
+                                                        @* Other text container for image other option *@
+                                                        <div class="other-text-container" id="otherText_@(i)_@(answer.Id)" style="display: none; padding: 12px;">
+                                                            <textarea class="form-control other-text-input"
+                                                  name="Questions[@i].OtherTexts[@answer.Id]"
+                                                  id="otherTextArea_@(i)_@(answer.Id)"
+                                                  rows="2"
+                                                  placeholder="Please describe your choice..."></textarea>
+                                                        </div>
+                                                    }
+                                                    else
+                                                    {
+                                                        <img src="@answer.Text" alt="Image option" class="img-fluid" />
+                                                        <input type="radio" id="image_answer_@answer.Id" name="Questions[@i].SelectedAnswerIds" value="@answer.Id" hidden data-condition="@answer.ConditionJson" />
+                                                    }
                                                 </div>
                                             }
                                         </div>
@@ -1318,12 +1371,11 @@
             const form = document.getElementById('questionnaireForm');
             if (!form) { console.error('Form not found!'); return; }
 
-            // ===== OTHER OPTION FUNCTIONALITY =====
-            // Handle showing/hiding text areas for "Other" options
+            // ===== ENHANCED OTHER OPTION FUNCTIONALITY - CONDITIONAL DISPLAY =====
             function initializeOtherOptions() {
-                console.log('Initializing other options...');
+                console.log('Initializing conditional other options...');
 
-                // Handle checkbox other options
+                // Handle checkbox other options (Multiple choice, CheckBox, Demographic, etc.)
                 $(document).on('change', 'input[type="checkbox"]', function() {
                     console.log('Checkbox changed:', this);
                     const $checkbox = $(this);
@@ -1353,7 +1405,7 @@
                     }
                 });
 
-                // Handle radio button other options
+                // Handle radio button other options (TrueFalse, Likert, Matrix, Rating, Image, etc.)
                 $(document).on('change', 'input[type="radio"]', function() {
                     console.log('Radio button changed:', this);
                     const $radio = $(this);
@@ -1381,6 +1433,33 @@
                     }
                 });
 
+                // Enhanced image card selection with other option support
+                window.selectImageCard = function(answerId, questionId) {
+                    console.log('Image card selected:', answerId, questionId);
+                    var cards = document.querySelectorAll('.image-question[data-question-id="' + questionId + '"] .card');
+                    cards.forEach(function (card) { card.classList.remove('selected'); });
+
+                    var selectedCard = document.getElementById('card_' + answerId);
+                    if (selectedCard) {
+                        selectedCard.classList.add('selected');
+                        selectedCard.style.animation = 'morphIn 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+                    }
+
+                    var radioButton = document.getElementById('image_answer_' + answerId);
+                    if (radioButton) {
+                        radioButton.checked = true;
+                        // Trigger change event to handle other option logic
+                        $(radioButton).trigger('change');
+                    }
+                };
+
+                // Debug: Show questions with other options
+                $('.step').each(function() {
+                    const hasOther = $(this).attr('data-has-other') === 'true';
+                    const questionId = $(this).attr('data-question-id');
+                    console.log(`Question ${questionId}: Has other options = ${hasOther}`);
+                });
+
                 // Debug: List all other option inputs
                 console.log('Other option inputs found:', $('input[data-is-other="true"]').length);
                 $('input[data-is-other="true"]').each(function() {
@@ -1393,7 +1472,7 @@
                 initializeOtherOptions();
             });
 
-            // Tracking
+            // Tracking (Your existing code preserved)
             let questionsShownArray = [1];
             let questionsSkippedArray = [];
             let navigationPath = [0];
@@ -1493,7 +1572,7 @@
                 submitButton.style.display = 'none';
             }
 
-            // Rating - Enhanced with jQuery
+            // Rating - Enhanced with jQuery (Your existing code preserved)
             $(document).ready(function () {
                 $('.rating-item').on('click', function () {
                     const $this = $(this);
@@ -1507,7 +1586,7 @@
                     $prevAll.add($this).find('.rating-star').addClass('selected');
 
                     // Check the radio input
-                    $this.find('.rating-input').prop('checked', true);
+                    $this.find('.rating-input').prop('checked', true).trigger('change');
 
                     // Add visual feedback
                     $this.addClass('rating-selected');
@@ -1523,7 +1602,7 @@
                 });
             });
 
-            // Enhanced CSS for rating interactions
+            // Enhanced CSS for rating interactions (Your existing code preserved)
             const ratingStyles = `
                 .rating-star.rating-hover {
                     color: #fbbf24 !important;
@@ -1541,7 +1620,7 @@
                 document.head.appendChild(styleElement);
             }
 
-            // Ranking
+            // Ranking (Your existing code preserved)
             if (!window.hasEventListenersAdded) {
                 const upButtons = document.querySelectorAll('.up-button');
                 const downButtons = document.querySelectorAll('.down-button');
@@ -1552,7 +1631,7 @@
             function moveUp(button) { var li = button.parentNode; if (li.previousElementSibling) { li.parentNode.insertBefore(li, li.previousElementSibling); } }
             function moveDown(button) { var li = button.parentNode; if (li.nextElementSibling) { li.parentNode.insertBefore(li.nextElementSibling, li); } }
 
-            // Stepper
+            // Stepper (Your existing code preserved)
             const steps = form.querySelectorAll('.step');
             const stepIndicators = document.querySelectorAll('.step-indicator');
             const submitButton = form.querySelector('.submit');
@@ -1640,7 +1719,7 @@
             showStep(currentStep);
         });
 
-        // Global helpers (kept for parity)
+        // Global helpers (kept for parity - Your existing code preserved)
         function allowDrop(ev) { ev.preventDefault(); }
         function dragStart(ev) { ev.dataTransfer.setData("text", ev.target.id); }
         function drop(ev) {
@@ -1655,18 +1734,6 @@
                 if (ev.clientY < midPoint) { list.insertBefore(draggedElement, dropTarget); }
                 else { if (dropTarget.nextSibling) { list.insertBefore(draggedElement, dropTarget.nextSibling); } else { list.appendChild(draggedElement); } }
             }
-        }
-        function selectImageCard(answerId, questionId) {
-            var cards = document.querySelectorAll('.image-question[data-question-id="' + questionId + '"] .card');
-            cards.forEach(function (card) { card.classList.remove('selected'); });
-            var selectedCard = document.getElementById('card_' + answerId);
-            if (selectedCard) {
-                selectedCard.classList.add('selected');
-                // Add selection animation
-                selectedCard.style.animation = 'morphIn 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
-            }
-            var radioButton = document.getElementById('image_answer_' + answerId);
-            if (radioButton) radioButton.checked = true;
         }
         function removeSelected(parent) { parent.querySelectorAll('.draggable-item').forEach(sibling => { sibling.classList.remove('selected'); }); }
     </script>

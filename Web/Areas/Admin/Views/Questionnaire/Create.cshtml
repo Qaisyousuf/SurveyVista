@@ -392,6 +392,40 @@
             box-shadow: var(--shadow-sm);
         }
 
+    /* Enhanced Other Option Button - Conditional Styling */
+    .add-other-option {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+        .add-other-option.hidden {
+            display: none !important;
+        }
+
+        .add-other-option.visible {
+            display: inline-flex !important;
+        }
+
+    /* Question Type Info */
+    .question-type-info {
+        background: var(--gray-100);
+        border-radius: var(--border-radius-sm);
+        padding: 0.75rem 1rem;
+        margin-top: 0.5rem;
+        border-left: 4px solid var(--info-color);
+        font-size: 0.875rem;
+        color: var(--gray-700);
+    }
+
+        .question-type-info.supports-other {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            border-left-color: var(--info-color);
+        }
+
+        .question-type-info.no-other {
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            border-left-color: var(--gray-400);
+        }
+
     /* Add Question Button */
     #add-question-btn {
         background: linear-gradient(135deg, var(--success-color) 0%, #059669 100%);
@@ -467,45 +501,39 @@
 
     /* Responsive Design */
     @@media (max-width: 768px) {
-        .card-body
+        .card-body {
+            padding: 2rem;
+        }
 
-    {
-        padding: 2rem;
-    }
+        #questions-container {
+            padding: 2rem;
+        }
 
-    #questions-container {
-        padding: 2rem;
-    }
+        .question-group {
+            padding: 2rem;
+        }
 
-    .question-group {
-        padding: 2rem;
-    }
+        .card-footer {
+            flex-direction: column;
+            align-items: stretch;
+        }
 
-    .card-footer {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .card-title {
-        font-size: 1.5rem;
-    }
-
+        .card-title {
+            font-size: 1.5rem;
+        }
     }
 
     /* Animations */
     @@keyframes slideDown {
-        from
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
 
-    {
-        opacity: 0;
-        transform: translateY(-20px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 
     .fade-in {
@@ -513,18 +541,15 @@
     }
 
     @@keyframes fadeIn {
-        from
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
 
-    {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 
     /* Enhanced Focus States */
@@ -587,6 +612,13 @@
                                             <!-- Include options for question types... -->
                                             <div class="container-sm"></div>
                                         </select>
+
+                                        <!-- Question Type Information -->
+                                        <div class="question-type-info">
+                                            <i class="bi bi-info-circle"></i>
+                                            <span class="type-info-text">Select a question type to see available options</span>
+                                        </div>
+
                                         <div class="answers-container">
                                             <label>Answers:</label>
                                             @for (int j = 0; j < Model.Questions?[i].Answers?.Count; j++)
@@ -642,6 +674,53 @@
         $(document).ready(function () {
             var questionIndex = @Model.Questions?.Count;
 
+            // ===== QUESTION TYPES THAT SUPPORT OTHER OPTIONS =====
+            const questionTypesWithOtherOption = [
+                'CheckBox',
+                'Multiple_choice',
+                'Demographic'
+            ];
+
+            // ===== FUNCTION TO CHECK IF QUESTION TYPE SUPPORTS OTHER OPTIONS =====
+            function supportsOtherOption(questionType) {
+                return questionTypesWithOtherOption.includes(questionType);
+            }
+
+            // ===== FUNCTION TO UPDATE OTHER OPTION VISIBILITY =====
+            function updateOtherOptionVisibility(questionGroup) {
+                const questionTypeSelect = questionGroup.find('.question-type, [class*="question-type-"]');
+                const selectedType = questionTypeSelect.val();
+                const addOtherBtn = questionGroup.find('.add-other-option');
+                const typeInfo = questionGroup.find('.question-type-info');
+                const typeInfoText = typeInfo.find('.type-info-text');
+
+                if (supportsOtherOption(selectedType)) {
+                    // Show "Add Other Option" button
+                    addOtherBtn.removeClass('hidden').addClass('visible').show();
+                    typeInfo.removeClass('no-other').addClass('supports-other');
+                    typeInfoText.html(`<strong>${selectedType}</strong> supports "Other" options - users can provide custom answers`);
+                } else {
+                    // Hide "Add Other Option" button
+                    addOtherBtn.removeClass('visible').addClass('hidden').hide();
+                    typeInfo.removeClass('supports-other').addClass('no-other');
+                    typeInfoText.html(`<strong>${selectedType}</strong> does not support "Other" options`);
+
+                    // Remove any existing other options for this question
+                    questionGroup.find('.other-option-group').remove();
+                }
+            }
+
+            // ===== UPDATE EXISTING QUESTIONS ON PAGE LOAD =====
+            $('.question-group').each(function() {
+                updateOtherOptionVisibility($(this));
+            });
+
+            // ===== HANDLE QUESTION TYPE CHANGES FOR EXISTING QUESTIONS =====
+            $("#questions-container").on("change", ".question-type, [class*='question-type-']", function () {
+                const questionGroup = $(this).closest('.question-group');
+                updateOtherOptionVisibility(questionGroup);
+            });
+
             $("#add-question-btn").click(function () {
                 var newQuestionHtml = `
                     <div class="question-group fade-in" data-question-index="${questionIndex}">
@@ -659,6 +738,13 @@
 
                 newQuestionHtml += `</select>`;
 
+                // Add question type information
+                newQuestionHtml += `
+                    <div class="question-type-info">
+                        <i class="bi bi-info-circle"></i>
+                        <span class="type-info-text">Question type information will appear here</span>
+                    </div>`;
+
                 // Add answers input fields
                 newQuestionHtml += `<div class="container-ms mx-5 py-2 px-5 ">`;
                 newQuestionHtml += `<div class="answers-container" data-question-index="${questionIndex}"><br>`;
@@ -668,7 +754,7 @@
                 newQuestionHtml += `<input type="text" name="Questions[${questionIndex}].Answers[0].Text" class="form-control" placeholder="new answer"/><br>`;
                 newQuestionHtml += `<input type="hidden" name="Questions[${questionIndex}].Answers[0].IsOtherOption" value="false"/>`;
                 newQuestionHtml += `<button type="button" class="btn btn-sm btn-success add-answer shadow mt-2"><i class="bi bi-plus-lg"></i> Add Answer</button>`;
-                newQuestionHtml += `<button type="button" class="btn btn-sm btn-info add-other-option shadow mt-2 ml-2"><i class="bi bi-pencil-square"></i> Add "Other" Option</button>`;
+                newQuestionHtml += `<button type="button" class="btn btn-sm btn-info add-other-option shadow mt-2 ml-2 hidden"><i class="bi bi-pencil-square"></i> Add "Other" Option</button>`;
                 newQuestionHtml += `<hr class="border m-2">`
                 newQuestionHtml += `</div> `;
                 newQuestionHtml += `</div>`;
@@ -681,7 +767,12 @@
                 newQuestionHtml += `<hr class="border border-primary border-4 opacity-75 mb-5">`
                 newQuestionHtml += `</div>`;
 
-                $("#questions-container .form-group").append(newQuestionHtml);
+                const newQuestionElement = $(newQuestionHtml);
+                $("#questions-container .form-group").append(newQuestionElement);
+
+                // Update other option visibility for the new question
+                updateOtherOptionVisibility(newQuestionElement);
+
                 questionIndex++;
             });
 
@@ -704,10 +795,19 @@
                 $(this).prev('.answer-group').find('.remove-answer').show();
             });
 
-            // Add "Other" option
+            // Add "Other" option - Enhanced with validation
             $("#questions-container").on("click", ".add-other-option", function () {
                 var questionIndex = $(this).closest('.answers-container').data('question-index');
                 var answerIndex = $(this).closest('.answers-container').find('.answer-group').length;
+                var questionGroup = $(this).closest('.question-group');
+                var questionTypeSelect = questionGroup.find('.question-type, [class*="question-type-"]');
+                var selectedType = questionTypeSelect.val();
+
+                // Double-check if the question type supports other options
+                if (!supportsOtherOption(selectedType)) {
+                    alert(`"Other" options are not supported for ${selectedType} question type.`);
+                    return;
+                }
 
                 // Check if "Other" option already exists
                 var existingOther = $(this).closest('.answers-container').find('.other-option-group');
@@ -768,6 +868,9 @@
                 questionGroup.find('.question-type').attr('disabled', false);
                 questionGroup.find('.answers-container').slideDown();
                 questionGroup.removeClass('collapsed');
+
+                // Update other option visibility when editing
+                updateOtherOptionVisibility(questionGroup);
 
                 // Remove any existing success message
                 questionGroup.find('.alert-success').remove();

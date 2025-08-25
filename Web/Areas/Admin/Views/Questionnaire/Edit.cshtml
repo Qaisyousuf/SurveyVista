@@ -604,6 +604,40 @@
             margin-right: 0.75rem;
         }
 
+    /* Question Type Info */
+    .question-type-info {
+        background: var(--gray-100);
+        border-radius: var(--border-radius-sm);
+        padding: 0.75rem 1rem;
+        margin-top: 0.5rem;
+        border-left: 4px solid var(--info-color);
+        font-size: 0.875rem;
+        color: var(--gray-700);
+    }
+
+        .question-type-info.supports-other {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            border-left-color: var(--info-color);
+        }
+
+        .question-type-info.no-other {
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            border-left-color: var(--gray-400);
+        }
+
+    /* Enhanced Other Option Button - Conditional Styling */
+    .addOtherOption {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+        .addOtherOption.hidden {
+            display: none !important;
+        }
+
+        .addOtherOption.visible {
+            display: inline-flex !important;
+        }
+
     /* Action Buttons */
     .action-buttons {
         display: flex;
@@ -930,8 +964,14 @@
                                     </div>
                                     <div class="form-group">
                                         <label asp-for="Questions[i].Type" class="control-label">Question Type</label>
-                                        <select asp-for="Questions[i].Type" asp-items="@ViewBag.QuestionTypes" class="form-control"></select>
+                                        <select asp-for="Questions[i].Type" asp-items="@ViewBag.QuestionTypes" class="form-control question-type"></select>
                                         <span asp-validation-for="Questions[i].Type" class="text-danger"></span>
+
+                                        <!-- Question Type Information -->
+                                        <div class="question-type-info">
+                                            <i class="bi bi-info-circle"></i>
+                                            <span class="type-info-text">Select a question type to see available options</span>
+                                        </div>
                                     </div>
 
                                     <div class="answers">
@@ -1097,6 +1137,56 @@
         $(document).ready(function () {
             let questionToDelete = null;
             let selectedQuestions = [];
+
+            // ===== QUESTION TYPES THAT SUPPORT OTHER OPTIONS =====
+            const questionTypesWithOtherOption = [
+                'CheckBox',
+                'Multiple_choice',
+                'Demographic'
+            ];
+
+            // ===== FUNCTION TO CHECK IF QUESTION TYPE SUPPORTS OTHER OPTIONS =====
+            function supportsOtherOption(questionType) {
+                return questionTypesWithOtherOption.includes(questionType);
+            }
+
+            // ===== FUNCTION TO UPDATE OTHER OPTION VISIBILITY =====
+            function updateOtherOptionVisibility(questionContainer) {
+                const questionTypeSelect = questionContainer.find('.question-type');
+                const selectedType = questionTypeSelect.val();
+                const addOtherBtn = questionContainer.find('.addOtherOption');
+                const typeInfo = questionContainer.find('.question-type-info');
+                const typeInfoText = typeInfo.find('.type-info-text');
+
+                // Get the text of the selected option
+                const selectedOptionText = questionTypeSelect.find('option:selected').text();
+
+                if (supportsOtherOption(selectedType)) {
+                    // Show "Add Other Option" button
+                    addOtherBtn.removeClass('hidden').addClass('visible').show();
+                    typeInfo.removeClass('no-other').addClass('supports-other');
+                    typeInfoText.html(`<strong>${selectedOptionText}</strong> supports "Other" options - users can provide custom answers`);
+                } else {
+                    // Hide "Add Other Option" button
+                    addOtherBtn.removeClass('visible').addClass('hidden').hide();
+                    typeInfo.removeClass('supports-other').addClass('no-other');
+                    typeInfoText.html(`<strong>${selectedOptionText}</strong> does not support "Other" options`);
+
+                    // Remove any existing other options for this question
+                    questionContainer.find('.other-option-group').remove();
+                }
+            }
+
+            // ===== UPDATE EXISTING QUESTIONS ON PAGE LOAD =====
+            $('.question').each(function() {
+                updateOtherOptionVisibility($(this));
+            });
+
+            // ===== HANDLE QUESTION TYPE CHANGES FOR EXISTING QUESTIONS =====
+            $(document).on("change", ".question-type", function () {
+                const questionContainer = $(this).closest('.question');
+                updateOtherOptionVisibility(questionContainer);
+            });
 
             // Update selection UI
             function updateSelectionUI() {
@@ -1359,11 +1449,20 @@
                 $(this).closest('.d-flex').before(answerHtml);
             });
 
-            // Function to add "Other" option
+            // Function to add "Other" option - Enhanced with validation
             $(document).on('click', '.addOtherOption', function () {
                 var questionContainer = $(this).closest('.question');
                 var questionIndex = questionContainer.attr('data-question-index');
                 var newAnswerIndex = questionContainer.find('.answers .answer-group').length;
+                var questionTypeSelect = questionContainer.find('.question-type');
+                var selectedType = questionTypeSelect.val();
+
+                // Double-check if the question type supports other options
+                if (!supportsOtherOption(selectedType)) {
+                    const selectedOptionText = questionTypeSelect.find('option:selected').text();
+                    alert(`"Other" options are not supported for ${selectedOptionText} question type.`);
+                    return;
+                }
 
                 // Check if "Other" option already exists
                 var existingOther = questionContainer.find('.other-option-group');
@@ -1428,6 +1527,9 @@
                 var questionContainer = $(this).closest('.question');
                 questionContainer.find('.question-title').hide();
                 questionContainer.find('.question-details').slideDown(300);
+
+                // Update other option visibility when editing starts
+                updateOtherOptionVisibility(questionContainer);
             });
 
             // Function to cancel edit
@@ -1531,20 +1633,21 @@
                                 </div>
                                 <div class="form-group">
                                     <label class="control-label">Question Type</label>
-                                    <select class="form-control" name="Questions[${newQuestionIndex}].Type">
-                                        <option value="0">Text</option>
-                                        <option value="1">CheckBox</option>
-                                        <option value="2">TrueFalse</option>
-                                        <option value="3">Multiple_choice</option>
-                                        <option value="4">Rating</option>
-                                        <option value="5">Likert</option>
-                                        <option value="6">Matrix</option>
-                                        <option value="7">Open_ended</option>
-                                        <option value="8">Demographic</option>
-                                        <option value="9">Ranking</option>
-                                        <option value="10">Image</option>
-                                        <option value="11">Slider</option>
-                                    </select>
+                                    <select class="form-control question-type" name="Questions[${newQuestionIndex}].Type">`;
+
+                    // Add question type options dynamically
+                    var questionTypes = @Html.Raw(Json.Serialize(Enum.GetNames(typeof(QuestionType))));
+                    for (var i = 0; i < questionTypes.length; i++) {
+                        questionHtml += `<option value="${questionTypes[i]}">${questionTypes[i]}</option>`;
+                    }
+
+                    questionHtml += `</select>
+
+                                    <!-- Question Type Information -->
+                                    <div class="question-type-info">
+                                        <i class="bi bi-info-circle"></i>
+                                        <span class="type-info-text">Select a question type to see available options</span>
+                                    </div>
                                 </div>
 
                                 <div class="answers">
@@ -1566,7 +1669,7 @@
                                         <button type="button" class="btn btn-success btn-sm addAnswer">
                                             <i class="bi bi-plus-square"></i> Add Answer
                                         </button>
-                                        <button type="button" class="btn btn-warning btn-sm addOtherOption">
+                                        <button type="button" class="btn btn-warning btn-sm addOtherOption hidden">
                                             <i class="bi bi-pencil-square"></i> Add "Other" Option
                                         </button>
                                     </div>
@@ -1583,11 +1686,15 @@
                             </div>
                         </div>`;
 
-                    $('#questionsContainer').append(questionHtml);
+                    const newQuestionElement = $(questionHtml);
+                    $('#questionsContainer').append(newQuestionElement);
+
+                    // Update other option visibility for the new question
+                    updateOtherOptionVisibility(newQuestionElement);
 
                     // Scroll to new question
                     $('html, body').animate({
-                        scrollTop: $('.question:last').offset().top - 100
+                        scrollTop: newQuestionElement.offset().top - 100
                     }, 500);
 
                     $btn.removeClass('loading').prop('disabled', false);
