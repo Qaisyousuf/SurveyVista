@@ -10,10 +10,10 @@
         <div class="container py-4">
             <div id="rowSection">
                 <div class="col-lg-6" id="box">
-                    <h3 class=" font-weight-bold" id="BtnColor">@Model.Title.ToUpper()</h3>
-                  @*   <p class="fst-italic text-muted">@Html.Raw(Model.Content) <a class="text-primary" href="@Model.Sitecopyright" target="_blank">SeoSoft</a></p> *@
-                 but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
-               
+                    <h4 class=" font-weight-bold" id="BtnColor">@Model.Title.ToUpper()</h4>
+
+                    <p>@Html.Raw(Model.Content)</p>
+                    <p class="fst-italic text-muted">@Model.Sitecopyright</p>
                 </div>
                 <div class="col-lg-6" id="box">
                     <script src="https://unpkg.com/@@dotlottie/player-component@latest/dist/dotlottie-player.mjs" type="module"></script>
@@ -25,7 +25,7 @@
 
     <!-- FOOTER -->
     <footer class="w-100 py-4 flex-shrink-0">
-        <div class="container">
+        <div class="container-fluid">
             <div class="row justify-content-around">
              <vc:address></vc:address>
                 <div class="col-lg-2 col-md-6">
@@ -69,10 +69,14 @@
                     <span class="text-muted">Update by @Model.UpdatedBy</span>
                 
                 </div>
+                @using System.Globalization
+
                 <div class="col-lg-2 col-md-3">
-                    <span class=" text-muted">Updated @Model.LastUpdated.ToShortDateString()</span>
-                 
+                    <span class="text-muted">
+                        Updated @Model.LastUpdated.ToString("dd-MM-yyyy HH:mm", new CultureInfo("da-DK"))
+                    </span>
                 </div>
+
                 <div class="col-lg-2 col-md-3">
                     <span class=" text-muted">Owner @Model.Owner</span>
                  

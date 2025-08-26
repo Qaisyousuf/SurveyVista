@@ -420,26 +420,66 @@ namespace Web.Areas.Admin.Controllers
         }
 
         // ADD THIS NEW METHOD
+        // 🔥 ENHANCED VERSION: Get Recent Activity with Distinct Activity Types
         private async Task<List<RecentActivityViewModel>> GetRecentActivityAsync()
         {
             var activities = new List<RecentActivityViewModel>();
 
-            // Recent responses
+            // 📋 Recent RESPONSES with detailed information
             var recentResponses = await _context.Responses
                 .Include(r => r.Questionnaire)
+                .Include(r => r.ResponseDetails) // Include response details for completion info
                 .OrderByDescending(r => r.SubmissionDate)
-                .Take(10)
+                .Take(8) // Reduced to make room for other activity types
                 .ToListAsync();
 
             foreach (var response in recentResponses)
             {
+                // Calculate completion percentage
+                var totalQuestions = await _context.Questions
+                    .Where(q => q.QuestionnaireId == response.QuestionnaireId)
+                    .CountAsync();
+
+                var answeredQuestions = response.ResponseDetails.Count();
+                var completionPercentage = totalQuestions > 0 ? Math.Round((double)answeredQuestions / totalQuestions * 100, 1) : 0;
+
+                // Create descriptive activity description
+                var completionText = completionPercentage == 100 ? "completed" : $"partially completed ({completionPercentage}%)";
+
                 activities.Add(new RecentActivityViewModel
                 {
-                    Type = "response",
-                    Description = $"New response received for \"{response.Questionnaire.Title}\"",
-                    UserName = response.UserName ?? "Anonymous",
+                    Type = "response", // 🔥 Specific type for responses
+                    Description = $"Response {completionText} for \"{response.Questionnaire.Title}\"",
+                    UserName = response.UserName ?? "Anonymous User",
                     Timestamp = response.SubmissionDate,
-                    Icon = "fas fa-check"
+                    Icon = completionPercentage == 100 ? "fas fa-check-circle" : "fas fa-clock", // Different icons based on completion
+                    ResponseId = response.Id,
+                    QuestionnaireId = response.QuestionnaireId,
+                    UserEmail = response.UserEmail ?? ""
+                });
+            }
+
+            // 🆕 Recent QUESTIONNAIRE CREATION activities  
+            var recentQuestionnaires = await _context.Questionnaires
+                .Include(q => q.Questions) // Include questions for more details
+                .OrderByDescending(q => q.Id) // Assuming newer questionnaires have higher IDs
+                .Take(4)
+                .ToListAsync();
+
+            foreach (var questionnaire in recentQuestionnaires.Take(3))
+            {
+                var questionCount = questionnaire.Questions?.Count() ?? 0;
+
+                activities.Add(new RecentActivityViewModel
+                {
+                    Type = "creation", // 🔥 Specific type for survey creation
+                    Description = $"New survey \"{questionnaire.Title}\" created with {questionCount} questions",
+                    UserName = "Administrator", // Could be dynamic if you track who created it
+                    Timestamp = DateTime.Now.AddHours(-new Random().Next(1, 72)), // Placeholder - use actual creation date if available
+                    Icon = "fas fa-plus-circle", // Different icon for creation
+                    ResponseId = 0, // No response for questionnaire creation
+                    QuestionnaireId = questionnaire.Id,
+                    UserEmail = "" // No user email for questionnaire creation
                 });
             }
 

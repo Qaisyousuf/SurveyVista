@@ -83,5 +83,9 @@ namespace Web.ViewModel.DashboardVM
         public string UserName { get; set; } = string.Empty;
         public DateTime Timestamp { get; set; }
         public string Icon { get; set; } = string.Empty;
+
+        public int ResponseId { get; set; }
+        public int QuestionnaireId { get; set; }
+        public string UserEmail { get; set; } = string.Empty;
     }
 }

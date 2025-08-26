@@ -951,6 +951,8 @@
     </div>
 
     <!-- Recent Activity -->
+    <!-- 🔥 UPDATED RECENT ACTIVITY SECTION with User-Specific Analytics Links -->
+    <!-- 🔥 UPDATED RECENT ACTIVITY SECTION with Distinct Activity Types -->
     <div class="recent-activity">
         <div class="activity-header">
             <h3>Recent Activity</h3>
@@ -961,21 +963,68 @@
             {
                 @foreach (var activity in Model.SurveyAnalytics.RecentActivity.Take(5))
                 {
-                    <div class="notification-item">
-                        <div class="notification-icon">
-                            <i class="fas fa-bell"></i>
+                    <div class="notification-item @(activity.Type == "creation" ? "creation-activity" : "response-activity")">
+                        <div class="notification-icon @(activity.Type == "creation" ? "creation-icon" : "response-icon")">
+                            <i class="@activity.Icon"></i>
                         </div>
                         <div class="notification-content">
                             <div class="notification-title">@activity.Description</div>
-                            <div class="notification-meta">@activity.Timestamp.ToString("MMM dd, yyyy HH:mm") @(!string.IsNullOrEmpty(activity.UserName) ? $"by {activity.UserName}" : "")</div>
+                            <div class="notification-meta">
+                                @activity.Timestamp.ToString("MMM dd, yyyy HH:mm")
+                                @(!string.IsNullOrEmpty(activity.UserName) ? $"by {activity.UserName}" : "")
+                                @if (!string.IsNullOrEmpty(activity.UserEmail))
+                                {
+                                    <span class="text-muted">(@activity.UserEmail)</span>
+                                }
+                            </div>
                         </div>
                         <div class="notification-actions">
-                            <a href="@Url.Action("Index", "UserResponse")" class="notification-btn btn-primary">
-                                <i class="fas fa-eye"></i> View Response
-                            </a>
-                            <a href="@Url.Action("Index", "Questionnaire")" class="notification-btn btn-secondary">
-                                <i class="fas fa-chart-bar"></i> Analytics
-                            </a>
+                            @if (activity.Type == "response")
+                            {
+                                <!-- 📋 RESPONSE ACTIVITY ACTIONS -->
+                                @if (activity.ResponseId > 0)
+                                {
+                                    <a href="@Url.Action("ViewResponse", "UserResponse", new { area = "Admin", id = activity.ResponseId })"
+                                       class="notification-btn btn-primary"
+                                       title="View Response #@activity.ResponseId">
+                                        <i class="fas fa-eye"></i> View Response
+                                    </a>
+                                }
+
+                                @if (!string.IsNullOrEmpty(activity.UserEmail))
+                                {
+                                    <a href="@Url.Action("UserResponsesStatus", "UserResponseStatus", new { area = "Admin", userEmail = activity.UserEmail })"
+                                       class="notification-btn btn-secondary"
+                                       title="View all responses from @activity.UserEmail">
+                                        <i class="fas fa-user-chart"></i> User Analytics
+                                    </a>
+                                }
+                            }
+                            else if (activity.Type == "creation")
+                            {
+                                <!-- 🆕 SURVEY CREATION ACTIVITY ACTIONS -->
+                                @if (activity.QuestionnaireId > 0)
+                                {
+                                    <a href="@Url.Action("Details", "Questionnaire", new { area = "Admin", id = activity.QuestionnaireId })"
+                                       class="notification-btn btn-success"
+                                       title="View Survey Details">
+                                        <i class="fas fa-info-circle"></i> View Survey
+                                    </a>
+                                    <a href="@Url.Action("Edit", "Questionnaire", new { area = "Admin", id = activity.QuestionnaireId })"
+                                       class="notification-btn btn-warning"
+                                       title="Edit Survey">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
+                                }
+                            }
+                            else
+                            {
+                                <!-- 🔄 FALLBACK ACTIONS -->
+                                <a href="@Url.Action("Index", "UserResponse", new { area = "Admin" })"
+                                   class="notification-btn btn-primary">
+                                    <i class="fas fa-list"></i> View All
+                                </a>
+                            }
                         </div>
                     </div>
                 }
@@ -991,7 +1040,8 @@
                         <div class="notification-meta">Start by creating your first questionnaire to see activity here</div>
                     </div>
                     <div class="notification-actions">
-                        <a href="@Url.Action("Create", "Questionnaire")" class="notification-btn btn-primary">
+                        <a href="@Url.Action("Create", "Questionnaire", new { area = "Admin" })"
+                           class="notification-btn btn-primary">
                             <i class="fas fa-plus"></i> Create Survey
                         </a>
                     </div>
@@ -999,6 +1049,106 @@
             }
         </div>
     </div>
+
+    <style>
+        /* 🎨 DISTINCT STYLING FOR DIFFERENT ACTIVITY TYPES */
+
+        /* 📋 Response Activity Styling */
+        .response-activity {
+            border-left: 4px solid var(--success-gradient) !important;
+            background: linear-gradient(90deg, rgba(16, 185, 129, 0.05) 0%, rgba(255, 255, 255, 1) 10%);
+        }
+
+        .response-icon {
+            background: var(--success-gradient) !important;
+            animation: pulse-green 2s infinite;
+        }
+
+        /* 🆕 Survey Creation Activity Styling */
+        .creation-activity {
+            border-left: 4px solid var(--primary-gradient) !important;
+            background: linear-gradient(90deg, rgba(102, 126, 234, 0.05) 0%, rgba(255, 255, 255, 1) 10%);
+        }
+
+        .creation-icon {
+            background: var(--primary-gradient) !important;
+            animation: pulse-blue 2s infinite;
+        }
+
+        /* ✨ Animation Effects */
+        @@keyframes pulse-green {
+            0%, 100%
+
+        {
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+        }
+
+        50% {
+            box-shadow: 0 0 0 5px rgba(16, 185, 129, 0);
+        }
+
+        }
+
+        @@keyframes pulse-blue {
+            0%, 100%
+
+        {
+            box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.4);
+        }
+
+        50% {
+            box-shadow: 0 0 0 5px rgba(102, 126, 234, 0);
+        }
+
+        }
+
+        /* 🔘 Additional Button Styles */
+        .btn-success {
+            background: var(--success-gradient);
+            color: white;
+            border: none;
+        }
+
+            .btn-success:hover {
+                color: white;
+                transform: translateY(-1px);
+                box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            }
+
+        .btn-warning {
+            background: var(--warning-gradient);
+            color: white;
+            border: none;
+        }
+
+            .btn-warning:hover {
+                color: white;
+                transform: translateY(-1px);
+                box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
+            }
+
+        /* 📱 Mobile Responsive Adjustments */
+        @@media (max-width: 768px) {
+            .creation-activity, .response-activity
+
+        {
+            background: var(--surface);
+        }
+
+        .notification-actions {
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .notification-btn {
+            flex: 1;
+            min-width: 120px;
+            font-size: 0.8rem;
+            padding: 0.4rem 0.8rem;
+        }
+
+        }
+    </style>
 
     <!-- Data Table - Full Width -->
     <div class="data-table full-width-table">
@@ -1008,10 +1158,10 @@
         @if (Model.SurveyAnalytics.TopSurveys.Any())
         {
             <div class="table-responsive">
-                <table class="table">
+                <table class="table w-100">
                     <thead>
                         <tr>
-                            <th style="width: 35%;">Title</th>
+                            <th style="width: 45%;">Title</th>
                             <th style="width: 10%;">Questions</th>
                             <th style="width: 10%;">Responses</th>
                             <th style="width: 15%;">Completion Rate</th>
@@ -1057,9 +1207,7 @@
                                         <a href="@Url.Action("Index", "UserResponse")" class="action-icon-btn" title="View Responses">
                                             <i class="fas fa-download"></i>
                                         </a>
-                                        <a href="@Url.Action("SendQuestionnaire", "Questionnaire", new { id = survey.Id })" class="action-icon-btn" title="Send Survey">
-                                            <i class="fas fa-paper-plane"></i>
-                                        </a>
+                                       
                                     </div>
                                 </td>
                             </tr>
@@ -1094,7 +1242,7 @@
         </a>
         <a href="@Url.Action("Index", "UserResponseStatus")" class="action-btn btn-secondary">
             <i class="fas fa-users"></i>
-            Manage Users
+            Manage Response
         </a>
         <a href="@Url.Action("Index", "Questionnaire")" class="action-btn btn-secondary">
             <i class="fas fa-list"></i>

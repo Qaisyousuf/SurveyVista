@@ -107,7 +107,7 @@ namespace Web.Areas.Admin.Controllers
                     Content = viewmodel.Content,
                     CreatedBy = viewmodel.CreatedBy,
                     UpdatedBy = viewmodel.UpdatedBy,
-                    LastUpdated = viewmodel.LastUpdated,
+                    LastUpdated = DateTime.UtcNow,
                     ImageUlr = viewmodel.ImageUlr,
                     Sitecopyright = viewmodel.Sitecopyright,
                 };
@@ -202,7 +202,7 @@ namespace Web.Areas.Admin.Controllers
                 footer.Owner = viewmodel.Owner;
                 footer.Content = viewmodel.Content;
                 footer.Name = viewmodel.Name;
-                footer.LastUpdated = viewmodel.LastUpdated;
+                footer.LastUpdated = DateTime.UtcNow;
                 footer.UpdatedBy = viewmodel.UpdatedBy;
                 footer.CreatedBy = viewmodel.CreatedBy;
                 footer.Sitecopyright = viewmodel.Sitecopyright;
