@@ -1,0 +1,365 @@
+[33mcommit 0792b1e1d5722dfb9e1bba65a0db15997a0c33df[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m)[m
+Author: Qaisyousuf <mr.qais.yousuf@gmail.com>
+Date:   Thu Aug 28 09:36:10 2025 +0200
+
+    Add AI-powered basic analysis feature for processing survey results
+
+[33mcommit cf77b41da7cdaec857095b267768e34b74844841[m[33m ([m[1;31morigin/main[m[33m)[m
+Author: Qaisyousuf <mr.qais.yousuf@gmail.com>
+Date:   Tue Aug 26 13:45:33 2025 +0200
+
+    Add database backup
+
+[33mcommit 4019fc4a951599d7a4d96a3d2e1d37a7d8b9a144[m
+Author: Qaisyousuf <mr.qais.yousuf@gmail.com>
+Date:   Tue Aug 26 13:42:26 2025 +0200
+
+    Improve frontend design and layout
+
+[33mcommit 1b1a736f3f17af9cb700a8b0526bcd7ec1c34a41[m
+Author: Qaisyousuf <mr.qais.yousuf@gmail.com>
+Date:   Mon Aug 25 12:19:43 2025 +0200
+
+    Improve dashboard to display real data
+
+[33mcommit 43461bbb2bcac49f097023fff0d5c86c435fc6d9[m
+Author: Qaisyousuf <mr.qais.yousuf@gmail.com>
+Date:   Wed Aug 20 13:29:10 2025 +0200
+
+    Add questionnaire status management with draft, archive, and recover options
+
+[33mcommit b67eca07293ae7b2a67f7c6f720d7d28a83544f2[m
+Author: Qaisyousuf <mr.qais.yousuf@gmail.com>
+Date:   Fri Aug 15 17:26:46 2025 +0200
+
+    Improve overall questionnaire design and user response experience
+
+[33mcommit d9f9b600d7c4911abef12b917642c6f586c1e375[m
+Author: Qaisyousuf <mr.qais.yousuf@gmail.com>
+Date:   Thu Aug 14 15:07:48 2025 +0200
+
+    Add 'Other' option to questionnaire for custom user input
+
+[33mcommit 908e241fd8caeb70f840e70a61f3603526240a85[m
+Author: Qaisyousuf <mr.qais.yousuf@gmail.com>
+Date:   Wed Aug 13 17:03:21 2025 +0200
+
+    Improve questionnaire UI for better usability on smaller devices
+
+[33mcommit f6a03302fd7818623e69d24136c50883fc6219d7[m
+Author: Qaisyousuf <mr.qais.yousuf@gmail.com>
+Date:   Mon Aug 11 18:06:13 2025 +0200
+
+    Add backend condition logic for user questionnaire submission handling
+
+[33mcommit 2ce5b50c9702b0b2a3a6b366a8ebf5fc47a88c2d[m
+Author: Qaisyousuf <mr.qais.yousuf@gmail.com>
+Date:   Mon Aug 11 11:28:32 2025 +0200
+
+    Add frontend condition logic for questionnaire
+
+[33mcommit d1dfcdd2ba6295810c6a92105d4466efa9a40a74[m
+Author: Qaisyousuf <mr.qais.yousuf@gmail.com>
+Date:   Fri Aug 8 17:21:29 2025 +0200
+
+    Implement condition logic for the questionnaire
+
+[33mcommit 9bfed53e7164371d5bacad39a8e53bdff3603886[m
+Author: Qaisyousuf <mr.qais.yousuf@gmail.com>
+Date:   Wed Aug 6 14:23:37 2025 +0200
+
+    Complete subscription and newsletter tracking for new emails in Danish
+    
+    Implemented subscription and newsletter tracking with support for new Danish emails. All emails are now delivered to the Primary tab in Gmail for improved visibility.
+
+[33mcommit 13bf203fe42182faaacca226e39ab21803097bc5[m
+Author: Qaisyousuf <mr.qais.yousuf@gmail.com>
+Date:   Tue Aug 5 17:59:13 2025 +0200
+
+    Configure Danish response emails and optimize survey email template for inbox delivery
+
+[33mcommit 24812a77fae855c8cdd27110340859a2cbb65bcf[m
+Author: Qaisyousuf <mr.qais.yousuf@gmail.com>
+Date:   Tue Aug 5 17:17:06 2025 +0200
+
+    Configure mail services for primary inbox delivery in Gmail and focused inbox in Outlook
+    
+    Updated mail service settings to ensure emails are delivered to the Primary tab in Gmail and the Focused inbox in Outlook.
+
+[33mcommit 285eb3ce931ee870f44fb25b86b85ce6092909b8[m
+Author: Qaisyousuf <mr.qais.yousuf@gmail.com>
+Date:   Tue Aug 5 14:22:48 2025 +0200
+
+    Update email services and improve email template in online survey project
+    
+    Replaced the email service implementation and enhanced the email template design. The main email address for sending online surveys is now survey@asurvey.dk.
+
+[33mcommit d06e0c5ba9b4235b8eafdf598914b00bf081805a[m
+Author: Qais Yousuf <mr.qais.yousuf@gmail.com>
+Date:   Wed Jul 30 14:41:43 2025 +0200
+
+    add database backup
+
+[33mcommit 196c6887a86769cea4e73db265af9c463b9603c0[m
+Author: Qais Yousuf <mr.qais.yousuf@gmail.com>
+Date:   Thu Jun 6 15:24:04 2024 +0200
+
+    real-time notification completed
+
+[33mcommit aacc23d5ef94ef12940a0cad863503372ca609ec[m
+Author: Qais Yousuf <mr.qais.yousuf@gmail.com>
+Date:   Sat Jun 1 21:04:36 2024 +0200
+
+    generate report for pdf and excel completed
+
+[33mcommit 9c560a798caddf2f70e4ac7d11fcb949e7da5301[m
+Author: Qais Yousuf <mr.qais.yousuf@gmail.com>
+Date:   Sat Jun 1 18:38:06 2024 +0200
+
+    user response for all the survey completed
+
+[33mcommit 1254366a650bbd9b2a86e9126907db23e63e3588[m
+Author: Qais Yousuf <mr.qais.yousuf@gmail.com>
+Date:   Fri May 10 20:37:42 2024 +0200
+
+    Email tracking with IP adress completed
+
+[33mcommit 8994421caf6f0ff4bec911ad49bbbb406844b678[m
+Author: Qais Yousuf <mr.qais.yousuf@gmail.com>
+Date:   Thu May 9 19:14:25 2024 +0200
+
+    Real-time email event with charts completed
+
+[33mcommit 4fb4e979e66d45fec42116fc7ca3e569d7e0d2e2[m
+Author: Qais Yousuf <mr.qais.yousuf@gmail.com>
+Date:   Thu May 9 14:08:10 2024 +0200
+
+    Real time email event tracking completed
+
+[33mcommit e80a2675e66485cec323bbae29040add4606867e[m
+Author: Qais Yousuf <mr.qais.yousuf@gmail.com>
+Date:   Sat May 4 20:19:22 2024 +0200
+
+    login functionality completed
+
+[33mcommit d733b2cdb15b5b05a1999daec5f0e70f60c1ceca[m
+Author: Qais Yousuf <mr.qais.yousuf@gmail.com>
+Date:   Wed May 1 17:51:38 2024 +0200
+
+    Sending the survey to multiple users created
+
+[33mcommit 644893ded8ea1823cd67c5d973e55a0401985f36[m
+Author: Qais Yousuf <mr.qais.yousuf@gmail.com>
+Date:   Tue Apr 30 21:27:33 2024 +0200
+
+    survey analyzer completed for all types of questions
+
+[33mcommit 5b49528a3329d28a3e655c1507a61d38ef3f9ebe[m
+Author: Qais Yousuf <mr.qais.yousuf@gmail.com>
+Date:   Tue Apr 30 14:28:32 2024 +0200
+
+    question type of image chart completed
+
+[33mcommit d3a6fd4918ba517d9e18af6a9b97ae500ada6eaf[m
+Author: Qais Yousuf <mr.qais.yousuf@gmail.com>
+Date:   Tue Apr 30 11:30:33 2024 +0200
+
+    Survey Analyzer for each survey created
+
+[33mcommit 181237e9ff666013e613cd698a3bca093e62d2c3[m
+Author: Qais Yousuf <mr.qais.yousuf@gmail.com>
+Date:   Fri Apr 26 11:40:27 2024 +0200
+
+    User response backend completed
+
+[33mcommit 98ec7a656101ebb7e0640d160e057ea59ebdcb2c[m
+Author: Qais Yousuf <mr.qais.yousuf@gmail.com>
+Date:   Tue Apr 23 20:00:09 2024 +0200
+
+    All question type frontend completed
+
+[33mcommit 1a43f8b456e885cd1a49911359da4ef23e6d7fed[m
+Author: Qais Yousuf <mr.qais.yousuf@gmail.com>
+Date:   Mon Apr 22 18:11:10 2024 +0200
+
+    Image and Likret forntend question type completed
+
+[33mcommit a29d11fbcd0a2c58789b623054e3543c5b0f78f6[m
+Author: Qais Yousuf <mr.qais.yousuf@gmail.com>
+Date:   Sun Apr 21 19:59:57 2024 +0200
+
+    ranking question type completed
+
+[33mcommit 89182ca4695b2dc1378f59519b27081fe634269b[m
+Author: Qais Yousuf <mr.qais.yousuf@gmail.com>
+Date:   Sun Apr 21 16:29:41 2024 +0200
+
+    sliber question type frontend completed
+
+[33mcommit ab3daa46f6d1f0a1a511833a424a6a4d02e4a4c4[m
+Author: Qais Yousuf <mr.qais.yousuf@gmail.com>
+Date:   Fri Apr 19 15:11:18 2024 +0200
+
+    Response questionnaire for multiple choice completed
+
+[33mcommit 31faec4f73e0d78ad2b5e593e081ebe8e53e214d[m
+Author: Qais Yousuf <mr.qais.yousuf@gmail.com>
+Date:   Wed Apr 10 19:26:03 2024 +0200
+
+    response frontend completed
+
+[33mcommit a399126e3b736b9d2b6542795275dacb284f29f0[m
+Author: Qais Yousuf <mr.qais.yousuf@gmail.com>
+Date:   Tue Apr 9 18:42:29 2024 +0200
+
+    URL expiration method completed
+
+[33mcommit 1f8eb6103c7b16cdcaa5ce3faaab8059da189331[m
+Author: Qais Yousuf <mr.qais.yousuf@gmail.com>
+Date:   Sun Apr 7 22:11:31 2024 +0200
+
+    sending email completed
+
+[33mcommit 6bc624dd70382659de65e477eb66b66d9c285078[m
+Author: Qais Yousuf <mr.qais.yousuf@gmail.com>
+Date:   Fri Apr 5 17:29:05 2024 +0200
+
+    User subscription with newsletter completed
+
+[33mcommit 46a75504d8297fb470ef09c999a93a336aa934c0[m
+Author: Qais Yousuf <mr.qais.yousuf@gmail.com>
+Date:   Fri Apr 5 17:27:17 2024 +0200
+
+    Subscription completed
+
+[33mcommit 2a383d0c3d5f7535d2a58526d95ad8f731cc5659[m
+Author: Qais Yousuf <mr.qais.yousuf@gmail.com>
+Date:   Wed Apr 3 16:40:00 2024 +0200
+
+    Subscription design completed
+
+[33mcommit 2ebe7ad5b332f209ca6ea0ca19a0ff46b13c216f[m
+Author: Qais Yousuf <mr.qais.yousuf@gmail.com>
+Date:   Sat Mar 30 16:10:19 2024 +0100
+
+    Frontend design completed
+
+[33mcommit 366f0c7bef1917c66470ebbbd04a6444d9e46e22[m
+Author: Qais Yousuf <mr.qais.yousuf@gmail.com>
+Date:   Wed Mar 27 11:48:25 2024 +0100
+
+    Page CURD comleted
+
+[33mcommit 57b89d6456377d02b4e65d43c4822f085c5b2f40[m
+Author: Qais Yousuf <mr.qais.yousuf@gmail.com>
+Date:   Tue Mar 26 17:51:26 2024 +0100
+
+    the questionnaire CURD operation is complete
+
+[33mcommit 64280c893683dec81596c86198d267c4e799dfc0[m
+Author: Qais Yousuf <mr.qais.yousuf@gmail.com>
+Date:   Tue Mar 26 16:45:27 2024 +0100
+
+    Creating multiple question in the edit mode comppleted
+
+[33mcommit 4b6f367545a69f25d1bf7f7b5048531ea1f891d7[m
+Author: Qais Yousuf <mr.qais.yousuf@gmail.com>
+Date:   Mon Mar 25 09:53:39 2024 +0100
+
+    Create new question in the edit questionnaire created
+
+[33mcommit 57ebc7119a8c9c1d79f7937080d17df52df031f5[m
+Author: Qais Yousuf <mr.qais.yousuf@gmail.com>
+Date:   Sun Mar 24 17:10:30 2024 +0100
+
+    create new question in the edit questionnaire is completed
+
+[33mcommit 57a7e4619407c4ee55ffdaaf0c45d544b3b9760d[m
+Author: Qais Yousuf <mr.qais.yousuf@gmail.com>
+Date:   Sun Mar 24 00:53:00 2024 +0100
+
+    the deletion of questions in the edit mode
+
+[33mcommit 3c5f0c7010325d4e2e6b483aa425ad7dee62fd51[m
+Author: Qais Yousuf <mr.qais.yousuf@gmail.com>
+Date:   Fri Mar 22 19:58:00 2024 +0100
+
+    the questionnaire create and save designe comppleted
+
+[33mcommit a50d5eb24141398ac4adc2e8dfd8076ab0744e23[m
+Author: Qais Yousuf <mr.qais.yousuf@gmail.com>
+Date:   Fri Mar 22 10:32:56 2024 +0100
+
+    Edit question and Save question functionality added to the edit questionnaire
+
+[33mcommit 729ffc869b0621c741f6be8b8ba2cd4f8e8ca9fa[m
+Author: Qais Yousuf <mr.qais.yousuf@gmail.com>
+Date:   Thu Mar 21 16:19:27 2024 +0100
+
+    save and edit functionlity is enabled for the questionnaire
+
+[33mcommit 69810186ebf1b77d9bcb554060f18cbb2a0e26cb[m
+Author: Qais Yousuf <mr.qais.yousuf@gmail.com>
+Date:   Thu Mar 21 11:00:24 2024 +0100
+
+    Questionnaire details configured
+
+[33mcommit 9938e696f6f6944396ca607cc4603238a35ddfea[m
+Author: Qais Yousuf <mr.qais.yousuf@gmail.com>
+Date:   Fri Mar 15 19:40:12 2024 +0100
+
+    the questionnaire with list of questions and answers added
+
+[33mcommit f83d5c492b765285d38a5d740ee781151a32a4e9[m
+Author: Qais Yousuf <mr.qais.yousuf@gmail.com>
+Date:   Tue Mar 12 16:57:42 2024 +0100
+
+    the questionnaire mode CURD complete
+
+[33mcommit 59d86a516e3c0737042e33c50bdf253b9bb83e21[m
+Author: Qais Yousuf <mr.qais.yousuf@gmail.com>
+Date:   Sun Mar 10 13:46:37 2024 +0100
+
+    the add method of questionnaire created
+
+[33mcommit 78ed96237d788bbe27336cbdd07d49ce95d8f579[m
+Author: Qais Yousuf <mr.qais.yousuf@gmail.com>
+Date:   Fri Mar 8 11:20:36 2024 +0100
+
+    Survey Models Created
+
+[33mcommit 3a8f1405b5beeff4318786a534a8bbf8fa513b64[m
+Author: Qais Yousuf <mr.qais.yousuf@gmail.com>
+Date:   Sun Mar 3 13:57:57 2024 +0100
+
+    config footer
+
+[33mcommit 3b98fd109f2b7743ff11c7a47f05819614fb108c[m
+Author: Qais Yousuf <mr.qais.yousuf@gmail.com>
+Date:   Thu Feb 22 16:46:42 2024 +0100
+
+    Banner CURD operation completed
+
+[33mcommit 4a65418344d89789d5875e7871ce6371116569e9[m
+Author: Qais Yousuf <mr.qais.yousuf@gmail.com>
+Date:   Wed Feb 21 18:35:32 2024 +0100
+
+    Banner with the CURD operation
+
+[33mcommit 86d6e8c49d8ecb73b3df32c472fccf50999f531a[m
+Author: Qais Yousuf <mr.qais.yousuf@gmail.com>
+Date:   Tue Feb 20 18:53:54 2024 +0100
+
+    Migration added
+
+[33mcommit eac2a698bd5a68117649104e8c1d1f8cbcee290c[m
+Author: Qais Yousuf <mr.qais.yousuf@gmail.com>
+Date:   Mon Feb 19 15:09:03 2024 +0100
+
+    Initialize project with basic structure and dependencies
+
+[33mcommit cd2c1959aa6148a8d1cb35e669c0b38d1d3549fb[m
+Author: Qais Yousuf <mr.qais.yousuf@gmail.com>
+Date:   Mon Feb 19 13:33:24 2024 +0100
+
+    SurveyVista initial

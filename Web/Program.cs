@@ -38,6 +38,7 @@ builder.Services.ConfigureDashboard();
 builder.Services.UserResponseConfiguration();
 builder.Services.ConfigureOpenAI(config);
 builder.Services.AddSignalR();
+builder.Services.ConfigureAIAnalysis();
 
 
 

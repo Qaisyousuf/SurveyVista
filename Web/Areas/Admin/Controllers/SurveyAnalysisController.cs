@@ -7,6 +7,8 @@ using Web.ViewModel.QuestionnaireVM;
 
 using System.IO;
 using Microsoft.AspNetCore.Authorization;
+using Services.Implemnetation;
+using Services.Interaces;
 
 namespace Web.Areas.Admin.Controllers
 {
@@ -15,10 +17,12 @@ namespace Web.Areas.Admin.Controllers
     public class SurveyAnalysisController : Controller
     {
         private readonly SurveyContext _context;
+        private readonly IAiAnalysisService _aiAnalysisService;
 
-        public SurveyAnalysisController(SurveyContext context)
+        public SurveyAnalysisController(SurveyContext context, IAiAnalysisService aiAnalysisService)
         {
             _context = context;
+          _aiAnalysisService = aiAnalysisService;
         }
         public IActionResult Index()
         {
@@ -115,7 +119,55 @@ namespace Web.Areas.Admin.Controllers
            
         }
 
+        [HttpGet]
+        public async Task<IActionResult> AiAnalysis(int id)
+        {
+            // Get survey responses for the questionnaire
+            var responses = await _context.Responses
+                .Where(r => r.QuestionnaireId == id)
+                .Include(r => r.ResponseDetails)
+                    .ThenInclude(rd => rd.Question)
+                .Include(r => r.Questionnaire)
+                .ToListAsync();
 
+            if (!responses.Any())
+            {
+                return NotFound("No responses found for this questionnaire.");
+            }
+
+            var analysisResults = new List<dynamic>();
+
+            foreach (var response in responses)
+            {
+                foreach (var detail in response.ResponseDetails)
+                {
+                    if (!string.IsNullOrWhiteSpace(detail.TextResponse))
+                    {
+                        // Analyze the text response with AI
+                        var sentiment = await _aiAnalysisService.AnalyzeSentimentAsync(detail.TextResponse);
+                        var riskAssessment = await _aiAnalysisService.GetRiskAssessmentAsync(detail.TextResponse);
+                        var keyPhrases = await _aiAnalysisService.ExtractKeyPhrasesAsync(detail.TextResponse);
+
+                        analysisResults.Add(new
+                        {
+                            UserName = response.UserName,
+                            UserEmail = response.UserEmail,
+                            Question = detail.Question.Text,
+                            Response = detail.TextResponse,
+                            Sentiment = sentiment.Sentiment.ToString(),
+                            PositiveScore = sentiment.ConfidenceScores.Positive,
+                            NegativeScore = sentiment.ConfidenceScores.Negative,
+                            NeutralScore = sentiment.ConfidenceScores.Neutral,
+                            RiskAssessment = riskAssessment,
+                            KeyPhrases = keyPhrases
+                        });
+                    }
+                }
+            }
+
+            ViewBag.QuestionnaireName = responses.First().Questionnaire.Title;
+            return View(analysisResults);
+        }
     }
 }
 

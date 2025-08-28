@@ -87,6 +87,13 @@ namespace Web.Extesions
         public static void MailStatConfiguration(this IServiceCollection services)
         {
             services.AddTransient<IEmailStatsService, EmailStatsService>();
+
+
+        }
+
+        public static void ConfigureAIAnalysis(this IServiceCollection services)
+        {
+            services.AddScoped<IAiAnalysisService,AiAnalysisService>();
         }
 
         //public static void MailConfiguration(this IServiceCollection services, IConfiguration configuration)

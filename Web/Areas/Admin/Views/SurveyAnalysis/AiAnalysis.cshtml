@@ -1,0 +1,71 @@
+﻿@model IEnumerable<dynamic>
+
+@{
+    ViewData["Title"] = "AI Analysis Results";
+}
+
+<div class="container mt-5">
+    <div class="card" id="Errocard">
+        <div class="card-header">
+            <h3>AI Analysis: @ViewBag.QuestionnaireName</h3>
+        </div>
+        <div class="card-body">
+
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Question</th>
+                                <th>Response</th>
+                                <th>Sentiment</th>
+                                <th>Risk Level</th>
+                                <th>Key Phrases</th>
+                                <th>Confidence Scores</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr class="@(item.RiskAssessment.Contains("High") ? "table-danger" :
+                                                                                 item.RiskAssessment.Contains("Medium") ? "table-warning" : "table-success")">
+                            <td>@item.UserName</td>
+                            <td>@item.Question</td>
+                            <td>@item.Response</td>
+                            <td>
+                                <span class="badge @(item.Sentiment == "Positive" ? "badge-success" :
+                                                                                                  item.Sentiment == "Negative" ? "badge-danger" : "badge-secondary")">
+                                    @item.Sentiment
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge @(item.RiskAssessment.Contains("High") ? "badge-danger" :
+                                                                                                  item.RiskAssessment.Contains("Medium") ? "badge-warning" : "badge-success")">
+                                    @item.RiskAssessment
+                                </span>
+                            </td>
+                            <td>
+                                @string.Join(", ", item.KeyPhrases)
+                            </td>
+                            <td>
+                                <small>
+                                    Pos: @item.PositiveScore.ToString("F2")<br />
+                                    Neg: @item.NegativeScore.ToString("F2")<br />
+                                    Neu: @item.NeutralScore.ToString("F2")
+                                </small>
+                            </td>
+                        </tr>
+                                                }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <p>No text responses found to analyze.</p>
+            }
+        </div>
+    </div>
+</div>
