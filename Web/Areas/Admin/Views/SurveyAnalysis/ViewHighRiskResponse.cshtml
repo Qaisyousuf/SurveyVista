@@ -1,0 +1,699 @@
+﻿
+@model List<Services.AIViewModel.ResponseAnalysisResult>
+
+@{
+    var response = ViewBag.Response as Model.Response;
+    ViewData["Title"] = $"High Risk Case Details - Response #{response?.Id}";
+
+}
+
+<div class="container-fluid">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item">
+                                <a href="@Url.Action("Index")">
+                                    <i class="fas fa-brain"></i> Analysis Dashboard
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item">
+                                <a href="@Url.Action("AnalyzeQuestionnaire", new { id = response?.QuestionnaireId })">
+                                    @response?.Questionnaire?.Title
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item">
+                                <a href="@Url.Action("HighRiskResponses", new { id = response?.QuestionnaireId })">
+                                    High Risk Cases
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item active">Response #@response?.Id</li>
+                        </ol>
+                    </nav>
+                    <h1 class="h3 mb-1">
+                        <i class="fas fa-user-injured text-danger me-2"></i>
+                        High Risk Case Analysis
+                    </h1>
+                    <p class="text-muted mb-0">Detailed mental health assessment requiring professional intervention</p>
+                </div>
+                <div class="text-end">
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-success btn-sm" onclick="markForIntervention()">
+                            <i class="fas fa-user-md"></i> Schedule Intervention
+                        </button>
+                        <button type="button" class="btn btn-warning btn-sm" onclick="flagForReview()">
+                            <i class="fas fa-flag"></i> Flag for Review
+                        </button>
+                        <button type="button" class="btn btn-info btn-sm" onclick="exportCaseReport()">
+                            <i class="fas fa-file-medical"></i> Export Case
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Critical Alert Banner -->
+    @if (Model.Any(r => r.RiskAssessment?.RequiresImmediateAttention == true))
+    {
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="alert alert-danger border-0 shadow-lg">
+                    <div class="row align-items-center">
+                        <div class="col-md-10">
+                            <h4 class="alert-heading mb-2">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <strong>IMMEDIATE ATTENTION REQUIRED</strong>
+                            </h4>
+                            <p class="mb-2">This employee's responses indicate significant mental health concerns that require urgent professional intervention.</p>
+                            <div class="d-flex gap-2 flex-wrap">
+                                <span class="badge bg-white text-danger fw-bold">HIGH PRIORITY</span>
+                                <span class="badge bg-white text-danger">PROFESSIONAL INTERVENTION</span>
+                                <span class="badge bg-white text-danger">CONFIDENTIAL</span>
+                            </div>
+                        </div>
+                        <div class="col-md-2 text-end">
+                            <i class="fas fa-heartbeat fa-3x text-white opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Employee Response Overview -->
+    @if (response != null)
+    {
+        <div class="row mb-4">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-user me-2"></i>
+                            Employee Response Overview
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <strong>Response ID:</strong><br>
+                                <span class="text-muted">#@response.Id</span>
+                            </div>
+                            <div class="col-md-4">
+                                <strong>Submission Date:</strong><br>
+                                <span class="text-muted">@response.SubmissionDate.ToString("MMMM dd, yyyy")</span>
+                            </div>
+                            <div class="col-md-4">
+                                <strong>Survey:</strong><br>
+                                <span class="text-muted">@response.Questionnaire?.Title</span>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info border-0">
+                            <i class="fas fa-shield-alt me-2"></i>
+                            <strong>Privacy Notice:</strong> All personal information has been anonymized to protect employee privacy while enabling professional mental health assessment.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-warning text-dark">
+                        <h6 class="mb-0">
+                            <i class="fas fa-clipboard-check me-2"></i>
+                            Action Checklist
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="reviewed">
+                            <label class="form-check-label small" for="reviewed">
+                                Case reviewed by mental health professional
+                            </label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="contacted">
+                            <label class="form-check-label small" for="contacted">
+                                Employee contacted for follow-up
+                            </label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="intervention">
+                            <label class="form-check-label small" for="intervention">
+                                Intervention plan created
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="documented">
+                            <label class="form-check-label small" for="documented">
+                                Actions documented in system
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Detailed Analysis by Question -->
+    @if (Model != null && Model.Any())
+    {
+        <div class="row">
+            @foreach (var analysis in Model.OrderByDescending(a => a.RiskAssessment?.RiskScore ?? 0))
+            {
+                var riskLevel = analysis.RiskAssessment?.RiskLevel ?? Services.AIViewModel.RiskLevel.Low;
+                var riskScore = analysis.RiskAssessment?.RiskScore ?? 0;
+
+                <div class="col-12 mb-4">
+                    <div class="card border-0 shadow-sm">
+                        <!-- Question Header -->
+                        <div class="card-header @GetRiskHeaderClass(riskLevel) text-white">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <h6 class="mb-1">
+                                        <i class="fas fa-question-circle me-2"></i>
+                                        Question Analysis
+                                    </h6>
+                                    <p class="mb-0 opacity-75">@analysis.QuestionText</p>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <div class="d-flex align-items-center justify-content-end gap-2">
+                                        <span class="badge bg-white text-dark">
+                                            <i class="fas @GetRiskIcon(riskLevel) me-1"></i>
+                                            @riskLevel Risk
+                                        </span>
+                                        <span class="badge bg-white text-dark">
+                                            @Math.Round(riskScore * 100, 0)% Risk Score
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card-body">
+                            <div class="row">
+                                <!-- Response Text -->
+                                <div class="col-lg-6 mb-4">
+                                    <h6 class="text-muted mb-3">
+                                        <i class="fas fa-comment-alt me-2"></i>Employee Response (Anonymized)
+                                    </h6>
+                                    <div class="bg-light rounded p-3 border-start border-4 border-primary">
+                                        <p class="mb-0 font-italic">@analysis.AnonymizedResponseText</p>
+                                    </div>
+
+                                    <!-- Sentiment Analysis -->
+                                    @if (analysis.SentimentAnalysis != null)
+                                    {
+                                        <div class="mt-3">
+                                            <h6 class="text-muted mb-2">
+                                                <i class="fas fa-heart me-2"></i>Emotional Sentiment
+                                            </h6>
+                                            <div class="sentiment-bars">
+                                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                                    <small class="text-success">Positive</small>
+                                                    <small class="fw-bold">@Math.Round(analysis.SentimentAnalysis.PositiveScore * 100, 1)%</small>
+                                                </div>
+                                                <div class="progress mb-2" style="height: 8px;">
+                                                    <div class="progress-bar bg-success" style="width: @(analysis.SentimentAnalysis.PositiveScore * 100)%"></div>
+                                                </div>
+
+                                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                                    <small class="text-warning">Neutral</small>
+                                                    <small class="fw-bold">@Math.Round(analysis.SentimentAnalysis.NeutralScore * 100, 1)%</small>
+                                                </div>
+                                                <div class="progress mb-2" style="height: 8px;">
+                                                    <div class="progress-bar bg-warning" style="width: @(analysis.SentimentAnalysis.NeutralScore * 100)%"></div>
+                                                </div>
+
+                                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                                    <small class="text-danger">Negative</small>
+                                                    <small class="fw-bold">@Math.Round(analysis.SentimentAnalysis.NegativeScore * 100, 1)%</small>
+                                                </div>
+                                                <div class="progress" style="height: 8px;">
+                                                    <div class="progress-bar bg-danger" style="width: @(analysis.SentimentAnalysis.NegativeScore * 100)%"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+
+                                <!-- AI Analysis Results -->
+                                <div class="col-lg-6">
+                                    <!-- Risk Assessment -->
+                                    @if (analysis.RiskAssessment != null)
+                                    {
+                                        <div class="mb-4">
+                                            <h6 class="text-muted mb-3">
+                                                <i class="fas fa-shield-alt me-2"></i>Mental Health Risk Assessment
+                                            </h6>
+
+                                            <!-- Risk Indicators -->
+                                            @if (analysis.RiskAssessment.RiskIndicators?.Any() == true)
+                                            {
+                                                <div class="mb-3">
+                                                    <strong class="text-danger small">RISK INDICATORS:</strong>
+                                                    <div class="mt-2">
+                                                        @foreach (var indicator in analysis.RiskAssessment.RiskIndicators)
+                                                        {
+                                                            <span class="badge bg-danger me-1 mb-1">
+                                                                <i class="fas fa-exclamation-triangle me-1"></i>@indicator
+                                                            </span>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            }
+
+                                            <!-- Recommended Action -->
+                                            @if (!string.IsNullOrEmpty(analysis.RiskAssessment.RecommendedAction))
+                                            {
+                                                <div class="mb-3">
+                                                    <strong class="text-success small">RECOMMENDED ACTION:</strong>
+                                                    <div class="bg-success bg-opacity-10 border border-success border-opacity-25 rounded p-2 mt-2">
+                                                        <p class="mb-0 small">@analysis.RiskAssessment.RecommendedAction</p>
+                                                    </div>
+                                                </div>
+                                            }
+
+                                            <!-- Protective Factors -->
+                                            @if (analysis.RiskAssessment.ProtectiveFactors?.Any() == true)
+                                            {
+                                                <div class="mb-3">
+                                                    <strong class="text-success small">PROTECTIVE FACTORS:</strong>
+                                                    <div class="mt-2">
+                                                        @foreach (var factor in analysis.RiskAssessment.ProtectiveFactors)
+                                                        {
+                                                            <span class="badge bg-success me-1 mb-1">
+                                                                <i class="fas fa-shield me-1"></i>@factor
+                                                            </span>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+
+                                    <!-- Key Phrases -->
+                                    @if (analysis.KeyPhrases?.KeyPhrases?.Any() == true)
+                                    {
+                                        <div class="mb-3">
+                                            <h6 class="text-muted mb-2">
+                                                <i class="fas fa-tags me-2"></i>Key Phrases Identified
+                                            </h6>
+                                            <div>
+                                                @foreach (var phrase in analysis.KeyPhrases.KeyPhrases.Take(6))
+                                                {
+                                                    <span class="badge bg-primary me-1 mb-1">@phrase</span>
+                                                }
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Workplace Insights -->
+                        @if (analysis.Insights?.Any() == true)
+                        {
+                            <div class="card-footer bg-light">
+                                <h6 class="text-muted mb-3">
+                                    <i class="fas fa-lightbulb me-2"></i>Workplace Intervention Recommendations
+                                </h6>
+                                <div class="row">
+                                    @foreach (var insight in analysis.Insights)
+                                    {
+                                        <div class="col-md-6 mb-3">
+                                            <div class="border-start border-4 @GetPriorityBorderClass(insight.Priority) ps-3">
+                                                <div class="d-flex justify-content-between align-items-start mb-1">
+                                                    <strong class="small text-primary">@insight.Category</strong>
+                                                    <span class="badge @GetPriorityBadgeClass(insight.Priority)">
+                                                        P@insight.Priority
+                                                    </span>
+                                                </div>
+                                                <p class="small text-muted mb-1">@insight.Issue</p>
+                                                <p class="small mb-0">
+                                                    <i class="fas fa-arrow-right me-1 text-success"></i>
+                                                    @insight.RecommendedIntervention
+                                                </p>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    <!-- Professional Actions Panel -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user-md me-2"></i>
+                        Mental Health Professional Action Plan
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-primary mb-3">
+                                <i class="fas fa-phone me-2"></i>Immediate Actions (Next 24 Hours)
+                            </h6>
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    Contact employee for confidential check-in
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    Assess immediate safety and support needs
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    Provide mental health resources and contacts
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    Document initial intervention in confidential records
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-info mb-3">
+                                <i class="fas fa-calendar-alt me-2"></i>Follow-up Actions (Next 7 Days)
+                            </h6>
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <i class="fas fa-calendar-check text-info me-2"></i>
+                                    Schedule follow-up conversation
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-calendar-check text-info me-2"></i>
+                                    Review workplace factors with management
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-calendar-check text-info me-2"></i>
+                                    Implement recommended workplace interventions
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-calendar-check text-info me-2"></i>
+                                    Assess progress and adjust support plan
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="text-center">
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-primary" onclick="createInterventionPlan()">
+                                <i class="fas fa-clipboard-list"></i> Create Intervention Plan
+                            </button>
+                            <button type="button" class="btn btn-success" onclick="scheduleFollowUp()">
+                                <i class="fas fa-calendar-plus"></i> Schedule Follow-up
+                            </button>
+                            <button type="button" class="btn btn-info" onclick="contactEmployee()">
+                                <i class="fas fa-phone"></i> Initiate Contact
+                            </button>
+                            <button type="button" class="btn btn-warning" onclick="alertManagement()">
+                                <i class="fas fa-exclamation-triangle"></i> Alert Management
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    private string GetRiskHeaderClass(Services.AIViewModel.RiskLevel riskLevel)
+    {
+        switch (riskLevel)
+        {
+            case Services.AIViewModel.RiskLevel.Critical:
+                return "bg-dark";
+            case Services.AIViewModel.RiskLevel.High:
+                return "bg-danger";
+            case Services.AIViewModel.RiskLevel.Moderate:
+                return "bg-warning";
+            default:
+                return "bg-secondary";
+        }
+    }
+
+    private string GetRiskIcon(Services.AIViewModel.RiskLevel riskLevel)
+    {
+        switch (riskLevel)
+        {
+            case Services.AIViewModel.RiskLevel.Critical:
+                return "fa-exclamation-triangle";
+            case Services.AIViewModel.RiskLevel.High:
+                return "fa-shield-alt";
+            case Services.AIViewModel.RiskLevel.Moderate:
+                return "fa-info-circle";
+            default:
+                return "fa-check-circle";
+        }
+    }
+
+    private string GetPriorityBorderClass(int priority)
+    {
+        switch (priority)
+        {
+            case 5:
+                return "border-danger";
+            case 4:
+                return "border-warning";
+            case 3:
+                return "border-primary";
+            case 2:
+                return "border-info";
+            default:
+                return "border-secondary";
+        }
+    }
+
+    private string GetPriorityBadgeClass(int priority)
+    {
+        switch (priority)
+        {
+            case 5:
+                return "bg-danger";
+            case 4:
+                return "bg-warning text-dark";
+            case 3:
+                return "bg-primary";
+            case 2:
+                return "bg-info";
+            default:
+                return "bg-secondary";
+        }
+    }
+}
+
+@section Scripts {
+    <script>
+        // Mark for intervention
+        function markForIntervention() {
+            Swal.fire({
+                title: 'Schedule Mental Health Intervention',
+                html: `
+                    <div class="text-start">
+                        <div class="mb-3">
+                            <label class="form-label">Intervention Type:</label>
+                            <select class="form-select" id="interventionType">
+                                <option value="immediate">Immediate Support Call</option>
+                                <option value="counseling">Professional Counseling Referral</option>
+                                <option value="workplace">Workplace Accommodation Meeting</option>
+                                <option value="followup">Follow-up Assessment</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Priority Level:</label>
+                            <select class="form-select" id="priorityLevel">
+                                <option value="urgent">Urgent (Same Day)</option>
+                                <option value="high">High (Within 2 Days)</option>
+                                <option value="normal">Normal (Within 1 Week)</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Notes:</label>
+                            <textarea class="form-control" id="interventionNotes" rows="3" placeholder="Additional intervention notes..."></textarea>
+                        </div>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Schedule Intervention',
+                confirmButtonColor: '#28a745',
+                cancelButtonText: 'Cancel',
+                width: '500px'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire('Intervention Scheduled', 'Mental health intervention has been scheduled and documented.', 'success');
+                }
+            });
+        }
+
+        // Flag for review
+        function flagForReview() {
+            Swal.fire({
+                title: 'Flag Case for Additional Review',
+                text: 'This will alert senior mental health professionals for additional assessment.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Flag for Review',
+                confirmButtonColor: '#ffc107'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire('Case Flagged', 'Case has been flagged for additional professional review.', 'success');
+                }
+            });
+        }
+
+        // Export case report
+        function exportCaseReport() {
+            // In a real implementation, this would generate a detailed case report
+            Swal.fire('Exporting Case Report', 'Generating comprehensive case report for professional documentation...', 'info');
+        }
+
+        // Create intervention plan
+        function createInterventionPlan() {
+            Swal.fire({
+                title: 'Create Intervention Plan',
+                text: 'This would open a detailed intervention planning interface with specific actions, timelines, and resources.',
+                icon: 'info',
+                confirmButtonText: 'Continue to Planner'
+            });
+        }
+
+        // Schedule follow-up
+        function scheduleFollowUp() {
+            Swal.fire({
+                title: 'Schedule Follow-up',
+                text: 'Integration with calendar system to schedule follow-up mental health assessment.',
+                icon: 'info',
+                confirmButtonText: 'Open Calendar'
+            });
+        }
+
+        // Contact employee
+        function contactEmployee() {
+            Swal.fire({
+                title: 'Initiate Employee Contact',
+                html: `
+                    <div class="text-start">
+                        <div class="alert alert-warning">
+                            <i class="fas fa-shield-alt me-2"></i>
+                            <strong>Privacy Notice:</strong> All contact must maintain confidentiality and follow mental health protocols.
+                        </div>
+                        <p>Recommended contact approach:</p>
+                        <ul class="small">
+                            <li>Confidential, non-judgmental approach</li>
+                            <li>Express concern and support</li>
+                            <li>Provide mental health resources</li>
+                            <li>Schedule follow-up if appropriate</li>
+                        </ul>
+                    </div>
+                `,
+                icon: 'info',
+                confirmButtonText: 'Proceed with Contact',
+                showCancelButton: true
+            });
+        }
+
+        // Alert management
+        function alertManagement() {
+            Swal.fire({
+                title: 'Alert Management Team',
+                text: 'This will notify management about workplace factors affecting employee mental health (without personal details).',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Send Alert',
+                confirmButtonColor: '#ffc107'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire('Management Notified', 'Workplace mental health concerns have been escalated to management.', 'success');
+                }
+            });
+        }
+
+        // Auto-save checklist progress
+        document.querySelectorAll('.form-check-input').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                // In a real implementation, this would save progress to the database
+                console.log('Checklist updated:', this.id, this.checked);
+            });
+        });
+    </script>
+}
+
+@section Styles {
+    <style>
+        .sentiment-bars .progress {
+            height: 8px;
+            border-radius: 4px;
+        }
+
+        .border-start {
+            border-left-width: 4px !important;
+        }
+
+        .bg-opacity-10 {
+            --bs-bg-opacity: 0.1;
+        }
+
+        .border-opacity-25 {
+            --bs-border-opacity: 0.25;
+        }
+
+        .font-italic {
+            font-style: italic;
+        }
+
+        .card {
+            transition: all 0.2s ease-in-out;
+        }
+
+        .list-unstyled li {
+            transition: all 0.2s ease-in-out;
+        }
+
+            .list-unstyled li:hover {
+                background-color: rgba(0,0,0,0.05);
+                padding: 0.25rem;
+                border-radius: 0.25rem;
+            }
+
+        .badge {
+            font-size: 0.75em;
+        }
+
+        .opacity-75 {
+            opacity: 0.75;
+        }
+
+        @@media (max-width: 768px) {
+            .btn-group
+
+        {
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .btn-group .btn {
+            border-radius: 0.375rem !important;
+            margin-bottom: 0.5rem;
+        }
+
+        }
+    </style>
+}

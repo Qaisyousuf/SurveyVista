@@ -1,0 +1,492 @@
+﻿@* Views/Admin/SurveyAnalysis/HighRiskResponses.cshtml *@
+@model List<Services.AIViewModel.ResponseAnalysisResult>
+
+@{
+    ViewData["Title"] = $"High Risk Responses - {ViewBag.QuestionnaireName}";
+    
+}
+
+<div class="container-fluid">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item">
+                                <a href="@Url.Action("Index")">
+                                    <i class="fas fa-brain"></i> Analysis Dashboard
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item">
+                                <a href="@Url.Action("AnalyzeQuestionnaire", new { id = ViewBag.QuestionnaireId })">
+                                    @ViewBag.QuestionnaireName
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item active">High Risk Responses</li>
+                        </ol>
+                    </nav>
+                    <h1 class="h3 mb-1">
+                        <i class="fas fa-shield-alt text-danger me-2"></i>
+                        High Risk Mental Health Cases
+                    </h1>
+                    <p class="text-muted mb-0">Employees requiring immediate attention and intervention</p>
+                </div>
+                <div class="text-end">
+                    <div class="btn-group" role="group">
+                        <a href="@Url.Action("AnalyzeQuestionnaire", new { id = ViewBag.QuestionnaireId })" 
+                           class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-chart-line"></i> Full Analysis
+                        </a>
+                        <a href="@Url.Action("GenerateReport", new { id = ViewBag.QuestionnaireId })" 
+                           class="btn btn-outline-info btn-sm">
+                            <i class="fas fa-file-medical"></i> Generate Report
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Banner -->
+    @if (Model != null && Model.Any())
+    {
+        var criticalCount = Model.Count(r => r.RiskAssessment?.RiskLevel == Services.AIViewModel.RiskLevel.Critical);
+        var highCount = Model.Count(r => r.RiskAssessment?.RiskLevel == Services.AIViewModel.RiskLevel.High);
+        var immediateAttentionCount = Model.Count(r => r.RiskAssessment?.RequiresImmediateAttention == true);
+
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="alert alert-danger border-0 shadow-sm">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h5 class="alert-heading mb-2">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                Mental Health Alert: @Model.Count Cases Requiring Attention
+                            </h5>
+                            <p class="mb-0">
+                                @if (criticalCount > 0)
+                                {
+                                    <span class="badge bg-dark me-2">@criticalCount Critical</span>
+                                }
+                                @if (highCount > 0)
+                                {
+                                    <span class="badge bg-danger me-2">@highCount High Risk</span>
+                                }
+                                @if (immediateAttentionCount > 0)
+                                {
+                                    <span class="badge bg-warning text-dark me-2">@immediateAttentionCount Immediate Attention</span>
+                                }
+                                <small class="text-muted">| Professional intervention recommended</small>
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <i class="fas fa-user-md fa-3x text-white-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- High Risk Cases -->
+    @if (Model != null && Model.Any())
+    {
+        <div class="row">
+            @foreach (var response in Model.OrderByDescending(r => r.RiskAssessment?.RiskScore ?? 0))
+            {
+                var riskLevel = response.RiskAssessment?.RiskLevel ?? Services.AIViewModel.RiskLevel.Low;
+                var riskScore = response.RiskAssessment?.RiskScore ?? 0;
+                var requiresAttention = response.RiskAssessment?.RequiresImmediateAttention ?? false;
+
+                <div class="col-lg-6 mb-4">
+                    <div class="card border-0 shadow-sm h-100 @(requiresAttention ? "border-warning border-2" : "")">
+                        <!-- Card Header -->
+                        <div class="card-header @GetRiskHeaderClass(riskLevel) text-white">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-0">
+                                        <i class="fas @GetRiskIcon(riskLevel) me-2"></i>
+                                        @riskLevel Risk Level
+                                    </h6>
+                                    <small class="opacity-75">Response ID: #@response.ResponseId</small>
+                                </div>
+                                <div class="text-end">
+                                    <div class="risk-score-badge">
+                                        <span class="badge bg-white text-dark">
+                                            Risk Score: @Math.Round(riskScore * 100, 0)%
+                                        </span>
+                                    </div>
+                                    @if (requiresAttention)
+                                    {
+                                        <div class="mt-1">
+                                            <span class="badge bg-warning text-dark">
+                                                <i class="fas fa-bell fa-xs"></i> Immediate
+                                            </span>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card Body -->
+                        <div class="card-body">
+                            <!-- Question Context -->
+                            <div class="mb-3">
+                                <h6 class="text-muted mb-2">
+                                    <i class="fas fa-question-circle me-1"></i>Question Context
+                                </h6>
+                                <p class="small bg-light rounded p-2 mb-0">@response.QuestionText</p>
+                            </div>
+
+                            <!-- Response Preview (Anonymized) -->
+                            <div class="mb-3">
+                                <h6 class="text-muted mb-2">
+                                    <i class="fas fa-comment me-1"></i>Response (Privacy Protected)
+                                </h6>
+                                <div class="response-preview bg-light rounded p-3">
+                                    <p class="mb-0">@(response.AnonymizedResponseText?.Length > 150 ? response.AnonymizedResponseText.Substring(0, 150) + "..." : response.AnonymizedResponseText)</p>
+                                </div>
+                            </div>
+
+                            <!-- Risk Indicators -->
+                            @if (response.RiskAssessment?.RiskIndicators?.Any() == true)
+                            {
+                                <div class="mb-3">
+                                    <h6 class="text-muted mb-2">
+                                        <i class="fas fa-warning me-1 text-danger"></i>Risk Indicators
+                                    </h6>
+                                    <div>
+                                        @foreach (var indicator in response.RiskAssessment.RiskIndicators.Take(3))
+                                        {
+                                            <span class="badge bg-danger me-1 mb-1">@indicator</span>
+                                        }
+                                    </div>
+                                </div>
+                            }
+
+                            <!-- Recommended Action -->
+                            @if (!string.IsNullOrEmpty(response.RiskAssessment?.RecommendedAction))
+                            {
+                                <div class="mb-3">
+                                    <h6 class="text-muted mb-2">
+                                        <i class="fas fa-clipboard-check me-1 text-success"></i>Recommended Action
+                                    </h6>
+                                    <div class="bg-success bg-opacity-10 border border-success border-opacity-25 rounded p-2">
+                                        <p class="mb-0 small text-success">@response.RiskAssessment.RecommendedAction</p>
+                                    </div>
+                                </div>
+                            }
+
+                            <!-- Workplace Insights -->
+                            @if (response.Insights?.Any() == true)
+                            {
+                                <div class="mb-3">
+                                    <h6 class="text-muted mb-2">
+                                        <i class="fas fa-lightbulb me-1 text-warning"></i>Key Insights
+                                    </h6>
+                                    @foreach (var insight in response.Insights.Take(2))
+                                    {
+                                        <div class="border-start border-3 border-primary ps-2 mb-2">
+                                            <small class="fw-bold text-primary">@insight.Category</small>
+                                            <p class="mb-0 small">@insight.RecommendedIntervention</p>
+                                        </div>
+                                    }
+                                </div>
+                            }
+
+                            <!-- Protective Factors (if any) -->
+                            @if (response.RiskAssessment?.ProtectiveFactors?.Any() == true)
+                            {
+                                <div class="mb-3">
+                                    <h6 class="text-muted mb-2">
+                                        <i class="fas fa-shield me-1 text-success"></i>Protective Factors
+                                    </h6>
+                                    <div>
+                                        @foreach (var factor in response.RiskAssessment.ProtectiveFactors.Take(3))
+                                        {
+                                            <span class="badge bg-success me-1 mb-1">@factor</span>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Card Footer -->
+                        <div class="card-footer bg-white border-top">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock me-1"></i>
+                                        Analyzed: @response.AnalyzedAt.ToString("MMM dd, HH:mm")
+                                    </small>
+                                </div>
+                                <div class="btn-group" role="group">
+                                    <a href="@Url.Action("ViewHighRiskResponse", new { questionnaireId = ViewBag.QuestionnaireId, responseId = response.ResponseId })" 
+                                       class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-eye"></i> View Details
+                                    </a>
+                                    @if (requiresAttention)
+                                    {
+                                        <button type="button" class="btn btn-warning btn-sm" onclick="markAsReviewed(@response.ResponseId)">
+                                            <i class="fas fa-check"></i> Mark Reviewed
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Action Panel -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-user-md me-2"></i>
+                            Mental Health Professional Actions
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <h6><i class="fas fa-phone text-success me-2"></i>Immediate Actions</h6>
+                                <ul class="small mb-0">
+                                    <li>Contact employees with Critical/High risk levels</li>
+                                    <li>Schedule follow-up conversations</li>
+                                    <li>Refer to mental health professionals if needed</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <h6><i class="fas fa-clipboard-list text-info me-2"></i>Documentation</h6>
+                                <ul class="small mb-0">
+                                    <li>Document interventions taken</li>
+                                    <li>Track response to interventions</li>
+                                    <li>Update risk assessments as needed</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <h6><i class="fas fa-users text-warning me-2"></i>Organizational</h6>
+                                <ul class="small mb-0">
+                                    <li>Alert management to workplace issues</li>
+                                    <li>Implement preventive measures</li>
+                                    <li>Schedule team interventions</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="text-center">
+                            <button type="button" class="btn btn-success me-2" onclick="exportHighRiskReport()">
+                                <i class="fas fa-file-medical"></i> Export Professional Report
+                            </button>
+                            <button type="button" class="btn btn-info me-2" onclick="scheduleFollowUps()">
+                                <i class="fas fa-calendar-plus"></i> Schedule Follow-ups
+                            </button>
+                            <a href="@Url.Action("AnalyzeTrends", new { id = ViewBag.QuestionnaireId })" class="btn btn-outline-primary">
+                                <i class="fas fa-chart-area"></i> View Trends
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- No High Risk Cases -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center py-5">
+                        <div class="text-success mb-4">
+                            <i class="fas fa-shield-alt" style="font-size: 4rem;"></i>
+                        </div>
+                        <h4 class="text-success mb-3">Excellent Mental Health Status</h4>
+                        <p class="text-muted mb-4">
+                            No high-risk or critical mental health cases were identified in this survey analysis.
+                            This indicates a generally positive workplace mental health environment.
+                        </p>
+                        <div class="btn-group" role="group">
+                            <a href="@Url.Action("AnalyzeQuestionnaire", new { id = ViewBag.QuestionnaireId })" 
+                               class="btn btn-primary">
+                                <i class="fas fa-chart-line"></i> View Full Analysis
+                            </a>
+                            <a href="@Url.Action("AnalyzeTrends", new { id = ViewBag.QuestionnaireId })" 
+                               class="btn btn-outline-info">
+                                <i class="fas fa-chart-area"></i> View Trends
+                            </a>
+                            <a href="@Url.Action("GenerateReport", new { id = ViewBag.QuestionnaireId })" 
+                               class="btn btn-outline-success">
+                                <i class="fas fa-file-alt"></i> Generate Report
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@functions {
+    private string GetRiskHeaderClass(Services.AIViewModel.RiskLevel riskLevel)
+    {
+        switch (riskLevel)
+        {
+            case Services.AIViewModel.RiskLevel.Critical:
+                return "bg-dark";
+            case Services.AIViewModel.RiskLevel.High:
+                return "bg-danger";
+            case Services.AIViewModel.RiskLevel.Moderate:
+                return "bg-warning";
+            default:
+                return "bg-secondary";
+        }
+    }
+
+    private string GetRiskIcon(Services.AIViewModel.RiskLevel riskLevel)
+    {
+        switch (riskLevel)
+        {
+            case Services.AIViewModel.RiskLevel.Critical:
+                return "fa-exclamation-triangle";
+            case Services.AIViewModel.RiskLevel.High:
+                return "fa-shield-alt";
+            case Services.AIViewModel.RiskLevel.Moderate:
+                return "fa-info-circle";
+            default:
+                return "fa-check-circle";
+        }
+    }
+}
+
+@section Scripts {
+    <script>
+        // Mark response as reviewed
+        function markAsReviewed(responseId) {
+            Swal.fire({
+                title: 'Mark as Reviewed',
+                text: 'Confirm that this high-risk case has been professionally reviewed and appropriate action taken.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, Mark as Reviewed',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // In a real implementation, this would make an API call
+                    // to update the response status in the database
+                    
+                    Swal.fire({
+                        title: 'Marked as Reviewed',
+                        text: 'The case has been marked as reviewed. Please ensure proper documentation.',
+                        icon: 'success',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                    
+                    // Optionally remove the "Immediate" badge or update the card
+                    // In a real implementation, you might refresh the page or update the UI
+                }
+            });
+        }
+
+        // Export high risk report
+        function exportHighRiskReport() {
+            window.location.href = '@Url.Action("DownloadReport", new { id = ViewBag.QuestionnaireId })';
+        }
+
+        // Schedule follow-ups
+        function scheduleFollowUps() {
+            Swal.fire({
+                title: 'Schedule Follow-ups',
+                text: 'This feature would integrate with your calendar system to schedule follow-up meetings with high-risk individuals.',
+                icon: 'info',
+                confirmButtonText: 'OK'
+            });
+        }
+
+        // Auto-refresh every 10 minutes to check for new high-risk cases
+        setInterval(function() {
+            // In a real implementation, you might check for new cases via AJAX
+            // and show a notification if new high-risk responses have been submitted
+        }, 600000);
+    </script>
+}
+
+@section Styles {
+    <style>
+        .response-preview {
+            font-style: italic;
+            line-height: 1.5;
+        }
+        
+        .risk-score-badge {
+            font-size: 0.875rem;
+        }
+        
+        .border-2 {
+            border-width: 2px !important;
+        }
+        
+        .card {
+            transition: all 0.2s ease-in-out;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .badge {
+            font-size: 0.75em;
+        }
+        
+        .border-start {
+            border-left-width: 3px !important;
+        }
+        
+        .opacity-75 {
+            opacity: 0.75;
+        }
+        
+        .bg-opacity-10 {
+            --bs-bg-opacity: 0.1;
+        }
+        
+        .border-opacity-25 {
+            --bs-border-opacity: 0.25;
+        }
+        
+        @@media (max-width: 768px) {
+            .btn-group {
+                width: 100%;
+            }
+            
+            .btn-group .btn {
+                flex: 1;
+                font-size: 0.8rem;
+            }
+        }
+        
+        /* Pulse animation for immediate attention cases */
+        .border-warning.border-2 {
+            animation: pulse-border 2s infinite;
+        }
+        
+        @@keyframes pulse-border {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(255, 193, 7, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 193, 7, 0);
+            }
+        }
+    </style>
+}

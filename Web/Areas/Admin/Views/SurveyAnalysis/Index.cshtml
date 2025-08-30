@@ -1,64 +1,446 @@
-﻿@model IEnumerable<ResponseQuestionnaireWithUsersViewModel>
+﻿@* Views/Admin/SurveyAnalysis/Index.cshtml *@
+@model IEnumerable<dynamic>
 
 @{
-    ViewData["Title"] = "Survey Analysis";
+    ViewData["Title"] = "Mental Health Survey Analysis - Dashboard";
+    
 }
-<div class="container-fluid mt-5">
 
-    <partial name="_Notification" />
+<div class="container-fluid">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-1">
+                        <i class="fas fa-brain text-primary me-2"></i>
+                        Mental Health Survey Analysis
+                    </h1>
+                    <p class="text-muted">AI-powered analysis of workplace mental health surveys</p>
+                </div>
+                <div class="text-end">
+                    <small class="text-muted">
+                        <i class="fas fa-user-md"></i> NVKN Nærværskonsulenterne
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
 
+    <!-- Service Health Status -->
+    @if (ViewBag.ServiceHealth != null)
+    {
+        var serviceHealth = ViewBag.ServiceHealth as Dictionary<string, bool>;
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body py-3">
+                        <div class="row align-items-center">
+                            <div class="col-md-6">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-heartbeat me-2"></i>AI Services Status
+                                </h6>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex justify-content-end gap-3">
+                                    @foreach (var service in serviceHealth)
+                                    {
+                                        <div class="d-flex align-items-center">
+                                            <span class="badge @(service.Value ? "bg-success" : "bg-danger") me-2">
+                                                <i class="fas @(service.Value ? "fa-check" : "fa-times")"></i>
+                                            </span>
+                                            <small class="text-muted">@service.Key.Replace("Azure", "")</small>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
 
-    <div class="card bg-default mb-3 ">
-        <div class="card-header">Survey analysis</div>
-        <div class="card-body">
-            <h4 class="card-title">Survey analysis list</h4>
+    <!-- Alert Messages -->
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
 
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
 
-            <form asp-action="DeleteUnusedQuestionnaires" method="post">
+    @if (TempData["WarningMessage"] != null)
+    {
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            @TempData["WarningMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
 
-                <table class="table table-responsive w-100 d-block d-md-table table-hover ">
-                    <thead class="w-100">
-                        <tr>
-                            <th><input type="checkbox" onclick="selectAll(this)" /></th> <!-- Master checkbox -->
-                            <th>Id</th>
-                            <th>Questionnaire</th>
-                            <th class="text-end">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody class="w-100">
-                        @foreach (var item in Model)
-                        {
-                            <tr>
-                                <td><input type="checkbox" name="ids" value="@item.Id" /></td>
-                                <td>@item.Id</td>
-                                <td>@item.Title</td>
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="mb-3">
+                                <i class="fas fa-tools me-2"></i>Quick Actions
+                            </h6>
+                            <button type="button" class="btn btn-outline-primary btn-sm me-2" onclick="testAIServices()">
+                                <i class="fas fa-vial"></i> Test AI Services
+                            </button>
+                            <button type="button" class="btn btn-outline-info btn-sm" data-bs-toggle="modal" data-bs-target="#testAnalysisModal">
+                                <i class="fas fa-microscope"></i> Test Analysis
+                            </button>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <small class="text-muted">
+                                Last updated: @DateTime.Now.ToString("yyyy-MM-dd HH:mm")
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-                                <td class="text-end">
-                                    <a asp-action="Analysis" asp-route-id="@item.Id" class="btn btn-info btn-sm"><i class="bi bi-graph-up-arrow"></i> Analyzer</a>
-                                    <a asp-action="AiAnalysis" asp-route-id="@item.Id" class="btn btn-primary btn-sm ms-1"><i class="bi bi-brain"></i> AI Analysis</a>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+    <!-- Questionnaires Grid -->
+    <div class="row">
+        @if (Model != null && Model.Any())
+        {
+            @foreach (var questionnaire in Model)
+            {
+                <div class="col-lg-6 col-xl-4 mb-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-white border-bottom">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="mb-1 fw-bold">@questionnaire.Title</h6>
+                                    <small class="text-muted">@questionnaire.Description</small>
+                                </div>
+                                <div class="dropdown">
+                                    <button class="btn btn-link btn-sm text-muted" type="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li><a class="dropdown-item" href="@Url.Action("AnalyzeQuestionnaire", new { id = questionnaire.Id })">
+                                            <i class="fas fa-chart-line me-2"></i>Full Analysis
+                                        </a></li>
+                                        <li><a class="dropdown-item" href="@Url.Action("HighRiskResponses", new { id = questionnaire.Id })">
+                                            <i class="fas fa-exclamation-triangle me-2 text-danger"></i>High Risk
+                                        </a></li>
+                                        <li><a class="dropdown-item" href="@Url.Action("Dashboard", new { id = questionnaire.Id })">
+                                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                                        </a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item" href="@Url.Action("GenerateReport", new { id = questionnaire.Id })">
+                                            <i class="fas fa-file-alt me-2"></i>Generate Report
+                                        </a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
 
-                <button type="submit" class="btn btn-danger">Delete Selected</button>
-            </form>
+                        <div class="card-body">
+                            <!-- Statistics -->
+                            <div class="row text-center mb-3">
+                                <div class="col-4">
+                                    <div class="border-end">
+                                        <h5 class="mb-0 text-primary">@questionnaire.QuestionCount</h5>
+                                        <small class="text-muted">Questions</small>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="border-end">
+                                        <h5 class="mb-0 text-success">@questionnaire.ResponseCount</h5>
+                                        <small class="text-muted">Responses</small>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <h5 class="mb-0 text-info">@questionnaire.TextResponseCount</h5>
+                                    <small class="text-muted">Text Answers</small>
+                                </div>
+                            </div>
 
+                            <!-- Last Response -->
+                            @if (questionnaire.LastResponse != null && questionnaire.LastResponse != DateTime.MinValue)
+                            {
+                                <div class="text-center mb-3">
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock me-1"></i>
+                                        Last response: @((DateTime)questionnaire.LastResponse).ToString("MMM dd, yyyy")
+                                    </small>
+                                </div>
+                            }
+
+                            <!-- Analysis Status -->
+                            @if (questionnaire.TextResponseCount > 0)
+                            {
+                                <div class="text-center">
+                                    <span class="badge bg-success mb-2">
+                                        <i class="fas fa-check me-1"></i>Ready for Analysis
+                                    </span>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="text-center">
+                                    <span class="badge bg-secondary mb-2">
+                                        <i class="fas fa-info me-1"></i>No Text Responses
+                                    </span>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="card-footer bg-white border-top-0 pt-0">
+                            <div class="d-grid gap-2">
+                                @if (questionnaire.TextResponseCount > 0)
+                                {
+                                    <a href="@Url.Action("AnalyzeQuestionnaire", new { id = questionnaire.Id })" 
+                                       class="btn btn-primary btn-sm">
+                                        <i class="fas fa-brain me-2"></i>Start AI Analysis
+                                    </a>
+                                    
+                                    <div class="btn-group" role="group">
+                                        <a href="@Url.Action("HighRiskResponses", new { id = questionnaire.Id })" 
+                                           class="btn btn-outline-danger btn-sm">
+                                            <i class="fas fa-shield-alt"></i> High Risk
+                                        </a>
+                                        <a href="@Url.Action("BatchAnalyze", new { id = questionnaire.Id })" 
+                                           class="btn btn-outline-info btn-sm">
+                                            <i class="fas fa-layer-group"></i> Batch Process
+                                        </a>
+                                        <a href="@Url.Action("AnalyzeTrends", new { id = questionnaire.Id })" 
+                                           class="btn btn-outline-success btn-sm">
+                                            <i class="fas fa-chart-area"></i> Trends
+                                        </a>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <button class="btn btn-secondary btn-sm" disabled>
+                                        <i class="fas fa-ban me-2"></i>No Text Data Available
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center py-5">
+                        <i class="fas fa-clipboard-list text-muted mb-3" style="font-size: 3rem;"></i>
+                        <h5 class="text-muted">No Questionnaires Found</h5>
+                        <p class="text-muted mb-4">There are no questionnaires available for analysis at the moment.</p>
+                        <a href="@Url.Action("Index", "Questionnaire")" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>Create New Questionnaire
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Test Analysis Modal -->
+<div class="modal fade" id="testAnalysisModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-microscope me-2"></i>Test AI Analysis
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="testAnalysisForm">
+                    <div class="mb-3">
+                        <label for="sampleText" class="form-label">Sample Response Text</label>
+                        <textarea class="form-control" id="sampleText" rows="4" 
+                                placeholder="Enter sample employee response for testing AI analysis..."></textarea>
+                        <div class="form-text">
+                            Example: "I feel overwhelmed with my workload and have trouble sleeping due to work stress."
+                        </div>
+                    </div>
+                </form>
+                
+                <div id="testResults" class="d-none">
+                    <hr>
+                    <h6><i class="fas fa-chart-bar me-2"></i>Analysis Results</h6>
+                    <div id="testResultsContent"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="performTestAnalysis()">
+                    <i class="fas fa-play me-2"></i>Run Analysis
+                </button>
+            </div>
         </div>
     </div>
 </div>
 
-
-
 @section Scripts {
     <script>
-        function selectAll(source) {
-            checkboxes = document.getElementsByName('ids');
-            for (var i = 0, n = checkboxes.length; i < n; i++) {
-                checkboxes[i].checked = source.checked;
+        // Test AI Services
+        function testAIServices() {
+            $.get('@Url.Action("ServiceHealth")')
+                .done(function(data) {
+                    if (data.success && data.services) {
+                        let status = '';
+                        for (let service in data.services) {
+                            let icon = data.services[service] ? 'fa-check text-success' : 'fa-times text-danger';
+                            let statusText = data.services[service] ? 'Online ✓' : 'Offline ✗';
+                            status += `<div class="mb-2"><i class="fas ${icon} me-2"></i><strong>${service.replace('Azure', '')}:</strong> ${statusText}</div>`;
+                        }
+                        
+                        Swal.fire({
+                            title: 'AI Services Health Check',
+                            html: `<div class="text-start">${status}</div><hr><small class="text-muted">${data.message}</small>`,
+                            icon: 'info',
+                            confirmButtonText: 'OK',
+                            width: '400px'
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Service Health Error',
+                            text: data.error || 'Unable to check service status',
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                })
+                .fail(function() {
+                    Swal.fire({
+                        title: 'Connection Error', 
+                        text: 'Unable to connect to service health endpoint',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
+                });
+        }
+
+        // Perform Test Analysis
+        function performTestAnalysis() {
+            const sampleText = document.getElementById('sampleText').value.trim();
+            
+            if (!sampleText) {
+                Swal.fire('Warning', 'Please enter sample text for analysis', 'warning');
+                return;
+            }
+
+            // Show loading
+            const resultsDiv = document.getElementById('testResults');
+            const contentDiv = document.getElementById('testResultsContent');
+            
+            contentDiv.innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin"></i> Analyzing...</div>';
+            resultsDiv.classList.remove('d-none');
+
+            $.post('@Url.Action("TestAnalysis")', { sampleText: sampleText })
+                .done(function(data) {
+                    if (data.success) {
+                        let html = `
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <strong>Sentiment:</strong> 
+                                    <span class="badge bg-${getSentimentColor(data.sentiment)}">${data.sentiment || 'N/A'}</span>
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>Risk Level:</strong> 
+                                    <span class="badge bg-${getRiskColor(data.riskLevel)}">${data.riskLevel || 'N/A'}</span>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <strong>Key Phrases:</strong><br>
+                                ${data.keyPhrases ? data.keyPhrases.map(phrase => `<span class="badge bg-light text-dark me-1">${phrase}</span>`).join('') : 'None'}
+                            </div>
+                            <div class="mt-3">
+                                <strong>Categories:</strong><br>
+                                ${data.insights ? data.insights.map(cat => `<span class="badge bg-info me-1">${cat}</span>`).join('') : 'None'}
+                            </div>
+                        `;
+                        contentDiv.innerHTML = html;
+                    } else {
+                        contentDiv.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
+                    }
+                })
+                .fail(function() {
+                    contentDiv.innerHTML = '<div class="alert alert-danger">Error performing analysis</div>';
+                });
+        }
+
+        function getSentimentColor(sentiment) {
+            switch(sentiment?.toLowerCase()) {
+                case 'positive': return 'success';
+                case 'negative': return 'danger';
+                case 'neutral': return 'secondary';
+                default: return 'secondary';
             }
         }
-    </script>
 
+        function getRiskColor(riskLevel) {
+            switch(riskLevel?.toLowerCase()) {
+                case 'low': return 'success';
+                case 'moderate': return 'warning';
+                case 'high': return 'danger';
+                case 'critical': return 'dark';
+                default: return 'secondary';
+            }
+        }
+
+        // Auto-refresh service health every 5 minutes
+        setInterval(function() {
+            location.reload();
+        }, 300000);
+    </script>
+}
+
+@section Styles {
+    <style>
+        .card {
+            transition: transform 0.2s ease-in-out;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .border-end {
+            border-right: 1px solid #dee2e6 !important;
+        }
+        
+        @@media (max-width: 768px) {
+            .border-end {
+                border-right: none !important;
+                border-bottom: 1px solid #dee2e6 !important;
+                padding-bottom: 1rem;
+                margin-bottom: 1rem;
+            }
+        }
+        
+        .badge {
+            font-size: 0.75em;
+        }
+        
+        .btn-sm {
+            font-size: 0.8rem;
+        }
+    </style>
 }

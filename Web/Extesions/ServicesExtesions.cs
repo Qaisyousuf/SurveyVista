@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Model;
-using OpenAI_API;
 using Services.Implemnetation;
 using Services.Interaces;
 using Web.AIConfiguration;
@@ -128,7 +127,7 @@ namespace Web.Extesions
         {
             services.Configure<OpenAIOptions>(configuration.GetSection("OpenAI"));
 
-            services.AddSingleton<IOpenAIAPI, OpenAIAPI>();
+            
             
 
 

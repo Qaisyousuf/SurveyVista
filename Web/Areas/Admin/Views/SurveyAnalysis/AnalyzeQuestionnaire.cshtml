@@ -1,0 +1,504 @@
+﻿
+@model Services.AIViewModel.QuestionnaireAnalysisOverview
+
+@{
+    ViewData["Title"] = $"AI Analysis - {Model.QuestionnaireTitle}";
+    
+}
+
+<div class="container-fluid">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item">
+                                <a href="@Url.Action("Index")">
+                                    <i class="fas fa-brain"></i> Analysis Dashboard
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item active">@Model.QuestionnaireTitle</li>
+                        </ol>
+                    </nav>
+                    <h1 class="h3 mb-1">
+                        <i class="fas fa-chart-line text-primary me-2"></i>
+                        AI Analysis Results
+                    </h1>
+                    <p class="text-muted mb-0">Comprehensive mental health analysis powered by Azure AI</p>
+                </div>
+                <div class="text-end">
+                    <div class="btn-group" role="group">
+                        <a href="@Url.Action("GenerateReport", new { id = Model.QuestionnaireId })" 
+                           class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-file-alt"></i> Generate Report
+                        </a>
+                        <a href="@Url.Action("ExportAnalysis", new { id = Model.QuestionnaireId })" 
+                           class="btn btn-outline-info btn-sm">
+                            <i class="fas fa-download"></i> Export Data
+                        </a>
+                        <a href="@Url.Action("HighRiskResponses", new { id = Model.QuestionnaireId })" 
+                           class="btn btn-outline-danger btn-sm">
+                            <i class="fas fa-exclamation-triangle"></i> High Risk
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Key Metrics Overview -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="text-primary mb-2">
+                        <i class="fas fa-users fa-2x"></i>
+                    </div>
+                    <h4 class="mb-0">@Model.TotalResponses</h4>
+                    <small class="text-muted">Total Responses</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="text-info mb-2">
+                        <i class="fas fa-brain fa-2x"></i>
+                    </div>
+                    <h4 class="mb-0">@Model.AnalyzedResponses</h4>
+                    <small class="text-muted">AI Analyzed</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="text-success mb-2">
+                        <i class="fas fa-smile fa-2x"></i>
+                    </div>
+                    <h4 class="mb-0">@Math.Round(Model.OverallPositiveSentiment * 100, 1)%</h4>
+                    <small class="text-muted">Positive Sentiment</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="@(Model.CriticalRiskResponses > 0 ? "text-danger" : Model.HighRiskResponses > 0 ? "text-warning" : "text-success") mb-2">
+                        <i class="fas fa-shield-alt fa-2x"></i>
+                    </div>
+                    <h4 class="mb-0">@(Model.HighRiskResponses + Model.CriticalRiskResponses)</h4>
+                    <small class="text-muted">High/Critical Risk</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Risk Distribution & Sentiment Analysis -->
+    <div class="row mb-4">
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0">
+                        <i class="fas fa-shield-alt me-2 text-primary"></i>
+                        Mental Health Risk Distribution
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.AnalyzedResponses > 0)
+                    {
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-success">
+                                    <i class="fas fa-circle me-1"></i>Low Risk
+                                </span>
+                                <strong>@Model.LowRiskResponses</strong>
+                            </div>
+                            <div class="progress mb-3" style="height: 10px;">
+                                <div class="progress-bar bg-success" 
+                                     style="width: @(Model.AnalyzedResponses > 0 ? (Model.LowRiskResponses * 100.0 / Model.AnalyzedResponses) : 0)%">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-warning">
+                                    <i class="fas fa-circle me-1"></i>Moderate Risk
+                                </span>
+                                <strong>@Model.ModerateRiskResponses</strong>
+                            </div>
+                            <div class="progress mb-3" style="height: 10px;">
+                                <div class="progress-bar bg-warning" 
+                                     style="width: @(Model.AnalyzedResponses > 0 ? (Model.ModerateRiskResponses * 100.0 / Model.AnalyzedResponses) : 0)%">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-danger">
+                                    <i class="fas fa-circle me-1"></i>High Risk
+                                </span>
+                                <strong>@Model.HighRiskResponses</strong>
+                            </div>
+                            <div class="progress mb-3" style="height: 10px;">
+                                <div class="progress-bar bg-danger" 
+                                     style="width: @(Model.AnalyzedResponses > 0 ? (Model.HighRiskResponses * 100.0 / Model.AnalyzedResponses) : 0)%">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-dark">
+                                    <i class="fas fa-circle me-1"></i>Critical Risk
+                                </span>
+                                <strong>@Model.CriticalRiskResponses</strong>
+                            </div>
+                            <div class="progress mb-3" style="height: 10px;">
+                                <div class="progress-bar bg-dark" 
+                                     style="width: @(Model.AnalyzedResponses > 0 ? (Model.CriticalRiskResponses * 100.0 / Model.AnalyzedResponses) : 0)%">
+                                </div>
+                            </div>
+                        </div>
+
+                        @if (Model.HighRiskResponses > 0 || Model.CriticalRiskResponses > 0)
+                        {
+                            <div class="alert alert-warning mb-0">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <strong>@(Model.HighRiskResponses + Model.CriticalRiskResponses) responses</strong> require immediate attention.
+                                <a href="@Url.Action("HighRiskResponses", new { id = Model.QuestionnaireId })" 
+                                   class="alert-link">View details</a>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-center text-muted">
+                            <i class="fas fa-info-circle mb-2"></i>
+                            <p>No risk assessment data available</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0">
+                        <i class="fas fa-heart me-2 text-primary"></i>
+                        Overall Sentiment Analysis
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.AnalyzedResponses > 0)
+                    {
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-success">
+                                    <i class="fas fa-smile me-1"></i>Positive
+                                </span>
+                                <strong>@Math.Round(Model.OverallPositiveSentiment * 100, 1)%</strong>
+                            </div>
+                            <div class="progress mb-3" style="height: 15px;">
+                                <div class="progress-bar bg-success" 
+                                     style="width: @(Model.OverallPositiveSentiment * 100)%">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-secondary">
+                                    <i class="fas fa-meh me-1"></i>Neutral
+                                </span>
+                                <strong>@Math.Round(Model.OverallNeutralSentiment * 100, 1)%</strong>
+                            </div>
+                            <div class="progress mb-3" style="height: 15px;">
+                                <div class="progress-bar bg-secondary" 
+                                     style="width: @(Model.OverallNeutralSentiment * 100)%">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-danger">
+                                    <i class="fas fa-frown me-1"></i>Negative
+                                </span>
+                                <strong>@Math.Round(Model.OverallNegativeSentiment * 100, 1)%</strong>
+                            </div>
+                            <div class="progress mb-3" style="height: 15px;">
+                                <div class="progress-bar bg-danger" 
+                                     style="width: @(Model.OverallNegativeSentiment * 100)%">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sentiment Interpretation -->
+                        
+                            string sentimentStatus = "";
+                            string sentimentColor = "";
+                            string sentimentIcon = "";
+                            
+                            if (Model.OverallPositiveSentiment >= 0.6)
+                            {
+                                sentimentStatus = "Excellent mental health climate";
+                                sentimentColor = "text-success";
+                                sentimentIcon = "fa-thumbs-up";
+                            }
+                            else if (Model.OverallPositiveSentiment >= 0.4)
+                            {
+                                sentimentStatus = "Moderate mental health climate";
+                                sentimentColor = "text-warning";
+                                sentimentIcon = "fa-balance-scale";
+                            }
+                            else
+                            {
+                                sentimentStatus = "Concerning mental health climate";
+                                sentimentColor = "text-danger";
+                                sentimentIcon = "fa-exclamation-triangle";
+                            }
+                        
+
+                        <div class="alert alert-light border">
+                            <i class="fas @sentimentIcon @sentimentColor me-2"></i>
+                            <strong class="@sentimentColor">@sentimentStatus</strong>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center text-muted">
+                            <i class="fas fa-info-circle mb-2"></i>
+                            <p>No sentiment analysis data available</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Executive Summary -->
+    @if (!string.IsNullOrEmpty(Model.ExecutiveSummary))
+    {
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-clipboard-list me-2"></i>
+                            Executive Summary
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="executive-summary">
+                            @Html.Raw(Model.ExecutiveSummary.Replace("\n", "<br />"))
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Top Workplace Issues -->
+    <div class="row mb-4">
+        <div class="col-lg-8 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0">
+                        <i class="fas fa-exclamation-circle me-2 text-primary"></i>
+                        Top Workplace Issues & Interventions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.TopWorkplaceIssues != null && Model.TopWorkplaceIssues.Any())
+                    {
+                        @foreach (var issue in Model.TopWorkplaceIssues.Take(5))
+                        {
+                            <div class="border-start border-4 @GetPriorityBorderColor(issue.Priority) ps-3 mb-4">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h6 class="mb-0">@issue.Category</h6>
+                                    <span class="badge @GetPriorityBadgeColor(issue.Priority)">
+                                        Priority @issue.Priority
+                                    </span>
+                                </div>
+                                <p class="text-muted mb-2 small">@issue.Issue</p>
+                                <div class="bg-light rounded p-2">
+                                    <strong class="small">Recommended Intervention:</strong>
+                                    <p class="mb-0 small">@issue.RecommendedIntervention</p>
+                                </div>
+                                @if (issue.AffectedAreas.Any())
+                                {
+                                    <div class="mt-2">
+                                        @foreach (var area in issue.AffectedAreas)
+                                        {
+                                            <span class="badge bg-light text-dark me-1">@area</span>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-center text-muted py-4">
+                            <i class="fas fa-info-circle mb-2"></i>
+                            <p>No workplace issues identified in the analysis</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0">
+                        <i class="fas fa-tags me-2 text-primary"></i>
+                        Common Themes
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.MostCommonKeyPhrases != null && Model.MostCommonKeyPhrases.Any())
+                    {
+                        <div class="mb-3">
+                            <h6 class="small text-muted mb-2">MOST MENTIONED PHRASES</h6>
+                            @foreach (var phrase in Model.MostCommonKeyPhrases.Take(8))
+                            {
+                                <span class="badge bg-primary me-1 mb-1">@phrase</span>
+                            }
+                        </div>
+
+                        @if (Model.TopWorkplaceIssues.Any())
+                        {
+                            <div class="mb-3">
+                                <h6 class="small text-muted mb-2">ISSUE CATEGORIES</h6>
+                                @foreach (var category in Model.TopWorkplaceIssues.Select(i => i.Category).Distinct().Take(5))
+                                {
+                                    <span class="badge bg-warning text-dark me-1 mb-1">@category</span>
+                                }
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-center text-muted">
+                            <i class="fas fa-info-circle mb-2"></i>
+                            <p>No common themes identified</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analysis Metadata -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Analysis completed on @Model.LastAnalyzedAt.ToString("MMMM dd, yyyy 'at' HH:mm") 
+                                | @Model.AnalyzedResponses of @Model.TotalResponses responses analyzed
+                                | Powered by Azure AI Services
+                            </small>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <div class="btn-group" role="group">
+                                <a href="@Url.Action("BatchAnalyze", new { id = Model.QuestionnaireId })" 
+                                   class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-sync"></i> Refresh Analysis
+                                </a>
+                                <a href="@Url.Action("AnalyzeTrends", new { id = Model.QuestionnaireId })" 
+                                   class="btn btn-outline-info btn-sm">
+                                    <i class="fas fa-chart-area"></i> View Trends
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    private string GetPriorityBorderColor(int priority)
+    {
+        return priority switch
+        {
+            5 => "border-danger",
+            4 => "border-warning",
+            3 => "border-primary",
+            2 => "border-info",
+            _ => "border-secondary"
+        };
+    }
+
+    private string GetPriorityBadgeColor(int priority)
+    {
+        return priority switch
+        {
+            5 => "bg-danger",
+            4 => "bg-warning text-dark",
+            3 => "bg-primary",
+            2 => "bg-info",
+            _ => "bg-secondary"
+        };
+    }
+}
+
+@section Styles {
+    <style>
+        .progress {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            transition: width 0.6s ease;
+        }
+        
+        .executive-summary {
+            line-height: 1.6;
+            font-size: 1rem;
+        }
+        
+        .card {
+            transition: transform 0.2s ease-in-out;
+        }
+        
+        .card:hover {
+            transform: translateY(-1px);
+        }
+        
+        .border-start {
+            border-left-width: 4px !important;
+        }
+        
+        .badge {
+            font-size: 0.75em;
+        }
+        
+        .btn-group .btn {
+            font-size: 0.875rem;
+        }
+        
+        @@media (max-width: 768px) {
+            .btn-group {
+                width: 100%;
+            }
+            
+            .btn-group .btn {
+                flex: 1;
+            }
+        }
+    </style>
+}

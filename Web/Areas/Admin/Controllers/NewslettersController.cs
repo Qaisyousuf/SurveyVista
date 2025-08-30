@@ -8,7 +8,7 @@ using Microsoft.VisualStudio.TextTemplating;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using Model;
 using Newtonsoft.Json.Linq;
-using OpenAI_API;
+
 using Services.EmailSend;
 using Services.Implemnetation;
 using Services.Interaces;
