@@ -1,0 +1,780 @@
+﻿@* Views/Admin/SurveyAnalysis/Dashboard.cshtml *@
+@model Services.AIViewModel.QuestionnaireAnalysisOverview
+
+@{
+    ViewData["Title"] = $"Executive Dashboard - {Model.QuestionnaireTitle}";
+   
+}
+
+<div class="container-fluid">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item">
+                                <a href="@Url.Action("Index")">
+                                    <i class="fas fa-brain"></i> Analysis Dashboard
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item active">Executive Dashboard</li>
+                        </ol>
+                    </nav>
+                    <h1 class="h3 mb-1">
+                        <i class="fas fa-tachometer-alt text-primary me-2"></i>
+                        Executive Mental Health Dashboard
+                    </h1>
+                    <p class="text-muted mb-0">Strategic overview of workplace mental health metrics</p>
+                </div>
+                <div class="text-end">
+                    <div class="btn-group" role="group">
+                        <a href="@Url.Action("GenerateReport", new { id = Model.QuestionnaireId })"
+                           class="btn btn-primary btn-sm">
+                            <i class="fas fa-file-contract"></i> Executive Report
+                        </a>
+                        <a href="@Url.Action("ExportAnalysis", new { id = Model.QuestionnaireId })"
+                           class="btn btn-outline-info btn-sm">
+                            <i class="fas fa-chart-pie"></i> Export Analytics
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Key Performance Indicators -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm bg-gradient-primary text-white h-100">
+                <div class="card-body text-center">
+                    <div class="mb-2">
+                        <i class="fas fa-users fa-2x opacity-75"></i>
+                    </div>
+                    <h3 class="mb-1">@Model.TotalResponses</h3>
+                    <p class="mb-0 opacity-75">Total Participants</p>
+                    <small class="opacity-75">@Model.AnalyzedResponses AI Analyzed</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm @GetOverallHealthCardClass() text-white h-100">
+                <div class="card-body text-center">
+                    <div class="mb-2">
+                        <i class="fas @GetOverallHealthIcon() fa-2x opacity-75"></i>
+                    </div>
+                    <h3 class="mb-1">@GetOverallHealthScore()%</h3>
+                    <p class="mb-0 opacity-75">Mental Health Score</p>
+                    <small class="opacity-75">@GetOverallHealthStatus()</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm @(Model.HighRiskResponses + Model.CriticalRiskResponses > 0 ? "bg-gradient-danger" : "bg-gradient-success") text-white h-100">
+                <div class="card-body text-center">
+                    <div class="mb-2">
+                        <i class="fas fa-shield-alt fa-2x opacity-75"></i>
+                    </div>
+                    <h3 class="mb-1">@(Model.HighRiskResponses + Model.CriticalRiskResponses)</h3>
+                    <p class="mb-0 opacity-75">High Risk Cases</p>
+                    <small class="opacity-75">
+                        @if (Model.CriticalRiskResponses > 0)
+                        {
+                            <text>@Model.CriticalRiskResponses Critical</text>
+                        }
+                        else if (Model.HighRiskResponses > 0)
+                        {
+                            <text>Immediate Attention</text>
+                        }
+                        else
+                        {
+                            <text>No Critical Cases</text>
+                        }
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm bg-gradient-info text-white h-100">
+                <div class="card-body text-center">
+                    <div class="mb-2">
+                        <i class="fas fa-chart-line fa-2x opacity-75"></i>
+                    </div>
+                    <h3 class="mb-1">@Math.Round(Model.OverallPositiveSentiment * 100, 0)%</h3>
+                    <p class="mb-0 opacity-75">Positive Sentiment</p>
+                    <small class="opacity-75">Employee Satisfaction</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mental Health Overview Charts -->
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-bar me-2 text-primary"></i>
+                        Mental Health Risk Distribution
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center mb-4">
+                        <div class="col-3">
+                            <div class="text-success">
+                                <i class="fas fa-smile fa-2x mb-2"></i>
+                                <h4 class="mb-0">@Model.LowRiskResponses</h4>
+                                <small class="text-muted">Low Risk</small>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="text-warning">
+                                <i class="fas fa-meh fa-2x mb-2"></i>
+                                <h4 class="mb-0">@Model.ModerateRiskResponses</h4>
+                                <small class="text-muted">Moderate</small>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="text-danger">
+                                <i class="fas fa-frown fa-2x mb-2"></i>
+                                <h4 class="mb-0">@Model.HighRiskResponses</h4>
+                                <small class="text-muted">High Risk</small>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="text-dark">
+                                <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+                                <h4 class="mb-0">@Model.CriticalRiskResponses</h4>
+                                <small class="text-muted">Critical</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Risk Distribution Chart -->
+                    <div class="chart-container">
+                        <canvas id="riskDistributionChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0">
+                        <i class="fas fa-heart me-2 text-primary"></i>
+                        Sentiment Overview
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="sentiment-chart-container">
+                        <canvas id="sentimentChart" width="300" height="300"></canvas>
+                    </div>
+
+                    <div class="sentiment-legend mt-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="d-flex align-items-center">
+                                <span class="badge bg-success me-2"></span>
+                                Positive
+                            </span>
+                            <strong>@Math.Round(Model.OverallPositiveSentiment * 100, 1)%</strong>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="d-flex align-items-center">
+                                <span class="badge bg-secondary me-2"></span>
+                                Neutral
+                            </span>
+                            <strong>@Math.Round(Model.OverallNeutralSentiment * 100, 1)%</strong>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="d-flex align-items-center">
+                                <span class="badge bg-danger me-2"></span>
+                                Negative
+                            </span>
+                            <strong>@Math.Round(Model.OverallNegativeSentiment * 100, 1)%</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Strategic Insights -->
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0">
+                        <i class="fas fa-lightbulb me-2 text-primary"></i>
+                        Strategic Workplace Interventions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.TopWorkplaceIssues?.Any() == true)
+                    {
+                        @foreach (var issue in Model.TopWorkplaceIssues.Take(4))
+                        {
+                            <div class="row mb-3 p-3 rounded @GetIssueBackgroundClass(issue.Priority)">
+                                <div class="col-md-8">
+                                    <h6 class="mb-1">
+                                        <i class="fas fa-arrow-right me-2 text-primary"></i>
+                                        @issue.Category
+                                    </h6>
+                                    <p class="mb-1 small text-muted">@issue.Issue</p>
+                                    <p class="mb-0 small">
+                                        <strong>Action:</strong> @issue.RecommendedIntervention
+                                    </p>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <span class="badge @GetPriorityBadgeClass(issue.Priority) mb-2">
+                                        Priority @issue.Priority
+                                    </span>
+                                    <br>
+                                    <small class="text-muted">
+                                        @issue.IdentifiedAt.ToString("MMM dd")
+                                    </small>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-center text-muted py-4">
+                            <i class="fas fa-check-circle fa-3x mb-3"></i>
+                            <h5>No Major Issues Identified</h5>
+                            <p>The AI analysis indicates a generally healthy workplace mental health environment.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0">
+                        <i class="fas fa-bullseye me-2 text-primary"></i>
+                        Key Metrics
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="metric-item mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="small text-muted">Mental Health Score</span>
+                            <strong class="@GetOverallHealthTextClass()">@GetOverallHealthScore()%</strong>
+                        </div>
+                        <div class="progress mt-1" style="height: 6px;">
+                            <div class="progress-bar @GetOverallHealthProgressClass()"
+                                 style="width: @GetOverallHealthScore()%"></div>
+                        </div>
+                    </div>
+
+                    <div class="metric-item mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="small text-muted">Response Rate</span>
+                            <strong>@Math.Round((double)Model.AnalyzedResponses / Model.TotalResponses * 100, 1)%</strong>
+                        </div>
+                        <div class="progress mt-1" style="height: 6px;">
+                            <div class="progress-bar bg-info"
+                                 style="width: @((double)Model.AnalyzedResponses / Model.TotalResponses * 100)%"></div>
+                        </div>
+                    </div>
+
+                    <div class="metric-item mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="small text-muted">Cases Requiring Attention</span>
+                            <strong class="@(Model.HighRiskResponses + Model.CriticalRiskResponses > 0 ? "text-danger" : "text-success")">
+                                @(Model.HighRiskResponses + Model.CriticalRiskResponses)
+                            </strong>
+                        </div>
+                    </div>
+
+                    <div class="metric-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="small text-muted">Last Analysis</span>
+                            <strong>@Model.LastAnalyzedAt.ToString("MMM dd, HH:mm")</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Executive Summary -->
+    @if (!string.IsNullOrEmpty(Model.ExecutiveSummary))
+    {
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-gradient-primary text-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">
+                                <i class="fas fa-clipboard-list me-2"></i>
+                                Executive Summary for Leadership
+                            </h5>
+                            <span class="badge bg-white text-primary">
+                                <i class="fas fa-user-tie me-1"></i>C-Level Summary
+                            </span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="executive-summary-content">
+                            @Html.Raw(Model.ExecutiveSummary.Replace("\n", "<br />"))
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Action Items and Recommendations -->
+    <div class="row mb-4">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0">
+                        <i class="fas fa-tasks me-2 text-primary"></i>
+                        Immediate Action Items
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.CriticalRiskResponses > 0 || Model.HighRiskResponses > 0)
+                    {
+                        <div class="action-item-urgent mb-3">
+                            <div class="d-flex align-items-start">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-exclamation-triangle text-danger fa-lg me-3 mt-1"></i>
+                                </div>
+                                <div>
+                                    <h6 class="text-danger mb-1">URGENT: Mental Health Interventions Required</h6>
+                                    <p class="mb-2 small">
+                                        @(Model.CriticalRiskResponses + Model.HighRiskResponses) employees require immediate professional attention.
+                                    </p>
+                                    <a href="@Url.Action("HighRiskResponses", new { id = Model.QuestionnaireId })"
+                                       class="btn btn-danger btn-sm">
+                                        <i class="fas fa-user-md"></i> Review High Risk Cases
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    @if (Model.TopWorkplaceIssues?.Any() == true)
+                    {
+                        @foreach (var issue in Model.TopWorkplaceIssues.Where(i => i.Priority >= 4).Take(3))
+                        {
+                            <div class="action-item mb-3">
+                                <div class="d-flex align-items-start">
+                                    <div class="flex-shrink-0">
+                                        <i class="fas fa-arrow-right text-warning fa-lg me-3 mt-1"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="text-warning mb-1">@issue.Category</h6>
+                                        <p class="mb-2 small">@issue.RecommendedIntervention</p>
+                                        <span class="badge @GetPriorityBadgeClass(issue.Priority)">
+                                            Priority @issue.Priority
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+
+                    @if (Model.CriticalRiskResponses == 0 && Model.HighRiskResponses == 0 && !Model.TopWorkplaceIssues.Any(i => i.Priority >= 4))
+                    {
+                        <div class="text-center text-success py-4">
+                            <i class="fas fa-check-circle fa-3x mb-3"></i>
+                            <h5>No Immediate Actions Required</h5>
+                            <p class="mb-0">Mental health status is stable with no urgent interventions needed.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0">
+                        <i class="fas fa-trending-up me-2 text-primary"></i>
+                        Strategic Recommendations
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @{
+                        var strategicActions = GetStrategicRecommendations();
+                    }
+
+                    @foreach (var action in strategicActions)
+                    {
+                        <div class="strategic-item mb-3 p-3 rounded bg-light">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h6 class="mb-0 text-primary">@action.Title</h6>
+                                <span class="badge @action.BadgeClass">@action.Timeline</span>
+                            </div>
+                            <p class="mb-0 small">@action.Description</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Most Common Themes -->
+    @if (Model.MostCommonKeyPhrases?.Any() == true)
+    {
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white border-bottom">
+                        <h5 class="mb-0">
+                            <i class="fas fa-cloud me-2 text-primary"></i>
+                            Most Common Employee Concerns
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="tag-cloud text-center">
+                            @foreach (var phrase in Model.MostCommonKeyPhrases.Take(12))
+                            {
+                                <span class="badge bg-primary me-2 mb-2 px-3 py-2" style="font-size: @GetTagSize(phrase)rem;">
+                                    @phrase
+                                </span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Footer Summary -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-info-circle text-primary me-3 fa-lg"></i>
+                                <div>
+                                    <strong>Dashboard Summary:</strong>
+                                    <span class="text-muted">
+                                        Analysis of @Model.TotalResponses employee responses shows
+                                        @GetOverallHealthStatus().ToLower() workplace mental health with
+                                        @(Model.HighRiskResponses + Model.CriticalRiskResponses) cases requiring attention.
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <div class="btn-group" role="group">
+                                <a href="@Url.Action("AnalyzeTrends", new { id = Model.QuestionnaireId })"
+                                   class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-chart-area"></i> View Trends
+                                </a>
+                                <a href="@Url.Action("AnalyzeQuestionnaire", new { id = Model.QuestionnaireId })"
+                                   class="btn btn-outline-info btn-sm">
+                                    <i class="fas fa-search"></i> Detailed Analysis
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    private string GetOverallHealthCardClass()
+    {
+        var score = GetOverallHealthScore();
+        if (score >= 75) return "bg-gradient-success";
+        if (score >= 50) return "bg-gradient-warning";
+        return "bg-gradient-danger";
+    }
+
+    private string GetOverallHealthIcon()
+    {
+        var score = GetOverallHealthScore();
+        if (score >= 75) return "fa-heart";
+        if (score >= 50) return "fa-heartbeat";
+        return "fa-heart-broken";
+    }
+
+    private string GetOverallHealthTextClass()
+    {
+        var score = GetOverallHealthScore();
+        if (score >= 75) return "text-success";
+        if (score >= 50) return "text-warning";
+        return "text-danger";
+    }
+
+    private string GetOverallHealthProgressClass()
+    {
+        var score = GetOverallHealthScore();
+        if (score >= 75) return "bg-success";
+        if (score >= 50) return "bg-warning";
+        return "bg-danger";
+    }
+
+    private int GetOverallHealthScore()
+    {
+        // Calculate overall health score based on positive sentiment and low risk
+        var sentimentScore = Model.OverallPositiveSentiment * 100;
+        var riskPenalty = (Model.HighRiskResponses + Model.CriticalRiskResponses * 2) * 10;
+        return Math.Max(0, (int)(sentimentScore - riskPenalty));
+    }
+
+    private string GetOverallHealthStatus()
+    {
+        var score = GetOverallHealthScore();
+        if (score >= 75) return "Excellent";
+        if (score >= 50) return "Good";
+        if (score >= 25) return "Concerning";
+        return "Critical";
+    }
+
+    private string GetIssueBackgroundClass(int priority)
+    {
+        switch (priority)
+        {
+            case 5:
+                return "bg-danger bg-opacity-10";
+            case 4:
+                return "bg-warning bg-opacity-10";
+            default:
+                return "bg-primary bg-opacity-10";
+        }
+    }
+
+    private string GetPriorityBadgeClass(int priority)
+    {
+        switch (priority)
+        {
+            case 5:
+                return "bg-danger";
+            case 4:
+                return "bg-warning text-dark";
+            case 3:
+                return "bg-primary";
+            case 2:
+                return "bg-info";
+            default:
+                return "bg-secondary";
+        }
+    }
+
+    private double GetTagSize(string phrase)
+    {
+        // Vary tag size based on importance (simple implementation)
+        return phrase.Length > 10 ? 1.1 : 0.9;
+    }
+
+    private List<dynamic> GetStrategicRecommendations()
+    {
+        var recommendations = new List<dynamic>();
+
+        if (Model.HighRiskResponses + Model.CriticalRiskResponses > 0)
+        {
+            recommendations.Add(new
+            {
+                Title = "Immediate Mental Health Support",
+                Description = "Deploy emergency mental health resources and professional counseling",
+                Timeline = "24-48 Hours",
+                BadgeClass = "bg-danger"
+            });
+        }
+
+        if (Model.OverallNegativeSentiment > 0.4)
+        {
+            recommendations.Add(new
+            {
+                Title = "Workplace Culture Assessment",
+                Description = "Conduct comprehensive review of workplace environment and management practices",
+                Timeline = "2-4 Weeks",
+                BadgeClass = "bg-warning text-dark"
+            });
+        }
+
+        recommendations.Add(new
+        {
+            Title = "Preventive Mental Health Program",
+            Description = "Implement ongoing mental health awareness and stress management programs",
+            Timeline = "1-3 Months",
+            BadgeClass = "bg-info"
+        });
+
+        recommendations.Add(new
+        {
+            Title = "Regular Mental Health Monitoring",
+            Description = "Establish quarterly mental health assessments and trend monitoring",
+            Timeline = "Ongoing",
+            BadgeClass = "bg-success"
+        });
+
+        return recommendations;
+    }
+}
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Risk Distribution Chart
+            const riskCtx = document.getElementById('riskDistributionChart').getContext('2d');
+            new Chart(riskCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Low Risk', 'Moderate', 'High Risk', 'Critical'],
+                    datasets: [{
+                        label: 'Number of Responses',
+                        data: [@Model.LowRiskResponses, @Model.ModerateRiskResponses, @Model.HighRiskResponses, @Model.CriticalRiskResponses],
+                        backgroundColor: ['#28a745', '#ffc107', '#dc3545', '#343a40'],
+                        borderColor: ['#1e7e34', '#e0a800', '#c82333', '#23272b'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { stepSize: 1 }
+                        }
+                    }
+                }
+            });
+
+            // Sentiment Pie Chart
+            const sentimentCtx = document.getElementById('sentimentChart').getContext('2d');
+            new Chart(sentimentCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Positive', 'Neutral', 'Negative'],
+                    datasets: [{
+                        data: [
+                            @Math.Round(Model.OverallPositiveSentiment * 100, 1),
+                            @Math.Round(Model.OverallNeutralSentiment * 100, 1),
+                            @Math.Round(Model.OverallNegativeSentiment * 100, 1)
+                        ],
+                        backgroundColor: ['#28a745', '#6c757d', '#dc3545'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        });
+    </script>
+}
+
+@section Styles {
+    <style>
+        .bg-gradient-primary {
+            background: linear-gradient(45deg, #007bff, #0056b3);
+        }
+
+        .bg-gradient-success {
+            background: linear-gradient(45deg, #28a745, #1e7e34);
+        }
+
+        .bg-gradient-warning {
+            background: linear-gradient(45deg, #ffc107, #e0a800);
+        }
+
+        .bg-gradient-danger {
+            background: linear-gradient(45deg, #dc3545, #c82333);
+        }
+
+        .bg-gradient-info {
+            background: linear-gradient(45deg, #17a2b8, #138496);
+        }
+
+        .bg-opacity-10 {
+            --bs-bg-opacity: 0.1;
+        }
+
+        .opacity-75 {
+            opacity: 0.75;
+        }
+
+        .executive-summary-content {
+            line-height: 1.7;
+            font-size: 1.05rem;
+        }
+
+        .metric-item {
+            padding: 0.5rem 0;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 200px;
+        }
+
+        .sentiment-chart-container {
+            position: relative;
+            height: 250px;
+        }
+
+        .tag-cloud .badge {
+            transition: all 0.2s ease-in-out;
+        }
+
+            .tag-cloud .badge:hover {
+                transform: scale(1.1);
+            }
+
+        .action-item-urgent {
+            border-left: 4px solid #dc3545;
+            padding-left: 1rem;
+            background-color: rgba(220, 53, 69, 0.05);
+            border-radius: 0.375rem;
+        }
+
+        .action-item {
+            border-left: 4px solid #ffc107;
+            padding-left: 1rem;
+            background-color: rgba(255, 193, 7, 0.05);
+            border-radius: 0.375rem;
+        }
+
+        .strategic-item {
+            border-left: 4px solid #17a2b8;
+        }
+
+        @@media (max-width: 768px) {
+            .btn-group
+
+        {
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .btn-group .btn {
+            border-radius: 0.375rem !important;
+            margin-bottom: 0.5rem;
+        }
+
+        .chart-container,
+        .sentiment-chart-container {
+            height: 180px;
+        }
+
+        }
+    </style>
+}

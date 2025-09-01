@@ -3,293 +3,482 @@
 
 @{
     ViewData["Title"] = "Mental Health Survey Analysis - Dashboard";
-    
 }
 
-<div class="container-fluid">
-    <!-- Header Section -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h1 class="h3 mb-1">
-                        <i class="fas fa-brain text-primary me-2"></i>
-                        Mental Health Survey Analysis
-                    </h1>
-                    <p class="text-muted">AI-powered analysis of workplace mental health surveys</p>
-                </div>
-                <div class="text-end">
-                    <small class="text-muted">
-                        <i class="fas fa-user-md"></i> NVKN Nærværskonsulenterne
-                    </small>
-                </div>
-            </div>
+<div class="dashboard-container">
+    <!-- Beautiful Hero Banner -->
+    <div class="hero-banner">
+        <div class="hero-background">
+            <div class="hero-pattern"></div>
+            <div class="hero-glow"></div>
         </div>
-    </div>
-
-    <!-- Service Health Status -->
-    @if (ViewBag.ServiceHealth != null)
-    {
-        var serviceHealth = ViewBag.ServiceHealth as Dictionary<string, bool>;
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-body py-3">
-                        <div class="row align-items-center">
-                            <div class="col-md-6">
-                                <h6 class="mb-0">
-                                    <i class="fas fa-heartbeat me-2"></i>AI Services Status
-                                </h6>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="d-flex justify-content-end gap-3">
-                                    @foreach (var service in serviceHealth)
-                                    {
-                                        <div class="d-flex align-items-center">
-                                            <span class="badge @(service.Value ? "bg-success" : "bg-danger") me-2">
-                                                <i class="fas @(service.Value ? "fa-check" : "fa-times")"></i>
-                                            </span>
-                                            <small class="text-muted">@service.Key.Replace("Azure", "")</small>
-                                        </div>
-                                    }
-                                </div>
-                            </div>
+        <div class="container-fluid px-4">
+            <div class="row align-items-center min-vh-30">
+                <div class="col-lg-8">
+                    <div class="hero-content">
+                        <div class="hero-badge mb-4">
+                            <i class="fas fa-sparkles me-2"></i>
+                            AI-Powered Analytics
+                        </div>
+                        <h1 class="hero-title mb-4">
+                            Mental Health Survey
+                            <span class="hero-highlight">Analysis Platform</span>
+                        </h1>
+                        <p class="hero-subtitle mb-5">
+                            Transform workplace mental health data into actionable insights with advanced AI analysis. 
+                            Identify risks, understand trends, and create healthier work environments.
+                        </p>
+                        <div class="hero-actions">
+                            <button type="button" class="btn btn-hero-primary me-3" onclick="testAIServices()">
+                                <i class="fas fa-heartbeat me-2"></i>Test AI Services
+                            </button>
+                            <button type="button" class="btn btn-hero-secondary" data-bs-toggle="modal" data-bs-target="#testAnalysisModal">
+                                <i class="fas fa-flask me-2"></i>Test Analysis
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="hero-visual">
+                        <div class="floating-card card-1">
+                            <i class="fas fa-brain text-primary"></i>
+                            <span>AI Analysis</span>
+                        </div>
+                        <div class="floating-card card-2">
+                            <i class="fas fa-chart-line text-success"></i>
+                            <span>Real-time Insights</span>
+                        </div>
+                        <div class="floating-card card-3">
+                            <i class="fas fa-shield-alt text-warning"></i>
+                            <span>Risk Assessment</span>
+                        </div>
+                        <div class="hero-illustration">
+                            <div class="pulse-circle"></div>
+                            <i class="fas fa-user-md hero-icon"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    }
-
-    <!-- Alert Messages -->
-    @if (TempData["ErrorMessage"] != null)
-    {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="fas fa-exclamation-triangle me-2"></i>
-            @TempData["ErrorMessage"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    }
-
-    @if (TempData["SuccessMessage"] != null)
-    {
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="fas fa-check-circle me-2"></i>
-            @TempData["SuccessMessage"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    }
-
-    @if (TempData["WarningMessage"] != null)
-    {
-        <div class="alert alert-warning alert-dismissible fade show" role="alert">
-            <i class="fas fa-exclamation-circle me-2"></i>
-            @TempData["WarningMessage"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    }
-
-    <!-- Quick Actions -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h6 class="mb-3">
-                                <i class="fas fa-tools me-2"></i>Quick Actions
-                            </h6>
-                            <button type="button" class="btn btn-outline-primary btn-sm me-2" onclick="testAIServices()">
-                                <i class="fas fa-vial"></i> Test AI Services
-                            </button>
-                            <button type="button" class="btn btn-outline-info btn-sm" data-bs-toggle="modal" data-bs-target="#testAnalysisModal">
-                                <i class="fas fa-microscope"></i> Test Analysis
-                            </button>
-                        </div>
-                        <div class="col-md-6 text-end">
-                            <small class="text-muted">
-                                Last updated: @DateTime.Now.ToString("yyyy-MM-dd HH:mm")
-                            </small>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        
+        <!-- Company Badge -->
+        <div class="company-badge">
+            <i class="fas fa-user-md me-2"></i>
+            NVKN Nærværskonsulenterne
         </div>
     </div>
 
-    <!-- Questionnaires Grid -->
-    <div class="row">
-        @if (Model != null && Model.Any())
-        {
-            @foreach (var questionnaire in Model)
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="container-fluid px-4">
+            <!-- AI Services Status -->
+            @if (ViewBag.ServiceHealth != null)
             {
-                <div class="col-lg-6 col-xl-4 mb-4">
-                    <div class="card border-0 shadow-sm h-100">
-                        <div class="card-header bg-white border-bottom">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <h6 class="mb-1 fw-bold">@questionnaire.Title</h6>
-                                    <small class="text-muted">@questionnaire.Description</small>
+                var serviceHealth = ViewBag.ServiceHealth as Dictionary<string, bool>;
+                <div class="row mb-5">
+                    <div class="col-12">
+                        <div class="status-card">
+                            <div class="status-header">
+                                <div class="status-icon">
+                                    <i class="fas fa-server"></i>
                                 </div>
-                                <div class="dropdown">
-                                    <button class="btn btn-link btn-sm text-muted" type="button" data-bs-toggle="dropdown">
-                                        <i class="fas fa-ellipsis-v"></i>
-                                    </button>
-                                    <ul class="dropdown-menu dropdown-menu-end">
-                                        <li><a class="dropdown-item" href="@Url.Action("AnalyzeQuestionnaire", new { id = questionnaire.Id })">
-                                            <i class="fas fa-chart-line me-2"></i>Full Analysis
-                                        </a></li>
-                                        <li><a class="dropdown-item" href="@Url.Action("HighRiskResponses", new { id = questionnaire.Id })">
-                                            <i class="fas fa-exclamation-triangle me-2 text-danger"></i>High Risk
-                                        </a></li>
-                                        <li><a class="dropdown-item" href="@Url.Action("Dashboard", new { id = questionnaire.Id })">
-                                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
-                                        </a></li>
-                                        <li><hr class="dropdown-divider"></li>
-                                        <li><a class="dropdown-item" href="@Url.Action("GenerateReport", new { id = questionnaire.Id })">
-                                            <i class="fas fa-file-alt me-2"></i>Generate Report
-                                        </a></li>
-                                    </ul>
+                                <div class="status-info">
+                                    <h5><i class="fas fa-wifi me-2"></i>AI Services Status</h5>
+                                    <p><i class="fas fa-eye me-2"></i>Real-time monitoring of all AI services</p>
                                 </div>
                             </div>
-                        </div>
-
-                        <div class="card-body">
-                            <!-- Statistics -->
-                            <div class="row text-center mb-3">
-                                <div class="col-4">
-                                    <div class="border-end">
-                                        <h5 class="mb-0 text-primary">@questionnaire.QuestionCount</h5>
-                                        <small class="text-muted">Questions</small>
-                                    </div>
-                                </div>
-                                <div class="col-4">
-                                    <div class="border-end">
-                                        <h5 class="mb-0 text-success">@questionnaire.ResponseCount</h5>
-                                        <small class="text-muted">Responses</small>
-                                    </div>
-                                </div>
-                                <div class="col-4">
-                                    <h5 class="mb-0 text-info">@questionnaire.TextResponseCount</h5>
-                                    <small class="text-muted">Text Answers</small>
-                                </div>
-                            </div>
-
-                            <!-- Last Response -->
-                            @if (questionnaire.LastResponse != null && questionnaire.LastResponse != DateTime.MinValue)
-                            {
-                                <div class="text-center mb-3">
-                                    <small class="text-muted">
-                                        <i class="fas fa-clock me-1"></i>
-                                        Last response: @((DateTime)questionnaire.LastResponse).ToString("MMM dd, yyyy")
-                                    </small>
-                                </div>
-                            }
-
-                            <!-- Analysis Status -->
-                            @if (questionnaire.TextResponseCount > 0)
-                            {
-                                <div class="text-center">
-                                    <span class="badge bg-success mb-2">
-                                        <i class="fas fa-check me-1"></i>Ready for Analysis
-                                    </span>
-                                </div>
-                            }
-                            else
-                            {
-                                <div class="text-center">
-                                    <span class="badge bg-secondary mb-2">
-                                        <i class="fas fa-info me-1"></i>No Text Responses
-                                    </span>
-                                </div>
-                            }
-                        </div>
-
-                        <div class="card-footer bg-white border-top-0 pt-0">
-                            <div class="d-grid gap-2">
-                                @if (questionnaire.TextResponseCount > 0)
+                            <div class="status-services">
+                                @foreach (var service in serviceHealth)
                                 {
-                                    <a href="@Url.Action("AnalyzeQuestionnaire", new { id = questionnaire.Id })" 
-                                       class="btn btn-primary btn-sm">
-                                        <i class="fas fa-brain me-2"></i>Start AI Analysis
-                                    </a>
-                                    
-                                    <div class="btn-group" role="group">
-                                        <a href="@Url.Action("HighRiskResponses", new { id = questionnaire.Id })" 
-                                           class="btn btn-outline-danger btn-sm">
-                                            <i class="fas fa-shield-alt"></i> High Risk
-                                        </a>
-                                        <a href="@Url.Action("BatchAnalyze", new { id = questionnaire.Id })" 
-                                           class="btn btn-outline-info btn-sm">
-                                            <i class="fas fa-layer-group"></i> Batch Process
-                                        </a>
-                                        <a href="@Url.Action("AnalyzeTrends", new { id = questionnaire.Id })" 
-                                           class="btn btn-outline-success btn-sm">
-                                            <i class="fas fa-chart-area"></i> Trends
-                                        </a>
+                                    <div class="service-status @(service.Value ? "online" : "offline")">
+                                        <div class="service-indicator"></div>
+                                        <span class="service-name">@service.Key.Replace("Azure", "")</span>
+                                        <span class="service-label">@(service.Value ? "Online" : "Offline")</span>
                                     </div>
-                                }
-                                else
-                                {
-                                    <button class="btn btn-secondary btn-sm" disabled>
-                                        <i class="fas fa-ban me-2"></i>No Text Data Available
-                                    </button>
                                 }
                             </div>
                         </div>
                     </div>
                 </div>
             }
-        }
-        else
-        {
-            <div class="col-12">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-body text-center py-5">
-                        <i class="fas fa-clipboard-list text-muted mb-3" style="font-size: 3rem;"></i>
-                        <h5 class="text-muted">No Questionnaires Found</h5>
-                        <p class="text-muted mb-4">There are no questionnaires available for analysis at the moment.</p>
-                        <a href="@Url.Action("Index", "Questionnaire")" class="btn btn-primary">
-                            <i class="fas fa-plus me-2"></i>Create New Questionnaire
+
+            <!-- Alert Messages -->
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-modern alert-danger" role="alert">
+                    <div class="alert-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="alert-content">
+                        <strong>Error:</strong> @TempData["ErrorMessage"]
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-modern alert-success" role="alert">
+                    <div class="alert-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="alert-content">
+                        <strong>Success:</strong> @TempData["SuccessMessage"]
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            @if (TempData["WarningMessage"] != null)
+            {
+                <div class="alert alert-modern alert-warning" role="alert">
+                    <div class="alert-icon">
+                        <i class="fas fa-exclamation-circle"></i>
+                    </div>
+                    <div class="alert-content">
+                        <strong>Warning:</strong> @TempData["WarningMessage"]
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            <!-- Questionnaires Section -->
+            <div class="section-header mb-5">
+                <h2 class="section-title">
+                    <span class="section-icon">
+                        <i class="fas fa-clipboard-check"></i>
+                    </span>
+                    Active Questionnaires
+                </h2>
+                <p class="section-subtitle">Manage and analyze your mental health surveys</p>
+            </div>
+
+            <!-- Questionnaires Grid -->
+            <div class="questionnaires-grid">
+                @{
+                    var hasAnyQuestionnairesWithResponses = false;
+                    var modelList = Model?.ToList() ?? new List<dynamic>();
+                    
+                    foreach (var q in modelList)
+                    {
+                        if (q.ResponseCount > 0)
+                        {
+                            hasAnyQuestionnairesWithResponses = true;
+                            break;
+                        }
+                    }
+                }
+
+                @if (Model != null && modelList.Count > 0)
+                {
+                    @foreach (var questionnaire in modelList)
+                    {
+                        // Only show questionnaires with responses
+                        @if (questionnaire.ResponseCount > 0)
+                        {
+                            <div class="questionnaire-card">
+                                <div class="card-header">
+                                    <div class="card-title-section">
+                                        <h3 class="card-title">@questionnaire.Title</h3>
+                                        
+                                        <!-- User Information -->
+                                        @{
+                                            var hasUsers = false;
+                                            var userCount = 0;
+                                            try {
+                                                if (questionnaire.Users != null)
+                                                {
+                                                    userCount = questionnaire.Users.Count;
+                                                    hasUsers = userCount > 0;
+                                                }
+                                            } catch { 
+                                                hasUsers = false;
+                                                userCount = 0;
+                                            }
+                                        }
+                                        
+                                        @if (hasUsers)
+                                        {
+                                            <div class="participants-section">
+                                                <div class="participants-header">
+                                                    <i class="fas fa-users"></i>
+                                                    <span>Recent Participants</span>
+                                                </div>
+                                                <div class="participants-list">
+                                                    @for (int i = 0; i < Math.Min(3, userCount); i++)
+                                                    {
+                                                        var user = questionnaire.Users[i];
+                                                        <div class="participant">
+                                                            <div class="participant-avatar">
+                                                                @user.UserName.Substring(0, 1).ToUpper()
+                                                            </div>
+                                                            <div class="participant-info">
+                                                                <span class="participant-name">@user.UserName</span>
+                                                                <span class="participant-email">@user.Email</span>
+                                                            </div>
+                                                        </div>
+                                                    }
+                                                    @if (userCount > 3)
+                                                    {
+                                                        <div class="participants-more">
+                                                            <span>+@(userCount - 3) more</span>
+                                                        </div>
+                                                    }
+                                                </div>
+                                            </div>
+                                        }
+                                        else if (questionnaire.ResponseCount > 0)
+                                        {
+                                            <div class="participation-stats">
+                                                <div class="stat-item">
+                                                    <i class="fas fa-chart-bar"></i>
+                                                    <span>@questionnaire.ResponseCount Responses</span>
+                                                </div>
+                                                <div class="stat-item">
+                                                    <i class="fas fa-comments"></i>
+                                                    <span>@questionnaire.TextResponseCount Text Responses</span>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                    
+                                    <!-- Card Actions Dropdown -->
+                                    <div class="card-actions">
+                                        <button class="btn-card-menu" type="button" data-bs-toggle="dropdown">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <li><a class="dropdown-item" href="@Url.Action("AnalyzeQuestionnaire", new { id = questionnaire.Id })">
+                                                <i class="fas fa-chart-line text-primary"></i>Full Analysis
+                                            </a></li>
+                                            <li><a class="dropdown-item" href="@Url.Action("HighRiskResponses", new { id = questionnaire.Id })">
+                                                <i class="fas fa-exclamation-triangle text-danger"></i>High Risk
+                                            </a></li>
+                                            <li><a class="dropdown-item" href="@Url.Action("Dashboard", new { id = questionnaire.Id })">
+                                                <i class="fas fa-tachometer-alt text-info"></i>Dashboard
+                                            </a></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li><a class="dropdown-item" href="@Url.Action("GenerateReport", new { id = questionnaire.Id })">
+                                                <i class="fas fa-file-alt text-success"></i>Generate Report
+                                            </a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <!-- Card Body -->
+                                <div class="card-body">
+                                    <!-- Statistics -->
+                                    <div class="stats-grid">
+                                        <div class="stat-box stat-primary">
+                                            <div class="stat-icon">
+                                                <i class="fas fa-question"></i>
+                                            </div>
+                                            <div class="stat-value">@questionnaire.QuestionCount</div>
+                                            <div class="stat-label">Questions</div>
+                                        </div>
+                                        <div class="stat-box stat-success">
+                                            <div class="stat-icon">
+                                                <i class="fas fa-reply"></i>
+                                            </div>
+                                            <div class="stat-value">@questionnaire.ResponseCount</div>
+                                            <div class="stat-label">Responses</div>
+                                        </div>
+                                        <div class="stat-box stat-info">
+                                            <div class="stat-icon">
+                                                <i class="fas fa-comment"></i>
+                                            </div>
+                                            <div class="stat-value">@questionnaire.TextResponseCount</div>
+                                            <div class="stat-label">Text Answers</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Last Response -->
+                                    @if (questionnaire.LastResponse != null && questionnaire.LastResponse != DateTime.MinValue)
+                                    {
+                                        <div class="last-activity">
+                                            <i class="fas fa-clock"></i>
+                                            <span>Last response: @((DateTime)questionnaire.LastResponse).ToString("MMM dd, yyyy")</span>
+                                        </div>
+                                    }
+                                </div>
+
+                                <!-- Card Footer -->
+                                <div class="card-footer">
+                                    @if (questionnaire.TextResponseCount > 0)
+                                    {
+                                        <!-- Ready Status -->
+                                        <div class="status-ready">
+                                            <i class="fas fa-check-circle"></i>
+                                            <span>Ready for AI Analysis</span>
+                                        </div>
+                                        
+                                        <!-- Primary Action -->
+                                        <button onclick="startAnalysisWithProgress(@questionnaire.Id, '@questionnaire.Title')" 
+                                               class="btn-analyze">
+                                            <span class="btn-content">
+                                                <i class="fas fa-rocket"></i>
+                                                Start AI Analysis
+                                            </span>
+                                            <div class="btn-shine"></div>
+                                        </button>
+                                        
+                                        <!-- Quick Actions -->
+                                        <div class="quick-actions-grid">
+                                            <a href="@Url.Action("HighRiskResponses", new { id = questionnaire.Id })" 
+                                               class="quick-action-btn risk">
+                                                <div class="quick-action-icon">
+                                                    <i class="fas fa-shield-alt"></i>
+                                                </div>
+                                                <span class="quick-action-label">High Risk</span>
+                                                <div class="quick-action-subtitle">Critical responses</div>
+                                            </a>
+                                            <a href="@Url.Action("BatchAnalyze", new { id = questionnaire.Id })" 
+                                               class="quick-action-btn batch">
+                                                <div class="quick-action-icon">
+                                                    <i class="fas fa-layer-group"></i>
+                                                </div>
+                                                <span class="quick-action-label">Batch Process</span>
+                                                <div class="quick-action-subtitle">Bulk analysis</div>
+                                            </a>
+                                            <a href="@Url.Action("AnalyzeTrends", new { id = questionnaire.Id })" 
+                                               class="quick-action-btn trends">
+                                                <div class="quick-action-icon">
+                                                    <i class="fas fa-chart-line"></i>
+                                                </div>
+                                                <span class="quick-action-label">Analyze Trends</span>
+                                                <div class="quick-action-subtitle">Time patterns</div>
+                                            </a>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="status-unavailable">
+                                            <i class="fas fa-info-circle"></i>
+                                            <span>No Text Data Available</span>
+                                        </div>
+                                        <button class="btn-disabled" disabled>
+                                            <i class="fas fa-ban me-2"></i>
+                                            Analysis Not Available
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    }
+                    
+                    <!-- Empty State -->
+                    @if (!hasAnyQuestionnairesWithResponses)
+                    {
+                        <div class="empty-state">
+                            <div class="empty-illustration">
+                                <i class="fas fa-clipboard-check"></i>
+                                <div class="empty-glow"></div>
+                            </div>
+                            <h3><i class="fas fa-search me-2"></i>No Questionnaires with Responses</h3>
+                            <p><i class="fas fa-info-circle me-2"></i>There are no questionnaires with responses available for analysis at the moment.</p>
+                            <a href="@Url.Action("Index", "Questionnaire")" class="btn-create">
+                                <i class="fas fa-plus-circle me-2"></i>
+                                Create New Questionnaire
+                            </a>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="empty-state">
+                        <div class="empty-illustration">
+                            <i class="fas fa-clipboard-check"></i>
+                            <div class="empty-glow"></div>
+                        </div>
+                        <h3><i class="fas fa-search me-2"></i>No Questionnaires Found</h3>
+                        <p><i class="fas fa-info-circle me-2"></i>There are no questionnaires available for analysis at the moment.</p>
+                        <a href="@Url.Action("Index", "Questionnaire")" class="btn-create">
+                            <i class="fas fa-plus-circle me-2"></i>
+                            Create New Questionnaire
                         </a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Enhanced AI Services Status Modal -->
+<div class="modal fade" id="aiServicesModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 1rem; overflow: hidden; border: none; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);">
+            <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; padding: 2rem;">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div style="width: 50px; height: 50px; background: rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-server" style="color: white; font-size: 1.25rem;"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title" style="color: white; font-weight: 700; margin-bottom: 0.25rem; font-size: 1.25rem;">AI Services Health Check</h5>
+                        <p style="color: rgba(255,255,255,0.8); margin: 0; font-size: 0.875rem;">Real-time monitoring of AI services</p>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" style="position: absolute; top: 1.5rem; right: 1.5rem;"></button>
+            </div>
+            <div class="modal-body" style="padding: 2rem; background: white;">
+                <div id="servicesStatusContent">
+                    <div style="text-center: true; padding: 2rem;">
+                        <div style="display: inline-block; width: 40px; height: 40px; border: 3px solid #e2e8f0; border-top: 3px solid #667eea; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 1rem;"></div>
+                        <h6 style="font-weight: 600; color: #1e293b; margin-bottom: 0.5rem;">Checking AI Services</h6>
+                        <p style="color: #64748b; margin: 0;">Please wait while we verify all systems...</p>
                     </div>
                 </div>
             </div>
-        }
+        </div>
     </div>
 </div>
 
 <!-- Test Analysis Modal -->
 <div class="modal fade" id="testAnalysisModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="fas fa-microscope me-2"></i>Test AI Analysis
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 1rem; overflow: hidden; border: none; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);">
+            <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; padding: 2rem;">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div style="width: 50px; height: 50px; background: rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-flask" style="color: white; font-size: 1.25rem;"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title" style="color: white; font-weight: 700; margin-bottom: 0.25rem; font-size: 1.25rem;">AI Analysis Testing</h5>
+                        <p style="color: rgba(255,255,255,0.8); margin: 0; font-size: 0.875rem;">Test AI capabilities with sample data</p>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" style="position: absolute; top: 1.5rem; right: 1.5rem;"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" style="padding: 2rem; background: white;">
                 <form id="testAnalysisForm">
-                    <div class="mb-3">
-                        <label for="sampleText" class="form-label">Sample Response Text</label>
+                    <div class="mb-4">
+                        <label for="sampleText" class="form-label" style="display: flex; align-items: center; font-weight: 600; color: #1e293b; margin-bottom: 0.75rem;">
+                            <i class="fas fa-comment-dots me-2"></i>
+                            Sample Response Text
+                        </label>
                         <textarea class="form-control" id="sampleText" rows="4" 
+                                style="padding: 1rem; border: 2px solid #e2e8f0; border-radius: 0.75rem; background: #f8fafc; resize: vertical; font-family: inherit;"
                                 placeholder="Enter sample employee response for testing AI analysis..."></textarea>
-                        <div class="form-text">
-                            Example: "I feel overwhelmed with my workload and have trouble sleeping due to work stress."
+                        <div class="form-text" style="display: flex; align-items: flex-start; gap: 0.5rem; margin-top: 0.75rem; font-size: 0.8rem; color: #64748b; padding: 0.75rem; background: #f1f5f9; border-radius: 0.5rem; border-left: 3px solid #667eea;">
+                            <i class="fas fa-info-circle" style="margin-top: 0.125rem;"></i>
+                            <span>Example: "I feel overwhelmed with my workload and have trouble sleeping due to work stress."</span>
                         </div>
                     </div>
                 </form>
                 
                 <div id="testResults" class="d-none">
-                    <hr>
-                    <h6><i class="fas fa-chart-bar me-2"></i>Analysis Results</h6>
+                    <div style="height: 1px; background: linear-gradient(90deg, transparent, #e2e8f0, transparent); margin: 2rem 0;"></div>
+                    <div style="display: flex; align-items: center; gap: 0.75rem; font-weight: 700; color: #1e293b; font-size: 1.125rem; margin-bottom: 1.5rem;">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Analysis Results</span>
+                    </div>
                     <div id="testResultsContent"></div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="performTestAnalysis()">
+            <div class="modal-footer" style="padding: 1.5rem 2rem; background: #f8fafc; border: none; display: flex; gap: 1rem; justify-content: flex-end;">
+                <button type="button" class="btn" style="padding: 0.75rem 1.5rem; background: white; color: #64748b; border: 2px solid #e2e8f0; border-radius: 0.75rem; font-weight: 600;" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Close
+                </button>
+                <button type="button" class="btn" style="padding: 0.75rem 1.5rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 0.75rem; font-weight: 600;" onclick="performTestAnalysis()">
                     <i class="fas fa-play me-2"></i>Run Analysis
                 </button>
             </div>
@@ -297,93 +486,320 @@
     </div>
 </div>
 
+<!-- Analysis Progress Modal -->
+<div class="modal fade" id="analysisProgressModal" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 1rem; overflow: hidden; border: none; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);">
+            <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; padding: 2rem;">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div style="width: 50px; height: 50px; background: rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-robot" style="color: white; font-size: 1.25rem;"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title" style="color: white; font-weight: 700; margin-bottom: 0.25rem; font-size: 1.25rem;">AI Analysis in Progress</h5>
+                        <p style="color: rgba(255,255,255,0.8); margin: 0; font-size: 0.875rem;">Processing your mental health data</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-body text-center" style="padding: 3rem 2rem; background: white;">
+                <div class="mb-4">
+                    <i class="fas fa-brain text-primary" style="font-size: 4rem; color: #667eea !important;"></i>
+                </div>
+                <h6 class="fw-bold mb-3" id="progressTitle" style="color: #1e293b;">Analyzing Questionnaire...</h6>
+                <div class="progress mb-4" style="height: 8px; background: #e2e8f0; border-radius: 4px;">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                         role="progressbar" style="width: 0%; background: #667eea;"></div>
+                </div>
+                <div id="progressSteps" class="text-start">
+                    <div class="progress-step" style="display: flex; align-items: center; padding: 0.5rem 0; color: #1e293b;">
+                        <i class="fas fa-check-circle text-success me-2" style="color: #22c55e !important;"></i>
+                        <span>Initializing AI services...</span>
+                    </div>
+                    <div class="progress-step text-muted" style="display: flex; align-items: center; padding: 0.5rem 0; opacity: 0.5;">
+                        <i class="fas fa-circle me-2"></i>
+                        <span>Processing responses...</span>
+                    </div>
+                    <div class="progress-step text-muted" style="display: flex; align-items: center; padding: 0.5rem 0; opacity: 0.5;">
+                        <i class="fas fa-circle me-2"></i>
+                        <span>Analyzing sentiment...</span>
+                    </div>
+                    <div class="progress-step text-muted" style="display: flex; align-items: center; padding: 0.5rem 0; opacity: 0.5;">
+                        <i class="fas fa-circle me-2"></i>
+                        <span>Generating insights...</span>
+                    </div>
+                    <div class="progress-step text-muted" style="display: flex; align-items: center; padding: 0.5rem 0; opacity: 0.5;">
+                        <i class="fas fa-circle me-2"></i>
+                        <span>Creating summary...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        // Test AI Services
+        // Enhanced Test AI Services with Beautiful Modal
         function testAIServices() {
+            const modal = new bootstrap.Modal(document.getElementById('aiServicesModal'));
+            modal.show();
+            
             $.get('@Url.Action("ServiceHealth")')
                 .done(function(data) {
                     if (data.success && data.services) {
-                        let status = '';
-                        for (let service in data.services) {
-                            let icon = data.services[service] ? 'fa-check text-success' : 'fa-times text-danger';
-                            let statusText = data.services[service] ? 'Online ✓' : 'Offline ✗';
-                            status += `<div class="mb-2"><i class="fas ${icon} me-2"></i><strong>${service.replace('Azure', '')}:</strong> ${statusText}</div>`;
-                        }
+                        let content = '';
                         
-                        Swal.fire({
-                            title: 'AI Services Health Check',
-                            html: `<div class="text-start">${status}</div><hr><small class="text-muted">${data.message}</small>`,
-                            icon: 'info',
-                            confirmButtonText: 'OK',
-                            width: '400px'
-                        });
+                        // Azure Language Service
+                        const langService = data.services['AzureLanguageService'] || false;
+                        content += createServiceCard('Azure Language Service', 'Sentiment Analysis & Text Processing', langService, 'fa-comments');
+                        
+                        // Azure OpenAI
+                        const openaiService = data.services['AzureOpenAI'] || false;
+                        content += createServiceCard('Azure OpenAI', 'AI-Powered Risk Assessment', openaiService, 'fa-brain');
+                        
+                        // Overall Status
+                        const allOnline = langService && openaiService;
+                        content += `
+                            <div class="mt-4 p-3 rounded-3 ${allOnline ? 'bg-success' : 'bg-warning'} bg-opacity-10">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas ${allOnline ? 'fa-check-circle text-success' : 'fa-exclamation-triangle text-warning'} me-3 fs-4"></i>
+                                    <div>
+                                        <strong>${allOnline ? 'All Systems Operational' : 'Service Issues Detected'}</strong>
+                                        <br><small class="text-muted">${data.message}</small>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        
+                        document.getElementById('servicesStatusContent').innerHTML = content;
                     } else {
-                        Swal.fire({
-                            title: 'Service Health Error',
-                            text: data.error || 'Unable to check service status',
-                            icon: 'error',
-                            confirmButtonText: 'OK'
-                        });
+                        document.getElementById('servicesStatusContent').innerHTML = `
+                            <div class="alert alert-danger border-0 rounded-3">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <strong>Error:</strong> ${data.error || 'Unable to check service status'}
+                            </div>
+                        `;
                     }
                 })
                 .fail(function() {
-                    Swal.fire({
-                        title: 'Connection Error', 
-                        text: 'Unable to connect to service health endpoint',
-                        icon: 'error',
-                        confirmButtonText: 'OK'
-                    });
+                    document.getElementById('servicesStatusContent').innerHTML = `
+                        <div class="alert alert-danger border-0 rounded-3">
+                            <i class="fas fa-times-circle me-2"></i>
+                            <strong>Connection Error:</strong> Unable to connect to service health endpoint
+                        </div>
+                    `;
                 });
         }
 
-        // Perform Test Analysis
+        function createServiceCard(name, description, isOnline, icon) {
+            const statusClass = isOnline ? 'success' : 'danger';
+            const statusIcon = isOnline ? 'fa-check-circle' : 'fa-times-circle';
+            const statusText = isOnline ? 'Online' : 'Offline';
+            
+            return `
+                <div class="service-card mb-3 p-4 border rounded-3 ${isOnline ? 'border-success' : 'border-danger'} bg-opacity-10 ${isOnline ? 'bg-success' : 'bg-danger'}">
+                    <div class="d-flex align-items-center">
+                        <div class="service-icon me-4">
+                            <i class="fas ${icon} text-${statusClass} fs-2"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1 fw-bold">${name}</h6>
+                            <p class="mb-2 text-muted small">${description}</p>
+                            <div class="d-flex align-items-center">
+                                <i class="fas ${statusIcon} text-${statusClass} me-2"></i>
+                                <span class="fw-semibold text-${statusClass}">${statusText}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Enhanced Test Analysis
         function performTestAnalysis() {
             const sampleText = document.getElementById('sampleText').value.trim();
             
             if (!sampleText) {
-                Swal.fire('Warning', 'Please enter sample text for analysis', 'warning');
+                Swal.fire({
+                    title: 'Input Required',
+                    text: 'Please enter sample text for analysis',
+                    icon: 'warning',
+                    confirmButtonClass: 'btn btn-warning rounded-pill px-4'
+                });
                 return;
             }
 
-            // Show loading
             const resultsDiv = document.getElementById('testResults');
             const contentDiv = document.getElementById('testResultsContent');
             
-            contentDiv.innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin"></i> Analyzing...</div>';
+            contentDiv.innerHTML = `
+                <div class="text-center py-4">
+                    <div class="spinner-border text-primary mb-3" role="status"></div>
+                    <p class="text-muted">Analyzing with AI services...</p>
+                </div>
+            `;
             resultsDiv.classList.remove('d-none');
 
             $.post('@Url.Action("TestAnalysis")', { sampleText: sampleText })
                 .done(function(data) {
                     if (data.success) {
-                        let html = `
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <strong>Sentiment:</strong> 
-                                    <span class="badge bg-${getSentimentColor(data.sentiment)}">${data.sentiment || 'N/A'}</span>
-                                </div>
-                                <div class="col-md-6">
-                                    <strong>Risk Level:</strong> 
-                                    <span class="badge bg-${getRiskColor(data.riskLevel)}">${data.riskLevel || 'N/A'}</span>
-                                </div>
-                            </div>
-                            <div class="mt-3">
-                                <strong>Key Phrases:</strong><br>
-                                ${data.keyPhrases ? data.keyPhrases.map(phrase => `<span class="badge bg-light text-dark me-1">${phrase}</span>`).join('') : 'None'}
-                            </div>
-                            <div class="mt-3">
-                                <strong>Categories:</strong><br>
-                                ${data.insights ? data.insights.map(cat => `<span class="badge bg-info me-1">${cat}</span>`).join('') : 'None'}
+                        contentDiv.innerHTML = createAnalysisResults(data);
+                    } else {
+                        contentDiv.innerHTML = `
+                            <div class="alert alert-danger border-0 rounded-3">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                ${data.message}
                             </div>
                         `;
-                        contentDiv.innerHTML = html;
-                    } else {
-                        contentDiv.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
                     }
                 })
                 .fail(function() {
-                    contentDiv.innerHTML = '<div class="alert alert-danger">Error performing analysis</div>';
+                    contentDiv.innerHTML = `
+                        <div class="alert alert-danger border-0 rounded-3">
+                            <i class="fas fa-times-circle me-2"></i>
+                            Error performing analysis
+                        </div>
+                    `;
                 });
+        }
+
+        function createAnalysisResults(data) {
+            return `
+                <div class="analysis-results">
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <div style="background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 0.75rem; padding: 1.5rem; text-align: center;">
+                                <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 1rem;">
+                                    <i class="fas fa-heart" style="color: #64748b; margin-right: 0.5rem;"></i>
+                                    <strong style="color: #1e293b;">Sentiment</strong>
+                                </div>
+                                <span style="background: ${getSentimentBg(data.sentiment)}; color: white; padding: 0.5rem 1.25rem; border-radius: 50px; font-weight: 600; font-size: 0.875rem;">
+                                    ${data.sentiment || 'N/A'}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div style="background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 0.75rem; padding: 1.5rem; text-align: center;">
+                                <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 1rem;">
+                                    <i class="fas fa-shield-alt" style="color: #64748b; margin-right: 0.5rem;"></i>
+                                    <strong style="color: #1e293b;">Risk Level</strong>
+                                </div>
+                                <span style="background: ${getRiskBg(data.riskLevel)}; color: white; padding: 0.5rem 1.25rem; border-radius: 50px; font-weight: 600; font-size: 0.875rem;">
+                                    ${data.riskLevel || 'N/A'}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 1.5rem;">
+                        <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                            <i class="fas fa-key" style="color: #64748b; margin-right: 0.5rem;"></i>
+                            <strong style="color: #1e293b;">Key Phrases</strong>
+                        </div>
+                        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; min-height: 2rem;">
+                            ${data.keyPhrases && data.keyPhrases.length > 0 ? 
+                                data.keyPhrases.map(phrase => 
+                                    `<span style="background: #f1f5f9; color: #374151; padding: 0.375rem 0.75rem; border-radius: 0.375rem; font-size: 0.875rem; border: 1px solid #d1d5db;">${phrase}</span>`
+                                ).join('') : 
+                                '<span style="color: #9ca3af; font-style: italic;">No key phrases detected</span>'}
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                            <i class="fas fa-tags" style="color: #64748b; margin-right: 0.5rem;"></i>
+                            <strong style="color: #1e293b;">Categories</strong>
+                        </div>
+                        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; min-height: 2rem;">
+                            ${data.insights && data.insights.length > 0 ? 
+                                data.insights.map(category => 
+                                    `<span style="background: #0891b2; color: white; padding: 0.375rem 0.75rem; border-radius: 0.375rem; font-size: 0.875rem; font-weight: 500;">${category}</span>`
+                                ).join('') : 
+                                '<span style="color: #9ca3af; font-style: italic;">No categories identified</span>'}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getSentimentBg(sentiment) {
+            switch(sentiment?.toLowerCase()) {
+                case 'positive': return '#22c55e';
+                case 'negative': return '#ef4444';
+                case 'neutral': return '#6b7280';
+                default: return '#6b7280';
+            }
+        }
+
+        function getRiskBg(riskLevel) {
+            switch(riskLevel?.toLowerCase()) {
+                case 'low': return '#22c55e';
+                case 'moderate': return '#f59e0b';
+                case 'high': return '#ef4444';
+                case 'critical': return '#7c2d12';
+                default: return '#6b7280';
+            }
+        }
+
+        // Start Analysis with Progress Bar
+        function startAnalysisWithProgress(questionnaireId, title) {
+            document.getElementById('progressTitle').textContent = `Analyzing "${title}"`;
+            
+            const modal = new bootstrap.Modal(document.getElementById('analysisProgressModal'));
+            modal.show();
+            
+            // Simulate progress
+            let progress = 0;
+            const progressBar = document.querySelector('#analysisProgressModal .progress-bar');
+            const steps = document.querySelectorAll('#progressSteps .progress-step');
+            
+            const interval = setInterval(() => {
+                progress += Math.random() * 20;
+                if (progress > 90) progress = 90;
+                
+                progressBar.style.width = progress + '%';
+                
+                // Update steps
+                const currentStep = Math.floor(progress / 20);
+                steps.forEach((step, index) => {
+                    if (index < currentStep) {
+                        step.classList.remove('text-muted');
+                        step.style.opacity = '1';
+                        step.style.color = '#22c55e';
+                        const icon = step.querySelector('i');
+                        icon.className = 'fas fa-check-circle me-2';
+                        icon.style.color = '#22c55e';
+                    } else if (index === currentStep) {
+                        step.classList.remove('text-muted');
+                        step.style.opacity = '1';
+                        step.style.color = '#667eea';
+                        const icon = step.querySelector('i');
+                        icon.className = 'fas fa-spinner fa-spin me-2';
+                        icon.style.color = '#667eea';
+                    }
+                });
+                
+                if (progress >= 90) {
+                    clearInterval(interval);
+                    
+                    setTimeout(() => {
+                        progressBar.style.width = '100%';
+                        steps.forEach((step, index) => {
+                            step.classList.remove('text-muted');
+                            step.style.opacity = '1';
+                            step.style.color = '#22c55e';
+                            const icon = step.querySelector('i');
+                            icon.className = 'fas fa-check-circle me-2';
+                            icon.style.color = '#22c55e';
+                        });
+                        
+                        setTimeout(() => {
+                            window.location.href = '@Url.Action("AnalyzeQuestionnaire")?id=' + questionnaireId;
+                        }, 1000);
+                    }, 1000);
+                }
+            }, 200);
         }
 
         function getSentimentColor(sentiment) {
@@ -404,43 +820,1802 @@
                 default: return 'secondary';
             }
         }
-
-        // Auto-refresh service health every 5 minutes
-        setInterval(function() {
-            location.reload();
-        }, 300000);
     </script>
 }
 
 @section Styles {
     <style>
-        .card {
-            transition: transform 0.2s ease-in-out;
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #64748b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #06b6d4;
+            
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-hero: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            --gradient-success: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --gradient-warning: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            --gradient-danger: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            --gradient-info: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
         }
-        
-        .card:hover {
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            color: #334155;
+        }
+
+        .dashboard-container {
+            min-height: 100vh;
+        }
+
+        /* Hero Banner */
+        .hero-banner {
+            position: relative;
+            min-height: 35vh;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .hero-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--gradient-hero);
+            z-index: 0;
+        }
+
+        .hero-pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(255,255,255,0.1) 1px, transparent 1px),
+                radial-gradient(circle at 75% 75%, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        .hero-glow {
+            position: absolute;
+            top: 20%;
+            right: 10%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            color: white;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1.25rem;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 50px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero-highlight {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.8);
+            max-width: 600px;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-hero-primary {
+            padding: 1rem 2rem;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: var(--radius-lg);
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-hero-primary:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-hero-secondary {
+            padding: 1rem 2rem;
+            background: transparent;
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: var(--radius-lg);
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-hero-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.5);
+            color: white;
             transform: translateY(-2px);
         }
-        
-        .border-end {
-            border-right: 1px solid #dee2e6 !important;
+
+        /* Hero Visual */
+        .hero-visual {
+            position: relative;
+            z-index: 2;
+            height: 400px;
         }
-        
-        @@media (max-width: 768px) {
-            .border-end {
-                border-right: none !important;
-                border-bottom: 1px solid #dee2e6 !important;
-                padding-bottom: 1rem;
-                margin-bottom: 1rem;
+
+        .floating-card {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 1.5rem;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius-lg);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            font-weight: 600;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .floating-card i {
+            font-size: 1.25rem;
+        }
+
+        .floating-card.card-1 {
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .floating-card.card-2 {
+            top: 30%;
+            right: 20%;
+            animation-delay: 2s;
+        }
+
+        .floating-card.card-3 {
+            bottom: 25%;
+            left: 20%;
+            animation-delay: 4s;
+        }
+
+        .hero-illustration {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .pulse-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        .pulse-circle::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: -20px;
+            right: -20px;
+            bottom: -20px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            animation: pulse 3s ease-in-out infinite 1s;
+        }
+
+        .hero-icon {
+            font-size: 3rem;
+            color: white;
+            position: relative;
+            z-index: 2;
+        }
+
+        .company-badge {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            padding: 0.75rem 1.5rem;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 50px;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 600;
+            font-size: 0.875rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            z-index: 3;
+        }
+
+        /* Main Content */
+        .main-content {
+            position: relative;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            padding: 4rem 0;
+            margin-top: -2rem;
+            border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+            z-index: 3;
+        }
+
+        /* Status Card */
+        .status-card {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            transition: all 0.3s ease;
+        }
+
+        .status-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-2xl);
+        }
+
+        .status-header {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .status-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--gradient-primary);
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .status-info h5 {
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 0.25rem;
+        }
+
+        .status-info p {
+            color: var(--secondary);
+            margin: 0;
+        }
+
+        .status-services {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .service-status {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+            background: #f8fafc;
+            border-radius: var(--radius-lg);
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .service-status.online {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        .service-status.offline {
+            border-color: var(--danger);
+            background: rgba(239, 68, 68, 0.05);
+        }
+
+        .service-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .service-status.online .service-indicator {
+            background: var(--success);
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2);
+        }
+
+        .service-status.offline .service-indicator {
+            background: var(--danger);
+            box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.2);
+        }
+
+        .service-name {
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .service-label {
+            font-size: 0.875rem;
+            color: var(--secondary);
+        }
+
+        /* Alert Messages */
+        .alert-modern {
+            display: flex;
+            align-items: center;
+            padding: 1.25rem;
+            border-radius: var(--radius-lg);
+            border: none;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 1.5rem;
+        }
+
+        .alert-icon {
+            font-size: 1.5rem;
+            margin-right: 1rem;
+        }
+
+        .alert-content {
+            flex: 1;
+        }
+
+        /* Section Header */
+        .section-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 1rem;
+        }
+
+        .section-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--gradient-primary);
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .section-subtitle {
+            font-size: 1.125rem;
+            color: var(--secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Questionnaires Grid */
+        .questionnaires-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 2rem;
+        }
+
+        /* Questionnaire Cards */
+        .questionnaire-card {
+            background: white;
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .questionnaire-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-2xl);
+        }
+
+        .card-header {
+            padding: 2rem;
+            background: linear-gradient(135deg, #f8f9ff 0%, #e6efff 100%);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .card-title-section {
+            flex: 1;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 1.5rem;
+            line-height: 1.3;
+        }
+
+        .participants-section {
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .participants-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+            color: var(--secondary);
+            font-size: 0.875rem;
+        }
+
+        .participants-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .participant {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .participant-avatar {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient-primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .participant-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .participant-name {
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 0.875rem;
+        }
+
+        .participant-email {
+            font-size: 0.75rem;
+            color: var(--secondary);
+        }
+
+        .participants-more {
+            text-align: center;
+            color: var(--secondary);
+            font-size: 0.875rem;
+            font-weight: 500;
+            padding: 0.5rem;
+        }
+
+        .participation-stats {
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+            font-size: 0.875rem;
+        }
+
+        .stat-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .stat-item i {
+            color: var(--secondary);
+        }
+
+        .card-actions {
+            position: relative;
+        }
+
+        .btn-card-menu {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.8);
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--secondary);
+            transition: all 0.3s ease;
+        }
+
+        .btn-card-menu:hover {
+            background: white;
+            color: var(--primary);
+            box-shadow: var(--shadow-md);
+        }
+
+        .card-body {
+            padding: 2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-box {
+            background: #f8fafc;
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .stat-box:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .stat-box.stat-primary {
+            border-color: var(--primary);
+            background: rgba(37, 99, 235, 0.05);
+        }
+
+        .stat-box.stat-success {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        .stat-box.stat-info {
+            border-color: var(--info);
+            background: rgba(6, 182, 212, 0.05);
+        }
+
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            color: white;
+        }
+
+        .stat-primary .stat-icon {
+            background: var(--primary);
+        }
+
+        .stat-success .stat-icon {
+            background: var(--success);
+        }
+
+        .stat-info .stat-icon {
+            background: var(--info);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--secondary);
+            font-weight: 500;
+        }
+
+        .last-activity {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: var(--radius-lg);
+            margin-top: 1rem;
+            font-size: 0.875rem;
+            color: var(--secondary);
+        }
+
+        .card-footer {
+            padding: 2rem;
+            background: #fafbfc;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .status-ready {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1.25rem;
+            background: var(--gradient-success);
+            color: white;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-analyze {
+            width: 100%;
+            padding: 1.25rem;
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-lg);
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .btn-analyze:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .btn-analyze:active {
+            transform: translateY(0);
+        }
+
+        .btn-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .btn-shine {
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.6s;
+        }
+
+        .btn-analyze:hover .btn-shine {
+            left: 100%;
+        }
+
+        .quick-actions-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .quick-action-btn {
+            background: white;
+            border: 2px solid;
+            border-radius: 1rem;
+            padding: 1.5rem 1rem;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 140px;
+        }
+
+        .quick-action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            text-decoration: none;
+        }
+
+        .quick-action-btn.risk {
+            border-color: #ff6b6b;
+            color: #e03131;
+        }
+
+        .quick-action-btn.risk:hover {
+            background: #fff5f5;
+        }
+
+        .quick-action-btn.batch {
+            border-color: #4ecdc4;
+            color: #0ca5a5;
+        }
+
+        .quick-action-btn.batch:hover {
+            background: #f0fdfc;
+        }
+
+        .quick-action-btn.trends {
+            border-color: #51cf66;
+            color: #37b24d;
+        }
+
+        .quick-action-btn.trends:hover {
+            background: #f4fcf4;
+        }
+
+        .quick-action-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            font-size: 1.25rem;
+            color: white;
+        }
+
+        .quick-action-btn.risk .quick-action-icon {
+            background: #ff6b6b;
+        }
+
+        .quick-action-btn.batch .quick-action-icon {
+            background: #4ecdc4;
+        }
+
+        .quick-action-btn.trends .quick-action-icon {
+            background: #51cf66;
+        }
+
+        .quick-action-label {
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            line-height: 1.2;
+        }
+
+        .quick-action-subtitle {
+            font-size: 0.875rem;
+            opacity: 0.8;
+            line-height: 1.3;
+        }
+
+        .status-unavailable {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1.25rem;
+            background: #f1f5f9;
+            color: var(--secondary);
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid #e2e8f0;
+        }
+
+        .btn-disabled {
+            width: 100%;
+            padding: 1.25rem;
+            background: #e2e8f0;
+            color: var(--secondary);
+            border: none;
+            border-radius: var(--radius-lg);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: not-allowed;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+
+        /* Empty State */
+        .empty-state {
+            grid-column: 1 / -1;
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: 4rem 2rem;
+            text-align: center;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .empty-illustration {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        .empty-illustration i {
+            font-size: 5rem;
+            color: #cbd5e1;
+        }
+
+        .empty-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle, rgba(37, 99, 235, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        .empty-state h3 {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state p {
+            font-size: 1.125rem;
+            color: var(--secondary);
+            margin-bottom: 2rem;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .btn-create {
+            padding: 1rem 2rem;
+            background: var(--gradient-primary);
+            color: white;
+            text-decoration: none;
+            border-radius: var(--radius-lg);
+            font-weight: 600;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-create:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-xl);
+            color: white;
+        }
+
+        /* Animations */
+        @@keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        @@keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.05); }
+        }
+
+        @@keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @@keyframes pulse-ring {
+            0% { transform: scale(1); opacity: 0.3; }
+            50% { transform: scale(1.1); opacity: 0.1; }
+            100% { transform: scale(1); opacity: 0.3; }
+        }
+
+        @@keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(200%); }
+        }
+
+        /* Responsive Design */
+        @@media (max-width: 1200px) {
+            .questionnaires-grid {
+                grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
             }
         }
-        
-        .badge {
-            font-size: 0.75em;
+
+        @@media (max-width: 768px) {
+            .hero-banner {
+                min-height: 40vh;
+            }
+            
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1rem;
+            }
+            
+            .hero-actions {
+                flex-direction: column;
+            }
+            
+            .btn-hero-primary,
+            .btn-hero-secondary {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .questionnaires-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .quick-actions-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .status-services {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .floating-card {
+                display: none;
+            }
+            
+            .company-badge {
+                position: relative;
+                top: auto;
+                right: auto;
+                margin: 1rem 0;
+            }
+
+            .modal-content-wrapper {
+                padding: 1.5rem;
+            }
+
+            .modal-header-content {
+                padding: 1.5rem;
+            }
+
+            .modal-footer-modern {
+                padding: 1.5rem;
+                flex-direction: column;
+            }
+
+            .btn-secondary-modern,
+            .btn-primary-modern {
+                width: 100%;
+                justify-content: center;
+            }
         }
-        
-        .btn-sm {
+
+        @@media (max-width: 480px) {
+            .hero-banner {
+                min-height: 35vh;
+            }
+            
+            .card-header,
+            .card-body,
+            .card-footer {
+                padding: 1.5rem;
+            }
+            
+            .main-content {
+                padding: 2rem 0;
+            }
+
+            .hero-title {
+                font-size: 2rem;
+            }
+
+            .section-title {
+                font-size: 2rem;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .quick-action-btn {
+                padding: 1rem 0.75rem;
+            }
+
+            .quick-action-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
+        }
+
+        /* Enhanced Modals */
+        .modal-backdrop {
+            backdrop-filter: blur(12px);
+            background-color: rgba(15, 23, 42, 0.6);
+        }
+
+        .modern-modal {
+            border: none;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
+
+        .rounded-5 {
+            border-radius: 1.5rem !important;
+        }
+
+        .modal-header-modern {
+            padding: 0;
+            border: none;
+            background: var(--gradient-primary);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .modal-header-modern::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+        }
+
+        .modal-header-content {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            padding: 2rem 2.5rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .modal-icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-title-section .modal-title {
+            font-size: 1.375rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 0.25rem;
+        }
+
+        .modal-subtitle {
+            font-size: 0.875rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin: 0;
+        }
+
+        .modern-close {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            width: 44px;
+            height: 44px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 3;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .modern-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        .modal-body-modern {
+            padding: 0;
+            background: #fafbfc;
+        }
+
+        .modal-content-wrapper {
+            padding: 2.5rem;
+            background: white;
+        }
+
+        .input-group-modern {
+            position: relative;
+        }
+
+        .form-label-modern {
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .form-control-modern {
+            width: 100%;
+            padding: 1.25rem 1.5rem;
+            border: 2px solid #e2e8f0;
+            border-radius: var(--radius-lg);
+            background: #f8fafc;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .form-control-modern:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-help {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            margin-top: 1rem;
             font-size: 0.8rem;
+            color: #64748b;
+            padding: 1rem 1.25rem;
+            background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+            border-radius: var(--radius-md);
+            border-left: 4px solid var(--primary);
+        }
+
+        .results-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #e2e8f0, transparent);
+            margin: 2.5rem 0;
+        }
+
+        .results-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 700;
+            color: #1e293b;
+            font-size: 1.125rem;
+            margin-bottom: 2rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid #f1f5f9;
+        }
+
+        .modal-footer-modern {
+            padding: 1.5rem 2.5rem;
+            background: #f8fafc;
+            border: none;
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .btn-secondary-modern {
+            padding: 0.875rem 1.75rem;
+            background: white;
+            color: #64748b;
+            border: 2px solid #e2e8f0;
+            border-radius: var(--radius-lg);
+            font-weight: 600;
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-secondary-modern:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+            color: #475569;
+            transform: translateY(-1px);
+        }
+
+        .btn-primary-modern {
+            padding: 0.875rem 1.75rem;
+            background: var(--gradient-primary);
+            color: white;
+            border: 2px solid transparent;
+            border-radius: var(--radius-lg);
+            font-weight: 600;
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary-modern:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-primary-modern::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-primary-modern:hover::before {
+            left: 100%;
+        }
+
+        /* Service Status Cards - Modern Design */
+        .service-status-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border: 2px solid;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .service-status-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: currentColor;
+        }
+
+        .service-status-card.online {
+            border-color: rgba(37, 99, 235, 0.2);
+            color: var(--primary);
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.02), rgba(37, 99, 235, 0.05));
+        }
+
+        .service-status-card.offline {
+            border-color: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.02), rgba(239, 68, 68, 0.05));
+        }
+
+        .service-card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .service-card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            background: rgba(255, 255, 255, 0.8);
+            border: 2px solid currentColor;
+        }
+
+        .service-card-content h6 {
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 0.25rem;
+            font-size: 1rem;
+        }
+
+        .service-card-content p {
+            color: #64748b;
+            margin: 0;
+            font-size: 0.875rem;
+        }
+
+        .service-status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-top: 1rem;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: currentColor;
+            animation: pulse 2s infinite;
+        }
+
+        .summary-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin-top: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .summary-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+        }
+
+        .summary-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .summary-icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Loading State - Modern Design */
+        .loading-state {
+            text-align: center;
+            padding: 3rem 2rem;
+        }
+
+        .loading-animation {
+            margin-bottom: 2rem;
+        }
+
+        .spinner-modern {
+            width: 60px;
+            height: 60px;
+            border: 3px solid #e2e8f0;
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .loading-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+        }
+
+        .loading-subtitle {
+            color: var(--secondary);
+            margin: 0;
+        }
+
+        /* Analysis Results Styling */
+        .result-card {
+            background: white;
+            border: 2px solid #f1f5f9;
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+
+        .result-card:hover {
+            border-color: #e2e8f0;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .result-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.125rem;
+            color: white;
+        }
+
+        .result-icon.sentiment {
+            background: linear-gradient(135deg, #ec4899, #be185d);
+        }
+
+        .result-icon.risk {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+
+        .result-info h6 {
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 0.25rem;
+            font-size: 0.875rem;
+        }
+
+        .result-info p {
+            color: #64748b;
+            margin: 0;
+            font-size: 0.75rem;
+        }
+
+        .result-value {
+            display: flex;
+            justify-content: center;
+        }
+
+        .badge-modern {
+            padding: 0.5rem 1.25rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            border: 2px solid currentColor;
+        }
+
+        .insights-section {
+            background: #f8fafc;
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            border: 1px solid #e2e8f0;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .section-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient-primary);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            color: white;
+        }
+
+        .section-info h6 {
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 0.25rem;
+            font-size: 0.875rem;
+        }
+
+        .section-info p {
+            color: #64748b;
+            margin: 0;
+            font-size: 0.75rem;
+        }
+
+        .phrases-grid,
+        .categories-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            min-height: 2rem;
+            align-items: flex-start;
+        }
+
+        .phrase-tag {
+            background: white;
+            color: #1e293b;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-md);
+            border: 2px solid #e2e8f0;
+            font-size: 0.8rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .phrase-tag:hover {
+            border-color: var(--primary);
+            transform: translateY(-1px);
+        }
+
+        .category-tag {
+            background: linear-gradient(135deg, var(--info), #0891b2);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-md);
+            border: 2px solid transparent;
+            font-size: 0.8rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .category-tag:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .empty-result {
+            color: #94a3b8;
+            font-style: italic;
+            font-size: 0.875rem;
+            text-align: center;
+            width: 100%;
+            padding: 1rem;
+        }
+
+        /* Progress Modal Enhancements */
+        .progress-illustration {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .progress-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--gradient-primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            position: relative;
+            z-index: 2;
+        }
+
+        .progress-circles {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .circle {
+            position: absolute;
+            border: 2px solid var(--primary);
+            border-radius: 50%;
+            opacity: 0.3;
+        }
+
+        .circle-1 {
+            width: 100px;
+            height: 100px;
+            top: -50px;
+            left: -50px;
+            animation: pulse-ring 2s ease-in-out infinite;
+        }
+
+        .circle-2 {
+            width: 130px;
+            height: 130px;
+            top: -65px;
+            left: -65px;
+            animation: pulse-ring 2s ease-in-out infinite 0.5s;
+        }
+
+        .circle-3 {
+            width: 160px;
+            height: 160px;
+            top: -80px;
+            left: -80px;
+            animation: pulse-ring 2s ease-in-out infinite 1s;
+        }
+
+        .progress-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .progress-modern {
+            height: 12px;
+            background: #e2e8f0;
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .progress-bar-modern {
+            background: var(--gradient-primary);
+            border-radius: 6px;
+            transition: width 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-bar-modern::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 1.5s ease-in-out infinite;
+        }
+
+        .progress-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            text-align: left;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+
+        .progress-step {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: all 0.3s ease;
+            opacity: 0.5;
+        }
+
+        .progress-step.step-active {
+            opacity: 1;
+        }
+
+        .progress-step.step-completed {
+            opacity: 1;
+        }
+
+        .progress-step.step-completed .step-text {
+            color: var(--success);
+            font-weight: 500;
+        }
+
+        .step-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+        }
+
+        .step-text {
+            font-size: 0.875rem;
+            color: #64748b;
+        }
+
+        .progress-step.step-active .step-text {
+            color: #1e293b;
+            font-weight: 500;
+        }
+
+        /* Bootstrap enhancements */
+        .dropdown-menu {
+            border: none;
+            box-shadow: var(--shadow-lg);
+            border-radius: var(--radius-md);
+            padding: 0.5rem 0;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1.25rem;
+            transition: all 0.2s ease;
+        }
+
+        .dropdown-item:hover {
+            background: #f8fafc;
+        }
+
+        .dropdown-item i {
+            width: 1.25rem;
         }
     </style>
 }

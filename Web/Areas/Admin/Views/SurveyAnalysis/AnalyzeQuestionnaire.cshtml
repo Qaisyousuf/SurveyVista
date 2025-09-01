@@ -1,9 +1,9 @@
-﻿
+﻿@* Views/Admin/SurveyAnalysis/AnalyzeQuestionnaire.cshtml *@
 @model Services.AIViewModel.QuestionnaireAnalysisOverview
 
 @{
     ViewData["Title"] = $"AI Analysis - {Model.QuestionnaireTitle}";
-    
+  
 }
 
 <div class="container-fluid">
@@ -30,6 +30,10 @@
                 </div>
                 <div class="text-end">
                     <div class="btn-group" role="group">
+                        <a href="@Url.Action("Dashboard", new { id = Model.QuestionnaireId })" 
+                           class="btn btn-primary btn-sm">
+                            <i class="fas fa-tachometer-alt"></i> Executive Dashboard
+                        </a>
                         <a href="@Url.Action("GenerateReport", new { id = Model.QuestionnaireId })" 
                            class="btn btn-outline-primary btn-sm">
                             <i class="fas fa-file-alt"></i> Generate Report
@@ -432,26 +436,36 @@
 @functions {
     private string GetPriorityBorderColor(int priority)
     {
-        return priority switch
+        switch (priority)
         {
-            5 => "border-danger",
-            4 => "border-warning",
-            3 => "border-primary",
-            2 => "border-info",
-            _ => "border-secondary"
-        };
+            case 5:
+                return "border-danger";
+            case 4:
+                return "border-warning";
+            case 3:
+                return "border-primary";
+            case 2:
+                return "border-info";
+            default:
+                return "border-secondary";
+        }
     }
 
     private string GetPriorityBadgeColor(int priority)
     {
-        return priority switch
+        switch (priority)
         {
-            5 => "bg-danger",
-            4 => "bg-warning text-dark",
-            3 => "bg-primary",
-            2 => "bg-info",
-            _ => "bg-secondary"
-        };
+            case 5:
+                return "bg-danger";
+            case 4:
+                return "bg-warning text-dark";
+            case 3:
+                return "bg-primary";
+            case 2:
+                return "bg-info";
+            default:
+                return "bg-secondary";
+        }
     }
 }
 

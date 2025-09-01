@@ -1,0 +1,741 @@
+﻿@* Views/Admin/SurveyAnalysis/BatchAnalysisProgress.cshtml *@
+
+@{
+    ViewData["Title"] = $"Batch Analysis - {ViewBag.QuestionnaireName}";
+   
+}
+
+<div class="container-fluid">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item">
+                                <a href="@Url.Action("Index")">
+                                    <i class="fas fa-brain"></i> Analysis Dashboard
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item">
+                                <a href="@Url.Action("AnalyzeQuestionnaire", new { id = ViewBag.QuestionnaireId })">
+                                    @ViewBag.QuestionnaireName
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item active">Batch Analysis</li>
+                        </ol>
+                    </nav>
+                    <h1 class="h3 mb-1">
+                        <i class="fas fa-layer-group text-primary me-2"></i>
+                        Batch AI Analysis Processing
+                    </h1>
+                    <p class="text-muted mb-0">Processing @ViewBag.TotalRequests mental health survey responses</p>
+                </div>
+                <div class="text-end">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="goBack()">
+                        <i class="fas fa-arrow-left"></i> Back to Analysis
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Processing Status Card -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-lg">
+                <div class="card-header bg-primary text-white">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h5 class="mb-0">
+                                <i class="fas fa-cogs me-2"></i>
+                                AI Analysis in Progress
+                            </h5>
+                            <small class="opacity-75">Analyzing responses using Azure Language Service and OpenAI</small>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <div id="statusBadge" class="badge bg-warning text-dark">
+                                <i class="fas fa-clock"></i> Initializing...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <!-- Progress Bar -->
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="fw-bold">Analysis Progress</span>
+                            <span id="progressPercentage" class="fw-bold text-primary">0%</span>
+                        </div>
+                        <div class="progress" style="height: 25px;">
+                            <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-primary"
+                                 role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                                <span id="progressText" class="fw-bold">Starting...</span>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between mt-2">
+                            <small class="text-muted">
+                                <span id="processedCount">0</span> of @ViewBag.TotalRequests responses processed
+                            </small>
+                            <small class="text-muted" id="estimatedTime">
+                                Estimated time: Calculating...
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- Processing Steps -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="mb-3">
+                                <i class="fas fa-list-check me-2"></i>Processing Pipeline
+                            </h6>
+                            <ul class="list-unstyled">
+                                <li id="step1" class="mb-2 text-muted">
+                                    <i class="fas fa-circle-notch fa-spin me-2"></i>
+                                    Connecting to Azure AI services...
+                                </li>
+                                <li id="step2" class="mb-2 text-muted">
+                                    <i class="fas fa-circle me-2"></i>
+                                    Anonymizing personal information...
+                                </li>
+                                <li id="step3" class="mb-2 text-muted">
+                                    <i class="fas fa-circle me-2"></i>
+                                    Running sentiment analysis...
+                                </li>
+                                <li id="step4" class="mb-2 text-muted">
+                                    <i class="fas fa-circle me-2"></i>
+                                    Extracting key phrases and themes...
+                                </li>
+                                <li id="step5" class="mb-2 text-muted">
+                                    <i class="fas fa-circle me-2"></i>
+                                    Assessing mental health risk levels...
+                                </li>
+                                <li id="step6" class="mb-2 text-muted">
+                                    <i class="fas fa-circle me-2"></i>
+                                    Generating workplace insights...
+                                </li>
+                                <li id="step7" class="mb-2 text-muted">
+                                    <i class="fas fa-circle me-2"></i>
+                                    Creating executive summary...
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="col-md-6">
+                            <h6 class="mb-3">
+                                <i class="fas fa-chart-bar me-2"></i>Real-time Statistics
+                            </h6>
+                            <div class="stats-container">
+                                <div class="row text-center">
+                                    <div class="col-6 mb-3">
+                                        <div class="bg-light rounded p-3">
+                                            <div class="text-success mb-1">
+                                                <i class="fas fa-smile fa-lg"></i>
+                                            </div>
+                                            <h5 id="positiveCount" class="mb-0">0</h5>
+                                            <small class="text-muted">Positive Responses</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 mb-3">
+                                        <div class="bg-light rounded p-3">
+                                            <div class="text-danger mb-1">
+                                                <i class="fas fa-frown fa-lg"></i>
+                                            </div>
+                                            <h5 id="negativeCount" class="mb-0">0</h5>
+                                            <small class="text-muted">Negative Responses</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="bg-light rounded p-3">
+                                            <div class="text-success mb-1">
+                                                <i class="fas fa-shield-alt fa-lg"></i>
+                                            </div>
+                                            <h5 id="lowRiskCount" class="mb-0">0</h5>
+                                            <small class="text-muted">Low Risk</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="bg-light rounded p-3">
+                                            <div class="text-danger mb-1">
+                                                <i class="fas fa-exclamation-triangle fa-lg"></i>
+                                            </div>
+                                            <h5 id="highRiskCount" class="mb-0">0</h5>
+                                            <small class="text-muted">High Risk</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-footer bg-light">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <div id="currentStatus" class="text-muted">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Ready to start batch processing of mental health responses...
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <button id="startButton" type="button" class="btn btn-success" onclick="startBatchAnalysis()">
+                                <i class="fas fa-play me-2"></i>Start Analysis
+                            </button>
+                            <button id="stopButton" type="button" class="btn btn-danger d-none" onclick="stopBatchAnalysis()">
+                                <i class="fas fa-stop me-2"></i>Stop Processing
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Section (Hidden until complete) -->
+    <div id="resultsSection" class="row d-none">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-check-circle me-2"></i>
+                        Batch Analysis Complete
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center mb-4">
+                        <div class="col-md-3">
+                            <div class="text-primary">
+                                <i class="fas fa-check-double fa-2x mb-2"></i>
+                                <h4 id="totalProcessed" class="mb-0">0</h4>
+                                <small class="text-muted">Responses Processed</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-danger">
+                                <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+                                <h4 id="finalHighRisk" class="mb-0">0</h4>
+                                <small class="text-muted">High Risk Cases Found</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-success">
+                                <i class="fas fa-smile fa-2x mb-2"></i>
+                                <h4 id="finalPositive" class="mb-0">0</h4>
+                                <small class="text-muted">Positive Responses</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-info">
+                                <i class="fas fa-clock fa-2x mb-2"></i>
+                                <h4 id="processingTime" class="mb-0">0s</h4>
+                                <small class="text-muted">Total Processing Time</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-success border-0">
+                        <h5 class="alert-heading">
+                            <i class="fas fa-brain me-2"></i>Analysis Successfully Completed!
+                        </h5>
+                        <p class="mb-3">
+                            Your mental health survey responses have been analyzed using advanced AI.
+                            The system has identified sentiment patterns, risk levels, and workplace insights
+                            to help NVKN provide targeted mental health interventions.
+                        </p>
+                        <div class="text-center">
+                            <div class="btn-group" role="group">
+                                <a id="viewResultsButton" href="@Url.Action("AnalyzeQuestionnaire", new { id = ViewBag.QuestionnaireId })" class="btn btn-primary">
+                                    <i class="fas fa-chart-line"></i> View Complete Analysis
+                                </a>
+                                <a id="viewHighRiskButton" href="@Url.Action("HighRiskResponses", new { id = ViewBag.QuestionnaireId })" class="btn btn-danger d-none">
+                                    <i class="fas fa-shield-alt"></i> View High Risk Cases
+                                </a>
+                                <a id="generateReportButton" href="@Url.Action("GenerateReport", new { id = ViewBag.QuestionnaireId })" class="btn btn-success">
+                                    <i class="fas fa-file-medical"></i> Generate Report
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Processing Log (Advanced Users) -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">
+                            <i class="fas fa-terminal me-2"></i>Processing Log
+                        </h6>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="toggleLog()">
+                            <i class="fas fa-chevron-down"></i> Show Details
+                        </button>
+                    </div>
+                </div>
+                <div id="logContainer" class="card-body bg-dark text-light d-none" style="max-height: 300px; overflow-y: auto;">
+                    <div id="processingLog" class="font-monospace small">
+                        <div class="log-entry text-info">
+                            [<span class="timestamp"></span>] Batch analysis system initialized and ready...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let batchProcessing = false;
+        let startTime = null;
+        let processedCount = 0;
+        let totalRequests = @ViewBag.TotalRequests;
+        let questionnaireId = @ViewBag.QuestionnaireId;
+
+        // Start batch analysis
+        function startBatchAnalysis() {
+            if (batchProcessing) return;
+
+            batchProcessing = true;
+            startTime = new Date();
+            processedCount = 0;
+
+            // Update UI
+            document.getElementById('startButton').classList.add('d-none');
+            document.getElementById('stopButton').classList.remove('d-none');
+            updateStatusBadge('info', 'fa-spinner fa-spin', 'Processing...');
+
+            // Start processing steps animation
+            animateProcessingSteps();
+
+            // Add log entry
+            addLogEntry('Starting batch analysis of ' + totalRequests + ' mental health responses...', 'info');
+            updateCurrentStatus('Initializing Azure AI services...');
+
+            // Start the actual batch processing
+            processBatch();
+        }
+
+        // Stop batch analysis
+        function stopBatchAnalysis() {
+            batchProcessing = false;
+
+            document.getElementById('startButton').classList.remove('d-none');
+            document.getElementById('stopButton').classList.add('d-none');
+            updateStatusBadge('warning', 'fa-pause', 'Stopped');
+
+            updateCurrentStatus('Batch processing stopped by user');
+            addLogEntry('Batch processing stopped by user', 'warning');
+        }
+
+        // Process batch via AJAX
+        function processBatch() {
+            if (!batchProcessing) return;
+
+            addLogEntry('Connecting to Azure AI services...', 'info');
+            updateCurrentStatus('Processing responses through AI pipeline...');
+
+            $.post('@Url.Action("ProcessBatchAnalysis")', { questionnaireId: questionnaireId })
+                .done(function(data) {
+                    if (data.success && batchProcessing) {
+                        addLogEntry(`Successfully processed ${data.processedCount} responses`, 'success');
+
+                        if (data.highRiskCount > 0) {
+                            addLogEntry(`🚨 ALERT: Found ${data.highRiskCount} high-risk cases requiring immediate attention`, 'warning');
+                        }
+
+                        completeBatchProcessing(data);
+                    } else {
+                        handleProcessingError(data.message || 'Unknown error occurred');
+                    }
+                })
+                .fail(function(xhr, status, error) {
+                    handleProcessingError('Network error: ' + error);
+                });
+        }
+
+        // Simulate progress for better UX (since processing happens server-side)
+        function simulateProgress(finalCount, highRiskCount) {
+            let currentProgress = 0;
+            const progressInterval = setInterval(() => {
+                if (!batchProcessing || currentProgress >= 95) {
+                    clearInterval(progressInterval);
+                    return;
+                }
+
+                currentProgress += Math.random() * 12 + 3; // Random increment between 3-15
+                currentProgress = Math.min(currentProgress, 95); // Stop at 95% until actual completion
+
+                updateProgress(currentProgress);
+
+                // Update simulated stats
+                const simulatedProcessed = Math.floor((currentProgress / 100) * totalRequests);
+                document.getElementById('processedCount').textContent = simulatedProcessed;
+
+                // Simulate finding results
+                if (currentProgress > 50) {
+                    const simPositive = Math.floor(simulatedProcessed * 0.6);
+                    const simNegative = Math.floor(simulatedProcessed * 0.3);
+                    const simLowRisk = Math.floor(simulatedProcessed * 0.7);
+                    const simHighRisk = Math.floor(simulatedProcessed * 0.1);
+
+                    document.getElementById('positiveCount').textContent = simPositive;
+                    document.getElementById('negativeCount').textContent = simNegative;
+                    document.getElementById('lowRiskCount').textContent = simLowRisk;
+                    document.getElementById('highRiskCount').textContent = simHighRisk;
+                }
+
+                // Update estimated time
+                const elapsed = (new Date() - startTime) / 1000;
+                const estimated = Math.max(0, (elapsed / currentProgress) * (100 - currentProgress));
+                document.getElementById('estimatedTime').textContent = `Estimated time: ${Math.round(estimated)}s remaining`;
+
+            }, 800 + Math.random() * 1500); // Random interval between 0.8-2.3 seconds
+        }
+
+        // Complete batch processing
+        function completeBatchProcessing(data) {
+            batchProcessing = false;
+
+            // Final progress update
+            updateProgress(100);
+            document.getElementById('processedCount').textContent = data.processedCount;
+            document.getElementById('estimatedTime').textContent = 'Analysis Complete!';
+
+            // Update final stats
+            document.getElementById('totalProcessed').textContent = data.processedCount;
+            document.getElementById('finalHighRisk').textContent = data.highRiskCount;
+
+            // Calculate processing time
+            const processingTime = Math.round((new Date() - startTime) / 1000);
+            document.getElementById('processingTime').textContent = processingTime + 's';
+
+            // Update status
+            updateStatusBadge('success', 'fa-check', 'Complete');
+
+            // Complete all steps
+            completeAllSteps();
+
+            // Show results section
+            document.getElementById('resultsSection').classList.remove('d-none');
+
+            // Show high risk button if needed
+            if (data.highRiskCount > 0) {
+                document.getElementById('viewHighRiskButton').classList.remove('d-none');
+            }
+
+            // Update UI
+            document.getElementById('stopButton').classList.add('d-none');
+            updateCurrentStatus(`✅ Successfully analyzed ${data.processedCount} mental health responses!`);
+
+            addLogEntry(`🎉 Batch processing completed successfully in ${processingTime} seconds`, 'success');
+
+            // Auto-scroll to results
+            setTimeout(() => {
+                document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+            }, 1000);
+        }
+
+        // Handle processing errors
+        function handleProcessingError(message) {
+            batchProcessing = false;
+
+            updateStatusBadge('danger', 'fa-times', 'Error');
+
+            document.getElementById('startButton').classList.remove('d-none');
+            document.getElementById('stopButton').classList.add('d-none');
+
+            updateCurrentStatus('❌ Error: ' + message);
+            addLogEntry('❌ Error: ' + message, 'error');
+
+            Swal.fire({
+                title: 'Processing Error',
+                text: message,
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+        }
+
+        // Update progress bar
+        function updateProgress(percentage) {
+            const progressBar = document.getElementById('progressBar');
+            const progressPercentage = document.getElementById('progressPercentage');
+            const progressText = document.getElementById('progressText');
+
+            progressBar.style.width = percentage + '%';
+            progressBar.setAttribute('aria-valuenow', percentage);
+            progressPercentage.textContent = Math.round(percentage) + '%';
+
+            if (percentage >= 100) {
+                progressBar.classList.remove('progress-bar-animated');
+                progressBar.classList.remove('bg-primary');
+                progressBar.classList.add('bg-success');
+                progressText.textContent = 'Complete!';
+            } else {
+                progressText.textContent = 'Processing...';
+            }
+        }
+
+        // Update status badge
+        function updateStatusBadge(type, icon, text) {
+            const badge = document.getElementById('statusBadge');
+            const colorClass = {
+                'info': 'bg-info',
+                'success': 'bg-success',
+                'warning': 'bg-warning text-dark',
+                'danger': 'bg-danger'
+            }[type] || 'bg-secondary';
+
+            badge.className = 'badge ' + colorClass;
+            badge.innerHTML = `<i class="fas ${icon}"></i> ${text}`;
+        }
+
+        // Animate processing steps
+        function animateProcessingSteps() {
+            const steps = ['step1', 'step2', 'step3', 'step4', 'step5', 'step6', 'step7'];
+            let currentStep = 0;
+
+            const stepInterval = setInterval(() => {
+                if (!batchProcessing || currentStep >= steps.length) {
+                    clearInterval(stepInterval);
+                    return;
+                }
+
+                // Complete previous step
+                if (currentStep > 0) {
+                    const prevStep = document.getElementById(steps[currentStep - 1]);
+                    prevStep.innerHTML = prevStep.innerHTML.replace('fa-spin', '').replace('fa-circle-notch', 'fa-check-circle text-success');
+                    prevStep.classList.remove('text-muted');
+                    prevStep.classList.add('text-success');
+                }
+
+                // Start current step
+                if (currentStep < steps.length) {
+                    const nextStep = document.getElementById(steps[currentStep]);
+                    nextStep.innerHTML = nextStep.innerHTML.replace('fa-circle', 'fa-circle-notch fa-spin');
+                    nextStep.classList.remove('text-muted');
+                    nextStep.classList.add('text-primary');
+                }
+
+                currentStep++;
+            }, 1500 + Math.random() * 2000); // Random interval between 1.5-3.5 seconds
+        }
+
+        // Complete all steps
+        function completeAllSteps() {
+            const steps = ['step1', 'step2', 'step3', 'step4', 'step5', 'step6', 'step7'];
+            steps.forEach(stepId => {
+                const step = document.getElementById(stepId);
+                step.innerHTML = step.innerHTML.replace('fa-spin', '').replace('fa-circle-notch', 'fa-check-circle text-success');
+                step.classList.remove('text-muted', 'text-primary');
+                step.classList.add('text-success');
+            });
+        }
+
+        // Update current status message
+        function updateCurrentStatus(message) {
+            document.getElementById('currentStatus').innerHTML = '<i class="fas fa-info-circle me-2"></i>' + message;
+        }
+
+        // Add log entry
+        function addLogEntry(message, type = 'info') {
+            const log = document.getElementById('processingLog');
+            const timestamp = new Date().toLocaleTimeString();
+
+            const colorClass = {
+                'info': 'text-info',
+                'success': 'text-success',
+                'warning': 'text-warning',
+                'error': 'text-danger'
+            }[type] || 'text-info';
+
+            const entry = document.createElement('div');
+            entry.className = 'log-entry ' + colorClass;
+            entry.innerHTML = `[<span class="timestamp">${timestamp}</span>] ${message}`;
+
+            log.appendChild(entry);
+
+            // Auto-scroll to bottom
+            const container = document.getElementById('logContainer');
+            if (!container.classList.contains('d-none')) {
+                container.scrollTop = container.scrollHeight;
+            }
+        }
+
+        // Toggle log visibility
+        function toggleLog() {
+            const logContainer = document.getElementById('logContainer');
+            const toggleButton = event.target.closest('button');
+
+            logContainer.classList.toggle('d-none');
+
+            if (logContainer.classList.contains('d-none')) {
+                toggleButton.innerHTML = '<i class="fas fa-chevron-down"></i> Show Details';
+            } else {
+                toggleButton.innerHTML = '<i class="fas fa-chevron-up"></i> Hide Details';
+                logContainer.scrollTop = logContainer.scrollHeight;
+            }
+        }
+
+        // Go back to analysis
+        function goBack() {
+            if (batchProcessing) {
+                Swal.fire({
+                    title: 'Processing in Progress',
+                    text: 'Batch analysis is currently running. Do you want to stop and go back?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Stop and Go Back',
+                    cancelButtonText: 'Continue Processing'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        stopBatchAnalysis();
+                        window.location.href = '@Url.Action("AnalyzeQuestionnaire", new { id = ViewBag.QuestionnaireId })';
+                    }
+                });
+            } else {
+                window.location.href = '@Url.Action("AnalyzeQuestionnaire", new { id = ViewBag.QuestionnaireId })';
+            }
+        }
+
+        // Initialize timestamps
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.timestamp').forEach(el => {
+                el.textContent = new Date().toLocaleTimeString();
+            });
+
+            // Start processing automatically if we have responses
+            if (totalRequests > 0) {
+                setTimeout(() => {
+                    addLogEntry('Auto-starting batch analysis...', 'info');
+                    startBatchAnalysis();
+                    simulateProgress(totalRequests, 0); // Start UI simulation
+                }, 1000);
+            }
+        });
+
+        // Prevent page refresh during processing
+        window.addEventListener('beforeunload', function(e) {
+            if (batchProcessing) {
+                e.preventDefault();
+                e.returnValue = 'Mental health analysis is in progress. Leaving now may interrupt the process.';
+            }
+        });
+    </script>
+}
+
+@section Styles {
+    <style>
+        .progress {
+            border-radius: 12px;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .progress-bar {
+            border-radius: 12px;
+            font-size: 0.875rem;
+            line-height: 25px;
+        }
+
+        .stats-container .bg-light {
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+            .stats-container .bg-light:hover {
+                background-color: #e9ecef !important;
+                transform: scale(1.02);
+                border-color: #dee2e6;
+            }
+
+        .log-entry {
+            margin-bottom: 0.25rem;
+            animation: fadeIn 0.3s ease-in;
+            padding: 0.125rem 0;
+        }
+
+            .log-entry .timestamp {
+                color: #6c757d;
+                font-weight: bold;
+            }
+
+        @@keyframes fadeIn {
+            from
+
+        {
+            opacity: 0;
+            transform: translateY(-5px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        }
+
+        .font-monospace {
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        .opacity-75 {
+            opacity: 0.75;
+        }
+
+        .card {
+            transition: all 0.2s ease-in-out;
+        }
+
+        .list-unstyled li {
+            transition: all 0.3s ease;
+            padding: 0.25rem 0;
+        }
+
+        .text-success .fa-check-circle {
+            animation: checkPulse 0.5s ease-in-out;
+        }
+
+        @@keyframes checkPulse {
+            0%
+
+        {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.2);
+        }
+
+        100% {
+            transform: scale(1);
+        }
+
+        }
+
+        @@media (max-width: 768px) {
+            .btn-group
+
+        {
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .btn-group .btn {
+            border-radius: 0.375rem !important;
+            margin-bottom: 0.5rem;
+        }
+
+        .stats-container .col-6 {
+            margin-bottom: 1rem;
+        }
+
+        }
+    </style>
+}

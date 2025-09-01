@@ -55,7 +55,19 @@ namespace Web.Areas.Admin.Controllers
                             .Where(r => r.QuestionnaireId == q.Id)
                             .OrderByDescending(r => r.SubmissionDate)
                             .Select(r => r.SubmissionDate)
-                            .FirstOrDefault()
+                            .FirstOrDefault(),
+                        // Add Users information for displaying participant details
+                        Users = _context.Responses
+                            .Where(r => r.QuestionnaireId == q.Id && !string.IsNullOrEmpty(r.UserName))
+                            .OrderByDescending(r => r.SubmissionDate)
+                            .Select(r => new
+                            {
+                                UserName = r.UserName,
+                                Email = r.UserEmail
+                            })
+                            .Distinct()
+                            .Take(5) // Show up to 5 recent participants
+                            .ToList()
                     })
                     .ToListAsync();
 
