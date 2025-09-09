@@ -376,8 +376,8 @@
         }
 
         .chip-status {
-            width: 10px;
-            height: 10px;
+            width: 15px;
+            height: 15px;
             border-radius: 50%;
             animation: pulse 2s infinite;
         }
@@ -1062,6 +1062,7 @@
             transition: all 0.2s ease;
             min-height: 80px;
             gap: 0.6rem;
+            cursor: pointer;
         }
 
         .quick-btn:hover {
@@ -2083,12 +2084,12 @@
         }
 
         /* Animations */
-        @@keyframes gridMove {
+       @@keyframes gridMove {
             0% { transform: translate(0, 0); }
             100% { transform: translate(60px, 60px); }
         }
 
-        @@keyframes meshShift {
+       @@keyframes meshShift {
             0%, 100% { 
                 filter: hue-rotate(0deg);
                 transform: scale(1);
@@ -2099,46 +2100,46 @@
             }
         }
 
-        @@keyframes pulse {
+       @@keyframes pulse {
             0%, 100% { opacity: 1; transform: scale(1); }
             50% { opacity: 0.7; transform: scale(1.1); }
         }
 
-        @@keyframes avatarFloat {
+       @@keyframes avatarFloat {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-3px); }
         }
 
-        @@keyframes ringPulse {
+       @@keyframes ringPulse {
             0% { transform: scale(1); opacity: 0.3; }
             50% { transform: scale(1.1); opacity: 0.1; }
             100% { transform: scale(1); opacity: 0.3; }
         }
 
-        @@keyframes scanPulse {
+       @@keyframes scanPulse {
             0%, 100% { transform: scaleX(1); opacity: 1; }
             50% { transform: scaleX(1.2); opacity: 0.7; }
         }
 
-        @@keyframes scanMove {
+       @@keyframes scanMove {
             0% { left: 0; transform: translateX(-100%); }
             50% { left: 50%; transform: translateX(-50%); }
             100% { left: 100%; transform: translateX(0); }
         }
 
-        @@keyframes waveExpand {
+       @@keyframes waveExpand {
             0% { transform: scale(0.8); opacity: 0.8; }
             100% { transform: scale(1.2); opacity: 0; }
         }
 
         /* Responsive Design */
-        @@media (max-width: 1200px) {
+       @@media (max-width: 1200px) {
             .surveys-grid {
                 grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
             }
         }
 
-        @@media (max-width: 768px) {
+       @@media (max-width: 768px) {
             .nav-container {
                 flex-wrap: wrap;
                 gap: 1rem;
@@ -2196,7 +2197,7 @@
             }
         }
 
-        @@media (max-width: 480px) {
+       @@media (max-width: 480px) {
             .container-fluid {
                 padding-left: 1rem;
                 padding-right: 1rem;
@@ -2248,7 +2249,7 @@
         }
 
         /* Print Styles */
-        @@media print {
+       @@media print {
             .bg-pattern,
             .top-nav,
             .modal,
@@ -2270,7 +2271,7 @@
         }
 
         /* Accessibility Improvements */
-        @@media (prefers-reduced-motion: reduce) {
+       @@media (prefers-reduced-motion: reduce) {
             *,
             *::before,
             *::after {
@@ -2281,7 +2282,7 @@
         }
 
         /* High Contrast Mode */
-        @@media (prefers-contrast: high) {
+       @@media (prefers-contrast: high) {
             :root {
                 --neon-blue: #4d9fff;
                 --neon-purple: #d499ff;
@@ -2298,7 +2299,7 @@
         }
 
         /* Dark Mode Enhancement */
-        @@media (prefers-color-scheme: dark) {
+       @@media (prefers-color-scheme: dark) {
             .survey-card {
                 box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             }
@@ -2389,6 +2390,127 @@
     pointer-events: auto;
     position: relative;
 }
+/* Enhanced Service Status Icons */
+.service-status-nexgen {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+}
+
+.status-icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.service-nexgen.online .status-icon-wrapper {
+    background: rgba(52, 211, 153, 0.2);
+    box-shadow: 0 0 15px rgba(52, 211, 153, 0.3);
+}
+
+.service-nexgen.offline .status-icon-wrapper {
+    background: rgba(248, 113, 113, 0.2);
+    box-shadow: 0 0 15px rgba(248, 113, 113, 0.3);
+}
+
+/* Enhanced System Status */
+.system-status .status-title {
+    display: flex;
+    align-items: center;
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: #ffffff;
+    margin-bottom: 0.3rem;
+}
+
+/* Enhanced Error States */
+.error-nexgen .error-info h5 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--neon-red);
+    margin-bottom: 0.4rem;
+}
+
+/* Service Strip Status Icons */
+.service-chip .chip-status {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.service-chip.online .chip-status::before {
+    content: '\f058'; /* fa-check-circle */
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    font-size: 0.8rem;
+    color: var(--neon-green);
+    position: absolute;
+    top: -2px;
+    right: -2px;
+}
+
+.service-chip.offline .chip-status::before {
+    content: '\f057'; /* fa-times-circle */
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    font-size: 0.8rem;
+    color: var(--neon-red);
+    position: absolute;
+ 
+}
+
+/* Analysis Results Icons */
+.result-header-nexgen .result-title::before {
+    margin-right: 0.5rem;
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+}
+
+.result-nexgen.sentiment .result-title::before {
+    content: '\f004'; /* fa-heart */
+    color: var(--neon-pink);
+}
+
+.result-nexgen.risk .result-title::before {
+    content: '\f3ed'; /* fa-shield-virus */
+    color: var(--neon-yellow);
+}
+
+/* Loading States with Icons */
+.loading-nexgen h5::before {
+    content: '\f1ce'; /* fa-circle-notch */
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    margin-right: 0.5rem;
+    animation: fa-spin 2s linear infinite;
+    color: var(--neon-blue);
+}
+
+/* Success States */
+.success-nexgen .success-title::before {
+    content: '\f058'; /* fa-check-circle */
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    margin-right: 0.5rem;
+    color: var(--neon-green);
+}
     </style>
 }
 
@@ -2472,16 +2594,36 @@
                             <p>Real-time service monitoring</p>
                         </div>
                     </div>
-                    <div class="services-strip">
-                        @foreach (var service in serviceHealth)
-                        {
-                            <div class="service-chip @(service.Value ? "online" : "offline")">
-                                <div class="chip-status"></div>
-                                <div class="chip-name">@service.Key.Replace("Azure", "")</div>
-                                <div class="chip-state">@(service.Value ? "ACTIVE" : "DOWN")</div>
-                            </div>
-                        }
-                    </div>
+                  <!-- Enhanced Services Strip with Status Icons -->
+<div class="services-strip">
+    @foreach (var service in serviceHealth)
+    {
+        <div class="service-chip @(service.Value ? "online" : "offline")">
+            <div class="chip-status">
+                @if (service.Value)
+                {
+                    <i class="fas fa-check-circle" style="color: #34d399;"></i>
+                }
+                else
+                {
+                    <i class="fas fa-times-circle" style="color: #f87171;"></i>
+                }
+            </div>
+            <div class="chip-name">@service.Key.Replace("Azure", "")</div>
+            <div class="chip-state">
+                @if (service.Value)
+                {
+                    <i class="fas fa-check" style="color: #34d399; margin-right: 0.3rem;"></i>
+                }
+                else
+                {
+                    <i class="fas fa-times" style="color: #f87171; margin-right: 0.3rem;"></i>
+                }
+                @(service.Value ? "ACTIVE" : "DOWN")
+            </div>
+        </div>
+    }
+</div>
                 </div>
             }
 
@@ -2684,61 +2826,62 @@
                                                 <div class="metric-text">RESPONSES</div>
                                             </div>
                                         </div>
-                                        <div class="metric-chip textdata">
-                                            <div class="metric-icon"><i class="fas fa-comment-medical"></i></div>
-                                            <div class="metric-data">
-                                                <div class="metric-number">@questionnaire.TextResponseCount</div>
-                                                <div class="metric-text">TEXT DATA</div>
-                                            </div>
-                                        </div>
+                                       <div class="metric-chip textdata">
+                                    <div class="metric-icon"><i class="fas fa-comment-medical"></i></div>
+                                    <div class="metric-data">
+                                     
+                                        <div class="metric-number">@questionnaire.AnalyzableResponseCount</div>
+                                       <div class="metric-text">ANALYZABLE DATA</div>
+                                    </div>
+                                </div>
                                     </div>
 
                                     @if (questionnaire.LastResponse != null && questionnaire.LastResponse != DateTime.MinValue)
                                     {
                                         <div class="activity-indicator">
                                             <div class="activity-pulse"></div>
-                                            <span>LAST ACTIVITY: @((DateTime)questionnaire.LastResponse).ToString("MMM dd, yyyy").ToUpper()</span>
+                                            <span>LAST ACTIVITY: @((DateTime)questionnaire.LastResponse)</span>
                                         </div>
                                     }
 
                                     <div class="action-zone">
-                                        @if (questionnaire.TextResponseCount > 0)
-                                        {
-                                            <button onclick="startAnalysisWithProgress(@questionnaire.Id, '@questionnaire.Title')" 
-                                                   class="primary-action">
-                                                <div class="action-bg"></div>
-                                                <div class="action-content">
-                                                    <div class="action-icon">
-                                                        <i class="fas fa-rocket"></i>
+                                        @if (questionnaire.AnalyzableResponseCount > 0)
+                                                {
+                                                    <button onclick="startAnalysisWithProgress(@questionnaire.Id, '@questionnaire.Title')" 
+                                                           class="primary-action">
+                                                        <div class="action-bg"></div>
+                                                        <div class="action-content">
+                                                            <div class="action-icon">
+                                                                <i class="fas fa-rocket"></i>
+                                                            </div>
+                                                            <div class="action-text">
+                                                                <div class="action-title">LAUNCH AI ANALYSIS</div>
+                                                                <div class="action-subtitle">Neural network processing</div>
+                                                            </div>
+                                                            <div class="action-arrow">
+                                                                <i class="fas fa-arrow-right"></i>
+                                                            </div>
+                                                        </div>
+                                                    </button>
+    
+                                                    <div class="quick-actions">
+                                                        <button onclick="startRiskScanWithProgress(@questionnaire.Id, '@questionnaire.Title')" 
+                                                               class="quick-btn risk-btn">
+                                                            <i class="fas fa-exclamation-triangle"></i>
+                                                            <span>RISK SCAN</span>
+                                                        </button>
+                                                        <button onclick="startBatchOpsWithProgress(@questionnaire.Id, '@questionnaire.Title')" 
+                                                               class="quick-btn batch-btn">
+                                                            <i class="fas fa-layer-group"></i>
+                                                            <span>BATCH OPS</span>
+                                                        </button>
+                                                        <button onclick="startTrendsWithProgress(@questionnaire.Id, '@questionnaire.Title')" 
+                                                               class="quick-btn trend-btn">
+                                                            <i class="fas fa-chart-line"></i>
+                                                            <span>TRENDS</span>
+                                                        </button>
                                                     </div>
-                                                    <div class="action-text">
-                                                        <div class="action-title">LAUNCH AI ANALYSIS</div>
-                                                        <div class="action-subtitle">Neural network processing</div>
-                                                    </div>
-                                                    <div class="action-arrow">
-                                                        <i class="fas fa-arrow-right"></i>
-                                                    </div>
-                                                </div>
-                                            </button>
-                                            
-                                            <div class="quick-actions">
-                                                <a href="@Url.Action("HighRiskResponses", new { id = questionnaire.Id })" 
-                                                   class="quick-btn risk-btn">
-                                                    <i class="fas fa-exclamation-triangle"></i>
-                                                    <span>RISK SCAN</span>
-                                                </a>
-                                                <a href="@Url.Action("BatchAnalyze", new { id = questionnaire.Id })" 
-                                                   class="quick-btn batch-btn">
-                                                    <i class="fas fa-layer-group"></i>
-                                                    <span>BATCH OPS</span>
-                                                </a>
-                                                <a href="@Url.Action("AnalyzeTrends", new { id = questionnaire.Id })" 
-                                                   class="quick-btn trend-btn">
-                                                    <i class="fas fa-chart-line"></i>
-                                                    <span>TRENDS</span>
-                                                </a>
-                                            </div>
-                                        }
+                                          }
                                         else
                                         {
                                             <div class="disabled-state">
@@ -2747,7 +2890,7 @@
                                                 </div>
                                                 <div class="disabled-text">
                                                     <div class="disabled-title">INSUFFICIENT DATA</div>
-                                                    <div class="disabled-message">Requires text responses for analysis</div>
+                                                  <div class="disabled-message">Requires responses for analysis</div>
                                                 </div>
                                             </div>
                                         }
@@ -2985,7 +3128,137 @@
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        // Enhanced AI Services Check with proper event handling
+        // Enhanced progress functions for all three buttons
+        function startRiskScanWithProgress(questionnaireId, title) {
+            document.getElementById('progressSubtitle').textContent = `Risk scanning "${title}"`;
+            document.getElementById('progressTitle').textContent = 'SCANNING FOR RISK INDICATORS';
+            
+            // Update pipeline for risk scan
+            updatePipelineSteps(['INIT', 'SCAN', 'DETECT', 'ASSESS', 'ALERT']);
+            
+            const modal = new bootstrap.Modal(document.getElementById('analysisProgressModal'));
+            modal.show();
+            
+            animateProgress(() => {
+                window.location.href = '@Url.Action("HighRiskResponses")?id=' + questionnaireId;
+            });
+        }
+
+        function startBatchOpsWithProgress(questionnaireId, title) {
+            document.getElementById('progressSubtitle').textContent = `Batch processing "${title}"`;
+            document.getElementById('progressTitle').textContent = 'EXECUTING BATCH OPERATIONS';
+            
+            // Update pipeline for batch operations
+            updatePipelineSteps(['INIT', 'QUEUE', 'PROCESS', 'VERIFY', 'COMPLETE']);
+            
+            const modal = new bootstrap.Modal(document.getElementById('analysisProgressModal'));
+            modal.show();
+            
+            animateProgress(() => {
+                window.location.href = '@Url.Action("BatchAnalyze")?id=' + questionnaireId;
+            });
+        }
+
+        function startTrendsWithProgress(questionnaireId, title) {
+            document.getElementById('progressSubtitle').textContent = `Analyzing trends in "${title}"`;
+            document.getElementById('progressTitle').textContent = 'CALCULATING TREND PATTERNS';
+            
+            // Update pipeline for trends analysis
+            updatePipelineSteps(['INIT', 'COLLECT', 'PATTERN', 'TREND', 'VISUAL']);
+            
+            const modal = new bootstrap.Modal(document.getElementById('analysisProgressModal'));
+            modal.show();
+            
+            animateProgress(() => {
+                window.location.href = '@Url.Action("AnalyzeTrends")?id=' + questionnaireId;
+            });
+        }
+
+        // Updated main analysis function to use the new pipeline system
+        function startAnalysisWithProgress(questionnaireId, title) {
+            document.getElementById('progressSubtitle').textContent = `Processing "${title}"`;
+            document.getElementById('progressTitle').textContent = 'PROCESSING QUESTIONNAIRE DATA';
+            
+            // Update pipeline for main analysis
+            updatePipelineSteps(['INIT', 'PARSE', 'ANALYZE', 'ASSESS', 'REPORT']);
+            
+            const modal = new bootstrap.Modal(document.getElementById('analysisProgressModal'));
+            modal.show();
+            
+            animateProgress(() => {
+                window.location.href = '@Url.Action("AnalyzeQuestionnaire")?id=' + questionnaireId;
+            });
+        }
+
+        // Helper function to update pipeline steps
+        function updatePipelineSteps(stepLabels) {
+            const pipeline = document.querySelector('.progress-pipeline');
+            let pipelineHTML = '';
+            
+            stepLabels.forEach((label, index) => {
+                const isFirst = index === 0;
+                
+                pipelineHTML += `
+                    <div class="pipeline-step ${isFirst ? 'completed' : ''}">
+                        <div class="step-marker"></div>
+                        <div class="step-label">${label}</div>
+                    </div>
+                `;
+                
+                // Add connector except for last step
+                if (index < stepLabels.length - 1) {
+                    pipelineHTML += '<div class="pipeline-connector"></div>';
+                }
+            });
+            
+            pipeline.innerHTML = pipelineHTML;
+        }
+
+        // Reusable progress animation function
+        function animateProgress(onComplete) {
+            let progress = 0;
+            const progressFill = document.querySelector('.progress-fill-nexgen');
+            const progressPercent = document.querySelector('.progress-percent');
+            const steps = document.querySelectorAll('.pipeline-step');
+            
+            const interval = setInterval(() => {
+                progress += Math.random() * 12 + 3;
+                if (progress > 95) progress = 95;
+                
+                progressFill.style.width = progress + '%';
+                progressPercent.textContent = Math.round(progress) + '%';
+                
+                // Update pipeline
+                const currentStep = Math.floor(progress / 20);
+                steps.forEach((step, index) => {
+                    step.classList.remove('active', 'completed');
+                    if (index < currentStep) {
+                        step.classList.add('completed');
+                    } else if (index === currentStep) {
+                        step.classList.add('active');
+                    }
+                });
+                
+                if (progress >= 95) {
+                    clearInterval(interval);
+                    
+                    setTimeout(() => {
+                        progressFill.style.width = '100%';
+                        progressPercent.textContent = '100%';
+                        
+                        steps.forEach(step => {
+                            step.classList.remove('active');
+                            step.classList.add('completed');
+                        });
+                        
+                        setTimeout(() => {
+                            onComplete();
+                        }, 800);
+                    }, 300);
+                }
+            }, 150);
+        }
+
         function testAIServices() {
             const modal = new bootstrap.Modal(document.getElementById('aiServicesModal'), {
                 backdrop: true,
@@ -3008,14 +3281,20 @@
                         content += '</div>';
                         
                         const allOnline = langService && openaiService;
+                        const systemStatusIcon = allOnline ? 'fa-check-circle' : 'fa-exclamation-triangle';
+                        const systemStatusColor = allOnline ? '#34d399' : '#fbbf24';
+                        
                         content += `
                             <div class="system-status ${allOnline ? 'operational' : 'degraded'}">
                                 <div class="status-indicator">
                                     <div class="indicator-ring"></div>
-                                    <i class="fas ${allOnline ? 'fa-check' : 'fa-exclamation'}"></i>
+                                    <i class="fas ${systemStatusIcon}" style="color: ${systemStatusColor};"></i>
                                 </div>
                                 <div class="status-info">
-                                    <div class="status-title">${allOnline ? 'ALL SYSTEMS OPERATIONAL' : 'SYSTEM DEGRADED'}</div>
+                                    <div class="status-title">
+                                        <i class="fas ${systemStatusIcon}" style="color: ${systemStatusColor}; margin-right: 0.5rem;"></i>
+                                        ${allOnline ? 'ALL SYSTEMS OPERATIONAL' : 'SYSTEM DEGRADED'}
+                                    </div>
                                     <div class="status-message">${data.message}</div>
                                 </div>
                             </div>
@@ -3026,10 +3305,13 @@
                         document.getElementById('servicesStatusContent').innerHTML = `
                             <div class="error-nexgen">
                                 <div class="error-visual">
-                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <i class="fas fa-times-circle" style="color: #f87171; font-size: 2rem;"></i>
                                 </div>
                                 <div class="error-info">
-                                    <h5>DIAGNOSTIC FAILED</h5>
+                                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                        <i class="fas fa-times-circle" style="color: #f87171;"></i>
+                                        <h5>DIAGNOSTIC FAILED</h5>
+                                    </div>
                                     <p>${data.error || 'Unable to verify system status'}</p>
                                 </div>
                             </div>
@@ -3040,10 +3322,13 @@
                     document.getElementById('servicesStatusContent').innerHTML = `
                         <div class="error-nexgen">
                             <div class="error-visual">
-                                <i class="fas fa-wifi-slash"></i>
+                                <i class="fas fa-wifi-slash" style="color: #f87171; font-size: 2rem;"></i>
                             </div>
                             <div class="error-info">
-                                <h5>CONNECTION TIMEOUT</h5>
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <i class="fas fa-times-circle" style="color: #f87171;"></i>
+                                    <h5>CONNECTION TIMEOUT</h5>
+                                </div>
                                 <p>Unable to reach diagnostic endpoint</p>
                             </div>
                         </div>
@@ -3051,9 +3336,11 @@
                 });
         }
 
-        function createNexGenServiceCard(name, description, isOnline, icon) {
+       function createNexGenServiceCard(name, description, isOnline, icon) {
             const statusClass = isOnline ? 'online' : 'offline';
             const statusText = isOnline ? 'ACTIVE' : 'OFFLINE';
+            const statusIcon = isOnline ? 'fa-check-circle' : 'fa-times-circle';
+            const statusIconColor = isOnline ? '#34d399' : '#f87171';
             
             return `
                 <div class="service-nexgen ${statusClass}">
@@ -3064,7 +3351,9 @@
                                 <i class="fas ${icon}"></i>
                             </div>
                             <div class="service-status-nexgen">
-                                <div class="status-dot-nexgen"></div>
+                                <div class="status-icon-wrapper">
+                                    <i class="fas ${statusIcon}" style="color: ${statusIconColor}; font-size: 1.2rem;"></i>
+                                </div>
                                 <span>${statusText}</span>
                             </div>
                         </div>
@@ -3227,54 +3516,6 @@
             }
         }
 
-        // Next-Gen Progress Animation
-        function startAnalysisWithProgress(questionnaireId, title) {
-            document.getElementById('progressSubtitle').textContent = `Processing "${title}"`;
-            
-            const modal = new bootstrap.Modal(document.getElementById('analysisProgressModal'));
-            modal.show();
-            
-            let progress = 0;
-            const progressFill = document.querySelector('.progress-fill-nexgen');
-            const progressPercent = document.querySelector('.progress-percent');
-            const steps = document.querySelectorAll('.pipeline-step');
-            
-            const interval = setInterval(() => {
-                progress += Math.random() * 12 + 3;
-                if (progress > 95) progress = 95;
-                
-                progressFill.style.width = progress + '%';
-                progressPercent.textContent = Math.round(progress) + '%';
-                
-                // Update pipeline
-                const currentStep = Math.floor(progress / 20);
-                steps.forEach((step, index) => {
-                    if (index <= currentStep) {
-                        step.classList.add('active');
-                    } else {
-                        step.classList.remove('active');
-                    }
-                });
-                
-                if (progress >= 95) {
-                    clearInterval(interval);
-                    
-                    setTimeout(() => {
-                        progressFill.style.width = '100%';
-                        progressPercent.textContent = '100%';
-                        
-                        steps.forEach(step => {
-                            step.classList.add('active');
-                        });
-                        
-                        setTimeout(() => {
-                            window.location.href = '@Url.Action("AnalyzeQuestionnaire")?id=' + questionnaireId;
-                        }, 800);
-                    }, 300);
-                }
-            }, 150);
-        }
-
         // Custom SweetAlert styling
         const swalStyle = document.createElement('style');
         swalStyle.textContent = `
@@ -3360,4 +3601,3 @@
         });
     </script>
 }
-

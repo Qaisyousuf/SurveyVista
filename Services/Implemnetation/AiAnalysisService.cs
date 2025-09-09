@@ -1,19 +1,20 @@
 ﻿// Services/Implementation/AiAnalysisService.cs
 using Azure;
-using Azure.AI.TextAnalytics;
 using Azure.AI.OpenAI;
-using OpenAI.Chat;
+using Azure.AI.TextAnalytics;
+using Data;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Model;
+using OpenAI.Chat;
 using Services.AIViewModel;
 using Services.Interaces;
+using System.ClientModel;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
-using Data;
-using Microsoft.EntityFrameworkCore;
-using System.ClientModel;
 
 namespace Services.Implemnetation
 {
@@ -605,13 +606,32 @@ Respond with a JSON array of applicable categories: [""category1"", ""category2"
                 {
                     foreach (var detail in response.ResponseDetails)
                     {
+                        string responseText = "";
+
+                        // Handle text-based questions (existing)
                         if (!string.IsNullOrWhiteSpace(detail.TextResponse))
+                        {
+                            responseText = detail.TextResponse;
+                        }
+                        // Handle CheckBox questions (NEW)
+                        else if (detail.QuestionType == QuestionType.CheckBox && detail.ResponseAnswers.Any())
+                        {
+                            var selectedAnswers = detail.ResponseAnswers
+                                .Select(ra => detail.Question.Answers.FirstOrDefault(a => a.Id == ra.AnswerId)?.Text)
+                                .Where(text => !string.IsNullOrEmpty(text))
+                                .ToList();
+
+                            responseText = $"Multiple Selection Question: {detail.Question.Text}\nSelected Options: {string.Join(", ", selectedAnswers)}\nAnalyze these selected workplace factors for mental health implications and patterns.";
+                        }
+
+                        // Create analysis request for ALL supported responses
+                        if (!string.IsNullOrEmpty(responseText))
                         {
                             var request = new AnalysisRequest
                             {
                                 ResponseId = response.Id,
                                 QuestionId = detail.QuestionId,
-                                ResponseText = detail.TextResponse,
+                                ResponseText = responseText,
                                 QuestionText = detail.Question?.Text ?? ""
                             };
 
@@ -868,13 +888,32 @@ Respond with a JSON array of applicable categories: [""category1"", ""category2"
                 {
                     foreach (var detail in response.ResponseDetails)
                     {
+                        string responseText = "";
+
+                        // Handle text-based questions
                         if (!string.IsNullOrWhiteSpace(detail.TextResponse))
+                        {
+                            responseText = detail.TextResponse;
+                        }
+                        // Handle CheckBox questions
+                        else if (detail.QuestionType == QuestionType.CheckBox && detail.ResponseAnswers.Any())
+                        {
+                            var selectedAnswers = detail.ResponseAnswers
+                                .Select(ra => detail.Question.Answers.FirstOrDefault(a => a.Id == ra.AnswerId)?.Text)
+                                .Where(text => !string.IsNullOrEmpty(text))
+                                .ToList();
+
+                            responseText = $"Multiple Selection Question: {detail.Question.Text}\nSelected Options: {string.Join(", ", selectedAnswers)}\nAnalyze these selected workplace factors for mental health implications and patterns.";
+                        }
+
+                        // Create analysis request if we have text to analyze
+                        if (!string.IsNullOrEmpty(responseText))
                         {
                             var request = new AnalysisRequest
                             {
                                 ResponseId = response.Id,
                                 QuestionId = detail.QuestionId,
-                                ResponseText = detail.TextResponse,
+                                ResponseText = responseText,
                                 QuestionText = detail.Question?.Text ?? ""
                             };
 
@@ -1086,6 +1125,8 @@ Respond with a JSON array of applicable categories: [""category1"", ""category2"
             if (el.ValueKind == JsonValueKind.String) return bool.TryParse(el.GetString(), out value);
             return false;
         }
+
+
 
         #endregion
     }

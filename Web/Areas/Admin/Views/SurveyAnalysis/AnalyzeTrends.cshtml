@@ -3,609 +3,2044 @@
 
 @{
     ViewData["Title"] = $"Mental Health Trends - {ViewBag.QuestionnaireName}";
-   
 }
 
-<div class="container-fluid">
-    <!-- Header Section -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <nav aria-label="breadcrumb">
-                        <ol class="breadcrumb">
-                            <li class="breadcrumb-item">
-                                <a href="@Url.Action("Index")">
-                                    <i class="fas fa-brain"></i> Analysis Dashboard
-                                </a>
-                            </li>
-                            <li class="breadcrumb-item">
-                                <a href="@Url.Action("AnalyzeQuestionnaire", new { id = ViewBag.QuestionnaireId })">
-                                    @ViewBag.QuestionnaireName
-                                </a>
-                            </li>
-                            <li class="breadcrumb-item active">Trends Analysis</li>
-                        </ol>
-                    </nav>
-                    <h1 class="h3 mb-1">
-                        <i class="fas fa-chart-line text-primary me-2"></i>
-                        Mental Health Trends Analysis
-                    </h1>
-                    <p class="text-muted mb-0">Track workplace mental health patterns and intervention effectiveness over time</p>
-                </div>
-                <div class="text-end">
-                    <div class="btn-group" role="group">
-                        <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#dateRangeModal">
-                            <i class="fas fa-calendar-alt"></i> Change Period
-                        </button>
-                        <button type="button" class="btn btn-outline-info btn-sm" onclick="exportTrendsData()">
-                            <i class="fas fa-download"></i> Export Trends
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
+@section Styles {
+    <style>
+        @@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --neon-blue: #60a5fa;
+            --neon-purple: #c084fc;
+            --neon-green: #34d399;
+            --neon-pink: #f472b6;
+            --neon-yellow: #fbbf24;
+            --neon-red: #f87171;
+            --neon-cyan: #22d3ee;
+            --neon-orange: #fb923c;
+            --dark-900: #0f172a;
+            --dark-800: #1e293b;
+            --dark-700: #334155;
+            --dark-600: #475569;
+            --dark-500: #64748b;
+            --dark-400: #94a3b8;
+            --dark-300: #cbd5e1;
+            --dark-200: #e2e8f0;
+            --dark-100: #f1f5f9;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+            --font-main: 'Space Grotesk', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            --success-gradient: linear-gradient(135deg, var(--neon-green), var(--neon-cyan));
+            --warning-gradient: linear-gradient(135deg, var(--neon-yellow), var(--neon-orange));
+            --danger-gradient: linear-gradient(135deg, var(--neon-red), #dc2626);
+            --info-gradient: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+            --primary-gradient: linear-gradient(135deg, var(--neon-green), var(--neon-blue));
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background: var(--dark-900);
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+
+        .nexgen-trends-dashboard {
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Dynamic Background */
+        .bg-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .grid-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: linear-gradient(rgba(52, 211, 153, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(52, 211, 153, 0.1) 1px, transparent 1px);
+            background-size: 60px 60px;
+            animation: gridMove 20s linear infinite;
+        }
+
+        .gradient-mesh {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 20%, rgba(52, 211, 153, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 60%, rgba(34, 211, 238, 0.15) 0%, transparent 50%), radial-gradient(circle at 40% 80%, rgba(96, 165, 250, 0.15) 0%, transparent 50%);
+            animation: meshShift 15s ease-in-out infinite;
+        }
+
+        /* Top Navigation */
+        .top-nav {
+            position: relative;
+            z-index: 100;
+            padding: 1rem 0;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(52, 211, 153, 0.2);
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            gap: 3rem;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .brand-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--neon-green), var(--neon-cyan));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .brand-name {
+            font-family: var(--font-mono);
+            font-weight: 700;
+            font-size: 1.1rem;
+            letter-spacing: 0.1em;
+            color: #e2e8f0;
+        }
+
+        .brand-version {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--neon-green);
+            background: rgba(52, 211, 153, 0.1);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            border: 1px solid rgba(52, 211, 153, 0.3);
+        }
+
+        .nav-center {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+        }
+
+        .breadcrumb-nexgen {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .crumb {
+            color: var(--dark-400);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+            .crumb:hover {
+                color: var(--neon-green);
+            }
+
+            .crumb.active {
+                color: var(--neon-green);
+            }
+
+        .breadcrumb-nexgen i {
+            color: var(--dark-500);
+            font-size: 0.6rem;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .nav-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1.2rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            color: #e2e8f0;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(10px);
+            text-decoration: none;
+        }
+
+            .nav-btn:hover {
+                background: rgba(52, 211, 153, 0.1);
+                border-color: rgba(52, 211, 153, 0.3);
+                color: var(--neon-green);
+            }
+
+        /* Hero Section */
+        .hero-nexgen {
+            padding: 4rem 0 2rem;
+            text-align: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.5rem 1.2rem;
+            background: rgba(52, 211, 153, 0.1);
+            border: 1px solid rgba(52, 211, 153, 0.3);
+            border-radius: 50px;
+            margin-bottom: 2rem;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            color: var(--neon-green);
+        }
+
+        .badge-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--neon-green);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            color: #ffffff;
+        }
+
+        .title-gradient {
+            background: linear-gradient(135deg, var(--neon-green), var(--neon-cyan), var(--neon-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-description {
+            font-size: 1.1rem;
+            color: var(--dark-300);
+            max-width: 600px;
+            margin: 0 auto 2rem;
+            line-height: 1.6;
+        }
+
+        /* Date Range Card */
+        .date-range-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 1.5rem 2rem;
+            margin-bottom: 3rem;
+            box-shadow: var(--glass-shadow);
+        }
+
+        .date-range-content {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+        }
+
+        .date-range-title {
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+            .date-range-title i {
+                color: var(--neon-green);
+            }
+
+        .date-badge {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 0.6rem 1.2rem;
+            border-radius: 20px;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Chart Cards */
+        .chart-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--glass-shadow);
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+            .chart-card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 20px 40px rgba(52, 211, 153, 0.1);
+            }
+
+        .chart-header {
+            padding: 2rem 2rem 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .chart-title {
+            font-family: var(--font-mono);
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0;
+        }
+
+            .chart-title i {
+                color: var(--neon-green);
+            }
+
+        .chart-body {
+            padding: 2rem;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-bottom: 1rem;
+        }
+
+        .chart-info {
+            text-align: center;
+            color: var(--dark-400);
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        /* Sentiment Indicators */
+        .sentiment-indicators {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .sentiment-indicator {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+            .sentiment-indicator:hover {
+                background: rgba(255, 255, 255, 0.05);
+                transform: translateY(-2px);
+            }
+
+        .sentiment-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .sentiment-indicator.positive .sentiment-icon {
+            color: var(--neon-green);
+        }
+
+        .sentiment-indicator.neutral .sentiment-icon {
+            color: var(--neon-yellow);
+        }
+
+        .sentiment-indicator.negative .sentiment-icon {
+            color: var(--neon-red);
+        }
+
+        .sentiment-title {
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+        }
+
+        .sentiment-change {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .sentiment-indicator.positive .sentiment-change {
+            color: var(--neon-green);
+        }
+
+        .sentiment-indicator.neutral .sentiment-change {
+            color: var(--neon-yellow);
+        }
+
+        .sentiment-indicator.negative .sentiment-change {
+            color: var(--neon-red);
+        }
+
+        /* Improvement Items */
+        .improvement-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+            .improvement-item:hover {
+                background: rgba(255, 255, 255, 0.05);
+                transform: translateX(5px);
+            }
+
+        .improvement-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .improvement-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            color: white;
+        }
+
+        .improvement-item.positive .improvement-icon {
+            background: var(--success-gradient);
+        }
+
+        .improvement-item.negative .improvement-icon {
+            background: var(--danger-gradient);
+        }
+
+        .improvement-item.neutral .improvement-icon {
+            background: var(--warning-gradient);
+        }
+
+        .improvement-title {
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+            .improvement-title.positive {
+                color: var(--neon-green);
+            }
+
+            .improvement-title.negative {
+                color: var(--neon-red);
+            }
+
+            .improvement-title.neutral {
+                color: var(--neon-yellow);
+            }
+
+        .progress-bar-nexgen {
+            height: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 5px;
+            transition: width 0.3s ease;
+        }
+
+            .progress-fill.success {
+                background: var(--success-gradient);
+            }
+
+            .progress-fill.danger {
+                background: var(--danger-gradient);
+            }
+
+            .progress-fill.warning {
+                background: var(--warning-gradient);
+            }
+
+        .improvement-change {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--dark-400);
+        }
+
+        /* Intervention Effectiveness */
+        .intervention-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--glass-shadow);
+            margin-bottom: 2rem;
+        }
+
+        .intervention-header {
+            background: var(--success-gradient);
+            padding: 2rem;
+            position: relative;
+        }
+
+            .intervention-header::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+            }
+
+        .intervention-title-group {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            justify-content: between;
+            align-items: center;
+        }
+
+        .intervention-title {
+            font-family: var(--font-mono);
+            font-size: 1.2rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .clinical-badge {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            padding: 0.4rem 1rem;
+            font-family: var(--font-mono);
+            font-size: 0.6rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .intervention-body {
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+        }
+
+        .intervention-results {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .results-title {
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 1.5rem;
+        }
+
+        .intervention-result {
+            margin-bottom: 1.5rem;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 0.8rem;
+        }
+
+        .result-name {
+            font-size: 0.8rem;
+            color: var(--dark-200);
+        }
+
+        .result-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-family: var(--font-mono);
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+        }
+
+            .result-badge.success {
+                background: rgba(52, 211, 153, 0.2);
+                border: 1px solid var(--neon-green);
+                color: var(--neon-green);
+            }
+
+            .result-badge.primary {
+                background: rgba(96, 165, 250, 0.2);
+                border: 1px solid var(--neon-blue);
+                color: var(--neon-blue);
+            }
+
+            .result-badge.info {
+                background: rgba(34, 211, 238, 0.2);
+                border: 1px solid var(--neon-cyan);
+                color: var(--neon-cyan);
+            }
+
+            .result-badge.warning {
+                background: rgba(251, 191, 36, 0.2);
+                border: 1px solid var(--neon-yellow);
+                color: var(--neon-yellow);
+            }
+
+        .result-effectiveness {
+            font-size: 0.7rem;
+            color: var(--dark-400);
+        }
+
+        /* Insights Section */
+        .insights-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .insights-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--glass-shadow);
+        }
+
+        .insights-header {
+            padding: 2rem 2rem 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .insights-title {
+            font-family: var(--font-mono);
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+            .insights-title i {
+                color: var(--neon-purple);
+            }
+
+        .insights-body {
+            padding: 2rem;
+        }
+
+        .insight-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+            .insight-item:hover {
+                background: rgba(255, 255, 255, 0.05);
+            }
+
+        .insight-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .insight-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .insight-item.positive .insight-icon {
+            background: var(--success-gradient);
+        }
+
+        .insight-item.warning .insight-icon {
+            background: var(--warning-gradient);
+        }
+
+        .insight-item.info .insight-icon {
+            background: var(--info-gradient);
+        }
+
+        .insight-content {
+            flex: 1;
+        }
+
+        .insight-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+            .insight-title.positive {
+                color: var(--neon-green);
+            }
+
+            .insight-title.warning {
+                color: var(--neon-yellow);
+            }
+
+            .insight-title.info {
+                color: var(--neon-cyan);
+            }
+
+        .insight-description {
+            font-size: 0.85rem;
+            color: var(--dark-300);
+            line-height: 1.5;
+            margin-bottom: 1rem;
+        }
+
+        .insight-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-family: var(--font-mono);
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+        }
+
+            .insight-badge.positive {
+                background: rgba(52, 211, 153, 0.2);
+                border: 1px solid var(--neon-green);
+                color: var(--neon-green);
+            }
+
+            .insight-badge.warning {
+                background: rgba(251, 191, 36, 0.2);
+                border: 1px solid var(--neon-yellow);
+                color: var(--neon-yellow);
+            }
+
+            .insight-badge.info {
+                background: rgba(34, 211, 238, 0.2);
+                border: 1px solid var(--neon-cyan);
+                color: var(--neon-cyan);
+            }
+
+        /* KPI Items */
+        .kpi-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+            .kpi-item:hover {
+                background: rgba(255, 255, 255, 0.05);
+                transform: scale(1.02);
+            }
+
+        .kpi-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .kpi-info {
+            flex: 1;
+        }
+
+        .kpi-title {
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 0.3rem;
+        }
+
+        .kpi-subtitle {
+            font-size: 0.8rem;
+            color: var(--dark-400);
+        }
+
+        .kpi-value-section {
+            text-align: right;
+        }
+
+        .kpi-value {
+            font-family: var(--font-mono);
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 0.3rem;
+        }
+
+            .kpi-value.success {
+                color: var(--neon-green);
+            }
+
+            .kpi-value.primary {
+                color: var(--neon-blue);
+            }
+
+            .kpi-value.info {
+                color: var(--neon-cyan);
+            }
+
+            .kpi-value.warning {
+                color: var(--neon-yellow);
+            }
+
+        .kpi-change {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--neon-green);
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            justify-content: flex-end;
+        }
+
+        /* Trending Topics */
+        .trending-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--glass-shadow);
+            margin-bottom: 2rem;
+        }
+
+        .trending-header {
+            padding: 2rem 2rem 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .trending-title {
+            font-family: var(--font-mono);
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+            .trending-title i {
+                color: var(--neon-orange);
+            }
+
+        .trending-body {
+            padding: 2rem;
+        }
+
+        .trending-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .trending-category {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .category-title {
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+            .category-title.improving {
+                color: var(--neon-green);
+            }
+
+            .category-title.attention {
+                color: var(--neon-yellow);
+            }
+
+        .trending-topic {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+            .trending-topic:hover {
+                background: rgba(255, 255, 255, 0.05);
+            }
+
+        .topic-content {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+        }
+
+        .topic-indicator {
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            font-weight: 700;
+            margin-right: 1rem;
+        }
+
+            .topic-indicator.up {
+                background: rgba(52, 211, 153, 0.2);
+                border: 1px solid var(--neon-green);
+                color: var(--neon-green);
+            }
+
+            .topic-indicator.down {
+                background: rgba(248, 113, 113, 0.2);
+                border: 1px solid var(--neon-red);
+                color: var(--neon-red);
+            }
+
+            .topic-indicator.stable {
+                background: rgba(251, 191, 36, 0.2);
+                border: 1px solid var(--neon-yellow);
+                color: var(--neon-yellow);
+            }
+
+        .topic-name {
+            flex: 1;
+            color: var(--dark-200);
+        }
+
+        .topic-change {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+            .topic-change.positive {
+                color: var(--neon-green);
+            }
+
+            .topic-change.negative {
+                color: var(--neon-red);
+            }
+
+            .topic-change.neutral {
+                color: var(--neon-yellow);
+            }
+
+        /* Action Recommendations */
+        .recommendations-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--glass-shadow);
+            margin-bottom: 2rem;
+        }
+
+        .recommendations-header {
+            background: var(--primary-gradient);
+            padding: 2rem;
+            position: relative;
+        }
+
+            .recommendations-header::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+            }
+
+        .recommendations-title {
+            position: relative;
+            z-index: 2;
+            font-family: var(--font-mono);
+            font-size: 1.2rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .recommendations-body {
+            padding: 2rem;
+        }
+
+        .recommendations-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+
+        .action-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid;
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+            .action-card:hover {
+                transform: translateY(-2px);
+                background: rgba(255, 255, 255, 0.05);
+            }
+
+            .action-card.success {
+                border-color: rgba(52, 211, 153, 0.3);
+            }
+
+            .action-card.warning {
+                border-color: rgba(251, 191, 36, 0.3);
+            }
+
+            .action-card.primary {
+                border-color: rgba(96, 165, 250, 0.3);
+            }
+
+        .action-header {
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+            .action-header.success {
+                color: var(--neon-green);
+            }
+
+            .action-header.warning {
+                color: var(--neon-yellow);
+            }
+
+            .action-header.primary {
+                color: var(--neon-blue);
+            }
+
+        .action-list {
+            list-style: none;
+            padding: 0;
+        }
+
+            .action-list li {
+                font-size: 0.8rem;
+                color: var(--dark-300);
+                line-height: 1.5;
+                margin-bottom: 0.5rem;
+                padding-left: 1rem;
+                position: relative;
+            }
+
+                .action-list li::before {
+                    content: '→';
+                    position: absolute;
+                    left: 0;
+                    color: var(--neon-cyan);
+                    font-weight: bold;
+                }
+
+        /* Modal Styling */
+        .modal-nexgen {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(52, 211, 153, 0.2);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-header-nexgen {
+            background: var(--primary-gradient);
+            padding: 2rem;
+            position: relative;
+        }
+
+            .modal-header-nexgen::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+            }
+
+        .modal-title-nexgen {
+            position: relative;
+            z-index: 2;
+            font-family: var(--font-mono);
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .modal-body-nexgen {
+            padding: 2rem;
+        }
+
+        .modal-footer-nexgen {
+            background: rgba(30, 41, 59, 0.8);
+            border: none;
+            padding: 1.5rem 2rem;
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .btn-nexgen {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid;
+            text-decoration: none;
+        }
+
+            .btn-nexgen.secondary {
+                background: rgba(255, 255, 255, 0.05);
+                border-color: rgba(255, 255, 255, 0.2);
+                color: var(--dark-300);
+            }
+
+                .btn-nexgen.secondary:hover {
+                    background: rgba(255, 255, 255, 0.1);
+                    color: #e2e8f0;
+                }
+
+            .btn-nexgen.primary {
+                background: var(--primary-gradient);
+                border-color: transparent;
+                color: white;
+            }
+
+                .btn-nexgen.primary:hover {
+                    transform: translateY(-1px);
+                    box-shadow: 0 10px 20px rgba(52, 211, 153, 0.3);
+                    color: white;
+                }
+
+        .form-control-nexgen {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: #e2e8f0;
+            padding: 0.8rem;
+            transition: all 0.2s ease;
+        }
+
+            .form-control-nexgen:focus {
+                outline: none;
+                border-color: rgba(52, 211, 153, 0.5);
+                background: rgba(255, 255, 255, 0.08);
+                box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.1);
+            }
+
+        .form-label-nexgen {
+            color: var(--dark-300);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .quick-select-group {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .quick-select-btn {
+            padding: 0.6rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            color: var(--dark-300);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+            .quick-select-btn:hover {
+                background: rgba(52, 211, 153, 0.1);
+                border-color: rgba(52, 211, 153, 0.3);
+                color: var(--neon-green);
+            }
+
+        /* Animations */
+        @@keyframes gridMove {
+            0%
+
+        {
+            transform: translate(0, 0);
+        }
+
+        100% {
+            transform: translate(60px, 60px);
+        }
+
+        }
+
+        @@keyframes meshShift {
+            0%, 100%
+
+        {
+            filter: hue-rotate(0deg);
+            transform: scale(1);
+        }
+
+        50% {
+            filter: hue-rotate(30deg);
+            transform: scale(1.05);
+        }
+
+        }
+
+        @@keyframes pulse {
+            0%, 100%
+
+        {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        50% {
+            opacity: 0.7;
+            transform: scale(1.1);
+        }
+
+        }
+
+        /* Responsive Design */
+        @@media (max-width: 1200px) {
+            .insights-section
+
+        {
+            grid-template-columns: 1fr;
+        }
+
+        .intervention-body {
+            grid-template-columns: 1fr;
+        }
+
+        .trending-columns {
+            grid-template-columns: 1fr;
+        }
+
+        }
+
+        @@media (max-width: 768px) {
+            .nav-container
+
+        {
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .nav-center {
+            order: 3;
+            flex-basis: 100%;
+            justify-content: flex-start;
+        }
+
+        .hero-title {
+            font-size: 2.5rem;
+        }
+
+        .date-range-content {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .sentiment-indicators {
+            grid-template-columns: 1fr;
+        }
+
+        .recommendations-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .chart-container {
+            height: 250px;
+        }
+
+        .quick-select-group {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        }
+
+        @@media (max-width: 480px) {
+            .chart-card, .intervention-card, .insights-card, .trending-section, .recommendations-section
+
+        {
+            margin-left: 1rem;
+            margin-right: 1rem;
+        }
+
+        .quick-select-group {
+            grid-template-columns: 1fr;
+        }
+
+        }
+
+        /* Print Styles */
+        @@media print {
+            .bg-pattern, .top-nav, .btn-nexgen, .nav-btn
+
+        {
+            display: none !important;
+        }
+
+        .chart-card,
+        .intervention-card,
+        .insights-card {
+            break-inside: avoid;
+            border: 1px solid #333;
+            background: white;
+            color: black;
+        }
+
+        .nexgen-trends-dashboard {
+            background: white;
+        }
+
+        }
+
+        /* Accessibility */
+        @@media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after
+
+        {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+        }
+
+        }
+
+        /* High Contrast Mode */
+        @@media (prefers-contrast: high) {
+            : root
+
+        {
+            --neon-green: #4dff88;
+            --neon-cyan: #00e5ff;
+            --neon-blue: #4d9fff;
+            --dark-300: #ffffff;
+            --dark-400: #cccccc;
+        }
+
+        .chart-card,
+        .intervention-card,
+        .insights-card {
+            border-width: 2px;
+        }
+
+        }
+    </style>
+}
+
+<div class="nexgen-trends-dashboard">
+    <!-- Dynamic Background -->
+    <div class="bg-pattern">
+        <div class="grid-overlay"></div>
+        <div class="gradient-mesh"></div>
     </div>
 
-    <!-- Date Range Display -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body py-3">
-                    <div class="row align-items-center">
-                        <div class="col-md-6">
-                            <h6 class="mb-0">
-                                <i class="fas fa-calendar-check me-2 text-primary"></i>
-                                Analysis Period
-                            </h6>
-                        </div>
-                        <div class="col-md-6 text-end">
-                            <span class="badge bg-primary px-3 py-2">
-                                <i class="fas fa-calendar me-1"></i>
-                                @ViewBag.FromDate.ToString("MMM dd, yyyy") - @ViewBag.ToDate.ToString("MMM dd, yyyy")
-                            </span>
-                        </div>
+    <!-- Top Navigation Bar -->
+    <nav class="top-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <div class="brand-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="brand-text">
+                    <span class="brand-name">TRENDS ANALYZER</span>
+                    <span class="brand-version">v1.0</span>
+                </div>
+            </div>
+
+            <div class="nav-center">
+                <nav class="breadcrumb-nexgen">
+                    <a href="@Url.Action("Index")" class="crumb">
+                        <i class="fas fa-brain"></i> ANALYSIS DASHBOARD
+                    </a>
+                    <i class="fas fa-chevron-right"></i>
+                    <a href="@Url.Action("AnalyzeQuestionnaire", new { id = ViewBag.QuestionnaireId })" class="crumb">
+                        @ViewBag.QuestionnaireName?.ToUpper()
+                    </a>
+                    <i class="fas fa-chevron-right"></i>
+                    <span class="crumb active">TRENDS ANALYSIS</span>
+                </nav>
+            </div>
+
+            <div class="nav-actions">
+                <button type="button" class="nav-btn" data-bs-toggle="modal" data-bs-target="#dateRangeModal">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Change Period</span>
+                </button>
+                <button type="button" class="nav-btn" onclick="exportTrendsData()">
+                    <i class="fas fa-download"></i>
+                    <span>Export Trends</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-nexgen">
+        <div class="container-fluid">
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <span class="badge-dot"></span>
+                    <span>PREDICTIVE MENTAL HEALTH ANALYTICS</span>
+                </div>
+                <h1 class="hero-title">
+                    Mental Health
+                    <span class="title-gradient">Trends</span>
+                    Analysis
+                </h1>
+                <p class="hero-description">
+                    Track workplace mental health patterns and intervention effectiveness over time
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container-fluid">
+            <!-- Date Range Display -->
+            <div class="date-range-card">
+                <div class="date-range-content">
+                    <h3 class="date-range-title">
+                        <i class="fas fa-calendar-check"></i>
+                        Analysis Period
+                    </h3>
+                    <div class="date-badge">
+                        <i class="fas fa-calendar"></i>
+                        @ViewBag.FromDate.ToString("MMM dd, yyyy") - @ViewBag.ToDate.ToString("MMM dd, yyyy")
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!-- Trend Charts Row -->
-    <div class="row mb-4">
-        <div class="col-lg-6">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-header bg-white border-bottom">
-                    <h5 class="mb-0">
-                        <i class="fas fa-heart me-2 text-primary"></i>
-                        Mental Health Score Trends
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="chart-container">
-                        <canvas id="mentalHealthTrendChart" width="400" height="300"></canvas>
-                    </div>
-                    <div class="mt-3 text-center">
-                        <small class="text-muted">
-                            <i class="fas fa-info-circle me-1"></i>
-                            Shows overall mental health score progression over time
-                        </small>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-6">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-header bg-white border-bottom">
-                    <h5 class="mb-0">
-                        <i class="fas fa-shield-alt me-2 text-primary"></i>
-                        Risk Level Distribution Trends
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="chart-container">
-                        <canvas id="riskTrendChart" width="400" height="300"></canvas>
-                    </div>
-                    <div class="mt-3 text-center">
-                        <small class="text-muted">
-                            <i class="fas fa-info-circle me-1"></i>
-                            Tracks changes in employee risk levels over time
-                        </small>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Sentiment and Workplace Factors -->
-    <div class="row mb-4">
-        <div class="col-lg-8">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-header bg-white border-bottom">
-                    <h5 class="mb-0">
-                        <i class="fas fa-smile me-2 text-primary"></i>
-                        Sentiment Evolution
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="chart-container">
-                        <canvas id="sentimentTrendChart" width="600" height="300"></canvas>
-                    </div>
-                    <div class="row mt-3 text-center">
-                        <div class="col-4">
-                            <div class="sentiment-indicator">
-                                <i class="fas fa-smile text-success fa-lg"></i>
-                                <h6 class="mb-0 mt-1">Positive Trend</h6>
-                                <small class="text-muted">+15% this period</small>
-                            </div>
+            <!-- Trend Charts Row -->
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h2 class="chart-title">
+                                <i class="fas fa-heart"></i>
+                                Mental Health Score Trends
+                            </h2>
                         </div>
-                        <div class="col-4">
-                            <div class="sentiment-indicator">
-                                <i class="fas fa-meh text-warning fa-lg"></i>
-                                <h6 class="mb-0 mt-1">Neutral Stable</h6>
-                                <small class="text-muted">-2% this period</small>
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="sentiment-indicator">
-                                <i class="fas fa-frown text-danger fa-lg"></i>
-                                <h6 class="mb-0 mt-1">Negative Decline</h6>
-                                <small class="text-muted">-13% this period</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-4">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-header bg-white border-bottom">
-                    <h5 class="mb-0">
-                        <i class="fas fa-trending-up me-2 text-primary"></i>
-                        Key Improvements
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="improvement-item mb-3">
-                        <div class="d-flex align-items-center mb-2">
-                            <i class="fas fa-arrow-up text-success me-2"></i>
-                            <strong class="text-success">Work-Life Balance</strong>
-                        </div>
-                        <div class="progress mb-1" style="height: 8px;">
-                            <div class="progress-bar bg-success" style="width: 78%"></div>
-                        </div>
-                        <small class="text-muted">+23% improvement</small>
-                    </div>
-
-                    <div class="improvement-item mb-3">
-                        <div class="d-flex align-items-center mb-2">
-                            <i class="fas fa-arrow-up text-success me-2"></i>
-                            <strong class="text-success">Team Communication</strong>
-                        </div>
-                        <div class="progress mb-1" style="height: 8px;">
-                            <div class="progress-bar bg-success" style="width: 65%"></div>
-                        </div>
-                        <small class="text-muted">+18% improvement</small>
-                    </div>
-
-                    <div class="improvement-item mb-3">
-                        <div class="d-flex align-items-center mb-2">
-                            <i class="fas fa-arrow-down text-danger me-2"></i>
-                            <strong class="text-danger">Workload Stress</strong>
-                        </div>
-                        <div class="progress mb-1" style="height: 8px;">
-                            <div class="progress-bar bg-danger" style="width: 45%"></div>
-                        </div>
-                        <small class="text-muted">-12% (reduced stress)</small>
-                    </div>
-
-                    <div class="improvement-item">
-                        <div class="d-flex align-items-center mb-2">
-                            <i class="fas fa-minus text-warning me-2"></i>
-                            <strong class="text-warning">Management Support</strong>
-                        </div>
-                        <div class="progress mb-1" style="height: 8px;">
-                            <div class="progress-bar bg-warning" style="width: 55%"></div>
-                        </div>
-                        <small class="text-muted">No significant change</small>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Intervention Effectiveness -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-success text-white">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">
-                            <i class="fas fa-chart-area me-2"></i>
-                            NVKN Intervention Effectiveness Tracking
-                        </h5>
-                        <span class="badge bg-white text-success">
-                            <i class="fas fa-user-md me-1"></i>Clinical Insights
-                        </span>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-8">
+                        <div class="chart-body">
                             <div class="chart-container">
-                                <canvas id="interventionEffectivenessChart" width="600" height="250"></canvas>
+                                <canvas id="mentalHealthTrendChart"></canvas>
+                            </div>
+                            <div class="chart-info">
+                                <i class="fas fa-info-circle"></i>
+                                Shows overall mental health score progression over time
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <h6 class="mb-3">Intervention Impact</h6>
+                    </div>
+                </div>
 
-                            <div class="intervention-result mb-3">
-                                <div class="d-flex justify-content-between align-items-center mb-1">
-                                    <span class="small">Stress Management Workshops</span>
-                                    <span class="badge bg-success">+34%</span>
-                                </div>
-                                <div class="progress" style="height: 6px;">
-                                    <div class="progress-bar bg-success" style="width: 85%"></div>
-                                </div>
-                                <small class="text-muted">Highly effective</small>
+                <div class="col-lg-6">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h2 class="chart-title">
+                                <i class="fas fa-shield-alt"></i>
+                                Risk Level Distribution Trends
+                            </h2>
+                        </div>
+                        <div class="chart-body">
+                            <div class="chart-container">
+                                <canvas id="riskTrendChart"></canvas>
                             </div>
-
-                            <div class="intervention-result mb-3">
-                                <div class="d-flex justify-content-between align-items-center mb-1">
-                                    <span class="small">Manager Training Program</span>
-                                    <span class="badge bg-primary">+28%</span>
-                                </div>
-                                <div class="progress" style="height: 6px;">
-                                    <div class="progress-bar bg-primary" style="width: 75%"></div>
-                                </div>
-                                <small class="text-muted">Very effective</small>
-                            </div>
-
-                            <div class="intervention-result mb-3">
-                                <div class="d-flex justify-content-between align-items-center mb-1">
-                                    <span class="small">Flexible Work Arrangements</span>
-                                    <span class="badge bg-info">+22%</span>
-                                </div>
-                                <div class="progress" style="height: 6px;">
-                                    <div class="progress-bar bg-info" style="width: 65%"></div>
-                                </div>
-                                <small class="text-muted">Effective</small>
-                            </div>
-
-                            <div class="intervention-result">
-                                <div class="d-flex justify-content-between align-items-center mb-1">
-                                    <span class="small">Team Building Activities</span>
-                                    <span class="badge bg-warning text-dark">+12%</span>
-                                </div>
-                                <div class="progress" style="height: 6px;">
-                                    <div class="progress-bar bg-warning" style="width: 45%"></div>
-                                </div>
-                                <small class="text-muted">Moderate impact</small>
+                            <div class="chart-info">
+                                <i class="fas fa-info-circle"></i>
+                                Tracks changes in employee risk levels over time
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!-- Trend Insights and Predictions -->
-    <div class="row mb-4">
-        <div class="col-lg-6">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-header bg-white border-bottom">
-                    <h5 class="mb-0">
-                        <i class="fas fa-crystal-ball me-2 text-primary"></i>
-                        Trend Insights & Predictions
-                    </h5>
+            <!-- Sentiment and Workplace Factors -->
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h2 class="chart-title">
+                                <i class="fas fa-smile"></i>
+                                Sentiment Evolution
+                            </h2>
+                        </div>
+                        <div class="chart-body">
+                            <div class="chart-container">
+                                <canvas id="sentimentTrendChart"></canvas>
+                            </div>
+                            <div class="sentiment-indicators">
+                                <div class="sentiment-indicator positive">
+                                    <div class="sentiment-icon">
+                                        <i class="fas fa-smile"></i>
+                                    </div>
+                                    <div class="sentiment-title">Positive Trend</div>
+                                    <div class="sentiment-change">+15% this period</div>
+                                </div>
+                                <div class="sentiment-indicator neutral">
+                                    <div class="sentiment-icon">
+                                        <i class="fas fa-meh"></i>
+                                    </div>
+                                    <div class="sentiment-title">Neutral Stable</div>
+                                    <div class="sentiment-change">-2% this period</div>
+                                </div>
+                                <div class="sentiment-indicator negative">
+                                    <div class="sentiment-icon">
+                                        <i class="fas fa-frown"></i>
+                                    </div>
+                                    <div class="sentiment-title">Negative Decline</div>
+                                    <div class="sentiment-change">-13% this period</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <div class="insight-item mb-4">
-                        <div class="d-flex align-items-start">
-                            <div class="flex-shrink-0">
-                                <i class="fas fa-trending-up text-success fa-lg me-3 mt-1"></i>
+
+                <div class="col-lg-4">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h2 class="chart-title">
+                                <i class="fas fa-trending-up"></i>
+                                Key Improvements
+                            </h2>
+                        </div>
+                        <div class="chart-body">
+                            <div class="improvement-item positive">
+                                <div class="improvement-header">
+                                    <div class="improvement-icon">
+                                        <i class="fas fa-arrow-up"></i>
+                                    </div>
+                                    <div class="improvement-title positive">Work-Life Balance</div>
+                                </div>
+                                <div class="progress-bar-nexgen">
+                                    <div class="progress-fill success" style="width: 78%"></div>
+                                </div>
+                                <div class="improvement-change">+23% improvement</div>
                             </div>
-                            <div>
-                                <h6 class="text-success mb-1">Positive Trajectory</h6>
-                                <p class="mb-2 small">
-                                    Mental health scores have improved 18% over the analyzed period,
-                                    indicating successful intervention strategies.
-                                </p>
-                                <span class="badge bg-success">Predicted: Continued improvement</span>
+
+                            <div class="improvement-item positive">
+                                <div class="improvement-header">
+                                    <div class="improvement-icon">
+                                        <i class="fas fa-arrow-up"></i>
+                                    </div>
+                                    <div class="improvement-title positive">Team Communication</div>
+                                </div>
+                                <div class="progress-bar-nexgen">
+                                    <div class="progress-fill success" style="width: 65%"></div>
+                                </div>
+                                <div class="improvement-change">+18% improvement</div>
+                            </div>
+
+                            <div class="improvement-item negative">
+                                <div class="improvement-header">
+                                    <div class="improvement-icon">
+                                        <i class="fas fa-arrow-down"></i>
+                                    </div>
+                                    <div class="improvement-title negative">Workload Stress</div>
+                                </div>
+                                <div class="progress-bar-nexgen">
+                                    <div class="progress-fill danger" style="width: 45%"></div>
+                                </div>
+                                <div class="improvement-change">-12% (reduced stress)</div>
+                            </div>
+
+                            <div class="improvement-item neutral">
+                                <div class="improvement-header">
+                                    <div class="improvement-icon">
+                                        <i class="fas fa-minus"></i>
+                                    </div>
+                                    <div class="improvement-title neutral">Management Support</div>
+                                </div>
+                                <div class="progress-bar-nexgen">
+                                    <div class="progress-fill warning" style="width: 55%"></div>
+                                </div>
+                                <div class="improvement-change">No significant change</div>
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
 
-                    <div class="insight-item mb-4">
-                        <div class="d-flex align-items-start">
-                            <div class="flex-shrink-0">
-                                <i class="fas fa-exclamation-triangle text-warning fa-lg me-3 mt-1"></i>
+            <!-- Intervention Effectiveness -->
+            <div class="intervention-card">
+                <div class="intervention-header">
+                    <div class="intervention-title-group">
+                        <h2 class="intervention-title">
+                            <i class="fas fa-chart-area"></i>
+                            NVKN Intervention Effectiveness Tracking
+                        </h2>
+                        <div class="clinical-badge">
+                            <i class="fas fa-user-md"></i>
+                            CLINICAL INSIGHTS
+                        </div>
+                    </div>
+                </div>
+                <div class="intervention-body">
+                    <div class="chart-container">
+                        <canvas id="interventionEffectivenessChart"></canvas>
+                    </div>
+                    <div class="intervention-results">
+                        <h3 class="results-title">Intervention Impact</h3>
+
+                        <div class="intervention-result">
+                            <div class="result-header">
+                                <div class="result-name">Stress Management Workshops</div>
+                                <div class="result-badge success">+34%</div>
                             </div>
-                            <div>
-                                <h6 class="text-warning mb-1">Area of Concern</h6>
-                                <p class="mb-2 small">
-                                    Management support scores remain static.
-                                    This may become a limiting factor for further improvements.
-                                </p>
-                                <span class="badge bg-warning text-dark">Action needed: Manager training</span>
+                            <div class="progress-bar-nexgen">
+                                <div class="progress-fill success" style="width: 85%"></div>
+                            </div>
+                            <div class="result-effectiveness">Highly effective</div>
+                        </div>
+
+                        <div class="intervention-result">
+                            <div class="result-header">
+                                <div class="result-name">Manager Training Program</div>
+                                <div class="result-badge primary">+28%</div>
+                            </div>
+                            <div class="progress-bar-nexgen">
+                                <div class="progress-fill" style="width: 75%; background: var(--info-gradient);"></div>
+                            </div>
+                            <div class="result-effectiveness">Very effective</div>
+                        </div>
+
+                        <div class="intervention-result">
+                            <div class="result-header">
+                                <div class="result-name">Flexible Work Arrangements</div>
+                                <div class="result-badge info">+22%</div>
+                            </div>
+                            <div class="progress-bar-nexgen">
+                                <div class="progress-fill" style="width: 65%; background: var(--info-gradient);"></div>
+                            </div>
+                            <div class="result-effectiveness">Effective</div>
+                        </div>
+
+                        <div class="intervention-result">
+                            <div class="result-header">
+                                <div class="result-name">Team Building Activities</div>
+                                <div class="result-badge warning">+12%</div>
+                            </div>
+                            <div class="progress-bar-nexgen">
+                                <div class="progress-fill warning" style="width: 45%"></div>
+                            </div>
+                            <div class="result-effectiveness">Moderate impact</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trend Insights and KPIs -->
+            <div class="insights-section">
+                <div class="insights-card">
+                    <div class="insights-header">
+                        <h2 class="insights-title">
+                            <i class="fas fa-crystal-ball"></i>
+                            Trend Insights & Predictions
+                        </h2>
+                    </div>
+                    <div class="insights-body">
+                        <div class="insight-item positive">
+                            <div class="insight-header">
+                                <div class="insight-icon">
+                                    <i class="fas fa-trending-up"></i>
+                                </div>
+                                <div class="insight-content">
+                                    <div class="insight-title positive">Positive Trajectory</div>
+                                    <div class="insight-description">
+                                        Mental health scores have improved 18% over the analyzed period,
+                                        indicating successful intervention strategies.
+                                    </div>
+                                    <div class="insight-badge positive">Predicted: Continued improvement</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="insight-item warning">
+                            <div class="insight-header">
+                                <div class="insight-icon">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </div>
+                                <div class="insight-content">
+                                    <div class="insight-title warning">Area of Concern</div>
+                                    <div class="insight-description">
+                                        Management support scores remain static.
+                                        This may become a limiting factor for further improvements.
+                                    </div>
+                                    <div class="insight-badge warning">Action needed: Manager training</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="insight-item info">
+                            <div class="insight-header">
+                                <div class="insight-icon">
+                                    <i class="fas fa-calendar-week"></i>
+                                </div>
+                                <div class="insight-content">
+                                    <div class="insight-title info">Seasonal Pattern</div>
+                                    <div class="insight-description">
+                                        Mental health scores typically dip during Q4 (holiday stress)
+                                        and peak in Q2 (post-intervention period).
+                                    </div>
+                                    <div class="insight-badge info">Plan: Preventive Q4 interventions</div>
+                                </div>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <div class="insight-item">
-                        <div class="d-flex align-items-start">
-                            <div class="flex-shrink-0">
-                                <i class="fas fa-calendar-week text-info fa-lg me-3 mt-1"></i>
+                <div class="insights-card">
+                    <div class="insights-header">
+                        <h2 class="insights-title">
+                            <i class="fas fa-bullseye"></i>
+                            Key Performance Indicators
+                        </h2>
+                    </div>
+                    <div class="insights-body">
+                        <div class="kpi-item">
+                            <div class="kpi-header">
+                                <div class="kpi-info">
+                                    <div class="kpi-title">Mental Health Response Rate</div>
+                                    <div class="kpi-subtitle">Employee participation in assessments</div>
+                                </div>
+                                <div class="kpi-value-section">
+                                    <div class="kpi-value success">87%</div>
+                                    <div class="kpi-change">
+                                        <i class="fas fa-arrow-up"></i> +12%
+                                    </div>
+                                </div>
                             </div>
-                            <div>
-                                <h6 class="text-info mb-1">Seasonal Pattern</h6>
-                                <p class="mb-2 small">
-                                    Mental health scores typically dip during Q4 (holiday stress)
-                                    and peak in Q2 (post-intervention period).
-                                </p>
-                                <span class="badge bg-info">Plan: Preventive Q4 interventions</span>
+                            <div class="progress-bar-nexgen">
+                                <div class="progress-fill success" style="width: 87%"></div>
+                            </div>
+                        </div>
+
+                        <div class="kpi-item">
+                            <div class="kpi-header">
+                                <div class="kpi-info">
+                                    <div class="kpi-title">High-Risk Case Resolution</div>
+                                    <div class="kpi-subtitle">Successful intervention outcomes</div>
+                                </div>
+                                <div class="kpi-value-section">
+                                    <div class="kpi-value primary">73%</div>
+                                    <div class="kpi-change">
+                                        <i class="fas fa-arrow-up"></i> +8%
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="progress-bar-nexgen">
+                                <div class="progress-fill" style="width: 73%; background: var(--info-gradient);"></div>
+                            </div>
+                        </div>
+
+                        <div class="kpi-item">
+                            <div class="kpi-header">
+                                <div class="kpi-info">
+                                    <div class="kpi-title">Workplace Satisfaction</div>
+                                    <div class="kpi-subtitle">Overall employee satisfaction score</div>
+                                </div>
+                                <div class="kpi-value-section">
+                                    <div class="kpi-value info">76%</div>
+                                    <div class="kpi-change">
+                                        <i class="fas fa-arrow-up"></i> +19%
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="progress-bar-nexgen">
+                                <div class="progress-fill" style="width: 76%; background: var(--info-gradient);"></div>
+                            </div>
+                        </div>
+
+                        <div class="kpi-item">
+                            <div class="kpi-header">
+                                <div class="kpi-info">
+                                    <div class="kpi-title">Early Warning Detection</div>
+                                    <div class="kpi-subtitle">AI-powered risk identification rate</div>
+                                </div>
+                                <div class="kpi-value-section">
+                                    <div class="kpi-value warning">92%</div>
+                                    <div class="kpi-change">
+                                        <i class="fas fa-arrow-up"></i> +5%
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="progress-bar-nexgen">
+                                <div class="progress-fill warning" style="width: 92%"></div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="col-lg-6">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-header bg-white border-bottom">
-                    <h5 class="mb-0">
-                        <i class="fas fa-bullseye me-2 text-primary"></i>
-                        Key Performance Indicators
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="kpi-item mb-4">
-                        <div class="row align-items-center">
-                            <div class="col-8">
-                                <h6 class="mb-1">Mental Health Response Rate</h6>
-                                <small class="text-muted">Employee participation in assessments</small>
-                            </div>
-                            <div class="col-4 text-end">
-                                <h4 class="mb-0 text-success">87%</h4>
-                                <small class="text-success">
-                                    <i class="fas fa-arrow-up"></i> +12%
-                                </small>
-                            </div>
-                        </div>
-                        <div class="progress mt-2" style="height: 8px;">
-                            <div class="progress-bar bg-success" style="width: 87%"></div>
-                        </div>
-                    </div>
-
-                    <div class="kpi-item mb-4">
-                        <div class="row align-items-center">
-                            <div class="col-8">
-                                <h6 class="mb-1">High-Risk Case Resolution</h6>
-                                <small class="text-muted">Successful intervention outcomes</small>
-                            </div>
-                            <div class="col-4 text-end">
-                                <h4 class="mb-0 text-primary">73%</h4>
-                                <small class="text-success">
-                                    <i class="fas fa-arrow-up"></i> +8%
-                                </small>
-                            </div>
-                        </div>
-                        <div class="progress mt-2" style="height: 8px;">
-                            <div class="progress-bar bg-primary" style="width: 73%"></div>
-                        </div>
-                    </div>
-
-                    <div class="kpi-item mb-4">
-                        <div class="row align-items-center">
-                            <div class="col-8">
-                                <h6 class="mb-1">Workplace Satisfaction</h6>
-                                <small class="text-muted">Overall employee satisfaction score</small>
-                            </div>
-                            <div class="col-4 text-end">
-                                <h4 class="mb-0 text-info">76%</h4>
-                                <small class="text-success">
-                                    <i class="fas fa-arrow-up"></i> +19%
-                                </small>
-                            </div>
-                        </div>
-                        <div class="progress mt-2" style="height: 8px;">
-                            <div class="progress-bar bg-info" style="width: 76%"></div>
-                        </div>
-                    </div>
-
-                    <div class="kpi-item">
-                        <div class="row align-items-center">
-                            <div class="col-8">
-                                <h6 class="mb-1">Early Warning Detection</h6>
-                                <small class="text-muted">AI-powered risk identification rate</small>
-                            </div>
-                            <div class="col-4 text-end">
-                                <h4 class="mb-0 text-warning">92%</h4>
-                                <small class="text-success">
-                                    <i class="fas fa-arrow-up"></i> +5%
-                                </small>
-                            </div>
-                        </div>
-                        <div class="progress mt-2" style="height: 8px;">
-                            <div class="progress-bar bg-warning" style="width: 92%"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Trending Topics -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white border-bottom">
-                    <h5 class="mb-0">
-                        <i class="fas fa-fire me-2 text-primary"></i>
+            <!-- Trending Topics -->
+            <div class="trending-section">
+                <div class="trending-header">
+                    <h2 class="trending-title">
+                        <i class="fas fa-fire"></i>
                         Trending Mental Health Topics
-                    </h5>
+                    </h2>
                 </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h6 class="text-success mb-3">
-                                <i class="fas fa-arrow-up me-2"></i>Improving Areas
-                            </h6>
-                            <div class="trending-topic mb-2">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="badge bg-success me-2">↗</span>
-                                    <span class="flex-grow-1">Remote Work Satisfaction</span>
-                                    <small class="text-success fw-bold">+31%</small>
+                <div class="trending-body">
+                    <div class="trending-columns">
+                        <div class="trending-category">
+                            <h3 class="category-title improving">
+                                <i class="fas fa-arrow-up"></i>Improving Areas
+                            </h3>
+                            <div class="trending-topic">
+                                <div class="topic-content">
+                                    <div class="topic-indicator up">↗</div>
+                                    <div class="topic-name">Remote Work Satisfaction</div>
+                                    <div class="topic-change positive">+31%</div>
                                 </div>
                             </div>
-                            <div class="trending-topic mb-2">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="badge bg-success me-2">↗</span>
-                                    <span class="flex-grow-1">Team Collaboration</span>
-                                    <small class="text-success fw-bold">+24%</small>
+                            <div class="trending-topic">
+                                <div class="topic-content">
+                                    <div class="topic-indicator up">↗</div>
+                                    <div class="topic-name">Team Collaboration</div>
+                                    <div class="topic-change positive">+24%</div>
                                 </div>
                             </div>
-                            <div class="trending-topic mb-2">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="badge bg-success me-2">↗</span>
-                                    <span class="flex-grow-1">Mental Health Awareness</span>
-                                    <small class="text-success fw-bold">+28%</small>
+                            <div class="trending-topic">
+                                <div class="topic-content">
+                                    <div class="topic-indicator up">↗</div>
+                                    <div class="topic-name">Mental Health Awareness</div>
+                                    <div class="topic-change positive">+28%</div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="col-md-6">
-                            <h6 class="text-warning mb-3">
-                                <i class="fas fa-eye me-2"></i>Areas Needing Attention
-                            </h6>
-                            <div class="trending-topic mb-2">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="badge bg-warning text-dark me-2">→</span>
-                                    <span class="flex-grow-1">Deadline Pressure</span>
-                                    <small class="text-warning fw-bold">0%</small>
+                        <div class="trending-category">
+                            <h3 class="category-title attention">
+                                <i class="fas fa-eye"></i>Areas Needing Attention
+                            </h3>
+                            <div class="trending-topic">
+                                <div class="topic-content">
+                                    <div class="topic-indicator stable">→</div>
+                                    <div class="topic-name">Deadline Pressure</div>
+                                    <div class="topic-change neutral">0%</div>
                                 </div>
                             </div>
-                            <div class="trending-topic mb-2">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="badge bg-danger me-2">↘</span>
-                                    <span class="flex-grow-1">Sleep Quality</span>
-                                    <small class="text-danger fw-bold">-8%</small>
+                            <div class="trending-topic">
+                                <div class="topic-content">
+                                    <div class="topic-indicator down">↘</div>
+                                    <div class="topic-name">Sleep Quality</div>
+                                    <div class="topic-change negative">-8%</div>
                                 </div>
                             </div>
-                            <div class="trending-topic mb-2">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="badge bg-warning text-dark me-2">→</span>
-                                    <span class="flex-grow-1">Career Development Clarity</span>
-                                    <small class="text-warning fw-bold">-2%</small>
+                            <div class="trending-topic">
+                                <div class="topic-content">
+                                    <div class="topic-indicator stable">→</div>
+                                    <div class="topic-name">Career Development Clarity</div>
+                                    <div class="topic-change neutral">-2%</div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!-- Action Recommendations -->
-    <div class="row">
-        <div class="col-12">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">
-                        <i class="fas fa-lightbulb me-2"></i>
+            <!-- Action Recommendations -->
+            <div class="recommendations-section">
+                <div class="recommendations-header">
+                    <h2 class="recommendations-title">
+                        <i class="fas fa-lightbulb"></i>
                         Trend-Based Action Recommendations
-                    </h5>
+                    </h2>
                 </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="action-card border border-success rounded p-3 mb-3">
-                                <h6 class="text-success mb-2">
-                                    <i class="fas fa-check-circle me-2"></i>Continue Success
-                                </h6>
-                                <ul class="small mb-0">
-                                    <li>Maintain current work-life balance initiatives</li>
-                                    <li>Expand successful stress management programs</li>
-                                    <li>Share best practices across departments</li>
-                                </ul>
-                            </div>
+                <div class="recommendations-body">
+                    <div class="recommendations-grid">
+                        <div class="action-card success">
+                            <h3 class="action-header success">
+                                <i class="fas fa-check-circle"></i>Continue Success
+                            </h3>
+                            <ul class="action-list">
+                                <li>Maintain current work-life balance initiatives</li>
+                                <li>Expand successful stress management programs</li>
+                                <li>Share best practices across departments</li>
+                            </ul>
                         </div>
-                        <div class="col-md-4">
-                            <div class="action-card border border-warning rounded p-3 mb-3">
-                                <h6 class="text-warning mb-2">
-                                    <i class="fas fa-exclamation-triangle me-2"></i>Address Concerns
-                                </h6>
-                                <ul class="small mb-0">
-                                    <li>Implement sleep hygiene education programs</li>
-                                    <li>Review deadline setting processes</li>
-                                    <li>Enhance manager support training</li>
-                                </ul>
-                            </div>
+                        <div class="action-card warning">
+                            <h3 class="action-header warning">
+                                <i class="fas fa-exclamation-triangle"></i>Address Concerns
+                            </h3>
+                            <ul class="action-list">
+                                <li>Implement sleep hygiene education programs</li>
+                                <li>Review deadline setting processes</li>
+                                <li>Enhance manager support training</li>
+                            </ul>
                         </div>
-                        <div class="col-md-4">
-                            <div class="action-card border border-primary rounded p-3 mb-3">
-                                <h6 class="text-primary mb-2">
-                                    <i class="fas fa-rocket me-2"></i>Strategic Focus
-                                </h6>
-                                <ul class="small mb-0">
-                                    <li>Develop career development clarity initiatives</li>
-                                    <li>Create predictive mental health models</li>
-                                    <li>Establish quarterly trend review meetings</li>
-                                </ul>
-                            </div>
+                        <div class="action-card primary">
+                            <h3 class="action-header primary">
+                                <i class="fas fa-rocket"></i>Strategic Focus
+                            </h3>
+                            <ul class="action-list">
+                                <li>Develop career development clarity initiatives</li>
+                                <li>Create predictive mental health models</li>
+                                <li>Establish quarterly trend review meetings</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </main>
 </div>
 
 <!-- Date Range Selection Modal -->
-<div class="modal fade" id="dateRangeModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="fas fa-calendar-alt me-2"></i>Select Analysis Period
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+<div class="modal fade" id="dateRangeModal" tabindex="-1" data-bs-backdrop="true" data-bs-keyboard="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-nexgen">
+            <div class="modal-header-nexgen">
+                <h2 class="modal-title-nexgen">
+                    <i class="fas fa-calendar-alt"></i>
+                    Select Analysis Period
+                </h2>
             </div>
-            <div class="modal-body">
+            <div class="modal-body-nexgen">
                 <form id="dateRangeForm">
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="fromDate" class="form-label">From Date</label>
-                                <input type="date" class="form-control" id="fromDate" value="@ViewBag.FromDate.ToString("yyyy-MM-dd")">
+                                <label for="fromDate" class="form-label-nexgen">From Date</label>
+                                <input type="date" class="form-control-nexgen" id="fromDate" value="@ViewBag.FromDate.ToString("yyyy-MM-dd")">
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="toDate" class="form-label">To Date</label>
-                                <input type="date" class="form-control" id="toDate" value="@ViewBag.ToDate.ToString("yyyy-MM-dd")">
+                                <label for="toDate" class="form-label-nexgen">To Date</label>
+                                <input type="date" class="form-control-nexgen" id="toDate" value="@ViewBag.ToDate.ToString("yyyy-MM-dd")">
                             </div>
                         </div>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Quick Select:</label>
-                        <div class="btn-group w-100" role="group">
-                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="setDateRange(30)">Last 30 Days</button>
-                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="setDateRange(90)">Last 3 Months</button>
-                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="setDateRange(180)">Last 6 Months</button>
-                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="setDateRange(365)">Last Year</button>
+                        <label class="form-label-nexgen">Quick Select:</label>
+                        <div class="quick-select-group">
+                            <button type="button" class="quick-select-btn" onclick="setDateRange(30)">Last 30 Days</button>
+                            <button type="button" class="quick-select-btn" onclick="setDateRange(90)">Last 3 Months</button>
+                            <button type="button" class="quick-select-btn" onclick="setDateRange(180)">Last 6 Months</button>
+                            <button type="button" class="quick-select-btn" onclick="setDateRange(365)">Last Year</button>
                         </div>
                     </div>
                 </form>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" onclick="applyDateRange()">
-                    <i class="fas fa-chart-line"></i> Analyze Period
+            <div class="modal-footer-nexgen">
+                <button type="button" class="btn-nexgen secondary" data-bs-dismiss="modal">CANCEL</button>
+                <button type="button" class="btn-nexgen primary" onclick="applyDateRange()">
+                    <i class="fas fa-chart-line"></i> ANALYZE PERIOD
                 </button>
             </div>
         </div>
@@ -614,12 +2049,18 @@
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             initializeTrendCharts();
         });
 
         function initializeTrendCharts() {
+            // Chart.js default color settings for dark theme
+            Chart.defaults.color = '#cbd5e1';
+            Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.1)';
+            Chart.defaults.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+
             // Mental Health Score Trend Chart
             const mentalHealthCtx = document.getElementById('mentalHealthTrendChart').getContext('2d');
             new Chart(mentalHealthCtx, {
@@ -629,27 +2070,50 @@
                     datasets: [{
                         label: 'Mental Health Score',
                         data: [65, 68, 72, 75, 78, 82],
-                        borderColor: '#28a745',
-                        backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                        borderColor: '#34d399',
+                        backgroundColor: 'rgba(52, 211, 153, 0.1)',
                         tension: 0.4,
                         fill: true,
-                        pointBackgroundColor: '#28a745',
-                        pointBorderColor: '#fff',
+                        pointBackgroundColor: '#34d399',
+                        pointBorderColor: '#ffffff',
                         pointBorderWidth: 2,
-                        pointRadius: 6
+                        pointRadius: 6,
+                        pointHoverRadius: 8
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { display: false }
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                            titleColor: '#ffffff',
+                            bodyColor: '#cbd5e1',
+                            borderColor: 'rgba(52, 211, 153, 0.3)',
+                            borderWidth: 1,
+                            cornerRadius: 8
+                        }
                     },
                     scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)',
+                                borderColor: 'rgba(255, 255, 255, 0.2)'
+                            },
+                            ticks: {
+                                color: '#cbd5e1'
+                            }
+                        },
                         y: {
                             beginAtZero: true,
                             max: 100,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)',
+                                borderColor: 'rgba(255, 255, 255, 0.2)'
+                            },
                             ticks: {
+                                color: '#cbd5e1',
                                 callback: function(value) {
                                     return value + '%';
                                 }
@@ -669,31 +2133,60 @@
                         {
                             label: 'Low Risk',
                             data: [45, 48, 52, 58, 62, 68],
-                            borderColor: '#28a745',
-                            backgroundColor: '#28a745',
-                            tension: 0.4
+                            borderColor: '#34d399',
+                            backgroundColor: 'rgba(52, 211, 153, 0.2)',
+                            tension: 0.4,
+                            fill: true
                         },
                         {
                             label: 'Moderate Risk',
                             data: [25, 23, 21, 18, 16, 14],
-                            borderColor: '#ffc107',
-                            backgroundColor: '#ffc107',
-                            tension: 0.4
+                            borderColor: '#fbbf24',
+                            backgroundColor: 'rgba(251, 191, 36, 0.2)',
+                            tension: 0.4,
+                            fill: true
                         },
                         {
                             label: 'High Risk',
                             data: [15, 12, 10, 8, 6, 4],
-                            borderColor: '#dc3545',
-                            backgroundColor: '#dc3545',
-                            tension: 0.4
+                            borderColor: '#f87171',
+                            backgroundColor: 'rgba(248, 113, 113, 0.2)',
+                            tension: 0.4,
+                            fill: true
                         }
                     ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    plugins: {
+                        tooltip: {
+                            backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                            titleColor: '#ffffff',
+                            bodyColor: '#cbd5e1',
+                            borderColor: 'rgba(52, 211, 153, 0.3)',
+                            borderWidth: 1,
+                            cornerRadius: 8
+                        }
+                    },
                     scales: {
-                        y: { beginAtZero: true }
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#cbd5e1'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#cbd5e1'
+                            }
+                        }
                     }
                 }
             });
@@ -701,31 +2194,31 @@
             // Sentiment Evolution Chart
             const sentimentCtx = document.getElementById('sentimentTrendChart').getContext('2d');
             new Chart(sentimentCtx, {
-                type: 'area',
+                type: 'line',
                 data: {
                     labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6'],
                     datasets: [
                         {
                             label: 'Positive',
                             data: [45, 48, 52, 58, 62, 68],
-                            borderColor: '#28a745',
-                            backgroundColor: 'rgba(40, 167, 69, 0.3)',
+                            borderColor: '#34d399',
+                            backgroundColor: 'rgba(52, 211, 153, 0.3)',
                             tension: 0.4,
                             fill: true
                         },
                         {
                             label: 'Neutral',
                             data: [35, 34, 33, 30, 28, 25],
-                            borderColor: '#6c757d',
-                            backgroundColor: 'rgba(108, 117, 125, 0.3)',
+                            borderColor: '#64748b',
+                            backgroundColor: 'rgba(100, 116, 139, 0.3)',
                             tension: 0.4,
                             fill: true
                         },
                         {
                             label: 'Negative',
                             data: [20, 18, 15, 12, 10, 7],
-                            borderColor: '#dc3545',
-                            backgroundColor: 'rgba(220, 53, 69, 0.3)',
+                            borderColor: '#f87171',
+                            backgroundColor: 'rgba(248, 113, 113, 0.3)',
                             tension: 0.4,
                             fill: true
                         }
@@ -734,8 +2227,35 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    plugins: {
+                        tooltip: {
+                            backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                            titleColor: '#ffffff',
+                            bodyColor: '#cbd5e1',
+                            borderColor: 'rgba(52, 211, 153, 0.3)',
+                            borderWidth: 1,
+                            cornerRadius: 8
+                        }
+                    },
                     scales: {
-                        y: { beginAtZero: true, max: 100 }
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#cbd5e1'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#cbd5e1'
+                            }
+                        }
                     }
                 }
             });
@@ -750,26 +2270,47 @@
                         label: 'Mental Health Score',
                         data: [58, 65, 72, 78, 84],
                         backgroundColor: [
-                            '#dc3545', // Red for pre-intervention
-                            '#ffc107', // Yellow for month 1
-                            '#17a2b8', // Blue for month 2
-                            '#28a745', // Green for month 3
-                            '#007bff'  // Primary for current
+                            '#f87171', // Red for pre-intervention
+                            '#fbbf24', // Yellow for month 1
+                            '#22d3ee', // Cyan for month 2
+                            '#34d399', // Green for month 3
+                            '#60a5fa'  // Blue for current
                         ],
-                        borderWidth: 0
+                        borderRadius: 8,
+                        borderSkipped: false
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { display: false }
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                            titleColor: '#ffffff',
+                            bodyColor: '#cbd5e1',
+                            borderColor: 'rgba(52, 211, 153, 0.3)',
+                            borderWidth: 1,
+                            cornerRadius: 8
+                        }
                     },
                     scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#cbd5e1'
+                            }
+                        },
                         y: {
                             beginAtZero: true,
                             max: 100,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
                             ticks: {
+                                color: '#cbd5e1',
                                 callback: function(value) {
                                     return value + '%';
                                 }
@@ -795,7 +2336,15 @@
             const toDate = document.getElementById('toDate').value;
 
             if (!fromDate || !toDate) {
-                Swal.fire('Invalid Date Range', 'Please select both from and to dates.', 'warning');
+                Swal.fire({
+                    title: 'Invalid Date Range',
+                    text: 'Please select both from and to dates.',
+                    icon: 'warning',
+                    customClass: {
+                        popup: 'swal-nexgen',
+                        title: 'swal-title-nexgen'
+                    }
+                });
                 return;
             }
 
@@ -813,123 +2362,34 @@
                 icon: 'info',
                 showCancelButton: true,
                 confirmButtonText: 'Export CSV',
-                cancelButtonText: 'Cancel'
+                cancelButtonText: 'Cancel',
+                customClass: {
+                    popup: 'swal-nexgen',
+                    title: 'swal-title-nexgen'
+                }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // In real implementation, this would trigger a download
                     window.location.href = '@Url.Action("ExportAnalysis", new { id = ViewBag.QuestionnaireId })';
                 }
             });
         }
+
+        // Custom SweetAlert styling
+        const swalStyle = document.createElement('style');
+        swalStyle.textContent = `
+            .swal-nexgen {
+                background: rgba(15, 23, 42, 0.95) !important;
+                backdrop-filter: blur(20px) !important;
+                border: 1px solid rgba(52, 211, 153, 0.3) !important;
+                border-radius: 1rem !important;
+                color: #e2e8f0 !important;
+            }
+            .swal-title-nexgen {
+                color: #34d399 !important;
+                font-weight: 700 !important;
+                letter-spacing: 0.05em !important;
+            }
+        `;
+        document.head.appendChild(swalStyle);
     </script>
-}
-
-@section Styles {
-    <style>
-        .chart-container {
-            position: relative;
-            height: 300px;
-        }
-
-        .sentiment-indicator {
-            padding: 1rem;
-            border-radius: 0.5rem;
-            transition: all 0.3s ease;
-        }
-
-            .sentiment-indicator:hover {
-                background-color: rgba(0,0,0,0.05);
-            }
-
-        .improvement-item {
-            padding: 0.75rem;
-            border-radius: 0.5rem;
-            background-color: rgba(0,0,0,0.02);
-            transition: all 0.3s ease;
-        }
-
-            .improvement-item:hover {
-                background-color: rgba(0,0,0,0.05);
-                transform: translateX(5px);
-            }
-
-        .kpi-item {
-            padding: 1rem;
-            border-radius: 0.5rem;
-            background-color: rgba(0,0,0,0.02);
-            transition: all 0.3s ease;
-        }
-
-            .kpi-item:hover {
-                background-color: rgba(0,0,0,0.05);
-                transform: scale(1.02);
-            }
-
-        .trending-topic {
-            padding: 0.5rem;
-            border-radius: 0.375rem;
-            transition: all 0.3s ease;
-        }
-
-            .trending-topic:hover {
-                background-color: rgba(0,0,0,0.05);
-            }
-
-        .action-card {
-            transition: all 0.3s ease;
-        }
-
-            .action-card:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            }
-
-        .insight-item {
-            transition: all 0.3s ease;
-            padding: 1rem;
-            border-radius: 0.5rem;
-        }
-
-            .insight-item:hover {
-                background-color: rgba(0,0,0,0.02);
-            }
-
-        .intervention-result {
-            padding: 0.75rem;
-            border-radius: 0.375rem;
-            background-color: rgba(0,0,0,0.02);
-            transition: all 0.3s ease;
-        }
-
-            .intervention-result:hover {
-                background-color: rgba(0,0,0,0.05);
-            }
-
-        .badge {
-            font-size: 0.75em;
-        }
-
-        .progress {
-            border-radius: 10px;
-        }
-
-        @@media (max-width: 768px) {
-            .chart-container
-
-        {
-            height: 250px;
-        }
-
-        .btn-group {
-            flex-direction: column;
-            width: 100%;
-        }
-
-            .btn-group .btn {
-                border-radius: 0.375rem !important;
-                margin-bottom: 0.25rem;
-            }
-
-        }
-    </style>
 }

@@ -1,240 +1,1737 @@
-﻿
-@model List<Services.AIViewModel.ResponseAnalysisResult>
+﻿@model List<Services.AIViewModel.ResponseAnalysisResult>
 
 @{
     var response = ViewBag.Response as Model.Response;
     ViewData["Title"] = $"High Risk Case Details - Response #{response?.Id}";
-
 }
 
-<div class="container-fluid">
-    <!-- Header Section -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <nav aria-label="breadcrumb">
-                        <ol class="breadcrumb">
-                            <li class="breadcrumb-item">
-                                <a href="@Url.Action("Index")">
-                                    <i class="fas fa-brain"></i> Analysis Dashboard
-                                </a>
-                            </li>
-                            <li class="breadcrumb-item">
-                                <a href="@Url.Action("AnalyzeQuestionnaire", new { id = response?.QuestionnaireId })">
-                                    @response?.Questionnaire?.Title
-                                </a>
-                            </li>
-                            <li class="breadcrumb-item">
-                                <a href="@Url.Action("HighRiskResponses", new { id = response?.QuestionnaireId })">
-                                    High Risk Cases
-                                </a>
-                            </li>
-                            <li class="breadcrumb-item active">Response #@response?.Id</li>
-                        </ol>
-                    </nav>
-                    <h1 class="h3 mb-1">
-                        <i class="fas fa-user-injured text-danger me-2"></i>
-                        High Risk Case Analysis
-                    </h1>
-                    <p class="text-muted mb-0">Detailed mental health assessment requiring professional intervention</p>
-                </div>
-                <div class="text-end">
-                    <div class="btn-group" role="group">
-                        <button type="button" class="btn btn-success btn-sm" onclick="markForIntervention()">
-                            <i class="fas fa-user-md"></i> Schedule Intervention
-                        </button>
-                        <button type="button" class="btn btn-warning btn-sm" onclick="flagForReview()">
-                            <i class="fas fa-flag"></i> Flag for Review
-                        </button>
-                        <button type="button" class="btn btn-info btn-sm" onclick="exportCaseReport()">
-                            <i class="fas fa-file-medical"></i> Export Case
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
+@section Styles {
+    <style>
+        @@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --neon-blue: #60a5fa;
+            --neon-purple: #c084fc;
+            --neon-green: #34d399;
+            --neon-pink: #f472b6;
+            --neon-yellow: #fbbf24;
+            --neon-red: #f87171;
+            --neon-cyan: #22d3ee;
+            --neon-orange: #fb923c;
+            --dark-900: #0f172a;
+            --dark-800: #1e293b;
+            --dark-700: #334155;
+            --dark-600: #475569;
+            --dark-500: #64748b;
+            --dark-400: #94a3b8;
+            --dark-300: #cbd5e1;
+            --dark-200: #e2e8f0;
+            --dark-100: #f1f5f9;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+            --font-main: 'Space Grotesk', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            --critical-gradient: linear-gradient(135deg, #dc2626, #7f1d1d);
+            --high-gradient: linear-gradient(135deg, var(--neon-red), #dc2626);
+            --moderate-gradient: linear-gradient(135deg, var(--neon-yellow), var(--neon-orange));
+            --low-gradient: linear-gradient(135deg, var(--neon-green), var(--neon-cyan));
+            --emergency-gradient: linear-gradient(135deg, #dc2626, var(--neon-red));
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background: var(--dark-900);
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+
+        .nexgen-case-dashboard {
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Dynamic Background with Emergency Theme */
+        .bg-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .grid-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: linear-gradient(rgba(248, 113, 113, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(248, 113, 113, 0.1) 1px, transparent 1px);
+            background-size: 60px 60px;
+            animation: gridMove 20s linear infinite;
+        }
+
+        .gradient-mesh {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 20%, rgba(248, 113, 113, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 60%, rgba(220, 38, 38, 0.15) 0%, transparent 50%), radial-gradient(circle at 40% 80%, rgba(251, 191, 36, 0.15) 0%, transparent 50%);
+            animation: meshShift 15s ease-in-out infinite;
+        }
+
+        /* Top Navigation */
+        .top-nav {
+            position: relative;
+            z-index: 100;
+            padding: 1rem 0;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(248, 113, 113, 0.2);
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            gap: 3rem;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .brand-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--emergency-gradient);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .brand-name {
+            font-family: var(--font-mono);
+            font-weight: 700;
+            font-size: 1.1rem;
+            letter-spacing: 0.1em;
+            color: #e2e8f0;
+        }
+
+        .brand-version {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--neon-red);
+            background: rgba(248, 113, 113, 0.1);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            border: 1px solid rgba(248, 113, 113, 0.3);
+        }
+
+        .nav-center {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+        }
+
+        .breadcrumb-nexgen {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .crumb {
+            color: var(--dark-400);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+            .crumb:hover {
+                color: var(--neon-red);
+            }
+
+            .crumb.active {
+                color: var(--neon-red);
+            }
+
+        .breadcrumb-nexgen i {
+            color: var(--dark-500);
+            font-size: 0.6rem;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .nav-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1.2rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            color: #e2e8f0;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(10px);
+            text-decoration: none;
+        }
+
+            .nav-btn.success:hover {
+                background: rgba(52, 211, 153, 0.1);
+                border-color: rgba(52, 211, 153, 0.3);
+                color: var(--neon-green);
+            }
+
+            .nav-btn.warning:hover {
+                background: rgba(251, 191, 36, 0.1);
+                border-color: rgba(251, 191, 36, 0.3);
+                color: var(--neon-yellow);
+            }
+
+            .nav-btn.info:hover {
+                background: rgba(34, 211, 238, 0.1);
+                border-color: rgba(34, 211, 238, 0.3);
+                color: var(--neon-cyan);
+            }
+
+        /* Hero Section */
+        .hero-nexgen {
+            padding: 4rem 0 2rem;
+            text-align: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.5rem 1.2rem;
+            background: rgba(248, 113, 113, 0.1);
+            border: 1px solid rgba(248, 113, 113, 0.3);
+            border-radius: 50px;
+            margin-bottom: 2rem;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            color: var(--neon-red);
+        }
+
+        .badge-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--neon-red);
+            border-radius: 50%;
+            animation: emergencyPulse 1.5s infinite;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            color: #ffffff;
+        }
+
+        .title-gradient {
+            background: linear-gradient(135deg, var(--neon-red), #dc2626, var(--neon-orange));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-description {
+            font-size: 1.1rem;
+            color: var(--dark-300);
+            max-width: 600px;
+            margin: 0 auto 2rem;
+            line-height: 1.6;
+        }
+
+        /* Critical Alert Banner */
+        .critical-alert {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(248, 113, 113, 0.4);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+            box-shadow: var(--glass-shadow);
+            position: relative;
+            overflow: hidden;
+            animation: emergencyGlow 3s infinite;
+        }
+
+        .alert-stripe {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 6px;
+            background: var(--emergency-gradient);
+        }
+
+        .alert-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .alert-content {
+            flex: 1;
+        }
+
+        .alert-title {
+            font-family: var(--font-mono);
+            font-size: 1.3rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            color: var(--neon-red);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .alert-description {
+            color: var(--dark-200);
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        .alert-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+        }
+
+        .alert-badge {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--neon-red);
+            border-radius: 20px;
+            padding: 0.4rem 1rem;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            color: var(--neon-red);
+        }
+
+        .alert-visual {
+            width: 80px;
+            height: 80px;
+            background: var(--emergency-gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            animation: heartbeat 2s infinite;
+        }
+
+        /* Response Overview Cards */
+        .overview-section {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .overview-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--glass-shadow);
+        }
+
+        .overview-header {
+            background: var(--emergency-gradient);
+            padding: 2rem;
+            position: relative;
+        }
+
+            .overview-header::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+            }
+
+        .overview-title {
+            position: relative;
+            z-index: 2;
+            font-family: var(--font-mono);
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .overview-body {
+            padding: 2rem;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .info-item {
+            text-align: center;
+        }
+
+        .info-label {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--dark-400);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-value {
+            font-weight: 600;
+            color: #ffffff;
+            word-break: break-word;
+        }
+
+        .privacy-notice {
+            background: rgba(34, 211, 238, 0.1);
+            border: 1px solid rgba(34, 211, 238, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .privacy-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--neon-cyan);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--dark-900);
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .privacy-content {
+            flex: 1;
+        }
+
+        .privacy-title {
+            font-weight: 600;
+            color: var(--neon-cyan);
+            margin-bottom: 0.5rem;
+        }
+
+        .privacy-text {
+            font-size: 0.9rem;
+            color: var(--dark-300);
+            line-height: 1.5;
+        }
+
+        /* Action Checklist */
+        .checklist-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--glass-shadow);
+        }
+
+        .checklist-header {
+            background: var(--moderate-gradient);
+            padding: 1.5rem;
+            position: relative;
+        }
+
+            .checklist-header::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+            }
+
+        .checklist-title {
+            position: relative;
+            z-index: 2;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .checklist-body {
+            padding: 1.5rem;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+            .checklist-item:hover {
+                background: rgba(255, 255, 255, 0.05);
+            }
+
+        .checkbox-nexgen {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--dark-500);
+            border-radius: 4px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+            .checkbox-nexgen:checked {
+                border-color: var(--neon-green);
+                background: var(--neon-green);
+            }
+
+                .checkbox-nexgen:checked::after {
+                    content: '✓';
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    color: white;
+                    font-size: 0.8rem;
+                    font-weight: bold;
+                }
+
+        .checkbox-label {
+            flex: 1;
+            font-size: 0.85rem;
+            color: var(--dark-200);
+            line-height: 1.4;
+        }
+
+        /* Analysis Cards */
+        .analysis-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--glass-shadow);
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+            .analysis-card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 20px 40px rgba(248, 113, 113, 0.1);
+            }
+
+        .analysis-header {
+            padding: 2rem;
+            position: relative;
+        }
+
+            .analysis-header.critical {
+                background: var(--critical-gradient);
+            }
+
+            .analysis-header.high {
+                background: var(--high-gradient);
+            }
+
+            .analysis-header.moderate {
+                background: var(--moderate-gradient);
+            }
+
+            .analysis-header.low {
+                background: var(--low-gradient);
+            }
+
+            .analysis-header::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+            }
+
+        .analysis-title-group {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            justify-content: between;
+            align-items: center;
+        }
+
+        .analysis-info {
+            flex: 1;
+        }
+
+        .analysis-title {
+            font-family: var(--font-mono);
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            color: white;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .analysis-question {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .analysis-badges {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            align-items: flex-end;
+        }
+
+        .risk-badge {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            padding: 0.4rem 1rem;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .analysis-body {
+            padding: 2rem;
+        }
+
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        /* Response Section */
+        .response-section {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .section-title {
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+            .section-title i {
+                color: var(--neon-blue);
+            }
+
+        .response-text {
+            background: rgba(255, 255, 255, 0.02);
+            border-left: 4px solid var(--neon-blue);
+            border-radius: 0 8px 8px 0;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            font-style: italic;
+            color: var(--dark-200);
+            line-height: 1.6;
+            position: relative;
+        }
+
+            .response-text::before {
+                content: '"';
+                position: absolute;
+                top: 0.5rem;
+                left: 1rem;
+                font-size: 2rem;
+                color: var(--dark-500);
+                font-family: serif;
+            }
+
+        /* Sentiment Analysis */
+        .sentiment-analysis {
+            margin-top: 1.5rem;
+        }
+
+        .sentiment-title {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+            .sentiment-title i {
+                color: var(--neon-pink);
+            }
+
+        .sentiment-bar {
+            margin-bottom: 1rem;
+        }
+
+        .sentiment-info {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .sentiment-label {
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+            .sentiment-label.positive {
+                color: var(--neon-green);
+            }
+
+            .sentiment-label.neutral {
+                color: var(--neon-yellow);
+            }
+
+            .sentiment-label.negative {
+                color: var(--neon-red);
+            }
+
+        .sentiment-value {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .progress-bar-nexgen {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+            .progress-fill.positive {
+                background: var(--neon-green);
+            }
+
+            .progress-fill.neutral {
+                background: var(--neon-yellow);
+            }
+
+            .progress-fill.negative {
+                background: var(--neon-red);
+            }
+
+        /* Risk Assessment Section */
+        .risk-section {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .risk-indicators {
+            margin-bottom: 1.5rem;
+        }
+
+        .risk-title {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--neon-red);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 1rem;
+        }
+
+        .indicator-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+        }
+
+        .indicator-tag {
+            background: rgba(248, 113, 113, 0.2);
+            border: 1px solid var(--neon-red);
+            border-radius: 20px;
+            padding: 0.4rem 0.8rem;
+            font-family: var(--font-mono);
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            color: var(--neon-red);
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .action-recommendation {
+            background: rgba(52, 211, 153, 0.1);
+            border: 1px solid rgba(52, 211, 153, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .action-title {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--neon-green);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 1rem;
+        }
+
+        .action-text {
+            color: var(--dark-200);
+            line-height: 1.5;
+            font-size: 0.9rem;
+        }
+
+        .protective-factors {
+            margin-top: 1.5rem;
+        }
+
+        .protective-title {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--neon-green);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 1rem;
+        }
+
+        .protective-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+        }
+
+        .protective-tag {
+            background: rgba(52, 211, 153, 0.2);
+            border: 1px solid var(--neon-green);
+            border-radius: 20px;
+            padding: 0.4rem 0.8rem;
+            font-family: var(--font-mono);
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            color: var(--neon-green);
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .key-phrases {
+            margin-top: 1.5rem;
+        }
+
+        .phrases-title {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+            .phrases-title i {
+                color: var(--neon-purple);
+            }
+
+        .phrases-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+        }
+
+        .phrase-tag {
+            background: rgba(192, 132, 252, 0.2);
+            border: 1px solid var(--neon-purple);
+            border-radius: 20px;
+            padding: 0.4rem 0.8rem;
+            font-family: var(--font-mono);
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            color: var(--neon-purple);
+        }
+
+        /* Workplace Insights */
+        .insights-footer {
+            background: rgba(30, 41, 59, 0.5);
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 2rem;
+        }
+
+        .insights-title {
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+            .insights-title i {
+                color: var(--neon-yellow);
+            }
+
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .insight-item {
+            background: rgba(255, 255, 255, 0.03);
+            border-left: 4px solid;
+            border-radius: 0 8px 8px 0;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+            .insight-item:hover {
+                background: rgba(255, 255, 255, 0.05);
+            }
+
+            .insight-item.priority-5 {
+                border-left-color: var(--neon-red);
+            }
+
+            .insight-item.priority-4 {
+                border-left-color: var(--neon-yellow);
+            }
+
+            .insight-item.priority-3 {
+                border-left-color: var(--neon-blue);
+            }
+
+            .insight-item.priority-2 {
+                border-left-color: var(--neon-cyan);
+            }
+
+        .insight-header {
+            display: flex;
+            justify-content: between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .insight-category {
+            font-weight: 600;
+            color: var(--neon-blue);
+            margin-bottom: 0.3rem;
+        }
+
+        .priority-badge {
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-family: var(--font-mono);
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+        }
+
+            .priority-badge.priority-5 {
+                background: rgba(248, 113, 113, 0.2);
+                border: 1px solid var(--neon-red);
+                color: var(--neon-red);
+            }
+
+            .priority-badge.priority-4 {
+                background: rgba(251, 191, 36, 0.2);
+                border: 1px solid var(--neon-yellow);
+                color: var(--neon-yellow);
+            }
+
+            .priority-badge.priority-3 {
+                background: rgba(96, 165, 250, 0.2);
+                border: 1px solid var(--neon-blue);
+                color: var(--neon-blue);
+            }
+
+            .priority-badge.priority-2 {
+                background: rgba(34, 211, 238, 0.2);
+                border: 1px solid var(--neon-cyan);
+                color: var(--neon-cyan);
+            }
+
+        .insight-issue {
+            font-size: 0.85rem;
+            color: var(--dark-300);
+            margin-bottom: 1rem;
+            line-height: 1.4;
+        }
+
+        .insight-intervention {
+            font-size: 0.85rem;
+            color: var(--dark-200);
+            line-height: 1.4;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.8rem;
+        }
+
+        .intervention-icon {
+            color: var(--neon-green);
+            margin-top: 0.1rem;
+            flex-shrink: 0;
+        }
+
+        /* Professional Actions Panel */
+        .actions-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--glass-shadow);
+            margin-top: 3rem;
+        }
+
+        .actions-header {
+            background: linear-gradient(135deg, var(--dark-700), var(--dark-600));
+            padding: 2rem;
+            position: relative;
+        }
+
+            .actions-header::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+            }
+
+        .actions-title {
+            position: relative;
+            z-index: 2;
+            font-family: var(--font-mono);
+            font-size: 1.2rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .actions-body {
+            padding: 2rem;
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .action-category {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .category-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .category-title {
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+            .category-title.immediate {
+                color: var(--neon-green);
+            }
+
+            .category-title.followup {
+                color: var(--neon-cyan);
+            }
+
+        .category-subtitle {
+            font-size: 0.8rem;
+            color: var(--dark-400);
+        }
+
+        .action-list {
+            list-style: none;
+            padding: 0;
+        }
+
+            .action-list li {
+                display: flex;
+                align-items: flex-start;
+                gap: 1rem;
+                margin-bottom: 1rem;
+                padding: 0.8rem;
+                background: rgba(255, 255, 255, 0.02);
+                border-radius: 8px;
+                transition: all 0.3s ease;
+            }
+
+                .action-list li:hover {
+                    background: rgba(255, 255, 255, 0.05);
+                }
+
+        .action-icon {
+            width: 20px;
+            text-align: center;
+            margin-top: 0.1rem;
+            flex-shrink: 0;
+        }
+
+            .action-icon.immediate {
+                color: var(--neon-green);
+            }
+
+            .action-icon.followup {
+                color: var(--neon-cyan);
+            }
+
+        .action-text {
+            flex: 1;
+            font-size: 0.85rem;
+            color: var(--dark-200);
+            line-height: 1.4;
+        }
+
+        .central-actions {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .btn-nexgen {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid;
+            text-decoration: none;
+        }
+
+            .btn-nexgen.primary {
+                background: rgba(96, 165, 250, 0.1);
+                border-color: rgba(96, 165, 250, 0.3);
+                color: var(--neon-blue);
+            }
+
+                .btn-nexgen.primary:hover {
+                    background: rgba(96, 165, 250, 0.2);
+                    color: var(--neon-blue);
+                    transform: translateY(-1px);
+                }
+
+            .btn-nexgen.success {
+                background: rgba(52, 211, 153, 0.1);
+                border-color: rgba(52, 211, 153, 0.3);
+                color: var(--neon-green);
+            }
+
+                .btn-nexgen.success:hover {
+                    background: rgba(52, 211, 153, 0.2);
+                    color: var(--neon-green);
+                    transform: translateY(-1px);
+                }
+
+            .btn-nexgen.info {
+                background: rgba(34, 211, 238, 0.1);
+                border-color: rgba(34, 211, 238, 0.3);
+                color: var(--neon-cyan);
+            }
+
+                .btn-nexgen.info:hover {
+                    background: rgba(34, 211, 238, 0.2);
+                    color: var(--neon-cyan);
+                    transform: translateY(-1px);
+                }
+
+            .btn-nexgen.warning {
+                background: rgba(251, 191, 36, 0.1);
+                border-color: rgba(251, 191, 36, 0.3);
+                color: var(--neon-yellow);
+            }
+
+                .btn-nexgen.warning:hover {
+                    background: rgba(251, 191, 36, 0.2);
+                    color: var(--neon-yellow);
+                    transform: translateY(-1px);
+                }
+
+        /* Animations */
+        @@keyframes gridMove {
+            0%
+
+        {
+            transform: translate(0, 0);
+        }
+
+        100% {
+            transform: translate(60px, 60px);
+        }
+
+        }
+
+        @@keyframes meshShift {
+            0%, 100%
+
+        {
+            filter: hue-rotate(0deg);
+            transform: scale(1);
+        }
+
+        50% {
+            filter: hue-rotate(30deg);
+            transform: scale(1.05);
+        }
+
+        }
+
+        @@keyframes emergencyPulse {
+            0%, 100%
+
+        {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        50% {
+            opacity: 0.5;
+            transform: scale(1.2);
+        }
+
+        }
+
+        @@keyframes emergencyGlow {
+            0%, 100%
+
+        {
+            box-shadow: 0 8px 32px rgba(248, 113, 113, 0.1);
+        }
+
+        50% {
+            box-shadow: 0 8px 32px rgba(248, 113, 113, 0.3);
+        }
+
+        }
+
+        @@keyframes heartbeat {
+            0%, 100%
+
+        {
+            transform: scale(1);
+        }
+
+        25% {
+            transform: scale(1.1);
+        }
+
+        50% {
+            transform: scale(1);
+        }
+
+        75% {
+            transform: scale(1.05);
+        }
+
+        }
+
+        /* Responsive Design */
+        @@media (max-width: 1200px) {
+            .overview-section
+
+        {
+            grid-template-columns: 1fr;
+        }
+
+        .analysis-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .actions-grid {
+            grid-template-columns: 1fr;
+        }
+
+        }
+
+        @@media (max-width: 768px) {
+            .nav-container
+
+        {
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .nav-center {
+            order: 3;
+            flex-basis: 100%;
+            justify-content: flex-start;
+        }
+
+        .hero-title {
+            font-size: 2.5rem;
+        }
+
+        .alert-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .central-actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .btn-nexgen {
+            justify-content: center;
+        }
+
+        }
+
+        @@media (max-width: 480px) {
+            .overview-card, .analysis-card, .actions-panel
+
+        {
+            margin-left: 1rem;
+            margin-right: 1rem;
+        }
+
+        .alert-badges {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        }
+
+        /* Print Styles */
+        @@media print {
+            .bg-pattern, .top-nav, .btn-nexgen, .nav-btn
+
+        {
+            display: none !important;
+        }
+
+        .overview-card,
+        .analysis-card,
+        .actions-panel {
+            break-inside: avoid;
+            border: 1px solid #333;
+            background: white;
+            color: black;
+        }
+
+        .nexgen-case-dashboard {
+            background: white;
+        }
+
+        }
+
+        /* Accessibility */
+        @@media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after
+
+        {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+        }
+
+        }
+
+        /* High Contrast Mode */
+        @@media (prefers-contrast: high) {
+            : root
+
+        {
+            --neon-red: #ff6b6b;
+            --neon-yellow: #ffd93d;
+            --neon-green: #6bcf7f;
+            --dark-300: #ffffff;
+            --dark-400: #cccccc;
+        }
+
+        .overview-card,
+        .analysis-card,
+        .actions-panel {
+            border-width: 2px;
+        }
+
+        }
+    </style>
+}
+
+<div class="nexgen-case-dashboard">
+    <!-- Dynamic Background -->
+    <div class="bg-pattern">
+        <div class="grid-overlay"></div>
+        <div class="gradient-mesh"></div>
     </div>
 
-    <!-- Critical Alert Banner -->
-    @if (Model.Any(r => r.RiskAssessment?.RequiresImmediateAttention == true))
-    {
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="alert alert-danger border-0 shadow-lg">
-                    <div class="row align-items-center">
-                        <div class="col-md-10">
-                            <h4 class="alert-heading mb-2">
-                                <i class="fas fa-exclamation-triangle me-2"></i>
-                                <strong>IMMEDIATE ATTENTION REQUIRED</strong>
-                            </h4>
-                            <p class="mb-2">This employee's responses indicate significant mental health concerns that require urgent professional intervention.</p>
-                            <div class="d-flex gap-2 flex-wrap">
-                                <span class="badge bg-white text-danger fw-bold">HIGH PRIORITY</span>
-                                <span class="badge bg-white text-danger">PROFESSIONAL INTERVENTION</span>
-                                <span class="badge bg-white text-danger">CONFIDENTIAL</span>
-                            </div>
-                        </div>
-                        <div class="col-md-2 text-end">
-                            <i class="fas fa-heartbeat fa-3x text-white opacity-50"></i>
-                        </div>
-                    </div>
+    <!-- Top Navigation Bar -->
+    <nav class="top-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <div class="brand-icon">
+                    <i class="fas fa-user-injured"></i>
                 </div>
+                <div class="brand-text">
+                    <span class="brand-name">CRISIS RESPONSE</span>
+                    <span class="brand-version">CONFIDENTIAL</span>
+                </div>
+            </div>
+
+            <div class="nav-center">
+                <nav class="breadcrumb-nexgen">
+                    <a href="@Url.Action("Index")" class="crumb">
+                        <i class="fas fa-brain"></i> ANALYSIS DASHBOARD
+                    </a>
+                    <i class="fas fa-chevron-right"></i>
+                    <a href="@Url.Action("AnalyzeQuestionnaire", new { id = response?.QuestionnaireId })" class="crumb">
+                        @response?.Questionnaire?.Title?.ToUpper()
+                    </a>
+                    <i class="fas fa-chevron-right"></i>
+                    <a href="@Url.Action("HighRiskResponses", new { id = response?.QuestionnaireId })" class="crumb">
+                        HIGH RISK CASES
+                    </a>
+                    <i class="fas fa-chevron-right"></i>
+                    <span class="crumb active">RESPONSE #@response?.Id</span>
+                </nav>
+            </div>
+
+            <div class="nav-actions">
+                <button type="button" class="nav-btn success" onclick="markForIntervention()">
+                    <i class="fas fa-user-md"></i>
+                    <span>Schedule Intervention</span>
+                </button>
+                <button type="button" class="nav-btn warning" onclick="flagForReview()">
+                    <i class="fas fa-flag"></i>
+                    <span>Flag for Review</span>
+                </button>
+                <button type="button" class="nav-btn info" onclick="exportCaseReport()">
+                    <i class="fas fa-file-medical"></i>
+                    <span>Export Case</span>
+                </button>
             </div>
         </div>
-    }
+    </nav>
 
-    <!-- Employee Response Overview -->
-    @if (response != null)
-    {
-        <div class="row mb-4">
-            <div class="col-lg-8">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0">
-                            <i class="fas fa-user me-2"></i>
-                            Employee Response Overview
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row mb-3">
-                            <div class="col-md-4">
-                                <strong>Response ID:</strong><br>
-                                <span class="text-muted">#@response.Id</span>
-                            </div>
-                            <div class="col-md-4">
-                                <strong>Submission Date:</strong><br>
-                                <span class="text-muted">@response.SubmissionDate.ToString("MMMM dd, yyyy")</span>
-                            </div>
-                            <div class="col-md-4">
-                                <strong>Survey:</strong><br>
-                                <span class="text-muted">@response.Questionnaire?.Title</span>
-                            </div>
-                        </div>
-
-                        <div class="alert alert-info border-0">
-                            <i class="fas fa-shield-alt me-2"></i>
-                            <strong>Privacy Notice:</strong> All personal information has been anonymized to protect employee privacy while enabling professional mental health assessment.
-                        </div>
-                    </div>
+    <!-- Hero Section -->
+    <section class="hero-nexgen">
+        <div class="container-fluid">
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <span class="badge-dot"></span>
+                    <span>URGENT MENTAL HEALTH INTERVENTION</span>
                 </div>
-            </div>
-
-            <div class="col-lg-4">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-header bg-warning text-dark">
-                        <h6 class="mb-0">
-                            <i class="fas fa-clipboard-check me-2"></i>
-                            Action Checklist
-                        </h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="form-check mb-2">
-                            <input class="form-check-input" type="checkbox" id="reviewed">
-                            <label class="form-check-label small" for="reviewed">
-                                Case reviewed by mental health professional
-                            </label>
-                        </div>
-                        <div class="form-check mb-2">
-                            <input class="form-check-input" type="checkbox" id="contacted">
-                            <label class="form-check-label small" for="contacted">
-                                Employee contacted for follow-up
-                            </label>
-                        </div>
-                        <div class="form-check mb-2">
-                            <input class="form-check-input" type="checkbox" id="intervention">
-                            <label class="form-check-label small" for="intervention">
-                                Intervention plan created
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="documented">
-                            <label class="form-check-label small" for="documented">
-                                Actions documented in system
-                            </label>
-                        </div>
-                    </div>
-                </div>
+                <h1 class="hero-title">
+                    High Risk
+                    <span class="title-gradient">Case</span>
+                    Analysis
+                </h1>
+                <p class="hero-description">
+                    Detailed mental health assessment requiring immediate professional intervention
+                </p>
             </div>
         </div>
-    }
+    </section>
 
-    <!-- Detailed Analysis by Question -->
-    @if (Model != null && Model.Any())
-    {
-        <div class="row">
-            @foreach (var analysis in Model.OrderByDescending(a => a.RiskAssessment?.RiskScore ?? 0))
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container-fluid">
+            <!-- Critical Alert Banner -->
+            @if (Model.Any(r => r.RiskAssessment?.RequiresImmediateAttention == true))
             {
-                var riskLevel = analysis.RiskAssessment?.RiskLevel ?? Services.AIViewModel.RiskLevel.Low;
-                var riskScore = analysis.RiskAssessment?.RiskScore ?? 0;
+                <div class="critical-alert">
+                    <div class="alert-stripe"></div>
+                    <div class="alert-header">
+                        <div class="alert-content">
+                            <h2 class="alert-title">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                IMMEDIATE ATTENTION REQUIRED
+                            </h2>
+                            <p class="alert-description">
+                                This employee's responses indicate significant mental health concerns that require urgent professional intervention.
+                            </p>
+                            <div class="alert-badges">
+                                <span class="alert-badge">HIGH PRIORITY</span>
+                                <span class="alert-badge">PROFESSIONAL INTERVENTION</span>
+                                <span class="alert-badge">CONFIDENTIAL</span>
+                            </div>
+                        </div>
+                        <div class="alert-visual">
+                            <i class="fas fa-heartbeat"></i>
+                        </div>
+                    </div>
+                </div>
+            }
 
-                <div class="col-12 mb-4">
-                    <div class="card border-0 shadow-sm">
-                        <!-- Question Header -->
-                        <div class="card-header @GetRiskHeaderClass(riskLevel) text-white">
-                            <div class="row align-items-center">
-                                <div class="col-md-8">
-                                    <h6 class="mb-1">
-                                        <i class="fas fa-question-circle me-2"></i>
-                                        Question Analysis
-                                    </h6>
-                                    <p class="mb-0 opacity-75">@analysis.QuestionText</p>
+            <!-- Employee Response Overview -->
+            @if (response != null)
+            {
+                <div class="overview-section">
+                    <div class="overview-card">
+                        <div class="overview-header">
+                            <h2 class="overview-title">
+                                <i class="fas fa-user"></i>
+                                Employee Response Overview
+                            </h2>
+                        </div>
+                        <div class="overview-body">
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <div class="info-label">Response ID</div>
+                                    <div class="info-value">#@response.Id</div>
                                 </div>
-                                <div class="col-md-4 text-end">
-                                    <div class="d-flex align-items-center justify-content-end gap-2">
-                                        <span class="badge bg-white text-dark">
-                                            <i class="fas @GetRiskIcon(riskLevel) me-1"></i>
-                                            @riskLevel Risk
-                                        </span>
-                                        <span class="badge bg-white text-dark">
-                                            @Math.Round(riskScore * 100, 0)% Risk Score
-                                        </span>
+                                <div class="info-item">
+                                    <div class="info-label">Submission Date</div>
+                                    <div class="info-value">@response.SubmissionDate.ToString("MMMM dd, yyyy")</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Survey</div>
+                                    <div class="info-value">@response.Questionnaire?.Title</div>
+                                </div>
+                            </div>
+
+                            <div class="privacy-notice">
+                                <div class="privacy-icon">
+                                    <i class="fas fa-shield-alt"></i>
+                                </div>
+                                <div class="privacy-content">
+                                    <div class="privacy-title">Privacy Notice</div>
+                                    <div class="privacy-text">
+                                        All personal information has been anonymized to protect employee privacy while enabling professional mental health assessment.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="checklist-card">
+                        <div class="checklist-header">
+                            <h3 class="checklist-title">
+                                <i class="fas fa-clipboard-check"></i>
+                                Action Checklist
+                            </h3>
+                        </div>
+                        <div class="checklist-body">
+                            <div class="checklist-item">
+                                <input class="checkbox-nexgen" type="checkbox" id="reviewed">
+                                <label class="checkbox-label" for="reviewed">
+                                    Case reviewed by mental health professional
+                                </label>
+                            </div>
+                            <div class="checklist-item">
+                                <input class="checkbox-nexgen" type="checkbox" id="contacted">
+                                <label class="checkbox-label" for="contacted">
+                                    Employee contacted for follow-up
+                                </label>
+                            </div>
+                            <div class="checklist-item">
+                                <input class="checkbox-nexgen" type="checkbox" id="intervention">
+                                <label class="checkbox-label" for="intervention">
+                                    Intervention plan created
+                                </label>
+                            </div>
+                            <div class="checklist-item">
+                                <input class="checkbox-nexgen" type="checkbox" id="documented">
+                                <label class="checkbox-label" for="documented">
+                                    Actions documented in system
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- Detailed Analysis by Question -->
+            @if (Model != null && Model.Any())
+            {
+                @foreach (var analysis in Model.OrderByDescending(a => a.RiskAssessment?.RiskScore ?? 0))
+                {
+                    var riskLevel = analysis.RiskAssessment?.RiskLevel ?? Services.AIViewModel.RiskLevel.Low;
+                    var riskScore = analysis.RiskAssessment?.RiskScore ?? 0;
+                    var riskClass = riskLevel.ToString().ToLower();
+
+                    <div class="analysis-card">
+                        <div class="analysis-header @riskClass">
+                            <div class="analysis-title-group">
+                                <div class="analysis-info">
+                                    <h3 class="analysis-title">
+                                        <i class="fas fa-question-circle"></i>
+                                        Question Analysis
+                                    </h3>
+                                    <p class="analysis-question">@analysis.QuestionText</p>
+                                </div>
+                                <div class="analysis-badges">
+                                    <div class="risk-badge">
+                                        <i class="fas @GetRiskIcon(riskLevel)"></i>
+                                        @riskLevel RISK
+                                    </div>
+                                    <div class="risk-badge">
+                                        @Math.Round(riskScore * 100, 0)% RISK SCORE
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="card-body">
-                            <div class="row">
+                        <div class="analysis-body">
+                            <div class="analysis-grid">
                                 <!-- Response Text -->
-                                <div class="col-lg-6 mb-4">
-                                    <h6 class="text-muted mb-3">
-                                        <i class="fas fa-comment-alt me-2"></i>Employee Response (Anonymized)
-                                    </h6>
-                                    <div class="bg-light rounded p-3 border-start border-4 border-primary">
-                                        <p class="mb-0 font-italic">@analysis.AnonymizedResponseText</p>
+                                <div class="response-section">
+                                    <h4 class="section-title">
+                                        <i class="fas fa-comment-alt"></i>
+                                        Employee Response (Anonymized)
+                                    </h4>
+                                    <div class="response-text">
+                                        @analysis.AnonymizedResponseText
                                     </div>
 
                                     <!-- Sentiment Analysis -->
                                     @if (analysis.SentimentAnalysis != null)
                                     {
-                                        <div class="mt-3">
-                                            <h6 class="text-muted mb-2">
-                                                <i class="fas fa-heart me-2"></i>Emotional Sentiment
-                                            </h6>
-                                            <div class="sentiment-bars">
-                                                <div class="d-flex justify-content-between align-items-center mb-1">
-                                                    <small class="text-success">Positive</small>
-                                                    <small class="fw-bold">@Math.Round(analysis.SentimentAnalysis.PositiveScore * 100, 1)%</small>
-                                                </div>
-                                                <div class="progress mb-2" style="height: 8px;">
-                                                    <div class="progress-bar bg-success" style="width: @(analysis.SentimentAnalysis.PositiveScore * 100)%"></div>
-                                                </div>
+                                        <div class="sentiment-analysis">
+                                            <h5 class="sentiment-title">
+                                                <i class="fas fa-heart"></i>
+                                                Emotional Sentiment
+                                            </h5>
 
-                                                <div class="d-flex justify-content-between align-items-center mb-1">
-                                                    <small class="text-warning">Neutral</small>
-                                                    <small class="fw-bold">@Math.Round(analysis.SentimentAnalysis.NeutralScore * 100, 1)%</small>
+                                            <div class="sentiment-bar">
+                                                <div class="sentiment-info">
+                                                    <div class="sentiment-label positive">Positive</div>
+                                                    <div class="sentiment-value">@Math.Round(analysis.SentimentAnalysis.PositiveScore * 100, 1)%</div>
                                                 </div>
-                                                <div class="progress mb-2" style="height: 8px;">
-                                                    <div class="progress-bar bg-warning" style="width: @(analysis.SentimentAnalysis.NeutralScore * 100)%"></div>
+                                                <div class="progress-bar-nexgen">
+                                                    <div class="progress-fill positive" style="width: @(analysis.SentimentAnalysis.PositiveScore * 100)%"></div>
                                                 </div>
+                                            </div>
 
-                                                <div class="d-flex justify-content-between align-items-center mb-1">
-                                                    <small class="text-danger">Negative</small>
-                                                    <small class="fw-bold">@Math.Round(analysis.SentimentAnalysis.NegativeScore * 100, 1)%</small>
+                                            <div class="sentiment-bar">
+                                                <div class="sentiment-info">
+                                                    <div class="sentiment-label neutral">Neutral</div>
+                                                    <div class="sentiment-value">@Math.Round(analysis.SentimentAnalysis.NeutralScore * 100, 1)%</div>
                                                 </div>
-                                                <div class="progress" style="height: 8px;">
-                                                    <div class="progress-bar bg-danger" style="width: @(analysis.SentimentAnalysis.NegativeScore * 100)%"></div>
+                                                <div class="progress-bar-nexgen">
+                                                    <div class="progress-fill neutral" style="width: @(analysis.SentimentAnalysis.NeutralScore * 100)%"></div>
+                                                </div>
+                                            </div>
+
+                                            <div class="sentiment-bar">
+                                                <div class="sentiment-info">
+                                                    <div class="sentiment-label negative">Negative</div>
+                                                    <div class="sentiment-value">@Math.Round(analysis.SentimentAnalysis.NegativeScore * 100, 1)%</div>
+                                                </div>
+                                                <div class="progress-bar-nexgen">
+                                                    <div class="progress-fill negative" style="width: @(analysis.SentimentAnalysis.NegativeScore * 100)%"></div>
                                                 </div>
                                             </div>
                                         </div>
@@ -242,71 +1739,67 @@
                                 </div>
 
                                 <!-- AI Analysis Results -->
-                                <div class="col-lg-6">
-                                    <!-- Risk Assessment -->
-                                    @if (analysis.RiskAssessment != null)
+                                <div class="risk-section">
+                                    <h4 class="section-title">
+                                        <i class="fas fa-shield-alt"></i>
+                                        Mental Health Risk Assessment
+                                    </h4>
+
+                                    <!-- Risk Indicators -->
+                                    @if (analysis.RiskAssessment?.RiskIndicators?.Any() == true)
                                     {
-                                        <div class="mb-4">
-                                            <h6 class="text-muted mb-3">
-                                                <i class="fas fa-shield-alt me-2"></i>Mental Health Risk Assessment
-                                            </h6>
+                                        <div class="risk-indicators">
+                                            <div class="risk-title">Risk Indicators</div>
+                                            <div class="indicator-grid">
+                                                @foreach (var indicator in analysis.RiskAssessment.RiskIndicators)
+                                                {
+                                                    <span class="indicator-tag">
+                                                        <i class="fas fa-exclamation-triangle"></i>
+                                                        @indicator
+                                                    </span>
+                                                }
+                                            </div>
+                                        </div>
+                                    }
 
-                                            <!-- Risk Indicators -->
-                                            @if (analysis.RiskAssessment.RiskIndicators?.Any() == true)
-                                            {
-                                                <div class="mb-3">
-                                                    <strong class="text-danger small">RISK INDICATORS:</strong>
-                                                    <div class="mt-2">
-                                                        @foreach (var indicator in analysis.RiskAssessment.RiskIndicators)
-                                                        {
-                                                            <span class="badge bg-danger me-1 mb-1">
-                                                                <i class="fas fa-exclamation-triangle me-1"></i>@indicator
-                                                            </span>
-                                                        }
-                                                    </div>
-                                                </div>
-                                            }
+                                    <!-- Recommended Action -->
+                                    @if (!string.IsNullOrEmpty(analysis.RiskAssessment?.RecommendedAction))
+                                    {
+                                        <div class="action-recommendation">
+                                            <div class="action-title">Recommended Action</div>
+                                            <div class="action-text">@analysis.RiskAssessment.RecommendedAction</div>
+                                        </div>
+                                    }
 
-                                            <!-- Recommended Action -->
-                                            @if (!string.IsNullOrEmpty(analysis.RiskAssessment.RecommendedAction))
-                                            {
-                                                <div class="mb-3">
-                                                    <strong class="text-success small">RECOMMENDED ACTION:</strong>
-                                                    <div class="bg-success bg-opacity-10 border border-success border-opacity-25 rounded p-2 mt-2">
-                                                        <p class="mb-0 small">@analysis.RiskAssessment.RecommendedAction</p>
-                                                    </div>
-                                                </div>
-                                            }
-
-                                            <!-- Protective Factors -->
-                                            @if (analysis.RiskAssessment.ProtectiveFactors?.Any() == true)
-                                            {
-                                                <div class="mb-3">
-                                                    <strong class="text-success small">PROTECTIVE FACTORS:</strong>
-                                                    <div class="mt-2">
-                                                        @foreach (var factor in analysis.RiskAssessment.ProtectiveFactors)
-                                                        {
-                                                            <span class="badge bg-success me-1 mb-1">
-                                                                <i class="fas fa-shield me-1"></i>@factor
-                                                            </span>
-                                                        }
-                                                    </div>
-                                                </div>
-                                            }
+                                    <!-- Protective Factors -->
+                                    @if (analysis.RiskAssessment?.ProtectiveFactors?.Any() == true)
+                                    {
+                                        <div class="protective-factors">
+                                            <div class="protective-title">Protective Factors</div>
+                                            <div class="protective-grid">
+                                                @foreach (var factor in analysis.RiskAssessment.ProtectiveFactors)
+                                                {
+                                                    <span class="protective-tag">
+                                                        <i class="fas fa-shield"></i>
+                                                        @factor
+                                                    </span>
+                                                }
+                                            </div>
                                         </div>
                                     }
 
                                     <!-- Key Phrases -->
                                     @if (analysis.KeyPhrases?.KeyPhrases?.Any() == true)
                                     {
-                                        <div class="mb-3">
-                                            <h6 class="text-muted mb-2">
-                                                <i class="fas fa-tags me-2"></i>Key Phrases Identified
-                                            </h6>
-                                            <div>
+                                        <div class="key-phrases">
+                                            <h5 class="phrases-title">
+                                                <i class="fas fa-tags"></i>
+                                                Key Phrases Identified
+                                            </h5>
+                                            <div class="phrases-grid">
                                                 @foreach (var phrase in analysis.KeyPhrases.KeyPhrases.Take(6))
                                                 {
-                                                    <span class="badge bg-primary me-1 mb-1">@phrase</span>
+                                                    <span class="phrase-tag">@phrase</span>
                                                 }
                                             </div>
                                         </div>
@@ -318,26 +1811,27 @@
                         <!-- Workplace Insights -->
                         @if (analysis.Insights?.Any() == true)
                         {
-                            <div class="card-footer bg-light">
-                                <h6 class="text-muted mb-3">
-                                    <i class="fas fa-lightbulb me-2"></i>Workplace Intervention Recommendations
-                                </h6>
-                                <div class="row">
+                            <div class="insights-footer">
+                                <h4 class="insights-title">
+                                    <i class="fas fa-lightbulb"></i>
+                                    Workplace Intervention Recommendations
+                                </h4>
+                                <div class="insights-grid">
                                     @foreach (var insight in analysis.Insights)
                                     {
-                                        <div class="col-md-6 mb-3">
-                                            <div class="border-start border-4 @GetPriorityBorderClass(insight.Priority) ps-3">
-                                                <div class="d-flex justify-content-between align-items-start mb-1">
-                                                    <strong class="small text-primary">@insight.Category</strong>
-                                                    <span class="badge @GetPriorityBadgeClass(insight.Priority)">
-                                                        P@insight.Priority
-                                                    </span>
+                                        <div class="insight-item priority-@insight.Priority">
+                                            <div class="insight-header">
+                                                <div class="insight-content">
+                                                    <div class="insight-category">@insight.Category</div>
                                                 </div>
-                                                <p class="small text-muted mb-1">@insight.Issue</p>
-                                                <p class="small mb-0">
-                                                    <i class="fas fa-arrow-right me-1 text-success"></i>
-                                                    @insight.RecommendedIntervention
-                                                </p>
+                                                <div class="priority-badge priority-@insight.Priority">
+                                                    P@insight.Priority
+                                                </div>
+                                            </div>
+                                            <div class="insight-issue">@insight.Issue</div>
+                                            <div class="insight-intervention">
+                                                <i class="fas fa-arrow-right intervention-icon"></i>
+                                                <span>@insight.RecommendedIntervention</span>
                                             </div>
                                         </div>
                                     }
@@ -345,111 +1839,129 @@
                             </div>
                         }
                     </div>
-                </div>
+                }
             }
-        </div>
-    }
 
-    <!-- Professional Actions Panel -->
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-dark text-white">
-                    <h5 class="mb-0">
-                        <i class="fas fa-user-md me-2"></i>
+            <!-- Professional Actions Panel -->
+            <div class="actions-panel">
+                <div class="actions-header">
+                    <h2 class="actions-title">
+                        <i class="fas fa-user-md"></i>
                         Mental Health Professional Action Plan
-                    </h5>
+                    </h2>
                 </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h6 class="text-primary mb-3">
-                                <i class="fas fa-phone me-2"></i>Immediate Actions (Next 24 Hours)
-                            </h6>
-                            <ul class="list-unstyled">
-                                <li class="mb-2">
-                                    <i class="fas fa-check-circle text-success me-2"></i>
-                                    Contact employee for confidential check-in
+                <div class="actions-body">
+                    <div class="actions-grid">
+                        <div class="action-category">
+                            <div class="category-header">
+                                <h3 class="category-title immediate">
+                                    <i class="fas fa-phone"></i>
+                                    Immediate Actions
+                                </h3>
+                                <div class="category-subtitle">Next 24 Hours</div>
+                            </div>
+                            <ul class="action-list">
+                                <li>
+                                    <div class="action-icon immediate">
+                                        <i class="fas fa-check-circle"></i>
+                                    </div>
+                                    <div class="action-text">
+                                        Contact employee for confidential check-in
+                                    </div>
                                 </li>
-                                <li class="mb-2">
-                                    <i class="fas fa-check-circle text-success me-2"></i>
-                                    Assess immediate safety and support needs
+                                <li>
+                                    <div class="action-icon immediate">
+                                        <i class="fas fa-check-circle"></i>
+                                    </div>
+                                    <div class="action-text">
+                                        Assess immediate safety and support needs
+                                    </div>
                                 </li>
-                                <li class="mb-2">
-                                    <i class="fas fa-check-circle text-success me-2"></i>
-                                    Provide mental health resources and contacts
+                                <li>
+                                    <div class="action-icon immediate">
+                                        <i class="fas fa-check-circle"></i>
+                                    </div>
+                                    <div class="action-text">
+                                        Provide mental health resources and contacts
+                                    </div>
                                 </li>
-                                <li class="mb-2">
-                                    <i class="fas fa-check-circle text-success me-2"></i>
-                                    Document initial intervention in confidential records
+                                <li>
+                                    <div class="action-icon immediate">
+                                        <i class="fas fa-check-circle"></i>
+                                    </div>
+                                    <div class="action-text">
+                                        Document initial intervention in confidential records
+                                    </div>
                                 </li>
                             </ul>
                         </div>
-                        <div class="col-md-6">
-                            <h6 class="text-info mb-3">
-                                <i class="fas fa-calendar-alt me-2"></i>Follow-up Actions (Next 7 Days)
-                            </h6>
-                            <ul class="list-unstyled">
-                                <li class="mb-2">
-                                    <i class="fas fa-calendar-check text-info me-2"></i>
-                                    Schedule follow-up conversation
+
+                        <div class="action-category">
+                            <div class="category-header">
+                                <h3 class="category-title followup">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    Follow-up Actions
+                                </h3>
+                                <div class="category-subtitle">Next 7 Days</div>
+                            </div>
+                            <ul class="action-list">
+                                <li>
+                                    <div class="action-icon followup">
+                                        <i class="fas fa-calendar-check"></i>
+                                    </div>
+                                    <div class="action-text">
+                                        Schedule follow-up conversation
+                                    </div>
                                 </li>
-                                <li class="mb-2">
-                                    <i class="fas fa-calendar-check text-info me-2"></i>
-                                    Review workplace factors with management
+                                <li>
+                                    <div class="action-icon followup">
+                                        <i class="fas fa-calendar-check"></i>
+                                    </div>
+                                    <div class="action-text">
+                                        Review workplace factors with management
+                                    </div>
                                 </li>
-                                <li class="mb-2">
-                                    <i class="fas fa-calendar-check text-info me-2"></i>
-                                    Implement recommended workplace interventions
+                                <li>
+                                    <div class="action-icon followup">
+                                        <i class="fas fa-calendar-check"></i>
+                                    </div>
+                                    <div class="action-text">
+                                        Implement recommended workplace interventions
+                                    </div>
                                 </li>
-                                <li class="mb-2">
-                                    <i class="fas fa-calendar-check text-info me-2"></i>
-                                    Assess progress and adjust support plan
+                                <li>
+                                    <div class="action-icon followup">
+                                        <i class="fas fa-calendar-check"></i>
+                                    </div>
+                                    <div class="action-text">
+                                        Assess progress and adjust support plan
+                                    </div>
                                 </li>
                             </ul>
                         </div>
                     </div>
 
-                    <hr>
-
-                    <div class="text-center">
-                        <div class="btn-group" role="group">
-                            <button type="button" class="btn btn-primary" onclick="createInterventionPlan()">
-                                <i class="fas fa-clipboard-list"></i> Create Intervention Plan
-                            </button>
-                            <button type="button" class="btn btn-success" onclick="scheduleFollowUp()">
-                                <i class="fas fa-calendar-plus"></i> Schedule Follow-up
-                            </button>
-                            <button type="button" class="btn btn-info" onclick="contactEmployee()">
-                                <i class="fas fa-phone"></i> Initiate Contact
-                            </button>
-                            <button type="button" class="btn btn-warning" onclick="alertManagement()">
-                                <i class="fas fa-exclamation-triangle"></i> Alert Management
-                            </button>
-                        </div>
+                    <div class="central-actions">
+                        <button type="button" class="btn-nexgen primary" onclick="createInterventionPlan()">
+                            <i class="fas fa-clipboard-list"></i> CREATE INTERVENTION PLAN
+                        </button>
+                        <button type="button" class="btn-nexgen success" onclick="scheduleFollowUp()">
+                            <i class="fas fa-calendar-plus"></i> SCHEDULE FOLLOW-UP
+                        </button>
+                        <button type="button" class="btn-nexgen info" onclick="contactEmployee()">
+                            <i class="fas fa-phone"></i> INITIATE CONTACT
+                        </button>
+                        <button type="button" class="btn-nexgen warning" onclick="alertManagement()">
+                            <i class="fas fa-exclamation-triangle"></i> ALERT MANAGEMENT
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </main>
 </div>
 
 @functions {
-    private string GetRiskHeaderClass(Services.AIViewModel.RiskLevel riskLevel)
-    {
-        switch (riskLevel)
-        {
-            case Services.AIViewModel.RiskLevel.Critical:
-                return "bg-dark";
-            case Services.AIViewModel.RiskLevel.High:
-                return "bg-danger";
-            case Services.AIViewModel.RiskLevel.Moderate:
-                return "bg-warning";
-            default:
-                return "bg-secondary";
-        }
-    }
-
     private string GetRiskIcon(Services.AIViewModel.RiskLevel riskLevel)
     {
         switch (riskLevel)
@@ -464,43 +1976,10 @@
                 return "fa-check-circle";
         }
     }
-
-    private string GetPriorityBorderClass(int priority)
-    {
-        switch (priority)
-        {
-            case 5:
-                return "border-danger";
-            case 4:
-                return "border-warning";
-            case 3:
-                return "border-primary";
-            case 2:
-                return "border-info";
-            default:
-                return "border-secondary";
-        }
-    }
-
-    private string GetPriorityBadgeClass(int priority)
-    {
-        switch (priority)
-        {
-            case 5:
-                return "bg-danger";
-            case 4:
-                return "bg-warning text-dark";
-            case 3:
-                return "bg-primary";
-            case 2:
-                return "bg-info";
-            default:
-                return "bg-secondary";
-        }
-    }
 }
 
 @section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         // Mark for intervention
         function markForIntervention() {
@@ -533,12 +2012,24 @@
                 `,
                 showCancelButton: true,
                 confirmButtonText: 'Schedule Intervention',
-                confirmButtonColor: '#28a745',
+                confirmButtonColor: '#34d399',
                 cancelButtonText: 'Cancel',
-                width: '500px'
+                width: '500px',
+                customClass: {
+                    popup: 'swal-nexgen',
+                    title: 'swal-title-nexgen'
+                }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    Swal.fire('Intervention Scheduled', 'Mental health intervention has been scheduled and documented.', 'success');
+                    Swal.fire({
+                        title: 'Intervention Scheduled',
+                        text: 'Mental health intervention has been scheduled and documented.',
+                        icon: 'success',
+                        customClass: {
+                            popup: 'swal-nexgen',
+                            title: 'swal-title-nexgen'
+                        }
+                    });
                 }
             });
         }
@@ -551,18 +2042,37 @@
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'Flag for Review',
-                confirmButtonColor: '#ffc107'
+                confirmButtonColor: '#fbbf24',
+                customClass: {
+                    popup: 'swal-nexgen',
+                    title: 'swal-title-nexgen'
+                }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    Swal.fire('Case Flagged', 'Case has been flagged for additional professional review.', 'success');
+                    Swal.fire({
+                        title: 'Case Flagged',
+                        text: 'Case has been flagged for additional professional review.',
+                        icon: 'success',
+                        customClass: {
+                            popup: 'swal-nexgen',
+                            title: 'swal-title-nexgen'
+                        }
+                    });
                 }
             });
         }
 
         // Export case report
         function exportCaseReport() {
-            // In a real implementation, this would generate a detailed case report
-            Swal.fire('Exporting Case Report', 'Generating comprehensive case report for professional documentation...', 'info');
+            Swal.fire({
+                title: 'Exporting Case Report',
+                text: 'Generating comprehensive case report for professional documentation...',
+                icon: 'info',
+                customClass: {
+                    popup: 'swal-nexgen',
+                    title: 'swal-title-nexgen'
+                }
+            });
         }
 
         // Create intervention plan
@@ -571,7 +2081,11 @@
                 title: 'Create Intervention Plan',
                 text: 'This would open a detailed intervention planning interface with specific actions, timelines, and resources.',
                 icon: 'info',
-                confirmButtonText: 'Continue to Planner'
+                confirmButtonText: 'Continue to Planner',
+                customClass: {
+                    popup: 'swal-nexgen',
+                    title: 'swal-title-nexgen'
+                }
             });
         }
 
@@ -581,7 +2095,11 @@
                 title: 'Schedule Follow-up',
                 text: 'Integration with calendar system to schedule follow-up mental health assessment.',
                 icon: 'info',
-                confirmButtonText: 'Open Calendar'
+                confirmButtonText: 'Open Calendar',
+                customClass: {
+                    popup: 'swal-nexgen',
+                    title: 'swal-title-nexgen'
+                }
             });
         }
 
@@ -606,7 +2124,11 @@
                 `,
                 icon: 'info',
                 confirmButtonText: 'Proceed with Contact',
-                showCancelButton: true
+                showCancelButton: true,
+                customClass: {
+                    popup: 'swal-nexgen',
+                    title: 'swal-title-nexgen'
+                }
             });
         }
 
@@ -618,82 +2140,50 @@
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'Send Alert',
-                confirmButtonColor: '#ffc107'
+                confirmButtonColor: '#fbbf24',
+                customClass: {
+                    popup: 'swal-nexgen',
+                    title: 'swal-title-nexgen'
+                }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    Swal.fire('Management Notified', 'Workplace mental health concerns have been escalated to management.', 'success');
+                    Swal.fire({
+                        title: 'Management Notified',
+                        text: 'Workplace mental health concerns have been escalated to management.',
+                        icon: 'success',
+                        customClass: {
+                            popup: 'swal-nexgen',
+                            title: 'swal-title-nexgen'
+                        }
+                    });
                 }
             });
         }
 
         // Auto-save checklist progress
-        document.querySelectorAll('.form-check-input').forEach(checkbox => {
+        document.querySelectorAll('.checkbox-nexgen').forEach(checkbox => {
             checkbox.addEventListener('change', function() {
                 // In a real implementation, this would save progress to the database
                 console.log('Checklist updated:', this.id, this.checked);
             });
         });
-    </script>
-}
 
-@section Styles {
-    <style>
-        .sentiment-bars .progress {
-            height: 8px;
-            border-radius: 4px;
-        }
-
-        .border-start {
-            border-left-width: 4px !important;
-        }
-
-        .bg-opacity-10 {
-            --bs-bg-opacity: 0.1;
-        }
-
-        .border-opacity-25 {
-            --bs-border-opacity: 0.25;
-        }
-
-        .font-italic {
-            font-style: italic;
-        }
-
-        .card {
-            transition: all 0.2s ease-in-out;
-        }
-
-        .list-unstyled li {
-            transition: all 0.2s ease-in-out;
-        }
-
-            .list-unstyled li:hover {
-                background-color: rgba(0,0,0,0.05);
-                padding: 0.25rem;
-                border-radius: 0.25rem;
+        // Custom SweetAlert styling
+        const swalStyle = document.createElement('style');
+        swalStyle.textContent = `
+            .swal-nexgen {
+                background: rgba(15, 23, 42, 0.95) !important;
+                backdrop-filter: blur(20px) !important;
+                border: 1px solid rgba(248, 113, 113, 0.3) !important;
+                border-radius: 1rem !important;
+                color: #e2e8f0 !important;
             }
-
-        .badge {
-            font-size: 0.75em;
-        }
-
-        .opacity-75 {
-            opacity: 0.75;
-        }
-
-        @@media (max-width: 768px) {
-            .btn-group
-
-        {
-            flex-direction: column;
-            width: 100%;
-        }
-
-        .btn-group .btn {
-            border-radius: 0.375rem !important;
-            margin-bottom: 0.5rem;
-        }
-
-        }
-    </style>
+            .swal-title-nexgen {
+                color: #f87171 !important;
+                font-weight: 700 !important;
+                letter-spacing: 0.05em !important;
+            }
+        `;
+        document.head.appendChild(swalStyle);
+    </script>
 }

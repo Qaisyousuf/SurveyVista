@@ -2,294 +2,1407 @@
 
 @{
     ViewData["Title"] = $"Batch Analysis - {ViewBag.QuestionnaireName}";
-   
 }
 
-<div class="container-fluid">
-    <!-- Header Section -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <nav aria-label="breadcrumb">
-                        <ol class="breadcrumb">
-                            <li class="breadcrumb-item">
-                                <a href="@Url.Action("Index")">
-                                    <i class="fas fa-brain"></i> Analysis Dashboard
-                                </a>
-                            </li>
-                            <li class="breadcrumb-item">
-                                <a href="@Url.Action("AnalyzeQuestionnaire", new { id = ViewBag.QuestionnaireId })">
-                                    @ViewBag.QuestionnaireName
-                                </a>
-                            </li>
-                            <li class="breadcrumb-item active">Batch Analysis</li>
-                        </ol>
-                    </nav>
-                    <h1 class="h3 mb-1">
-                        <i class="fas fa-layer-group text-primary me-2"></i>
-                        Batch AI Analysis Processing
-                    </h1>
-                    <p class="text-muted mb-0">Processing @ViewBag.TotalRequests mental health survey responses</p>
-                </div>
-                <div class="text-end">
-                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="goBack()">
-                        <i class="fas fa-arrow-left"></i> Back to Analysis
-                    </button>
-                </div>
-            </div>
-        </div>
+@section Styles {
+    <style>
+        @@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --neon-blue: #60a5fa;
+            --neon-purple: #c084fc;
+            --neon-green: #34d399;
+            --neon-pink: #f472b6;
+            --neon-yellow: #fbbf24;
+            --neon-red: #f87171;
+            --neon-cyan: #22d3ee;
+            --neon-orange: #fb923c;
+            --dark-900: #0f172a;
+            --dark-800: #1e293b;
+            --dark-700: #334155;
+            --dark-600: #475569;
+            --dark-500: #64748b;
+            --dark-400: #94a3b8;
+            --dark-300: #cbd5e1;
+            --dark-200: #e2e8f0;
+            --dark-100: #f1f5f9;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+            --font-main: 'Space Grotesk', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            --success-gradient: linear-gradient(135deg, var(--neon-green), var(--neon-cyan));
+            --warning-gradient: linear-gradient(135deg, var(--neon-yellow), var(--neon-orange));
+            --danger-gradient: linear-gradient(135deg, var(--neon-red), #dc2626);
+            --info-gradient: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+            --primary-gradient: linear-gradient(135deg, var(--neon-blue), var(--neon-cyan));
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background: var(--dark-900);
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+
+        .nexgen-batch-dashboard {
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Dynamic Background */
+        .bg-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .grid-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: linear-gradient(rgba(34, 211, 238, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(34, 211, 238, 0.1) 1px, transparent 1px);
+            background-size: 60px 60px;
+            animation: gridMove 20s linear infinite;
+        }
+
+        .gradient-mesh {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 20%, rgba(34, 211, 238, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 60%, rgba(96, 165, 250, 0.15) 0%, transparent 50%), radial-gradient(circle at 40% 80%, rgba(192, 132, 252, 0.15) 0%, transparent 50%);
+            animation: meshShift 15s ease-in-out infinite;
+        }
+
+        /* Top Navigation */
+        .top-nav {
+            position: relative;
+            z-index: 100;
+            padding: 1rem 0;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(34, 211, 238, 0.2);
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            gap: 3rem;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .brand-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-blue));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .brand-name {
+            font-family: var(--font-mono);
+            font-weight: 700;
+            font-size: 1.1rem;
+            letter-spacing: 0.1em;
+            color: #e2e8f0;
+        }
+
+        .brand-version {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--neon-cyan);
+            background: rgba(34, 211, 238, 0.1);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            border: 1px solid rgba(34, 211, 238, 0.3);
+        }
+
+        .nav-center {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+        }
+
+        .breadcrumb-nexgen {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .crumb {
+            color: var(--dark-400);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+            .crumb:hover {
+                color: var(--neon-cyan);
+            }
+
+            .crumb.active {
+                color: var(--neon-cyan);
+            }
+
+        .breadcrumb-nexgen i {
+            color: var(--dark-500);
+            font-size: 0.6rem;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .nav-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1.2rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            color: #e2e8f0;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(10px);
+            text-decoration: none;
+        }
+
+            .nav-btn:hover {
+                background: rgba(34, 211, 238, 0.1);
+                border-color: rgba(34, 211, 238, 0.3);
+                color: var(--neon-cyan);
+            }
+
+        /* Hero Section */
+        .hero-nexgen {
+            padding: 4rem 0 2rem;
+            text-align: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.5rem 1.2rem;
+            background: rgba(34, 211, 238, 0.1);
+            border: 1px solid rgba(34, 211, 238, 0.3);
+            border-radius: 50px;
+            margin-bottom: 2rem;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            color: var(--neon-cyan);
+        }
+
+        .badge-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--neon-cyan);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            color: #ffffff;
+        }
+
+        .title-gradient {
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-blue), var(--neon-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-description {
+            font-size: 1.1rem;
+            color: var(--dark-300);
+            max-width: 600px;
+            margin: 0 auto 2rem;
+            line-height: 1.6;
+        }
+
+        /* Processing Status Card */
+        .processing-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--glass-shadow);
+            margin-bottom: 3rem;
+            position: relative;
+        }
+
+        .processing-header {
+            background: var(--primary-gradient);
+            padding: 2rem;
+            position: relative;
+        }
+
+            .processing-header::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+            }
+
+        .header-content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            justify-content: between;
+            align-items: center;
+        }
+
+        .header-info {
+            flex: 1;
+        }
+
+        .header-title {
+            font-family: var(--font-mono);
+            font-size: 1.3rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            color: white;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-subtitle {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+            margin-bottom: 0;
+        }
+
+        .status-badge {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            padding: 0.6rem 1.2rem;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+            .status-badge.processing {
+                background: rgba(251, 191, 36, 0.2);
+                border-color: var(--neon-yellow);
+                color: var(--neon-yellow);
+            }
+
+            .status-badge.success {
+                background: rgba(52, 211, 153, 0.2);
+                border-color: var(--neon-green);
+                color: var(--neon-green);
+            }
+
+            .status-badge.error {
+                background: rgba(248, 113, 113, 0.2);
+                border-color: var(--neon-red);
+                color: var(--neon-red);
+            }
+
+        /* Progress Section */
+        .progress-section {
+            padding: 2rem;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .progress-title {
+            font-weight: 600;
+            color: #ffffff;
+            font-size: 1.1rem;
+        }
+
+        .progress-percentage {
+            font-family: var(--font-mono);
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--neon-cyan);
+        }
+
+        .progress-container {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        .progress-bar-nexgen {
+            height: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary-gradient);
+            border-radius: 10px;
+            transition: width 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .progress-fill.animated {
+                background: linear-gradient(90deg, var(--neon-cyan) 0%, var(--neon-blue) 25%, var(--neon-cyan) 50%, var(--neon-blue) 75%, var(--neon-cyan) 100%);
+                background-size: 200% 100%;
+                animation: progressShimmer 2s linear infinite;
+            }
+
+            .progress-fill.complete {
+                background: var(--success-gradient);
+                animation: none;
+            }
+
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-top: 1rem;
+        }
+
+        .progress-count {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--dark-300);
+        }
+
+        .estimated-time {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--dark-300);
+        }
+
+        /* Pipeline Section */
+        .pipeline-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            padding: 0 2rem 2rem;
+        }
+
+        .pipeline-container {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .pipeline-title {
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            color: #ffffff;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+            .pipeline-title i {
+                color: var(--neon-cyan);
+            }
+
+        .pipeline-steps {
+            list-style: none;
+            padding: 0;
+        }
+
+        .pipeline-step {
+            padding: 0.8rem 0;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: var(--dark-400);
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+            .pipeline-step.active {
+                color: var(--neon-blue);
+            }
+
+            .pipeline-step.completed {
+                color: var(--neon-green);
+            }
+
+        .step-icon {
+            width: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .pipeline-step.active .step-icon {
+            animation: spin 1s linear infinite;
+        }
+
+        .pipeline-step.completed .step-icon {
+            animation: checkPulse 0.5s ease-in-out;
+        }
+
+        /* Statistics Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .stat-card:hover {
+                transform: translateY(-2px);
+                background: rgba(255, 255, 255, 0.05);
+            }
+
+        .stat-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .stat-card.positive .stat-icon {
+            color: var(--neon-green);
+        }
+
+        .stat-card.negative .stat-icon {
+            color: var(--neon-red);
+        }
+
+        .stat-card.low-risk .stat-icon {
+            color: var(--neon-green);
+        }
+
+        .stat-card.high-risk .stat-icon {
+            color: var(--neon-red);
+        }
+
+        .stat-value {
+            font-family: var(--font-mono);
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            color: var(--dark-400);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Control Footer */
+        .control-footer {
+            padding: 1.5rem 2rem;
+            background: rgba(30, 41, 59, 0.5);
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            justify-content: between;
+            align-items: center;
+        }
+
+        .current-status {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: var(--dark-300);
+            font-size: 0.9rem;
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn-nexgen {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid;
+            text-decoration: none;
+        }
+
+            .btn-nexgen.success {
+                background: rgba(52, 211, 153, 0.1);
+                border-color: rgba(52, 211, 153, 0.3);
+                color: var(--neon-green);
+            }
+
+                .btn-nexgen.success:hover {
+                    background: rgba(52, 211, 153, 0.2);
+                    color: var(--neon-green);
+                    transform: translateY(-1px);
+                }
+
+            .btn-nexgen.danger {
+                background: rgba(248, 113, 113, 0.1);
+                border-color: rgba(248, 113, 113, 0.3);
+                color: var(--neon-red);
+            }
+
+                .btn-nexgen.danger:hover {
+                    background: rgba(248, 113, 113, 0.2);
+                    color: var(--neon-red);
+                    transform: translateY(-1px);
+                }
+
+            .btn-nexgen:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+
+        /* Results Section */
+        .results-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--glass-shadow);
+            margin-bottom: 3rem;
+        }
+
+        .results-header {
+            background: var(--success-gradient);
+            padding: 2rem;
+            position: relative;
+        }
+
+            .results-header::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+            }
+
+        .results-title {
+            position: relative;
+            z-index: 2;
+            font-family: var(--font-mono);
+            font-size: 1.3rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .results-body {
+            padding: 2rem;
+        }
+
+        .results-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .result-stat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .result-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .result-stat.processed .result-icon {
+            background: var(--info-gradient);
+        }
+
+        .result-stat.high-risk .result-icon {
+            background: var(--danger-gradient);
+        }
+
+        .result-stat.positive .result-icon {
+            background: var(--success-gradient);
+        }
+
+        .result-stat.time .result-icon {
+            background: var(--primary-gradient);
+        }
+
+        .result-value {
+            font-family: var(--font-mono);
+            font-size: 2rem;
+            font-weight: 700;
+            color: #ffffff;
+            line-height: 1;
+        }
+
+        .result-label {
+            font-size: 0.8rem;
+            color: var(--dark-400);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .completion-alert {
+            background: rgba(52, 211, 153, 0.1);
+            border: 1px solid rgba(52, 211, 153, 0.3);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .alert-title {
+            font-family: var(--font-mono);
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--neon-green);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .alert-description {
+            color: var(--dark-200);
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+
+        .result-actions {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-nexgen.primary {
+            background: var(--info-gradient);
+            border-color: transparent;
+            color: white;
+        }
+
+            .btn-nexgen.primary:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 10px 20px rgba(96, 165, 250, 0.3);
+                color: white;
+            }
+
+        /* Processing Log */
+        .log-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--glass-shadow);
+        }
+
+        .log-header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            justify-content: between;
+            align-items: center;
+        }
+
+        .log-title {
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+            .log-title i {
+                color: var(--neon-purple);
+            }
+
+        .log-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            color: var(--dark-300);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+            .log-toggle:hover {
+                background: rgba(255, 255, 255, 0.1);
+                color: #ffffff;
+            }
+
+        .log-container {
+            background: var(--dark-800);
+            padding: 1.5rem;
+            max-height: 300px;
+            overflow-y: auto;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .log-entry {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            line-height: 1.4;
+            margin-bottom: 0.5rem;
+            padding: 0.2rem 0;
+            animation: fadeInUp 0.3s ease-out;
+        }
+
+            .log-entry.info {
+                color: var(--neon-cyan);
+            }
+
+            .log-entry.success {
+                color: var(--neon-green);
+            }
+
+            .log-entry.warning {
+                color: var(--neon-yellow);
+            }
+
+            .log-entry.error {
+                color: var(--neon-red);
+            }
+
+        .timestamp {
+            color: var(--dark-400);
+            font-weight: 600;
+        }
+
+        /* Animations */
+        @@keyframes gridMove {
+            0%
+
+        {
+            transform: translate(0, 0);
+        }
+
+        100% {
+            transform: translate(60px, 60px);
+        }
+
+        }
+
+        @@keyframes meshShift {
+            0%, 100%
+
+        {
+            filter: hue-rotate(0deg);
+            transform: scale(1);
+        }
+
+        50% {
+            filter: hue-rotate(30deg);
+            transform: scale(1.05);
+        }
+
+        }
+
+        @@keyframes pulse {
+            0%, 100%
+
+        {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        50% {
+            opacity: 0.7;
+            transform: scale(1.1);
+        }
+
+        }
+
+        @@keyframes progressShimmer {
+            0%
+
+        {
+            background-position: -200% 0;
+        }
+
+        100% {
+            background-position: 200% 0;
+        }
+
+        }
+
+        @@keyframes spin {
+            from
+
+        {
+            transform: rotate(0deg);
+        }
+
+        to {
+            transform: rotate(360deg);
+        }
+
+        }
+
+        @@keyframes checkPulse {
+            0%
+
+        {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.2);
+        }
+
+        100% {
+            transform: scale(1);
+        }
+
+        }
+
+        @@keyframes fadeInUp {
+            from
+
+        {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        }
+
+        /* Responsive Design */
+        @@media (max-width: 1200px) {
+            .pipeline-section
+
+        {
+            grid-template-columns: 1fr;
+        }
+
+        }
+
+        @@media (max-width: 768px) {
+            .nav-container
+
+        {
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .nav-center {
+            order: 3;
+            flex-basis: 100%;
+            justify-content: flex-start;
+        }
+
+        .hero-title {
+            font-size: 2.5rem;
+        }
+
+        .header-content {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .results-stats {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .control-footer {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        .result-actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        }
+
+        @@media (max-width: 480px) {
+            .processing-card, .results-section, .log-section
+
+        {
+            margin-left: 1rem;
+            margin-right: 1rem;
+        }
+
+        .results-stats {
+            grid-template-columns: 1fr;
+        }
+
+        }
+
+        /* Print Styles */
+        @@media print {
+            .bg-pattern, .top-nav, .btn-nexgen, .log-section
+
+        {
+            display: none !important;
+        }
+
+        .processing-card,
+        .results-section {
+            break-inside: avoid;
+            border: 1px solid #333;
+            background: white;
+            color: black;
+        }
+
+        .nexgen-batch-dashboard {
+            background: white;
+        }
+
+        }
+
+        /* Accessibility */
+        @@media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after
+
+        {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+        }
+
+        }
+
+        /* High Contrast Mode */
+        @@media (prefers-contrast: high) {
+            : root
+
+        {
+            --neon-cyan: #00e5ff;
+            --neon-blue: #4d9fff;
+            --neon-green: #4dff88;
+            --dark-300: #ffffff;
+            --dark-400: #cccccc;
+        }
+
+        .processing-card,
+        .results-section,
+        .log-section {
+            border-width: 2px;
+        }
+
+        }
+    </style>
+}
+
+<div class="nexgen-batch-dashboard">
+    <!-- Dynamic Background -->
+    <div class="bg-pattern">
+        <div class="grid-overlay"></div>
+        <div class="gradient-mesh"></div>
     </div>
 
-    <!-- Processing Status Card -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card border-0 shadow-lg">
-                <div class="card-header bg-primary text-white">
-                    <div class="row align-items-center">
-                        <div class="col-md-8">
-                            <h5 class="mb-0">
-                                <i class="fas fa-cogs me-2"></i>
+    <!-- Top Navigation Bar -->
+    <nav class="top-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <div class="brand-icon">
+                    <i class="fas fa-layer-group"></i>
+                </div>
+                <div class="brand-text">
+                    <span class="brand-name">BATCH PROCESSOR</span>
+                    <span class="brand-version">v1.0</span>
+                </div>
+            </div>
+
+            <div class="nav-center">
+                <nav class="breadcrumb-nexgen">
+                    <a href="@Url.Action("Index")" class="crumb">
+                        <i class="fas fa-brain"></i> ANALYSIS DASHBOARD
+                    </a>
+                    <i class="fas fa-chevron-right"></i>
+                    <a href="@Url.Action("AnalyzeQuestionnaire", new { id = ViewBag.QuestionnaireId })" class="crumb">
+                        @ViewBag.QuestionnaireName?.ToUpper()
+                    </a>
+                    <i class="fas fa-chevron-right"></i>
+                    <span class="crumb active">BATCH ANALYSIS</span>
+                </nav>
+            </div>
+
+            <div class="nav-actions">
+                <button type="button" class="nav-btn" onclick="goBack()">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Back to Analysis</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-nexgen">
+        <div class="container-fluid">
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <span class="badge-dot"></span>
+                    <span>AI BATCH PROCESSING SYSTEM</span>
+                </div>
+                <h1 class="hero-title">
+                    Batch AI
+                    <span class="title-gradient">Analysis</span>
+                    Processing
+                </h1>
+                <p class="hero-description">
+                    Processing @ViewBag.TotalRequests mental health survey responses using advanced neural networks
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container-fluid">
+            <!-- Processing Status Card -->
+            <div class="processing-card">
+                <div class="processing-header">
+                    <div class="header-content">
+                        <div class="header-info">
+                            <h2 class="header-title">
+                                <i class="fas fa-cogs"></i>
                                 AI Analysis in Progress
-                            </h5>
-                            <small class="opacity-75">Analyzing responses using Azure Language Service and OpenAI</small>
+                            </h2>
+                            <p class="header-subtitle">Analyzing responses using Azure Language Service and OpenAI</p>
                         </div>
-                        <div class="col-md-4 text-end">
-                            <div id="statusBadge" class="badge bg-warning text-dark">
-                                <i class="fas fa-clock"></i> Initializing...
-                            </div>
+                        <div id="statusBadge" class="status-badge">
+                            <i class="fas fa-clock"></i> INITIALIZING...
                         </div>
                     </div>
                 </div>
 
-                <div class="card-body">
-                    <!-- Progress Bar -->
-                    <div class="mb-4">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="fw-bold">Analysis Progress</span>
-                            <span id="progressPercentage" class="fw-bold text-primary">0%</span>
-                        </div>
-                        <div class="progress" style="height: 25px;">
-                            <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-primary"
-                                 role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
-                                <span id="progressText" class="fw-bold">Starting...</span>
+                <div class="progress-section">
+                    <div class="progress-header">
+                        <div class="progress-title">Analysis Progress</div>
+                        <div id="progressPercentage" class="progress-percentage">0%</div>
+                    </div>
+
+                    <div class="progress-container">
+                        <div class="progress-bar-nexgen">
+                            <div id="progressBar" class="progress-fill animated" style="width: 0%">
+                                <div id="progressText" class="progress-text">Starting...</div>
                             </div>
-                        </div>
-                        <div class="d-flex justify-content-between mt-2">
-                            <small class="text-muted">
-                                <span id="processedCount">0</span> of @ViewBag.TotalRequests responses processed
-                            </small>
-                            <small class="text-muted" id="estimatedTime">
-                                Estimated time: Calculating...
-                            </small>
                         </div>
                     </div>
 
-                    <!-- Processing Steps -->
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h6 class="mb-3">
-                                <i class="fas fa-list-check me-2"></i>Processing Pipeline
-                            </h6>
-                            <ul class="list-unstyled">
-                                <li id="step1" class="mb-2 text-muted">
-                                    <i class="fas fa-circle-notch fa-spin me-2"></i>
-                                    Connecting to Azure AI services...
-                                </li>
-                                <li id="step2" class="mb-2 text-muted">
-                                    <i class="fas fa-circle me-2"></i>
-                                    Anonymizing personal information...
-                                </li>
-                                <li id="step3" class="mb-2 text-muted">
-                                    <i class="fas fa-circle me-2"></i>
-                                    Running sentiment analysis...
-                                </li>
-                                <li id="step4" class="mb-2 text-muted">
-                                    <i class="fas fa-circle me-2"></i>
-                                    Extracting key phrases and themes...
-                                </li>
-                                <li id="step5" class="mb-2 text-muted">
-                                    <i class="fas fa-circle me-2"></i>
-                                    Assessing mental health risk levels...
-                                </li>
-                                <li id="step6" class="mb-2 text-muted">
-                                    <i class="fas fa-circle me-2"></i>
-                                    Generating workplace insights...
-                                </li>
-                                <li id="step7" class="mb-2 text-muted">
-                                    <i class="fas fa-circle me-2"></i>
-                                    Creating executive summary...
-                                </li>
-                            </ul>
+                    <div class="progress-info">
+                        <div class="progress-count">
+                            <span id="processedCount">0</span> of @ViewBag.TotalRequests responses processed
                         </div>
+                        <div id="estimatedTime" class="estimated-time">
+                            Estimated time: Calculating...
+                        </div>
+                    </div>
+                </div>
 
-                        <div class="col-md-6">
-                            <h6 class="mb-3">
-                                <i class="fas fa-chart-bar me-2"></i>Real-time Statistics
-                            </h6>
-                            <div class="stats-container">
-                                <div class="row text-center">
-                                    <div class="col-6 mb-3">
-                                        <div class="bg-light rounded p-3">
-                                            <div class="text-success mb-1">
-                                                <i class="fas fa-smile fa-lg"></i>
-                                            </div>
-                                            <h5 id="positiveCount" class="mb-0">0</h5>
-                                            <small class="text-muted">Positive Responses</small>
-                                        </div>
-                                    </div>
-                                    <div class="col-6 mb-3">
-                                        <div class="bg-light rounded p-3">
-                                            <div class="text-danger mb-1">
-                                                <i class="fas fa-frown fa-lg"></i>
-                                            </div>
-                                            <h5 id="negativeCount" class="mb-0">0</h5>
-                                            <small class="text-muted">Negative Responses</small>
-                                        </div>
-                                    </div>
-                                    <div class="col-6">
-                                        <div class="bg-light rounded p-3">
-                                            <div class="text-success mb-1">
-                                                <i class="fas fa-shield-alt fa-lg"></i>
-                                            </div>
-                                            <h5 id="lowRiskCount" class="mb-0">0</h5>
-                                            <small class="text-muted">Low Risk</small>
-                                        </div>
-                                    </div>
-                                    <div class="col-6">
-                                        <div class="bg-light rounded p-3">
-                                            <div class="text-danger mb-1">
-                                                <i class="fas fa-exclamation-triangle fa-lg"></i>
-                                            </div>
-                                            <h5 id="highRiskCount" class="mb-0">0</h5>
-                                            <small class="text-muted">High Risk</small>
-                                        </div>
-                                    </div>
+                <div class="pipeline-section">
+                    <div class="pipeline-container">
+                        <h3 class="pipeline-title">
+                            <i class="fas fa-list-check"></i>
+                            Processing Pipeline
+                        </h3>
+                        <ul class="pipeline-steps">
+                            <li id="step1" class="pipeline-step">
+                                <div class="step-icon">
+                                    <i class="fas fa-circle-notch"></i>
                                 </div>
+                                <span>Connecting to Azure AI services...</span>
+                            </li>
+                            <li id="step2" class="pipeline-step">
+                                <div class="step-icon">
+                                    <i class="fas fa-circle"></i>
+                                </div>
+                                <span>Anonymizing personal information...</span>
+                            </li>
+                            <li id="step3" class="pipeline-step">
+                                <div class="step-icon">
+                                    <i class="fas fa-circle"></i>
+                                </div>
+                                <span>Running sentiment analysis...</span>
+                            </li>
+                            <li id="step4" class="pipeline-step">
+                                <div class="step-icon">
+                                    <i class="fas fa-circle"></i>
+                                </div>
+                                <span>Extracting key phrases and themes...</span>
+                            </li>
+                            <li id="step5" class="pipeline-step">
+                                <div class="step-icon">
+                                    <i class="fas fa-circle"></i>
+                                </div>
+                                <span>Assessing mental health risk levels...</span>
+                            </li>
+                            <li id="step6" class="pipeline-step">
+                                <div class="step-icon">
+                                    <i class="fas fa-circle"></i>
+                                </div>
+                                <span>Generating workplace insights...</span>
+                            </li>
+                            <li id="step7" class="pipeline-step">
+                                <div class="step-icon">
+                                    <i class="fas fa-circle"></i>
+                                </div>
+                                <span>Creating executive summary...</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="pipeline-container">
+                        <h3 class="pipeline-title">
+                            <i class="fas fa-chart-bar"></i>
+                            Real-time Statistics
+                        </h3>
+                        <div class="stats-grid">
+                            <div class="stat-card positive">
+                                <div class="stat-icon">
+                                    <i class="fas fa-smile"></i>
+                                </div>
+                                <div id="positiveCount" class="stat-value">0</div>
+                                <div class="stat-label">Positive Responses</div>
+                            </div>
+                            <div class="stat-card negative">
+                                <div class="stat-icon">
+                                    <i class="fas fa-frown"></i>
+                                </div>
+                                <div id="negativeCount" class="stat-value">0</div>
+                                <div class="stat-label">Negative Responses</div>
+                            </div>
+                            <div class="stat-card low-risk">
+                                <div class="stat-icon">
+                                    <i class="fas fa-shield-alt"></i>
+                                </div>
+                                <div id="lowRiskCount" class="stat-value">0</div>
+                                <div class="stat-label">Low Risk</div>
+                            </div>
+                            <div class="stat-card high-risk">
+                                <div class="stat-icon">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </div>
+                                <div id="highRiskCount" class="stat-value">0</div>
+                                <div class="stat-label">High Risk</div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="card-footer bg-light">
-                    <div class="row align-items-center">
-                        <div class="col-md-8">
-                            <div id="currentStatus" class="text-muted">
-                                <i class="fas fa-info-circle me-2"></i>
-                                Ready to start batch processing of mental health responses...
-                            </div>
-                        </div>
-                        <div class="col-md-4 text-end">
-                            <button id="startButton" type="button" class="btn btn-success" onclick="startBatchAnalysis()">
-                                <i class="fas fa-play me-2"></i>Start Analysis
-                            </button>
-                            <button id="stopButton" type="button" class="btn btn-danger d-none" onclick="stopBatchAnalysis()">
-                                <i class="fas fa-stop me-2"></i>Stop Processing
-                            </button>
-                        </div>
+                <div class="control-footer">
+                    <div id="currentStatus" class="current-status">
+                        <i class="fas fa-info-circle"></i>
+                        Ready to start batch processing of mental health responses...
+                    </div>
+                    <div class="control-buttons">
+                        <button id="startButton" type="button" class="btn-nexgen success" onclick="startBatchAnalysis()">
+                            <i class="fas fa-play"></i>START ANALYSIS
+                        </button>
+                        <button id="stopButton" type="button" class="btn-nexgen danger d-none" onclick="stopBatchAnalysis()">
+                            <i class="fas fa-stop"></i>STOP PROCESSING
+                        </button>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!-- Results Section (Hidden until complete) -->
-    <div id="resultsSection" class="row d-none">
-        <div class="col-12">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-success text-white">
-                    <h5 class="mb-0">
-                        <i class="fas fa-check-circle me-2"></i>
+            <!-- Results Section (Hidden until complete) -->
+            <div id="resultsSection" class="results-section d-none">
+                <div class="results-header">
+                    <h2 class="results-title">
+                        <i class="fas fa-check-circle"></i>
                         Batch Analysis Complete
-                    </h5>
+                    </h2>
                 </div>
-                <div class="card-body">
-                    <div class="row text-center mb-4">
-                        <div class="col-md-3">
-                            <div class="text-primary">
-                                <i class="fas fa-check-double fa-2x mb-2"></i>
-                                <h4 id="totalProcessed" class="mb-0">0</h4>
-                                <small class="text-muted">Responses Processed</small>
+                <div class="results-body">
+                    <div class="results-stats">
+                        <div class="result-stat processed">
+                            <div class="result-icon">
+                                <i class="fas fa-check-double"></i>
                             </div>
+                            <div id="totalProcessed" class="result-value">0</div>
+                            <div class="result-label">Responses Processed</div>
                         </div>
-                        <div class="col-md-3">
-                            <div class="text-danger">
-                                <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
-                                <h4 id="finalHighRisk" class="mb-0">0</h4>
-                                <small class="text-muted">High Risk Cases Found</small>
+                        <div class="result-stat high-risk">
+                            <div class="result-icon">
+                                <i class="fas fa-exclamation-triangle"></i>
                             </div>
+                            <div id="finalHighRisk" class="result-value">0</div>
+                            <div class="result-label">High Risk Cases Found</div>
                         </div>
-                        <div class="col-md-3">
-                            <div class="text-success">
-                                <i class="fas fa-smile fa-2x mb-2"></i>
-                                <h4 id="finalPositive" class="mb-0">0</h4>
-                                <small class="text-muted">Positive Responses</small>
+                        <div class="result-stat positive">
+                            <div class="result-icon">
+                                <i class="fas fa-smile"></i>
                             </div>
+                            <div id="finalPositive" class="result-value">0</div>
+                            <div class="result-label">Positive Responses</div>
                         </div>
-                        <div class="col-md-3">
-                            <div class="text-info">
-                                <i class="fas fa-clock fa-2x mb-2"></i>
-                                <h4 id="processingTime" class="mb-0">0s</h4>
-                                <small class="text-muted">Total Processing Time</small>
+                        <div class="result-stat time">
+                            <div class="result-icon">
+                                <i class="fas fa-clock"></i>
                             </div>
+                            <div id="processingTime" class="result-value">0s</div>
+                            <div class="result-label">Total Processing Time</div>
                         </div>
                     </div>
 
-                    <div class="alert alert-success border-0">
-                        <h5 class="alert-heading">
-                            <i class="fas fa-brain me-2"></i>Analysis Successfully Completed!
-                        </h5>
-                        <p class="mb-3">
+                    <div class="completion-alert">
+                        <h3 class="alert-title">
+                            <i class="fas fa-brain"></i>
+                            Analysis Successfully Completed!
+                        </h3>
+                        <p class="alert-description">
                             Your mental health survey responses have been analyzed using advanced AI.
                             The system has identified sentiment patterns, risk levels, and workplace insights
                             to help NVKN provide targeted mental health interventions.
                         </p>
-                        <div class="text-center">
-                            <div class="btn-group" role="group">
-                                <a id="viewResultsButton" href="@Url.Action("AnalyzeQuestionnaire", new { id = ViewBag.QuestionnaireId })" class="btn btn-primary">
-                                    <i class="fas fa-chart-line"></i> View Complete Analysis
-                                </a>
-                                <a id="viewHighRiskButton" href="@Url.Action("HighRiskResponses", new { id = ViewBag.QuestionnaireId })" class="btn btn-danger d-none">
-                                    <i class="fas fa-shield-alt"></i> View High Risk Cases
-                                </a>
-                                <a id="generateReportButton" href="@Url.Action("GenerateReport", new { id = ViewBag.QuestionnaireId })" class="btn btn-success">
-                                    <i class="fas fa-file-medical"></i> Generate Report
-                                </a>
-                            </div>
+                        <div class="result-actions">
+                            <a id="viewResultsButton" href="@Url.Action("AnalyzeQuestionnaire", new { id = ViewBag.QuestionnaireId })" class="btn-nexgen primary">
+                                <i class="fas fa-chart-line"></i> VIEW COMPLETE ANALYSIS
+                            </a>
+                            <a id="viewHighRiskButton" href="@Url.Action("HighRiskResponses", new { id = ViewBag.QuestionnaireId })" class="btn-nexgen danger d-none">
+                                <i class="fas fa-shield-alt"></i> VIEW HIGH RISK CASES
+                            </a>
+                            <a id="generateReportButton" href="@Url.Action("GenerateReport", new { id = ViewBag.QuestionnaireId })" class="btn-nexgen success">
+                                <i class="fas fa-file-medical"></i> GENERATE REPORT
+                            </a>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!-- Processing Log (Advanced Users) -->
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-light">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h6 class="mb-0">
-                            <i class="fas fa-terminal me-2"></i>Processing Log
-                        </h6>
-                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="toggleLog()">
-                            <i class="fas fa-chevron-down"></i> Show Details
-                        </button>
-                    </div>
+            <!-- Processing Log -->
+            <div class="log-section">
+                <div class="log-header">
+                    <h3 class="log-title">
+                        <i class="fas fa-terminal"></i>
+                        Processing Log
+                    </h3>
+                    <button type="button" class="log-toggle" onclick="toggleLog()">
+                        <i class="fas fa-chevron-down"></i> SHOW DETAILS
+                    </button>
                 </div>
-                <div id="logContainer" class="card-body bg-dark text-light d-none" style="max-height: 300px; overflow-y: auto;">
-                    <div id="processingLog" class="font-monospace small">
-                        <div class="log-entry text-info">
+                <div id="logContainer" class="log-container d-none">
+                    <div id="processingLog">
+                        <div class="log-entry info">
                             [<span class="timestamp"></span>] Batch analysis system initialized and ready...
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </main>
 </div>
 
 @section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         let batchProcessing = false;
         let startTime = null;
@@ -308,7 +1421,7 @@
             // Update UI
             document.getElementById('startButton').classList.add('d-none');
             document.getElementById('stopButton').classList.remove('d-none');
-            updateStatusBadge('info', 'fa-spinner fa-spin', 'Processing...');
+            updateStatusBadge('processing', 'fa-spinner fa-spin', 'PROCESSING...');
 
             // Start processing steps animation
             animateProcessingSteps();
@@ -327,7 +1440,7 @@
 
             document.getElementById('startButton').classList.remove('d-none');
             document.getElementById('stopButton').classList.add('d-none');
-            updateStatusBadge('warning', 'fa-pause', 'Stopped');
+            updateStatusBadge('', 'fa-pause', 'STOPPED');
 
             updateCurrentStatus('Batch processing stopped by user');
             addLogEntry('Batch processing stopped by user', 'warning');
@@ -416,7 +1529,7 @@
             document.getElementById('processingTime').textContent = processingTime + 's';
 
             // Update status
-            updateStatusBadge('success', 'fa-check', 'Complete');
+            updateStatusBadge('success', 'fa-check', 'COMPLETE');
 
             // Complete all steps
             completeAllSteps();
@@ -445,7 +1558,7 @@
         function handleProcessingError(message) {
             batchProcessing = false;
 
-            updateStatusBadge('danger', 'fa-times', 'Error');
+            updateStatusBadge('error', 'fa-times', 'ERROR');
 
             document.getElementById('startButton').classList.remove('d-none');
             document.getElementById('stopButton').classList.add('d-none');
@@ -457,7 +1570,11 @@
                 title: 'Processing Error',
                 text: message,
                 icon: 'error',
-                confirmButtonText: 'OK'
+                confirmButtonText: 'OK',
+                customClass: {
+                    popup: 'swal-nexgen',
+                    title: 'swal-title-nexgen'
+                }
             });
         }
 
@@ -468,13 +1585,11 @@
             const progressText = document.getElementById('progressText');
 
             progressBar.style.width = percentage + '%';
-            progressBar.setAttribute('aria-valuenow', percentage);
             progressPercentage.textContent = Math.round(percentage) + '%';
 
             if (percentage >= 100) {
-                progressBar.classList.remove('progress-bar-animated');
-                progressBar.classList.remove('bg-primary');
-                progressBar.classList.add('bg-success');
+                progressBar.classList.remove('animated');
+                progressBar.classList.add('complete');
                 progressText.textContent = 'Complete!';
             } else {
                 progressText.textContent = 'Processing...';
@@ -484,14 +1599,8 @@
         // Update status badge
         function updateStatusBadge(type, icon, text) {
             const badge = document.getElementById('statusBadge');
-            const colorClass = {
-                'info': 'bg-info',
-                'success': 'bg-success',
-                'warning': 'bg-warning text-dark',
-                'danger': 'bg-danger'
-            }[type] || 'bg-secondary';
 
-            badge.className = 'badge ' + colorClass;
+            badge.className = `status-badge ${type}`;
             badge.innerHTML = `<i class="fas ${icon}"></i> ${text}`;
         }
 
@@ -509,17 +1618,16 @@
                 // Complete previous step
                 if (currentStep > 0) {
                     const prevStep = document.getElementById(steps[currentStep - 1]);
-                    prevStep.innerHTML = prevStep.innerHTML.replace('fa-spin', '').replace('fa-circle-notch', 'fa-check-circle text-success');
-                    prevStep.classList.remove('text-muted');
-                    prevStep.classList.add('text-success');
+                    prevStep.querySelector('.step-icon i').className = 'fas fa-check-circle';
+                    prevStep.classList.remove('active');
+                    prevStep.classList.add('completed');
                 }
 
                 // Start current step
                 if (currentStep < steps.length) {
                     const nextStep = document.getElementById(steps[currentStep]);
-                    nextStep.innerHTML = nextStep.innerHTML.replace('fa-circle', 'fa-circle-notch fa-spin');
-                    nextStep.classList.remove('text-muted');
-                    nextStep.classList.add('text-primary');
+                    nextStep.querySelector('.step-icon i').className = 'fas fa-circle-notch';
+                    nextStep.classList.add('active');
                 }
 
                 currentStep++;
@@ -531,15 +1639,15 @@
             const steps = ['step1', 'step2', 'step3', 'step4', 'step5', 'step6', 'step7'];
             steps.forEach(stepId => {
                 const step = document.getElementById(stepId);
-                step.innerHTML = step.innerHTML.replace('fa-spin', '').replace('fa-circle-notch', 'fa-check-circle text-success');
-                step.classList.remove('text-muted', 'text-primary');
-                step.classList.add('text-success');
+                step.querySelector('.step-icon i').className = 'fas fa-check-circle';
+                step.classList.remove('active');
+                step.classList.add('completed');
             });
         }
 
         // Update current status message
         function updateCurrentStatus(message) {
-            document.getElementById('currentStatus').innerHTML = '<i class="fas fa-info-circle me-2"></i>' + message;
+            document.getElementById('currentStatus').innerHTML = '<i class="fas fa-info-circle"></i>' + message;
         }
 
         // Add log entry
@@ -547,15 +1655,8 @@
             const log = document.getElementById('processingLog');
             const timestamp = new Date().toLocaleTimeString();
 
-            const colorClass = {
-                'info': 'text-info',
-                'success': 'text-success',
-                'warning': 'text-warning',
-                'error': 'text-danger'
-            }[type] || 'text-info';
-
             const entry = document.createElement('div');
-            entry.className = 'log-entry ' + colorClass;
+            entry.className = 'log-entry ' + type;
             entry.innerHTML = `[<span class="timestamp">${timestamp}</span>] ${message}`;
 
             log.appendChild(entry);
@@ -575,9 +1676,9 @@
             logContainer.classList.toggle('d-none');
 
             if (logContainer.classList.contains('d-none')) {
-                toggleButton.innerHTML = '<i class="fas fa-chevron-down"></i> Show Details';
+                toggleButton.innerHTML = '<i class="fas fa-chevron-down"></i> SHOW DETAILS';
             } else {
-                toggleButton.innerHTML = '<i class="fas fa-chevron-up"></i> Hide Details';
+                toggleButton.innerHTML = '<i class="fas fa-chevron-up"></i> HIDE DETAILS';
                 logContainer.scrollTop = logContainer.scrollHeight;
             }
         }
@@ -591,7 +1692,11 @@
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonText: 'Stop and Go Back',
-                    cancelButtonText: 'Continue Processing'
+                    cancelButtonText: 'Continue Processing',
+                    customClass: {
+                        popup: 'swal-nexgen',
+                        title: 'swal-title-nexgen'
+                    }
                 }).then((result) => {
                     if (result.isConfirmed) {
                         stopBatchAnalysis();
@@ -602,6 +1707,24 @@
                 window.location.href = '@Url.Action("AnalyzeQuestionnaire", new { id = ViewBag.QuestionnaireId })';
             }
         }
+
+        // Custom SweetAlert styling
+        const swalStyle = document.createElement('style');
+        swalStyle.textContent = `
+            .swal-nexgen {
+                background: rgba(15, 23, 42, 0.95) !important;
+                backdrop-filter: blur(20px) !important;
+                border: 1px solid rgba(34, 211, 238, 0.3) !important;
+                border-radius: 1rem !important;
+                color: #e2e8f0 !important;
+            }
+            .swal-title-nexgen {
+                color: #22d3ee !important;
+                font-weight: 700 !important;
+                letter-spacing: 0.05em !important;
+            }
+        `;
+        document.head.appendChild(swalStyle);
 
         // Initialize timestamps
         document.addEventListener('DOMContentLoaded', function() {
@@ -627,115 +1750,4 @@
             }
         });
     </script>
-}
-
-@section Styles {
-    <style>
-        .progress {
-            border-radius: 12px;
-            box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
-        }
-
-        .progress-bar {
-            border-radius: 12px;
-            font-size: 0.875rem;
-            line-height: 25px;
-        }
-
-        .stats-container .bg-light {
-            transition: all 0.3s ease;
-            border: 1px solid transparent;
-        }
-
-            .stats-container .bg-light:hover {
-                background-color: #e9ecef !important;
-                transform: scale(1.02);
-                border-color: #dee2e6;
-            }
-
-        .log-entry {
-            margin-bottom: 0.25rem;
-            animation: fadeIn 0.3s ease-in;
-            padding: 0.125rem 0;
-        }
-
-            .log-entry .timestamp {
-                color: #6c757d;
-                font-weight: bold;
-            }
-
-        @@keyframes fadeIn {
-            from
-
-        {
-            opacity: 0;
-            transform: translateY(-5px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        }
-
-        .font-monospace {
-            font-family: 'Courier New', monospace;
-            font-size: 0.85rem;
-            line-height: 1.4;
-        }
-
-        .opacity-75 {
-            opacity: 0.75;
-        }
-
-        .card {
-            transition: all 0.2s ease-in-out;
-        }
-
-        .list-unstyled li {
-            transition: all 0.3s ease;
-            padding: 0.25rem 0;
-        }
-
-        .text-success .fa-check-circle {
-            animation: checkPulse 0.5s ease-in-out;
-        }
-
-        @@keyframes checkPulse {
-            0%
-
-        {
-            transform: scale(1);
-        }
-
-        50% {
-            transform: scale(1.2);
-        }
-
-        100% {
-            transform: scale(1);
-        }
-
-        }
-
-        @@media (max-width: 768px) {
-            .btn-group
-
-        {
-            flex-direction: column;
-            width: 100%;
-        }
-
-        .btn-group .btn {
-            border-radius: 0.375rem !important;
-            margin-bottom: 0.5rem;
-        }
-
-        .stats-container .col-6 {
-            margin-bottom: 1rem;
-        }
-
-        }
-    </style>
 }

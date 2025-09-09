@@ -40,40 +40,42 @@ namespace Web.Areas.Admin.Controllers
             {
                 var questionnaires = await _context.Questionnaires
                     .Include(q => q.Questions)
-                    .Select(q => new
-                    {
-                        q.Id,
-                        q.Title,
-                        q.Description,
-                        QuestionCount = q.Questions.Count,
-                        ResponseCount = _context.Responses.Count(r => r.QuestionnaireId == q.Id),
-                        TextResponseCount = _context.Responses
-                            .Where(r => r.QuestionnaireId == q.Id)
-                            .SelectMany(r => r.ResponseDetails)
-                            .Count(rd => !string.IsNullOrEmpty(rd.TextResponse)),
-                        LastResponse = _context.Responses
-                            .Where(r => r.QuestionnaireId == q.Id)
-                            .OrderByDescending(r => r.SubmissionDate)
-                            .Select(r => r.SubmissionDate)
-                            .FirstOrDefault(),
-                        // Add Users information for displaying participant details
-                        Users = _context.Responses
-                            .Where(r => r.QuestionnaireId == q.Id && !string.IsNullOrEmpty(r.UserName))
-                            .OrderByDescending(r => r.SubmissionDate)
-                            .Select(r => new
-                            {
-                                UserName = r.UserName,
-                                Email = r.UserEmail
-                            })
-                            .Distinct()
-                            .Take(5) // Show up to 5 recent participants
-                            .ToList()
-                    })
                     .ToListAsync();
 
-                ViewBag.ServiceHealth = await _aiAnalysisService.GetServiceHealthStatusAsync();
+                var result = questionnaires.Select(q => new
+                {
+                    q.Id,
+                    q.Title,
+                    q.Description,
+                    QuestionCount = q.Questions.Count,
+                    ResponseCount = _context.Responses.Count(r => r.QuestionnaireId == q.Id),
+                    AnalyzableResponseCount = _context.Responses
+                        .Include(r => r.ResponseDetails)
+                            .ThenInclude(rd => rd.ResponseAnswers)
+                        .Where(r => r.QuestionnaireId == q.Id)
+                        .SelectMany(r => r.ResponseDetails)
+                        .Count(rd => !string.IsNullOrEmpty(rd.TextResponse) ||
+                                    (rd.QuestionType == QuestionType.CheckBox && rd.ResponseAnswers.Any())),
+                    LastResponse = _context.Responses
+                        .Where(r => r.QuestionnaireId == q.Id)
+                        .OrderByDescending(r => r.SubmissionDate)
+                        .Select(r => r.SubmissionDate)
+                        .FirstOrDefault(),
+                    Users = _context.Responses
+                        .Where(r => r.QuestionnaireId == q.Id && !string.IsNullOrEmpty(r.UserName))
+                        .OrderByDescending(r => r.SubmissionDate)
+                        .Select(r => new
+                        {
+                            UserName = r.UserName,
+                            Email = r.UserEmail
+                        })
+                        .Distinct()
+                        .Take(5)
+                        .ToList()
+                }).ToList();
 
-                return View(questionnaires);
+                ViewBag.ServiceHealth = await _aiAnalysisService.GetServiceHealthStatusAsync();
+                return View(result);
             }
             catch (Exception ex)
             {
@@ -101,21 +103,52 @@ namespace Web.Areas.Admin.Controllers
                 }
 
                 // Check if there are responses to analyze
-                var hasResponses = await _context.Responses
-                    .AnyAsync(r => r.QuestionnaireId == id);
+                var totalResponses = await _context.Responses
+                    .CountAsync(r => r.QuestionnaireId == id);
 
-                if (!hasResponses)
+                if (totalResponses == 0)
                 {
                     TempData["WarningMessage"] = "No responses found for this questionnaire.";
                     return RedirectToAction(nameof(Index));
                 }
 
-                _logger.LogInformation("Starting analysis for questionnaire {QuestionnaireId}", id);
+                // Calculate analyzable responses (same logic as dashboard)
+                var analyzableCount = await _context.Responses
+                    .Where(r => r.QuestionnaireId == id)
+                    .SelectMany(r => r.ResponseDetails)
+                    .CountAsync(rd => !string.IsNullOrEmpty(rd.TextResponse) ||
+                                    (rd.QuestionType == QuestionType.CheckBox &&
+                                     _context.ResponseAnswers.Any(ra => ra.ResponseDetailId == rd.Id)));
+
+                if (analyzableCount == 0)
+                {
+                    TempData["WarningMessage"] = "No analyzable responses found. Responses must contain text or checkbox selections.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                _logger.LogInformation("Starting analysis for questionnaire {QuestionnaireId}. Total responses: {TotalResponses}, Analyzable: {AnalyzableCount}",
+                    id, totalResponses, analyzableCount);
 
                 // Generate comprehensive analysis
                 var analysisOverview = await _aiAnalysisService.GenerateQuestionnaireOverviewAsync(id);
 
-                _logger.LogInformation("Analysis completed successfully for questionnaire {QuestionnaireId}", id);
+                var actuallyAnalyzed = analysisOverview.AnalyzedResponses;
+
+                _logger.LogInformation("Analysis completed for questionnaire {QuestionnaireId}. " +
+                    "Analyzable: {AnalyzableCount}, Successfully Analyzed: {ActuallyAnalyzed}",
+                    id, analyzableCount, actuallyAnalyzed);
+
+                // Provide user feedback about the difference if significant
+                if (analyzableCount > actuallyAnalyzed && (analyzableCount - actuallyAnalyzed) > 0)
+                {
+                    var difference = analyzableCount - actuallyAnalyzed;
+                    TempData["InfoMessage"] = $"Analysis completed successfully. {actuallyAnalyzed} of {analyzableCount} analyzable responses were processed. " +
+                        $"{difference} response(s) could not be analyzed due to processing limitations or API constraints.";
+                }
+                else
+                {
+                    TempData["SuccessMessage"] = $"Analysis completed successfully. All {actuallyAnalyzed} analyzable responses were processed.";
+                }
 
                 return View(analysisOverview);
             }
@@ -295,15 +328,37 @@ namespace Web.Areas.Admin.Controllers
 
                 foreach (var response in responses)
                 {
-                    foreach (var detail in response.ResponseDetails.Where(rd => !string.IsNullOrWhiteSpace(rd.TextResponse)))
+                    foreach (var detail in response.ResponseDetails)
                     {
-                        analysisRequests.Add(new AnalysisRequest
+                        string responseText = "";
+
+                        // Handle text-based questions
+                        if (!string.IsNullOrWhiteSpace(detail.TextResponse))
                         {
-                            ResponseId = response.Id,
-                            QuestionId = detail.QuestionId,
-                            ResponseText = detail.TextResponse,
-                            QuestionText = detail.Question?.Text ?? ""
-                        });
+                            responseText = detail.TextResponse;
+                        }
+                        // Handle CheckBox questions
+                        else if (detail.QuestionType == QuestionType.CheckBox && detail.ResponseAnswers.Any())
+                        {
+                            var selectedAnswers = detail.ResponseAnswers
+                                .Select(ra => detail.Question.Answers.FirstOrDefault(a => a.Id == ra.AnswerId)?.Text)
+                                .Where(text => !string.IsNullOrEmpty(text))
+                                .ToList();
+
+                            responseText = $"Multiple Selection Question: {detail.Question.Text}\nSelected Options: {string.Join(", ", selectedAnswers)}\nAnalyze these selected workplace factors for mental health implications and patterns.";
+                        }
+
+                        // Add to analysis requests if we have text to analyze
+                        if (!string.IsNullOrEmpty(responseText))
+                        {
+                            analysisRequests.Add(new AnalysisRequest
+                            {
+                                ResponseId = response.Id,
+                                QuestionId = detail.QuestionId,
+                                ResponseText = responseText,
+                                QuestionText = detail.Question?.Text ?? ""
+                            });
+                        }
                     }
                 }
 
@@ -346,15 +401,37 @@ namespace Web.Areas.Admin.Controllers
 
                 foreach (var response in responses)
                 {
-                    foreach (var detail in response.ResponseDetails.Where(rd => !string.IsNullOrWhiteSpace(rd.TextResponse)))
+                    foreach (var detail in response.ResponseDetails)
                     {
-                        analysisRequests.Add(new AnalysisRequest
+                        string responseText = "";
+
+                        // Handle text-based questions
+                        if (!string.IsNullOrWhiteSpace(detail.TextResponse))
                         {
-                            ResponseId = response.Id,
-                            QuestionId = detail.QuestionId,
-                            ResponseText = detail.TextResponse,
-                            QuestionText = detail.Question?.Text ?? ""
-                        });
+                            responseText = detail.TextResponse;
+                        }
+                        // Handle CheckBox questions  
+                        else if (detail.QuestionType == QuestionType.CheckBox && detail.ResponseAnswers.Any())
+                        {
+                            var selectedAnswers = detail.ResponseAnswers
+                                .Select(ra => detail.Question.Answers.FirstOrDefault(a => a.Id == ra.AnswerId)?.Text)
+                                .Where(text => !string.IsNullOrEmpty(text))
+                                .ToList();
+
+                            responseText = $"Multiple Selection Question: {detail.Question.Text}\nSelected Options: {string.Join(", ", selectedAnswers)}\nAnalyze these selected workplace factors for mental health implications and patterns.";
+                        }
+
+                        // Add to analysis requests if we have text to analyze
+                        if (!string.IsNullOrEmpty(responseText))
+                        {
+                            analysisRequests.Add(new AnalysisRequest
+                            {
+                                ResponseId = response.Id,
+                                QuestionId = detail.QuestionId,
+                                ResponseText = responseText,
+                                QuestionText = detail.Question?.Text ?? ""
+                            });
+                        }
                     }
                 }
 
