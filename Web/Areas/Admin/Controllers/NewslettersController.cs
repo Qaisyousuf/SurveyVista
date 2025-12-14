@@ -77,6 +77,7 @@ namespace Web.Areas.Admin.Controllers
             return View(listViewModel);
         }
 
+        [Authorize(Roles = "Admin")]
         public IActionResult Create()
         {
             var totalSubscribedUsers = _context.Subscriptions.Count(s => s.IsSubscribed);
@@ -102,7 +103,7 @@ namespace Web.Areas.Admin.Controllers
         }
 
 
-
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> Create(SendNewsLetterViewModel viewModel)
         {

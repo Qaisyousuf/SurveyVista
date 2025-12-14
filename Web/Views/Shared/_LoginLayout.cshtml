@@ -8,49 +8,489 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Web.styles.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #000000;
+            color: white;
+            position: relative;
+            min-height: 100vh;
+        }
+
+            /* Background Effects */
+            body::before {
+                content: '';
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: radial-gradient(circle at 15% 25%, rgba(59, 130, 246, 0.03) 0%, transparent 35%), radial-gradient(circle at 85% 75%, rgba(20, 184, 166, 0.02) 0%, transparent 35%), radial-gradient(circle at 50% 50%, rgba(249, 115, 22, 0.01) 0%, transparent 40%);
+                z-index: -1;
+            }
+
+        /* Ultra Modern Glassmorphism Navbar */
+        .navbar {
+            background: rgba(5, 8, 18, 0.85) !important;
+            backdrop-filter: blur(25px) saturate(1.8);
+            border-bottom: 1px solid rgba(59, 130, 246, 0.15);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 60px rgba(59, 130, 246, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            padding: 14px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+            .navbar::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, transparent 30%, rgba(20, 184, 166, 0.05) 70%, rgba(249, 115, 22, 0.03) 100%);
+                border-radius: inherit;
+                z-index: -1;
+            }
+
+        /* Enhanced Brand Styling */
+        .navbar-brand {
+            font-weight: 900;
+            font-size: 1.5rem;
+            color: #ffffff !important;
+            text-decoration: none;
+            background: linear-gradient(135deg, #3b82f6 0%, #14b8a6 50%, #f97316 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.02em;
+            text-transform: uppercase;
+            position: relative;
+            transition: all 0.4s ease;
+        }
+
+            .navbar-brand::after {
+                content: '';
+                position: absolute;
+                bottom: -4px;
+                left: 0;
+                width: 0;
+                height: 2px;
+                background: linear-gradient(90deg, #3b82f6, #14b8a6, #f97316);
+                transition: width 0.4s ease;
+                border-radius: 1px;
+            }
+
+            .navbar-brand:hover::after {
+                width: 100%;
+            }
+
+            .navbar-brand:hover {
+                transform: translateY(-2px) scale(1.02);
+                filter: drop-shadow(0 4px 8px rgba(59, 130, 246, 0.3));
+            }
+
+        /* Compact Modern Toggle Button */
+        .navbar-toggler {
+            border: 1px solid rgba(59, 130, 246, 0.3) !important;
+            border-radius: 8px !important;
+            padding: 6px 10px !important;
+            background: rgba(59, 130, 246, 0.08) !important;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            width: 42px;
+            height: 36px;
+        }
+
+            .navbar-toggler::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+                transition: left 0.5s ease;
+            }
+
+            .navbar-toggler:hover::before {
+                left: 100%;
+            }
+
+            .navbar-toggler:focus {
+                box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
+                border-color: rgba(59, 130, 246, 0.5) !important;
+            }
+
+            .navbar-toggler:hover {
+                background: rgba(59, 130, 246, 0.15) !important;
+                border-color: rgba(59, 130, 246, 0.5) !important;
+                transform: scale(1.05);
+            }
+
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%2859, 130, 246, 1%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2.5' d='m4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+            transition: all 0.3s ease;
+            width: 22px !important;
+            height: 18px !important;
+        }
+
+        /* Modern Account Dropdown */
+        .account-dropdown {
+            position: relative;
+        }
+
+        .account-dropdown-toggle {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.12), rgba(20, 184, 166, 0.08)) !important;
+            border: 1px solid rgba(59, 130, 246, 0.3) !important;
+            color: rgba(255, 255, 255, 0.9) !important;
+            font-weight: 600;
+            border-radius: 8px !important;
+            padding: 8px 14px !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+            .account-dropdown-toggle:hover {
+                background: linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(20, 184, 166, 0.18)) !important;
+                border-color: rgba(59, 130, 246, 0.5) !important;
+                color: #ffffff !important;
+                transform: translateY(-2px);
+                box-shadow: 0 6px 16px rgba(59, 130, 246, 0.25);
+            }
+
+            .account-dropdown-toggle::after {
+                border: none !important;
+                content: '\f078' !important;
+                font-family: 'Font Awesome 6 Free' !important;
+                font-weight: 900 !important;
+                font-size: 0.7rem !important;
+                margin-left: 4px !important;
+                transition: transform 0.3s ease !important;
+            }
+
+            .account-dropdown-toggle[aria-expanded="true"]::after {
+                transform: rotate(180deg) !important;
+            }
+
+        /* Modern Dropdown Menu */
+        .dropdown-menu {
+            background: rgba(5, 8, 18, 0.95) !important;
+            backdrop-filter: blur(25px) saturate(1.8) !important;
+            border: 1px solid rgba(59, 130, 246, 0.2) !important;
+            border-radius: 12px !important;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 60px rgba(59, 130, 246, 0.1) !important;
+            padding: 8px !important;
+            margin-top: 8px !important;
+            min-width: 240px !important;
+            animation: dropdownFadeIn 0.3s ease-out;
+        }
+
+        @@keyframes dropdownFadeIn {
+            from
+
+        {
+            opacity: 0;
+            transform: translateY(-10px) scale(0.95);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        }
+
+        /* User Info in Dropdown */
+        .user-info {
+            background: rgba(59, 130, 246, 0.1) !important;
+            border: 1px solid rgba(59, 130, 246, 0.2) !important;
+            border-radius: 8px !important;
+            padding: 12px !important;
+            margin-bottom: 8px !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 10px !important;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6 0%, #14b8a6 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: white;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+        }
+
+        .user-details h6 {
+            color: rgba(255, 255, 255, 0.95) !important;
+            font-weight: 600 !important;
+            margin: 0 !important;
+            font-size: 0.9rem !important;
+        }
+
+        .user-details small {
+            color: rgba(255, 255, 255, 0.6) !important;
+            font-size: 0.75rem !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.5px !important;
+            font-weight: 500 !important;
+        }
+
+        .dropdown-header {
+            color: rgba(255, 255, 255, 0.7) !important;
+            font-weight: 600 !important;
+            font-size: 0.75rem !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.5px !important;
+            padding: 8px 12px 4px 12px !important;
+            margin-bottom: 4px !important;
+        }
+
+        .dropdown-item {
+            color: rgba(255, 255, 255, 0.85) !important;
+            font-weight: 500 !important;
+            padding: 10px 12px !important;
+            border-radius: 8px !important;
+            transition: all 0.3s ease !important;
+            margin: 2px 0 !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 10px !important;
+            font-size: 0.85rem !important;
+            position: relative !important;
+            overflow: hidden !important;
+        }
+
+            .dropdown-item:hover {
+                background: rgba(59, 130, 246, 0.15) !important;
+                color: #ffffff !important;
+                transform: translateX(4px) !important;
+                box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2) !important;
+            }
+
+            .dropdown-item.danger-item {
+                color: rgba(239, 68, 68, 0.9) !important;
+            }
+
+                .dropdown-item.danger-item:hover {
+                    background: rgba(239, 68, 68, 0.15) !important;
+                    color: rgba(255, 255, 255, 0.95) !important;
+                    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2) !important;
+                }
+
+            .dropdown-item.admin-item {
+                color: rgba(20, 184, 166, 0.9) !important;
+            }
+
+                .dropdown-item.admin-item:hover {
+                    background: rgba(20, 184, 166, 0.15) !important;
+                    color: rgba(255, 255, 255, 0.95) !important;
+                    box-shadow: 0 4px 12px rgba(20, 184, 166, 0.2) !important;
+                }
+
+        .dropdown-divider {
+            border-color: rgba(59, 130, 246, 0.2) !important;
+            margin: 8px 0 !important;
+        }
+
+        /* Sign In Button for unauthenticated users */
+        .btn-outline-info.signin-btn {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.12), rgba(20, 184, 166, 0.08)) !important;
+            border: 1px solid rgba(59, 130, 246, 0.4) !important;
+            color: rgba(255, 255, 255, 0.9) !important;
+            font-weight: 600;
+            border-radius: 8px !important;
+            padding: 8px 14px !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+            .btn-outline-info.signin-btn:hover {
+                background: linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(20, 184, 166, 0.18)) !important;
+                border-color: rgba(59, 130, 246, 0.6) !important;
+                color: #ffffff !important;
+                transform: translateY(-2px);
+                box-shadow: 0 6px 16px rgba(59, 130, 246, 0.25);
+            }
+
+        /* Main content styling */
+        main {
+            min-height: calc(100vh - 80px);
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Icon styling */
+        .dropdown-item i {
+            width: 16px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .bi {
+            margin-right: 6px;
+        }
+
+        /* Smooth Navbar Scroll Effect */
+        .navbar.scrolled {
+            background: rgba(2, 4, 12, 0.95) !important;
+            backdrop-filter: blur(30px) saturate(2);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 80px rgba(59, 130, 246, 0.08);
+            padding: 10px 0;
+        }
+
+        /* Responsive Design */
+        @@media (max-width: 768px) {
+            .navbar
+
+        {
+            padding: 10px 0;
+        }
+
+        .navbar-brand {
+            font-size: 1.3rem;
+        }
+
+        .navbar-collapse {
+            background: rgba(5, 8, 18, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 12px;
+            margin-top: 12px;
+            padding: 16px;
+            border: 1px solid rgba(59, 130, 246, 0.15);
+        }
+
+        .dropdown-menu {
+            min-width: 200px !important;
+            margin-top: 4px !important;
+        }
+
+        .account-dropdown-toggle {
+            padding: 6px 12px !important;
+            font-size: 0.8rem;
+        }
+
+        .user-avatar {
+            width: 28px;
+            height: 28px;
+            font-size: 0.8rem;
+        }
+
+        .user-details h6 {
+            font-size: 0.8rem !important;
+        }
+
+        .user-details small {
+            font-size: 0.7rem !important;
+        }
+
+        }
+
+        /* Ultra smooth collapse animation */
+        .navbar-collapse {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .collapsing {
+            transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+    </style>
+
+    <script>
+        // Add scroll effect to navbar
+        window.addEventListener('scroll', function() {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+    </script>
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light shadow-lg">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Online survey</a>
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Online Survey</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon text-white"></span>
+                    <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
-                    
-
                     </ul>
                     <ul class="navbar-nav">
                         @if (User.Identity.IsAuthenticated)
                         {
-                            <li class="nav-item text-white">
-
-                                <span class="badge mt-3">Hi @User.Identity.Name</span>
-
+                            <li class="nav-item dropdown account-dropdown">
+                                <button class="btn dropdown-toggle account-dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-person-circle"></i>
+                                    <span>Account</span>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li class="user-info">
+                                        <div class="user-avatar">
+                                            @(User.Identity.Name?.Substring(0, 1).ToUpper() ?? "U")
+                                        </div>
+                                        <div class="user-details">
+                                            <h6>@User.Identity.Name</h6>
+                                            <small>Account Holder</small>
+                                        </div>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><h6 class="dropdown-header">Actions</h6></li>
+                                    <li>
+                                        <a class="dropdown-item admin-item" asp-controller="Admin" asp-action="Index" asp-area="Admin">
+                                            <i class="bi bi-gear"></i>Admin Dashboard
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form asp-area="Admin" asp-controller="Admin" asp-action="Logout" method="post" class="d-inline w-100">
+                                            <button type="submit" class="dropdown-item danger-item w-100" style="border: none; background: none;">
+                                                <i class="bi bi-box-arrow-left"></i>Logout
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
                             </li>
-                            <li class="nav-item text-white m-2">
-
-                                <a asp-controller="Admin" asp-action="Index" asp-area="Admin" class="btn btn-outline-info btn-sm " id="BannerButton">
-                                    @*  <span class="text-white navbar-text">Admin Dashboard</span> *@
-                                    <span class="bi bi-gear"></span> Admin Dashboard
-                                </a>
-                            </li>
-                            <li class="nav-item m-2">
-                                <form asp-area="Admin" asp-controller="Admin" asp-action="Logout" method="post">
-                                    <button type="submit" class="btn btn-danger btn-sm"> <span class="bi bi-box-arrow-left"></span> Logout</button>
-                                </form>
-                            </li>
-
                         }
                         else
                         {
                             <li class="nav-item">
-                                <a asp-controller="Account" asp-action="Login" class="btn btn-outline-info btn-sm" id="BannerButton">
-                                    <span class="bi bi-box-arrow-right"></span> Sign in
+                                <a asp-controller="Account" asp-action="Login" class="btn btn-outline-info signin-btn">
+                                    <i class="bi bi-box-arrow-right"></i>Sign In
                                 </a>
                             </li>
                         }
@@ -59,18 +499,11 @@
             </div>
         </nav>
     </header>
-    
-        <main role="main">
 
-                @RenderBody()
-        </main>
-  
+    <main role="main">
+        @RenderBody()
+    </main>
 
-    
-     
-     
-     
-  
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

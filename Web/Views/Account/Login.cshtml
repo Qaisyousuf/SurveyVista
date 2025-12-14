@@ -1,192 +1,473 @@
 ﻿@model Web.ViewModel.AccountVM.LoginViewModel
-
 @{
     ViewData["Title"] = "Login";
     Layout = "~/Views/Shared/_LoginLayout.cshtml";
 }
 
 <style>
-    body {
-        height: 100% !important;
-        background-repeat: no-repeat;
-        background: linear-gradient(119deg, rgba(47,82,131,1) 0%, rgba(29,33,59,1) 34%, rgba(27,54,61,1) 67%, rgba(58,82,116,1) 100%) !important
-    }
+    @@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
-    #rowSectionError {
-        display: flex;
-        flex-wrap: nowrap;
-        justify-content: space-around;
-        align-items: center;
-        align-content: center;
-        width: 100%;
-        flex-direction: row;
-    }
-
-    #Errocard {
-       
-       
-        box-shadow: 0px 0px 36px -12px rgba(20, 101, 230, 1);
-        -webkit-box-shadow: 0px 0px 20px 2px rgba(20, 101, 230, 1);
-        border-radius: 10px;
-        background-color: transparent;
-        height: 400px;
-        flex-wrap: nowrap;
-        align-items: center;
-        padding: 87px 50px 0 50px;
-        margin: 150px 0px 0px 0px;
+    #BannerBackground {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(135deg, #000000 0%, #0a0e1a 30%, #000000 70%, #000101 100%);
         color: white;
-        justify-content: flex-start;
-    }
-
-  
-    #boxError{
-        display: inline;
-        flex-direction: row;
-        flex-wrap: nowrap;
-        justify-content: space-around;
+        min-height: 100vh;
+        position: relative;
+        overflow: hidden;
+        display: flex;
         align-items: center;
-    }
-    
-
-
-
-
-    @@media (max-width: 792px) {
-
-
-        #Errocard {
-            display: flex;
-            flex-direction: column;
-            flex-wrap: wrap;
-            justify-content: center;
-            align-items: center;
-            align-content: center;
-            height: 70vh;
-            padding: 70 20px 0 20px;
-        }
-
-        #boxError {
-            width: auto;
-            height: 30%;
-            margin: 5px;
-        }
+        justify-content: center;
+        padding: 40px 0;
     }
 
-    @@media (max-width: 800px) {
-
-
-        #Errocard {
-            display: flex;
-            flex-direction: column;
-            flex-wrap: nowrap;
-            justify-content: center;
-            align-items: center;
-            align-content: center;
-            height: 70vh;
-            padding: 0 20px 0 20px;
-        }
-
-        #boxError {
-            width: auto;
-            height: 30%;
-            margin: 5px;
-        }
+    #BannerBackground::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(circle at 15% 25%, rgba(59, 130, 246, 0.08) 0%, transparent 35%), radial-gradient(circle at 85% 75%, rgba(20, 184, 166, 0.06) 0%, transparent 35%), radial-gradient(circle at 50% 50%, rgba(249, 115, 22, 0.04) 0%, transparent 40%);
+        z-index: 1;
     }
 
+    /* Floating elements animation */
+    .floating-elements {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 2;
+        pointer-events: none;
+        overflow: hidden;
+    }
 
-    @@media (max-width: 1300px) {
+    .floating-element {
+        position: absolute;
+        border-radius: 50%;
+        background: linear-gradient(45deg, rgba(59, 130, 246, 0.1), rgba(20, 184, 166, 0.08));
+        animation: float 20s infinite linear;
+    }
 
-
-        #Errocard {
-           
-            box-shadow: 0px 0px 36px -12px rgba(20,101,230,1);
-            -webkit-box-shadow: 0px 0px 20px 2px rgba(20,101,230,1);
-            border-radius: 10px;
-            background-color: transparent;
-            height: 400px;
-            flex-wrap: nowrap;
-            align-items: center;
-            padding: 89px 0px 0 0px;
-            margin: 50px 0px 0px 0px;
-            color: white;
+        .floating-element:nth-child(1) {
+            width: 100px;
+            height: 100px;
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
         }
 
-        #boxError {
-            width: auto;
-            margin: 5px;
+        .floating-element:nth-child(2) {
+            width: 60px;
+            height: 60px;
+            top: 70%;
+            right: 10%;
+            animation-delay: -7s;
         }
 
-
-        #boxBanner {
-            display: block;
-            width: auto;
-            margin: 5px;
+        .floating-element:nth-child(3) {
+            width: 80px;
+            height: 80px;
+            bottom: 20%;
+            left: 20%;
+            animation-delay: -14s;
         }
 
-      }
+    @@keyframes float {
+        0%, 100%
 
-    .form-control  {
-        display: block;
+    {
+        transform: translateY(0) rotate(0deg);
+        opacity: 0.3;
+    }
+
+    50% {
+        transform: translateY(-20px) rotate(180deg);
+        opacity: 0.6;
+    }
+
+    }
+
+    /* Main login container */
+    .login-container {
+        position: relative;
+        z-index: 10;
         width: 100%;
-        height: calc(1.5em + 0.75rem + 2px);
-        padding: 0.375rem 0.75rem;
+        max-width: 450px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+
+    /* Modern glassmorphic login card */
+    .login-card {
+        background: rgba(5, 8, 18, 0.85);
+        backdrop-filter: blur(25px) saturate(1.8);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4), 0 0 80px rgba(59, 130, 246, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        position: relative;
+        overflow: hidden;
+    }
+
+        .login-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.06) 0%, transparent 30%, rgba(20, 184, 166, 0.04) 70%, rgba(249, 115, 22, 0.02) 100%);
+            border-radius: inherit;
+            z-index: -1;
+        }
+
+    /* Login header */
+    .login-header {
+        text-align: center;
+        margin-bottom: 32px;
+    }
+
+    .login-title {
+        font-size: 2.2rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, #3b82f6 0%, #14b8a6 50%, #f97316 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 8px;
+        letter-spacing: -0.02em;
+    }
+
+    .login-subtitle {
+        color: rgba(255, 255, 255, 0.7);
         font-size: 1rem;
-        font-weight: 400;
-        line-height: 1.5;
-        color: #495057;
-        background-color: #73494900 !important;
-        background-clip: padding-box;
-        border: 1px solid #115caf;
-        border-radius: 0.25rem;
-        -webkit-transition: border-color 0.15s ease-in-out, -webkit-box-shadow 0.15s ease-in-out;
-        transition: border-color 0.15s ease-in-out, -webkit-box-shadow 0.15s ease-in-out;
-        -o-transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out, -webkit-box-shadow 0.15s ease-in-out;
+        font-weight: 500;
+        margin-bottom: 0;
+    }
+
+    /* Modern form group styling */
+    .form-group {
+        margin-bottom: 24px;
+    }
+
+    /* Form labels */
+    .form-label {
+        color: rgba(255, 255, 255, 0.8) !important;
+        font-weight: 600 !important;
+        font-size: 0.9rem !important;
+        margin-bottom: 8px !important;
+        display: block !important;
+        letter-spacing: 0.3px !important;
+    }
+
+    /* Modern form control styling */
+    .form-control {
+        background: rgba(255, 255, 255, 0.08) !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        border-radius: 12px !important;
+        color: rgba(255, 255, 255, 0.95) !important;
+        padding: 16px 20px !important;
+        font-size: 1rem !important;
+        font-weight: 500 !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        backdrop-filter: blur(15px);
+        height: 56px !important;
+        line-height: 1.5 !important;
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+        outline: none !important;
+        -webkit-appearance: none !important;
+        -moz-appearance: none !important;
+        appearance: none !important;
+    }
+
+        /* Remove autofill styling */
+        .form-control:-webkit-autofill,
+        .form-control:-webkit-autofill:hover,
+        .form-control:-webkit-autofill:focus {
+            -webkit-box-shadow: 0 0 0 1000px rgba(255, 255, 255, 0.08) inset !important;
+            -webkit-text-fill-color: rgba(255, 255, 255, 0.95) !important;
+            transition: background-color 5000s ease-in-out 0s !important;
+        }
+
+        .form-control:focus {
+            background: rgba(255, 255, 255, 0.12) !important;
+            border-color: rgba(59, 130, 246, 0.6) !important;
+            color: rgba(255, 255, 255, 1) !important;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15), 0 0 30px rgba(59, 130, 246, 0.1), inset 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+            transform: translateY(-2px);
+            outline: none !important;
+        }
+
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.4) !important;
+            font-weight: 400 !important;
+            font-size: 0.95rem !important;
+        }
+
+    /* Modern checkbox styling */
+    .form-check {
+        margin: 20px 0 24px 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .form-check-input {
+        background: rgba(255, 255, 255, 0.08) !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        border-radius: 6px !important;
+        width: 18px !important;
+        height: 18px !important;
+        transition: all 0.3s ease !important;
+        cursor: pointer !important;
+        outline: none !important;
+    }
+
+        .form-check-input:checked {
+            background: linear-gradient(135deg, #3b82f6 0%, #14b8a6 100%) !important;
+            border-color: rgba(59, 130, 246, 0.6) !important;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3) !important;
+        }
+
+        .form-check-input:focus {
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
+            outline: none !important;
+        }
+
+    .form-check-label {
+        color: rgba(255, 255, 255, 0.8) !important;
+        font-size: 0.9rem !important;
+        font-weight: 500 !important;
+        cursor: pointer !important;
+        margin-bottom: 0 !important;
+        user-select: none !important;
+    }
+
+    /* Modern submit button */
+    .login-submit-btn {
+        background: linear-gradient(135deg, #3b82f6 0%, #14b8a6 50%, var(--bs-primary-text-emphasis) 100%) !important;
+        border: none !important;
+        border-radius: 12px !important;
+        color: white !important;
+        font-weight: 700 !important;
+        font-size: 1.1rem !important;
+        padding: 16px 32px !important;
+        width: 100% !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.5px !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        position: relative !important;
+        overflow: hidden !important;
+        cursor: pointer !important;
+        box-shadow: 0 8px 25px rgba(59, 130, 246, 0.2);
+        outline: none !important;
+    }
+
+        .login-submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .login-submit-btn:hover::before {
+            left: 100%;
+        }
+
+        .login-submit-btn:hover {
+            transform: translateY(-3px) !important;
+            box-shadow: 0 12px 40px rgba(59, 130, 246, 0.3), 0 0 60px rgba(59, 130, 246, 0.15) !important;
+            background: linear-gradient(135deg, #2563eb 0%, #059669 50%, #ea580 100%) !important;
+            outline: none !important;
+        }
+
+        .login-submit-btn:active {
+            transform: translateY(-1px) !important;
+            outline: none !important;
+        }
+
+        .login-submit-btn:focus {
+            outline: none !important;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3), 0 12px 40px rgba(59, 130, 246, 0.3) !important;
+        }
+
+    /* Validation messages styling */
+    .text-danger {
+        color: rgba(239, 68, 68, 0.9) !important;
+        font-size: 0.85rem !important;
+        font-weight: 500 !important;
+        margin-top: 6px !important;
+        display: block !important;
+    }
+
+    .validation-summary-errors {
+        background: rgba(239, 68, 68, 0.1) !important;
+        border: 1px solid rgba(239, 68, 68, 0.3) !important;
+        border-radius: 8px !important;
+        padding: 12px 16px !important;
+        margin-bottom: 24px !important;
+        backdrop-filter: blur(10px);
+    }
+
+        .validation-summary-errors ul {
+            margin: 0 !important;
+            padding-left: 0 !important;
+            list-style: none !important;
+        }
+
+        .validation-summary-errors li {
+            color: rgba(239, 68, 68, 0.9) !important;
+            font-size: 0.85rem !important;
+            font-weight: 500 !important;
+            margin-bottom: 4px !important;
+        }
+
+            .validation-summary-errors li:before {
+                content: '⚠ ';
+                margin-right: 6px;
+            }
+
+    /* Notification styling */
+    .alert {
+        background: rgba(59, 130, 246, 0.1) !important;
+        border: 1px solid rgba(59, 130, 246, 0.3) !important;
+        border-radius: 12px !important;
+        color: rgba(255, 255, 255, 0.9) !important;
+        backdrop-filter: blur(15px);
+        margin-bottom: 20px;
+    }
+
+    /* Responsive design */
+    @@media (max-width: 768px) {
+        #BannerBackground
+
+    {
+        padding: 20px 0;
+        min-height: calc(100vh - 40px);
+    }
+
+    .login-card {
+        padding: 32px 24px;
+        border-radius: 16px;
+        margin: 0 16px;
+    }
+
+    .login-title {
+        font-size: 1.8rem;
+    }
+
+    .login-subtitle {
+        font-size: 0.9rem;
+    }
+
+    .form-control {
+        padding: 14px 16px !important;
+        font-size: 0.95rem !important;
+        height: 52px !important;
+    }
+
+    .login-submit-btn {
+        padding: 14px 28px !important;
+        font-size: 1rem !important;
+    }
+
+    .floating-element {
+        display: none;
+    }
+
+    }
+
+    @@media (max-width: 480px) {
+        .login-card
+
+    {
+        padding: 24px 20px;
+        margin: 0 12px;
+    }
+
+    .login-title {
+        font-size: 1.6rem;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-control {
+        padding: 12px 14px !important;
+        font-size: 0.9rem !important;
+        height: 48px !important;
+    }
+
+    .login-submit-btn {
+        padding: 12px 24px !important;
+        font-size: 0.95rem !important;
+    }
+
     }
 </style>
 
-
-
 <div class="d-flex flex-column" id="BannerBackground">
+    <!-- Floating background elements -->
+    <div class="floating-elements">
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+    </div>
 
-    <!-- FOR DEMO PURPOSE -->
+    <!-- Main login section -->
     <section class="text-white">
         <div class="container py-1">
-            <partial name="_Notification" />
+            <div class="login-container">
+                <div class="login-card">
+                    <!-- Login header -->
+                    <div class="login-header">
+                        <h1 class="login-title">Welcome Back</h1>
+                        <p class="login-subtitle">Sign in to your account to continue</p>
+                    </div>
 
-            <div class="" id="Errocard">
-                <div class="col-lg-6 col-md-6 offset-md-3 offset-lg-3  col-sm-12">
+                    <!-- Notifications -->
+                    <partial name="_Notification" />
+
+                    <!-- Login form -->
                     <form asp-action="Login">
-                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                        <div class="form-floating mb-3">
-                            <input asp-for="Email" type="email" class="form-control" id="floatingInput" placeholder="name@example.com">
-                            <label for="floatingInput">Email address</label>
+                        <div asp-validation-summary="ModelOnly" class="text-danger validation-summary-errors"></div>
+
+                        <div class="form-group">
+                            <label asp-for="Email" class="form-label">Email Address</label>
+                            <input asp-for="Email" type="email" class="form-control" placeholder="Enter your email address">
                             <span asp-validation-for="Email" class="text-danger"></span>
                         </div>
-                        <div class="form-floating">
-                            <input type="password" asp-for="Password" class="form-control" id="floatingPassword" placeholder="Password">
-                            <label for="floatingPassword">Password</label>
+
+                        <div class="form-group">
+                            <label asp-for="Password" class="form-label">Password</label>
+                            <input asp-for="Password" type="password" class="form-control" placeholder="Enter your password">
                             <span asp-validation-for="Password" class="text-danger"></span>
                         </div>
-                        <div class="form-group form-check mt-2">
-                            <label class="form-check-label">
-                                <input class="form-check-input" asp-for="RememberMe" /> @Html.DisplayNameFor(model => model.RememberMe)
+
+                        <div class="form-check">
+                            <input class="form-check-input" asp-for="RememberMe" type="checkbox" id="rememberMe">
+                            <label class="form-check-label" for="rememberMe">
+                                @Html.DisplayNameFor(model => model.RememberMe)
                             </label>
                         </div>
+
                         <div class="form-group">
-                            <input type="submit" value="Login" class="btn btn-outline-info btn-sm" />
+                            <button type="submit" class="btn login-submit-btn">
+                                Sign In
+                            </button>
                         </div>
                     </form>
-
                 </div>
-             
             </div>
-
-
         </div>
     </section>
-
 </div>
 
 @section Scripts {

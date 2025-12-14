@@ -3,37 +3,198 @@
     ViewData["Title"] = "Home Page";
 }
 
+<style>
+    @@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
+    #MainContent {
+        background: #000000;
+        font-family: 'Inter', sans-serif;
+        position: relative;
+        min-height: 60vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 0;
+    }
 
+    #MainContent::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(circle at 25% 25%, rgba(59, 130, 246, 0.08) 0%, transparent 35%), radial-gradient(circle at 75% 75%, rgba(20, 184, 166, 0.06) 0%, transparent 35%), radial-gradient(circle at 50% 50%, rgba(249, 115, 22, 0.04) 0%, transparent 40%), linear-gradient(135deg, #010203 0%, #050812 30%, #010203 70%, #000101 100%);
+        z-index: 0;
+    }
 
-    <!-- FOR DEMO PURPOSE -->
+    .tech-pattern-main {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-image: radial-gradient(circle at 30% 30%, rgba(59, 130, 246, 0.08) 0%, transparent 2px), radial-gradient(circle at 70% 70%, rgba(20, 184, 166, 0.06) 0%, transparent 2px), linear-gradient(90deg, rgba(255, 255, 255, 0.01) 1px, transparent 1px), linear-gradient(180deg, rgba(255, 255, 255, 0.01) 1px, transparent 1px);
+        background-size: 120px 120px, 150px 150px, 60px 60px, 60px 60px;
+        z-index: 1;
+    }
+
+    .container-fluid {
+        position: relative;
+        z-index: 10;
+    }
+
+    .main-content-wrapper {
+        background: rgba(59, 130, 246, 0.05);
+        backdrop-filter: blur(25px);
+        border: 1px solid rgba(59, 130, 246, 0.15);
+        border-radius: 24px;
+        padding: 40px 40px;
+        text-align: center;
+        max-width: 900px;
+        margin: 0 auto;
+        transition: all 0.3s ease;
+        position: relative;
+        z-index: 10;
+    }
+
+        .main-content-wrapper:hover {
+            background: rgba(59, 130, 246, 0.08);
+            border-color: rgba(59, 130, 246, 0.25);
+            transform: translateY(-5px);
+            box-shadow: 0 25px 50px rgba(59, 130, 246, 0.1);
+        }
+
+    .main-title {
+        font-size: clamp(1.5rem, 3vw, 2.5rem);
+        font-weight: 900;
+        line-height: 1.2;
+        margin-bottom: 20px;
+        letter-spacing: -0.02em;
+        color: #ffffff !important;
+    }
+
+    .main-content {
+        font-size: 1.2rem;
+        color: rgba(255, 255, 255, 0.9) !important;
+        line-height: 1.7;
+        margin-bottom: 30px;
+        position: relative;
+        z-index: 10;
+    }
+
+    .btn-main {
+        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        color: white !important;
+        padding: 16px 40px;
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 1.1rem;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.3s ease;
+        box-shadow: 0 8px 25px rgba(30, 41, 59, 0.4);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        position: relative;
+        z-index: 10;
+    }
+
+        .btn-main:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(30, 41, 59, 0.6);
+            color: white !important;
+            text-decoration: none;
+            background: linear-gradient(135deg, #0f172a 0%, #020617 100%);
+            border-color: rgba(59, 130, 246, 0.5);
+        }
+
+   
+   
+
+    @@media (max-width: 768px) {
+        #MainContent
+
+    {
+        padding: 30px 20px;
+    }
+
+    .main-content-wrapper {
+        padding: 30px 25px;
+        margin: 0 15px;
+        max-width: 90%;
+    }
+
+    .main-title {
+        font-size: 16px;
+        margin-bottom: 20px;
+    }
+
+    .main-content {
+        font-size: 1rem;
+        margin-bottom: 25px;
+    }
+
+    .btn-main {
+        padding: 14px 32px;
+        font-size: 1rem;
+        width: 100%;
+        max-width: 250px;
+    }
+
+    .floating-elements-main {
+        display: none;
+    }
+
+    
+
+    @@media (max-width: 480px) {
+        .main-content-wrapper
+
+    {
+        padding: 25px 20px;
+        margin: 0 10px;
+        max-width: 95%;
+    }
+
+    .main-title {
+        font-size: 16px;
+        margin-bottom: 15px;
+    }
+
+    .main-content {
+        font-size: 0.9rem;
+        margin-bottom: 20px;
+    }
+
+    .btn-main {
+        padding: 12px 28px;
+        font-size: 0.9rem;
+    }
+
+    }
+</style>
+
 <section id="MainContent" class="text-white">
-        <div class="container py-1">
-            @*   <div class="col-12" id="boxBanner">
-            <h1 class="display-6 text-white font-weight-bold">@Model.Description.ToUpper()</h1>
-            </div> *@
-            <div id="rowSectionMain">
+    <div class="tech-pattern-main"></div>
 
-                <div class="col-lg-12" id="boxMain">
-                    <h4 class="font-weight-bold text-white">@Model.Title.ToUpper()</h4>
-                    
+    <div class="floating-elements-main">
+        <div class="floating-element-main"></div>
+        <div class="floating-element-main"></div>
+        <div class="floating-element-main"></div>
+    </div>
 
-                    @*   <p class="fst-italic text-muted">@Html.Raw(Model.Content) <a class="text-primary" href="@Model.Sitecopyright" target="_blank">SeoSoft</a></p> *@
-                    <p class="text-white">@Html.Raw(Model.Content)</p>
-                <a href="#" class="btn btn-sm mt-1" id="HomeButon"> Contact</a>
-                    
-                </div>
-                
-            </div>
+    <div class="container-fluid py-1">
+        <div class="main-content-wrapper">
+            <h4 class="main-title">@Model.Title.ToUpper()</h4>
+            <p class="main-content">@Html.Raw(Model.Content)</p>
+            <a href="#" class="btn-main">Contact</a>
         </div>
-    </section>
-
-
-
+    </div>
+</section>
 
 @section Scripts {
-
-
     @{
         <partial name="_ValidationScriptsPartial" />
     }

@@ -1,31 +1,446 @@
 ﻿@model Banner
 
-<div class="d-flex flex-column" id="BannerBackground">
+<style>
+    @@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
-    <!-- FOR DEMO PURPOSE -->
-    <section class="hero text-white">
-        <div class="container py-1">
-          @*   <div class="col-12" id="boxBanner">
-                <h1 class="display-6 text-white font-weight-bold">@Model.Description.ToUpper()</h1>
-            </div> *@
-            <div id="rowSectionBanner">
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
 
-                <div class="col-lg-6" id="boxBanner">
-                    <h4 class="display-6 font-weight-bold" id="BtnColor">@Model.Title.ToUpper()</h4>
-                    <h6 class="text-white font-weight-bold">@Model.Description.ToUpper()</h6>
-                    
-                    @*   <p class="fst-italic text-muted">@Html.Raw(Model.Content) <a class="text-primary" href="@Model.Sitecopyright" target="_blank">SeoSoft</a></p> *@
-                    <p class="text-white">@Html.Raw(Model.Content)</p>
-                    <a href="@Model.LinkUrl" class="btn btn-sm mt-1" id="BannerButon"> Contact <i class="bi bi-ui-checks"></i></a>
+    body {
+        font-family: 'Inter', sans-serif;
+        background: #000000;
+        color: white;
+        line-height: 1.6;
+    }
+
+    .page-container {
+        min-height: 100vh;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+    }
+
+        .page-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 15% 25%, rgba(59, 130, 246, 0.1) 0%, transparent 35%), radial-gradient(circle at 85% 75%, rgba(20, 184, 166, 0.08) 0%, transparent 35%), radial-gradient(circle at 50% 50%, rgba(249, 115, 22, 0.05) 0%, transparent 40%), linear-gradient(135deg, #010203 0%, #050812 30%, #010203 70%, #000101 100%);
+            z-index: 0;
+        }
+
+    .tech-pattern {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        
+        background-size: 100px 100px, 130px 130px, 50px 50px, 50px 50px;
+        z-index: 1;
+    }
+
+    .hero-section {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 60px 24px;
+        position: relative;
+        z-index: 10;
+    }
+
+    .hero-content {
+        display: grid;
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto;
+        gap: 40px;
+        align-items: center;
+        min-height: 80vh;
+        width: 100%;
+        text-align: center;
+    }
+
+    @@media (min-width: 1200px) {
+        .hero-content
+
+    {
+        gap: 45px;
+    }
+
+    .description-cards {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+        max-width: 900px;
+        margin: 0 auto 32px auto;
+    }
+
+    .hero-title {
+        font-size: clamp(2.5rem, 4vw, 4.5rem);
+    }
+
+    }
+
+    @@media (min-width: 1025px) and (max-width: 1199px) {
+        .hero-content
+
+    {
+        gap: 40px;
+    }
+
+    .description-cards {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 18px;
+        max-width: 800px;
+        margin: 0 auto 32px auto;
+    }
+
+    .hero-title {
+        font-size: clamp(2.2rem, 4vw, 4rem);
+    }
+
+    }
+
+    .left-column {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        order: 1;
+    }
+
+    .right-column {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        order: 2;
+    }
+
+    .hero-title {
+        font-size: clamp(1.5rem, 4vw, 4rem);
+        font-weight: 900;
+        line-height: 1.1;
+        margin-bottom: 16px;
+        letter-spacing: -0.02em;
+        color: #ffffff;
+        text-align: center;
+    }
+
+    .title-accent {
+        display: block;
+        background: linear-gradient(135deg, #3b82f6 0%, #147bb8 50%, #f97316 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .hero-description {
+        display: none;
+    }
+
+    .description-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 16px;
+        margin-bottom: 32px;
+        max-width: 100%;
+    }
+
+    .description-card {
+        background: rgba(59, 130, 246, 0.08);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        border-radius: 10px;
+        padding: 12px 16px;
+        transition: all 0.3s ease;
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.9);
+        line-height: 1.4;
+    }
+
+        .description-card:hover {
+            background: rgba(59, 130, 246, 0.12);
+            border-color: rgba(59, 130, 246, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .description-card:nth-child(2n) {
+            background: rgba(20, 184, 166, 0.08);
+            border-color: rgba(20, 184, 166, 0.2);
+        }
+
+            .description-card:nth-child(2n):hover {
+                background: rgba(20, 184, 166, 0.12);
+                border-color: rgba(20, 184, 166, 0.3);
+            }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        color: white !important;
+        padding: 16px 40px;
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 1.1rem;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.3s ease;
+        box-shadow: 0 8px 25px rgba(30, 41, 59, 0.4);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        position: relative;
+        z-index: 10;
+    }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(59, 130, 246, 0.4);
+            color: white;
+            text-decoration: none;
+        }
+
+    .animation-container {
+        background: transparent;
+        border: none;
+        padding: 30px;
+        transition: all 0.3s ease;
+        max-width: 600px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .animation-container:hover {
+            background: transparent;
+            border: none;
+            transform: none;
+            box-shadow: none;
+        }
+
+    dotlottie-player {
+        width: 100%;
+        height: auto;
+        display: block;
+        margin: 0 auto;
+    }
+
+    .floating-elements {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 2;
+        pointer-events: none;
+    }
+
+    
+
+   
+
+    @@media (max-width: 1024px) {
+        .hero-content
+
+    {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto;
+        gap: 35px;
+    }
+
+    .hero-section {
+        padding: 40px 20px;
+    }
+
+    .hero-title {
+        font-size: clamp(2rem, 5vw, 3.5rem);
+        text-align: center;
+    }
+
+    .description-cards {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 14px;
+        padding: 0 20px;
+    }
+
+    .animation-container {
+        max-width: 500px;
+        margin: 0 auto;
+    }
+
+    .left-column,
+    .right-column {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .left-column {
+        order: 1;
+    }
+
+    .right-column {
+        order: 2;
+    }
+
+    }
+
+    @@media (max-width: 768px) {
+        .page-container
+
+    {
+        padding: 20px 15px;
+    }
+
+    .hero-section {
+        padding: 20px 0;
+    }
+
+    .hero-content {
+        gap: 20px;
+    }
+
+    .hero-title {
+        font-size: clamp(1.4rem, 5vw, 2.2rem);
+        margin-bottom: 15px;
+    }
+
+    .description-cards {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        margin-bottom: 20px;
+        padding: 0 10px;
+    }
+
+    .btn-primary {
+        padding: 12px 24px;
+        font-size: 0.9rem;
+    }
+
+    .animation-container {
+        padding: 15px;
+        min-height: 220px;
+        max-width: 350px;
+        margin: 0 auto;
+    }
+
+    dotlottie-player {
+        width: 100% !important;
+        height: auto !important;
+        min-height: 180px !important;
+        max-width: 320px !important;
+    }
+
+    }
+
+    @@media (max-width: 480px) {
+        .page-container
+
+    {
+        padding: 15px 10px;
+    }
+
+    .hero-section {
+        padding: 15px 0;
+    }
+
+    .hero-content {
+        gap: 15px;
+    }
+
+    .hero-title {
+        font-size: clamp(1.2rem, 6vw, 2rem);
+        margin-bottom: 12px;
+    }
+
+    .description-cards {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        margin-bottom: 15px;
+        padding: 0 5px;
+    }
+
+    .description-card {
+        padding: 10px 14px;
+        font-size: 0.8rem;
+    }
+
+    .btn-primary {
+        padding: 10px 20px;
+        font-size: 0.8rem;
+    }
+
+    .animation-container {
+        padding: 10px;
+        min-height: 180px;
+        max-width: 280px;
+        margin: 0 auto;
+    }
+
+    dotlottie-player {
+        width: 100% !important;
+        height: auto !important;
+        min-height: 160px !important;
+        max-width: 260px !important;
+    }
+
+    .floating-elements {
+        display: none;
+    }
+
+    }
+</style>
+
+<div class="page-container">
+    <div class="tech-pattern"></div>
+
+    <div class="floating-elements">
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+    </div>
+
+    <div class="hero-section">
+        <div class="hero-content">
+            <div class="left-column">
+                <h1 class="hero-title">
+                    @Model.Title.ToUpper()
+                    <span class="title-accent">@Model.Description.ToUpper()</span>
+                </h1>
+
+                <div class="description-cards">
+                  
+                    <div class="description-card">
+                     @Html.Raw(Model.Content)
+                    </div>
+                  
                 </div>
-                <div class="col-lg-6" id="boxBanner">
+
+                <a href="tel:+4561777336" class="btn-primary">
+                    Request Demo
+                </a>
+
+            </div>
+
+            <div class="right-column">
+                <div class="animation-container">
                     <script src="https://unpkg.com/@@dotlottie/player-component@latest/dist/dotlottie-player.mjs" type="module"></script>
-                    <dotlottie-player src="@Model.ImageUrl" class="img-fluid" speed="1" style="width: auto; height: auto;" direction="1" playMode="normal" loop autoplay></dotlottie-player>
+                    <dotlottie-player src="@Model.ImageUrl"
+                                      speed="1"
+                                      direction="1"
+                                      playMode="normal"
+                                      loop
+                                      autoplay>
+                    </dotlottie-player>
                 </div>
             </div>
         </div>
-    </section>
-
     </div>
-
-
+</div>

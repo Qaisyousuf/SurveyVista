@@ -8,7 +8,8 @@ using Web.ViewModel.AccountVM;
 
 namespace Web.Areas.Admin.Controllers
 {
-  
+
+    [Authorize(Roles = "Admin")]
     public class UsersController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;

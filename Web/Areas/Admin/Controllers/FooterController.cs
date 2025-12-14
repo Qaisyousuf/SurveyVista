@@ -15,7 +15,8 @@ using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 namespace Web.Areas.Admin.Controllers
 {
 
-   
+
+    
     public class FooterController : Controller
     {
         private readonly IFooterRepository _footer;

@@ -10,7 +10,7 @@ using Web.ViewModel.DashboardVM;
 
 namespace Web.Areas.Admin.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,Demo")]
     public class AdminController : Controller
     {
         private readonly SignInManager<ApplicationUser> _signInManager;

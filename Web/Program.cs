@@ -41,7 +41,15 @@ builder.Services.AddSignalR();
 builder.Services.ConfigureAIAnalysis();
 
 
-
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSeoSoft", policy =>
+    {
+        policy.WithOrigins("https://seosoft.dk", "https://unabused-terina-wavier.ngrok-free.dev")
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
 
 var app = builder.Build();
 
@@ -65,7 +73,7 @@ app.UseAuthorization();
 
 app.MapRazorPages();
 app.MapControllers();
-
+app.UseCors("AllowSeoSoft");
 
 app.MapControllerRoute(
     name: "page",

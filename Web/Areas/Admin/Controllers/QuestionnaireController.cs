@@ -97,6 +97,7 @@ namespace Web.Areas.Admin.Controllers
             });
         }
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public IActionResult Create()
 
 
@@ -120,6 +121,7 @@ namespace Web.Areas.Admin.Controllers
             return View(questionnaire);
         }
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create(QuestionnaireViewModel viewmodel)
         {
             if (ModelState.IsValid)
@@ -172,6 +174,7 @@ namespace Web.Areas.Admin.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public IActionResult Edit(int id)
         {
             var questionTypes = Enum.GetValues(typeof(QuestionType))
@@ -214,7 +217,7 @@ namespace Web.Areas.Admin.Controllers
 
             return View(viewModel);
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> Edit(EditQuestionnaireViewModel viewModel)
         {
@@ -510,6 +513,7 @@ namespace Web.Areas.Admin.Controllers
             }
         }
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public IActionResult Delete(int id)
         {
             var questionTypes = Enum.GetValues(typeof(QuestionType)).Cast<QuestionType>();
@@ -830,6 +834,7 @@ namespace Web.Areas.Admin.Controllers
         // Add these methods to your existing QuestionnaireController class
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public IActionResult SetLogic(int id)
         {
             var questionnaire = _questionnaire.GetQuestionnaireWithQuestionAndAnswer(id);
