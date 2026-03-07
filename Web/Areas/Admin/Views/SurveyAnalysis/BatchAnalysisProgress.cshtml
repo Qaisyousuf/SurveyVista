@@ -1,1753 +1,513 @@
 ﻿@* Views/Admin/SurveyAnalysis/BatchAnalysisProgress.cshtml *@
 
 @{
-    ViewData["Title"] = $"Batch Analysis - {ViewBag.QuestionnaireName}";
+    ViewData["Title"] = $"Batch Analysis — {ViewBag.QuestionnaireName}";
 }
 
 @section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <style>
         @@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
 
-        :root {
-            --neon-blue: #60a5fa;
-            --neon-purple: #c084fc;
-            --neon-green: #34d399;
-            --neon-pink: #f472b6;
-            --neon-yellow: #fbbf24;
-            --neon-red: #f87171;
-            --neon-cyan: #22d3ee;
-            --neon-orange: #fb923c;
-            --dark-900: #0f172a;
-            --dark-800: #1e293b;
-            --dark-700: #334155;
-            --dark-600: #475569;
-            --dark-500: #64748b;
-            --dark-400: #94a3b8;
-            --dark-300: #cbd5e1;
-            --dark-200: #e2e8f0;
-            --dark-100: #f1f5f9;
-            --glass-bg: rgba(255, 255, 255, 0.05);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-            --font-main: 'Space Grotesk', sans-serif;
-            --font-mono: 'JetBrains Mono', monospace;
-            --success-gradient: linear-gradient(135deg, var(--neon-green), var(--neon-cyan));
-            --warning-gradient: linear-gradient(135deg, var(--neon-yellow), var(--neon-orange));
-            --danger-gradient: linear-gradient(135deg, var(--neon-red), #dc2626);
-            --info-gradient: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
-            --primary-gradient: linear-gradient(135deg, var(--neon-blue), var(--neon-cyan));
+        :root{
+            --neon-blue:#60a5fa;--neon-purple:#c084fc;--neon-green:#34d399;--neon-pink:#f472b6;
+            --neon-yellow:#fbbf24;--neon-red:#f87171;--neon-cyan:#22d3ee;--neon-indigo:#818cf8;
+            --neon-teal:#33b3ae;--neon-amber:#f59e0b;--neon-orange:#fb923c;
+            --dark-900:#0f172a;--dark-800:#1e293b;--dark-700:#334155;--dark-600:#475569;
+            --dark-500:#64748b;--dark-400:#94a3b8;--dark-300:#cbd5e1;--dark-200:#e2e8f0;
+            --glass-bg:rgba(255,255,255,0.04);--glass-border:rgba(255,255,255,0.08);
+            --font-main:'Space Grotesk',sans-serif;--font-mono:'JetBrains Mono',monospace;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: var(--font-main);
-            background: var(--dark-900);
-            color: #e2e8f0;
-            overflow-x: hidden;
-        }
-
-        .nexgen-batch-dashboard {
-            min-height: 100vh;
-            position: relative;
-        }
-
-        /* Dynamic Background */
-        .bg-pattern {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: -1;
-            overflow: hidden;
-        }
-
-        .grid-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: linear-gradient(rgba(34, 211, 238, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(34, 211, 238, 0.1) 1px, transparent 1px);
-            background-size: 60px 60px;
-            animation: gridMove 20s linear infinite;
-        }
-
-        .gradient-mesh {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at 20% 20%, rgba(34, 211, 238, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 60%, rgba(96, 165, 250, 0.15) 0%, transparent 50%), radial-gradient(circle at 40% 80%, rgba(192, 132, 252, 0.15) 0%, transparent 50%);
-            animation: meshShift 15s ease-in-out infinite;
-        }
-
-        /* Top Navigation */
-        .top-nav {
-            position: relative;
-            z-index: 100;
-            padding: 1rem 0;
-            background: rgba(15, 23, 42, 0.8);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(34, 211, 238, 0.2);
-        }
-
-        .nav-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 2rem;
-            display: flex;
-            align-items: center;
-            gap: 3rem;
-        }
-
-        .nav-brand {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .brand-icon {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-blue));
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.2rem;
-        }
-
-        .brand-name {
-            font-family: var(--font-mono);
-            font-weight: 700;
-            font-size: 1.1rem;
-            letter-spacing: 0.1em;
-            color: #e2e8f0;
-        }
-
-        .brand-version {
-            font-family: var(--font-mono);
-            font-size: 0.7rem;
-            color: var(--neon-cyan);
-            background: rgba(34, 211, 238, 0.1);
-            padding: 0.2rem 0.5rem;
-            border-radius: 4px;
-            border: 1px solid rgba(34, 211, 238, 0.3);
-        }
-
-        .nav-center {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-        }
-
-        .breadcrumb-nexgen {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            font-family: var(--font-mono);
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .crumb {
-            color: var(--dark-400);
-            text-decoration: none;
-            transition: color 0.2s ease;
-        }
-
-            .crumb:hover {
-                color: var(--neon-cyan);
-            }
-
-            .crumb.active {
-                color: var(--neon-cyan);
-            }
-
-        .breadcrumb-nexgen i {
-            color: var(--dark-500);
-            font-size: 0.6rem;
-        }
-
-        .nav-actions {
-            display: flex;
-            gap: 1rem;
-        }
-
-        .nav-btn {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.6rem 1.2rem;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 8px;
-            color: #e2e8f0;
-            font-size: 0.8rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            backdrop-filter: blur(10px);
-            text-decoration: none;
-        }
-
-            .nav-btn:hover {
-                background: rgba(34, 211, 238, 0.1);
-                border-color: rgba(34, 211, 238, 0.3);
-                color: var(--neon-cyan);
-            }
-
-        /* Hero Section */
-        .hero-nexgen {
-            padding: 4rem 0 2rem;
-            text-align: center;
-            position: relative;
-            z-index: 10;
-        }
-
-        .hero-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.6rem;
-            padding: 0.5rem 1.2rem;
-            background: rgba(34, 211, 238, 0.1);
-            border: 1px solid rgba(34, 211, 238, 0.3);
-            border-radius: 50px;
-            margin-bottom: 2rem;
-            font-family: var(--font-mono);
-            font-size: 0.7rem;
-            font-weight: 600;
-            letter-spacing: 0.1em;
-            color: var(--neon-cyan);
-        }
-
-        .badge-dot {
-            width: 6px;
-            height: 6px;
-            background: var(--neon-cyan);
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-
-        .hero-title {
-            font-size: 3.5rem;
-            font-weight: 700;
-            line-height: 1.1;
-            margin-bottom: 1.5rem;
-            color: #ffffff;
-        }
-
-        .title-gradient {
-            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-blue), var(--neon-purple));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .hero-description {
-            font-size: 1.1rem;
-            color: var(--dark-300);
-            max-width: 600px;
-            margin: 0 auto 2rem;
-            line-height: 1.6;
-        }
-
-        /* Processing Status Card */
-        .processing-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: var(--glass-shadow);
-            margin-bottom: 3rem;
-            position: relative;
-        }
-
-        .processing-header {
-            background: var(--primary-gradient);
-            padding: 2rem;
-            position: relative;
-        }
-
-            .processing-header::before {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
-            }
-
-        .header-content {
-            position: relative;
-            z-index: 2;
-            display: flex;
-            justify-content: between;
-            align-items: center;
-        }
-
-        .header-info {
-            flex: 1;
-        }
-
-        .header-title {
-            font-family: var(--font-mono);
-            font-size: 1.3rem;
-            font-weight: 700;
-            letter-spacing: 0.05em;
-            color: white;
-            margin-bottom: 0.5rem;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .header-subtitle {
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 0.9rem;
-            margin-bottom: 0;
-        }
-
-        .status-badge {
-            background: rgba(255, 255, 255, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 20px;
-            padding: 0.6rem 1.2rem;
-            font-family: var(--font-mono);
-            font-size: 0.7rem;
-            font-weight: 600;
-            letter-spacing: 0.1em;
-            color: white;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: all 0.3s ease;
-        }
-
-            .status-badge.processing {
-                background: rgba(251, 191, 36, 0.2);
-                border-color: var(--neon-yellow);
-                color: var(--neon-yellow);
-            }
-
-            .status-badge.success {
-                background: rgba(52, 211, 153, 0.2);
-                border-color: var(--neon-green);
-                color: var(--neon-green);
-            }
-
-            .status-badge.error {
-                background: rgba(248, 113, 113, 0.2);
-                border-color: var(--neon-red);
-                color: var(--neon-red);
-            }
-
-        /* Progress Section */
-        .progress-section {
-            padding: 2rem;
-        }
-
-        .progress-header {
-            display: flex;
-            justify-content: between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .progress-title {
-            font-weight: 600;
-            color: #ffffff;
-            font-size: 1.1rem;
-        }
-
-        .progress-percentage {
-            font-family: var(--font-mono);
-            font-weight: 700;
-            font-size: 1.2rem;
-            color: var(--neon-cyan);
-        }
-
-        .progress-container {
-            position: relative;
-            margin-bottom: 1.5rem;
-        }
-
-        .progress-bar-nexgen {
-            height: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            overflow: hidden;
-            position: relative;
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: var(--primary-gradient);
-            border-radius: 10px;
-            transition: width 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-            .progress-fill.animated {
-                background: linear-gradient(90deg, var(--neon-cyan) 0%, var(--neon-blue) 25%, var(--neon-cyan) 50%, var(--neon-blue) 75%, var(--neon-cyan) 100%);
-                background-size: 200% 100%;
-                animation: progressShimmer 2s linear infinite;
-            }
-
-            .progress-fill.complete {
-                background: var(--success-gradient);
-                animation: none;
-            }
-
-        .progress-text {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-family: var(--font-mono);
-            font-size: 0.8rem;
-            font-weight: 700;
-            color: white;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-        }
-
-        .progress-info {
-            display: flex;
-            justify-content: between;
-            align-items: center;
-            margin-top: 1rem;
-        }
-
-        .progress-count {
-            font-family: var(--font-mono);
-            font-size: 0.8rem;
-            color: var(--dark-300);
-        }
-
-        .estimated-time {
-            font-family: var(--font-mono);
-            font-size: 0.8rem;
-            color: var(--dark-300);
-        }
-
-        /* Pipeline Section */
-        .pipeline-section {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-            padding: 0 2rem 2rem;
-        }
-
-        .pipeline-container {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 12px;
-            padding: 1.5rem;
-        }
-
-        .pipeline-title {
-            font-family: var(--font-mono);
-            font-size: 0.9rem;
-            font-weight: 600;
-            letter-spacing: 0.05em;
-            color: #ffffff;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-            .pipeline-title i {
-                color: var(--neon-cyan);
-            }
-
-        .pipeline-steps {
-            list-style: none;
-            padding: 0;
-        }
-
-        .pipeline-step {
-            padding: 0.8rem 0;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            color: var(--dark-400);
-            transition: all 0.3s ease;
-            font-size: 0.9rem;
-        }
-
-            .pipeline-step.active {
-                color: var(--neon-blue);
-            }
-
-            .pipeline-step.completed {
-                color: var(--neon-green);
-            }
-
-        .step-icon {
-            width: 20px;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-
-        .pipeline-step.active .step-icon {
-            animation: spin 1s linear infinite;
-        }
-
-        .pipeline-step.completed .step-icon {
-            animation: checkPulse 0.5s ease-in-out;
-        }
-
-        /* Statistics Grid */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
-        }
-
-        .stat-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 12px;
-            padding: 1.5rem;
-            text-align: center;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-            .stat-card:hover {
-                transform: translateY(-2px);
-                background: rgba(255, 255, 255, 0.05);
-            }
-
-        .stat-icon {
-            font-size: 1.5rem;
-            margin-bottom: 0.8rem;
-        }
-
-        .stat-card.positive .stat-icon {
-            color: var(--neon-green);
-        }
-
-        .stat-card.negative .stat-icon {
-            color: var(--neon-red);
-        }
-
-        .stat-card.low-risk .stat-icon {
-            color: var(--neon-green);
-        }
-
-        .stat-card.high-risk .stat-icon {
-            color: var(--neon-red);
-        }
-
-        .stat-value {
-            font-family: var(--font-mono);
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: #ffffff;
-            margin-bottom: 0.5rem;
-            line-height: 1;
-        }
-
-        .stat-label {
-            font-size: 0.7rem;
-            color: var(--dark-400);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:var(--font-main);background:var(--dark-900);color:#e2e8f0;overflow-x:hidden}
+
+        .nex-bg{position:fixed;inset:0;z-index:-1;overflow:hidden}
+        .nex-bg .grid{position:absolute;inset:0;background-image:linear-gradient(rgba(34,211,238,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(34,211,238,0.04) 1px,transparent 1px);background-size:60px 60px;animation:gridDrift 25s linear infinite}
+        .nex-bg .mesh{position:absolute;inset:0;background:radial-gradient(ellipse at 25% 20%,rgba(34,211,238,0.06) 0%,transparent 55%),radial-gradient(ellipse at 75% 60%,rgba(96,165,250,0.05) 0%,transparent 55%),radial-gradient(ellipse at 50% 90%,rgba(192,132,252,0.04) 0%,transparent 55%);animation:meshFloat 18s ease-in-out infinite}
+
+        @@keyframes gridDrift{0%{transform:translate(0,0)}100%{transform:translate(60px,60px)}}
+        @@keyframes meshFloat{0%,100%{filter:hue-rotate(0deg);transform:scale(1)}50%{filter:hue-rotate(12deg);transform:scale(1.02)}}
+        @@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(1.12)}}
+        @@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+        @@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+        @@keyframes checkPop{0%{transform:scale(1)}50%{transform:scale(1.25)}100%{transform:scale(1)}}
+        @@keyframes progressShimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+        @@keyframes barGrow{from{width:0}to{width:var(--w)}}
+
+        .container{max-width:1400px;margin:0 auto;padding:0 2rem}
+
+        /* ===== HEADER ===== */
+        .page-header{position:relative;z-index:10;padding:2rem 0 1.5rem;border-bottom:1px solid rgba(34,211,238,0.12)}
+        .breadcrumb-nex{display:flex;align-items:center;gap:.7rem;margin-bottom:1.8rem;font-family:var(--font-mono);font-size:.65rem;letter-spacing:.08em;flex-wrap:wrap}
+        .breadcrumb-nex a{color:var(--dark-400);text-decoration:none;display:flex;align-items:center;gap:.4rem;transition:color .2s}
+        .breadcrumb-nex a:hover{color:var(--neon-cyan)}
+        .breadcrumb-nex .sep{color:var(--dark-600);font-size:.5rem}
+        .breadcrumb-nex .current{color:var(--neon-cyan);font-weight:600}
+
+        .header-row{display:flex;justify-content:space-between;align-items:flex-start;gap:2rem}
+        .header-left{flex:1}
+        .header-badge{display:inline-flex;align-items:center;gap:.5rem;padding:.4rem 1rem;background:rgba(34,211,238,0.08);border:1px solid rgba(34,211,238,0.2);border-radius:50px;margin-bottom:1.5rem;font-family:var(--font-mono);font-size:.6rem;font-weight:600;letter-spacing:.1em;color:var(--neon-cyan)}
+        .header-badge .dot{width:6px;height:6px;background:var(--neon-cyan);border-radius:50%;animation:pulse 2s infinite}
+        .header-title{font-size:2.8rem;font-weight:700;line-height:1.1;margin-bottom:.8rem;color:#fff}
+        .header-title .grad{background:linear-gradient(135deg,var(--neon-cyan),var(--neon-blue),var(--neon-purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+        .header-sub{font-size:.95rem;color:var(--dark-300);line-height:1.6}
+
+        .header-actions{display:flex;flex-wrap:wrap;gap:.7rem;align-items:flex-start;padding-top:.5rem}
+        .h-btn{display:flex;align-items:center;gap:.6rem;padding:.65rem 1.2rem;border-radius:10px;text-decoration:none;font-family:var(--font-mono);font-size:.68rem;font-weight:600;letter-spacing:.04em;transition:all .25s;border:1px solid;cursor:pointer;background:none}
+        .h-btn:hover{transform:translateY(-2px);text-decoration:none}
+        .h-btn.sec{background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.1);color:var(--dark-300)}
+        .h-btn.sec:hover{background:rgba(34,211,238,0.08);border-color:rgba(34,211,238,0.25);color:var(--neon-cyan)}
+
+        /* ===== MAIN CARD ===== */
+        .nex-card{background:rgba(30,41,59,0.45);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.07);border-radius:18px;overflow:hidden;position:relative;margin-bottom:1.5rem}
+
+        /* Processing Header */
+        .proc-head{background:linear-gradient(135deg,rgba(30,41,59,0.95),rgba(51,65,85,0.95));padding:1.5rem 1.8rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;border-bottom:1px solid rgba(34,211,238,0.15);position:relative;flex-wrap:wrap}
+        .proc-head::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(34,211,238,0.08) 0%,transparent 60%)}
+        .proc-head-info{position:relative;z-index:2;flex:1}
+        .proc-head h3{font-family:var(--font-mono);font-size:.95rem;font-weight:700;letter-spacing:.05em;color:#e2e8f0;display:flex;align-items:center;gap:.8rem;margin-bottom:.3rem}
+        .proc-head p{font-size:.75rem;color:var(--dark-400)}
+
+        .status-chip{position:relative;z-index:2;display:flex;align-items:center;gap:.5rem;padding:.45rem 1rem;border-radius:20px;font-family:var(--font-mono);font-size:.6rem;font-weight:600;letter-spacing:.08em;border:1px solid;transition:all .3s}
+        .status-chip.init{background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.15);color:var(--dark-300)}
+        .status-chip.processing{background:rgba(251,191,36,0.12);border-color:rgba(251,191,36,0.3);color:var(--neon-yellow)}
+        .status-chip.success{background:rgba(52,211,153,0.12);border-color:rgba(52,211,153,0.3);color:var(--neon-green)}
+        .status-chip.error{background:rgba(248,113,113,0.12);border-color:rgba(248,113,113,0.3);color:var(--neon-red)}
+
+        /* Progress */
+        .prog-section{padding:1.8rem}
+        .prog-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
+        .prog-label{font-weight:600;color:#fff;font-size:.95rem}
+        .prog-pct{font-family:var(--font-mono);font-weight:700;font-size:1.1rem;color:var(--neon-cyan)}
+
+        .prog-bar-wrap{position:relative;margin-bottom:1rem}
+        .prog-bar{height:16px;background:rgba(255,255,255,0.06);border-radius:8px;overflow:hidden;position:relative}
+        .prog-fill{height:100%;border-radius:8px;transition:width .4s ease;position:relative;overflow:hidden}
+        .prog-fill.animated{background:linear-gradient(90deg,var(--neon-cyan) 0%,var(--neon-blue) 25%,var(--neon-cyan) 50%,var(--neon-blue) 75%,var(--neon-cyan) 100%);background-size:200% 100%;animation:progressShimmer 2s linear infinite}
+        .prog-fill.complete{background:linear-gradient(90deg,var(--neon-green),var(--neon-teal));animation:none}
+        .prog-text{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:var(--font-mono);font-size:.65rem;font-weight:700;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.5)}
+
+        .prog-info{display:flex;justify-content:space-between;align-items:center}
+        .prog-count,.prog-eta{font-family:var(--font-mono);font-size:.7rem;color:var(--dark-400)}
+
+        /* Pipeline + Stats Grid */
+        .pipe-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;padding:0 1.8rem 1.8rem}
+        .pipe-box{background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:1.4rem}
+        .pipe-title{font-family:var(--font-mono);font-size:.78rem;font-weight:600;letter-spacing:.05em;color:#fff;display:flex;align-items:center;gap:.8rem;margin-bottom:1.2rem}
+        .pipe-title i{color:var(--neon-cyan)}
+
+        .pipe-step{padding:.6rem 0;display:flex;align-items:center;gap:.8rem;color:var(--dark-500);transition:all .3s;font-size:.78rem}
+        .pipe-step.active{color:var(--neon-cyan)}
+        .pipe-step.done{color:var(--neon-green)}
+        .pipe-step .s-icon{width:18px;text-align:center;font-size:.7rem}
+        .pipe-step.active .s-icon{animation:spin 1s linear infinite}
+        .pipe-step.done .s-icon{animation:checkPop .4s ease}
+
+        .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
+        .stat-card{background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:1.2rem;text-align:center;transition:all .2s}
+        .stat-card:hover{background:rgba(255,255,255,0.04);transform:translateY(-2px)}
+        .stat-icon{font-size:1.2rem;margin-bottom:.6rem}
+        .stat-card.pos .stat-icon{color:var(--neon-green)}.stat-card.neg .stat-icon{color:var(--neon-red)}
+        .stat-card.low .stat-icon{color:var(--neon-green)}.stat-card.high .stat-icon{color:var(--neon-red)}
+        .stat-val{font-family:var(--font-mono);font-size:1.5rem;font-weight:700;color:#fff;margin-bottom:.3rem;line-height:1}
+        .stat-lbl{font-family:var(--font-mono);font-size:.55rem;color:var(--dark-400);text-transform:uppercase;letter-spacing:.08em}
 
         /* Control Footer */
-        .control-footer {
-            padding: 1.5rem 2rem;
-            background: rgba(30, 41, 59, 0.5);
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
-            display: flex;
-            justify-content: between;
-            align-items: center;
-        }
-
-        .current-status {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            color: var(--dark-300);
-            font-size: 0.9rem;
-        }
-
-        .control-buttons {
-            display: flex;
-            gap: 1rem;
-        }
-
-        .btn-nexgen {
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
-            padding: 0.8rem 1.5rem;
-            border-radius: 8px;
-            font-family: var(--font-mono);
-            font-size: 0.7rem;
-            font-weight: 600;
-            letter-spacing: 0.05em;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            border: 1px solid;
-            text-decoration: none;
-        }
-
-            .btn-nexgen.success {
-                background: rgba(52, 211, 153, 0.1);
-                border-color: rgba(52, 211, 153, 0.3);
-                color: var(--neon-green);
-            }
-
-                .btn-nexgen.success:hover {
-                    background: rgba(52, 211, 153, 0.2);
-                    color: var(--neon-green);
-                    transform: translateY(-1px);
-                }
-
-            .btn-nexgen.danger {
-                background: rgba(248, 113, 113, 0.1);
-                border-color: rgba(248, 113, 113, 0.3);
-                color: var(--neon-red);
-            }
-
-                .btn-nexgen.danger:hover {
-                    background: rgba(248, 113, 113, 0.2);
-                    color: var(--neon-red);
-                    transform: translateY(-1px);
-                }
-
-            .btn-nexgen:disabled {
-                opacity: 0.5;
-                cursor: not-allowed;
-            }
-
-        /* Results Section */
-        .results-section {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: var(--glass-shadow);
-            margin-bottom: 3rem;
-        }
-
-        .results-header {
-            background: var(--success-gradient);
-            padding: 2rem;
-            position: relative;
-        }
-
-            .results-header::before {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
-            }
-
-        .results-title {
-            position: relative;
-            z-index: 2;
-            font-family: var(--font-mono);
-            font-size: 1.3rem;
-            font-weight: 700;
-            letter-spacing: 0.05em;
-            color: white;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .results-body {
-            padding: 2rem;
-        }
-
-        .results-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 2rem;
-            margin-bottom: 2rem;
-            text-align: center;
-        }
-
-        .result-stat {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .result-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            color: white;
-        }
-
-        .result-stat.processed .result-icon {
-            background: var(--info-gradient);
-        }
-
-        .result-stat.high-risk .result-icon {
-            background: var(--danger-gradient);
-        }
-
-        .result-stat.positive .result-icon {
-            background: var(--success-gradient);
-        }
-
-        .result-stat.time .result-icon {
-            background: var(--primary-gradient);
-        }
-
-        .result-value {
-            font-family: var(--font-mono);
-            font-size: 2rem;
-            font-weight: 700;
-            color: #ffffff;
-            line-height: 1;
-        }
-
-        .result-label {
-            font-size: 0.8rem;
-            color: var(--dark-400);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .completion-alert {
-            background: rgba(52, 211, 153, 0.1);
-            border: 1px solid rgba(52, 211, 153, 0.3);
-            border-radius: 12px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        .alert-title {
-            font-family: var(--font-mono);
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--neon-green);
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .alert-description {
-            color: var(--dark-200);
-            line-height: 1.6;
-            margin-bottom: 2rem;
-        }
-
-        .result-actions {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-
-        .btn-nexgen.primary {
-            background: var(--info-gradient);
-            border-color: transparent;
-            color: white;
-        }
-
-            .btn-nexgen.primary:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 10px 20px rgba(96, 165, 250, 0.3);
-                color: white;
-            }
-
-        /* Processing Log */
-        .log-section {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: var(--glass-shadow);
-        }
-
-        .log-header {
-            padding: 1.5rem 2rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-            display: flex;
-            justify-content: between;
-            align-items: center;
-        }
-
-        .log-title {
-            font-family: var(--font-mono);
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: #ffffff;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-            .log-title i {
-                color: var(--neon-purple);
-            }
-
-        .log-toggle {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 1rem;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 6px;
-            color: var(--dark-300);
-            font-size: 0.8rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-            .log-toggle:hover {
-                background: rgba(255, 255, 255, 0.1);
-                color: #ffffff;
-            }
-
-        .log-container {
-            background: var(--dark-800);
-            padding: 1.5rem;
-            max-height: 300px;
-            overflow-y: auto;
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .log-entry {
-            font-family: var(--font-mono);
-            font-size: 0.8rem;
-            line-height: 1.4;
-            margin-bottom: 0.5rem;
-            padding: 0.2rem 0;
-            animation: fadeInUp 0.3s ease-out;
-        }
-
-            .log-entry.info {
-                color: var(--neon-cyan);
-            }
-
-            .log-entry.success {
-                color: var(--neon-green);
-            }
-
-            .log-entry.warning {
-                color: var(--neon-yellow);
-            }
-
-            .log-entry.error {
-                color: var(--neon-red);
-            }
-
-        .timestamp {
-            color: var(--dark-400);
-            font-weight: 600;
-        }
-
-        /* Animations */
-        @@keyframes gridMove {
-            0%
-
-        {
-            transform: translate(0, 0);
-        }
-
-        100% {
-            transform: translate(60px, 60px);
-        }
-
-        }
-
-        @@keyframes meshShift {
-            0%, 100%
-
-        {
-            filter: hue-rotate(0deg);
-            transform: scale(1);
-        }
-
-        50% {
-            filter: hue-rotate(30deg);
-            transform: scale(1.05);
-        }
-
-        }
-
-        @@keyframes pulse {
-            0%, 100%
-
-        {
-            opacity: 1;
-            transform: scale(1);
-        }
-
-        50% {
-            opacity: 0.7;
-            transform: scale(1.1);
-        }
-
-        }
-
-        @@keyframes progressShimmer {
-            0%
-
-        {
-            background-position: -200% 0;
-        }
-
-        100% {
-            background-position: 200% 0;
-        }
-
-        }
-
-        @@keyframes spin {
-            from
-
-        {
-            transform: rotate(0deg);
-        }
-
-        to {
-            transform: rotate(360deg);
-        }
-
-        }
-
-        @@keyframes checkPulse {
-            0%
-
-        {
-            transform: scale(1);
-        }
-
-        50% {
-            transform: scale(1.2);
-        }
-
-        100% {
-            transform: scale(1);
-        }
-
-        }
-
-        @@keyframes fadeInUp {
-            from
-
-        {
-            opacity: 0;
-            transform: translateY(10px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        }
-
-        /* Responsive Design */
-        @@media (max-width: 1200px) {
-            .pipeline-section
-
-        {
-            grid-template-columns: 1fr;
-        }
-
-        }
-
-        @@media (max-width: 768px) {
-            .nav-container
-
-        {
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-
-        .nav-center {
-            order: 3;
-            flex-basis: 100%;
-            justify-content: flex-start;
-        }
-
-        .hero-title {
-            font-size: 2.5rem;
-        }
-
-        .header-content {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 1rem;
-        }
-
-        .stats-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .results-stats {
-            grid-template-columns: repeat(2, 1fr);
-        }
-
-        .control-footer {
-            flex-direction: column;
-            gap: 1rem;
-            align-items: flex-start;
-        }
-
-        .result-actions {
-            flex-direction: column;
-            align-items: stretch;
-        }
-
-        }
-
-        @@media (max-width: 480px) {
-            .processing-card, .results-section, .log-section
-
-        {
-            margin-left: 1rem;
-            margin-right: 1rem;
-        }
-
-        .results-stats {
-            grid-template-columns: 1fr;
-        }
-
-        }
-
-        /* Print Styles */
-        @@media print {
-            .bg-pattern, .top-nav, .btn-nexgen, .log-section
-
-        {
-            display: none !important;
-        }
-
-        .processing-card,
-        .results-section {
-            break-inside: avoid;
-            border: 1px solid #333;
-            background: white;
-            color: black;
-        }
-
-        .nexgen-batch-dashboard {
-            background: white;
-        }
-
-        }
-
-        /* Accessibility */
-        @@media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after
-
-        {
-            animation-duration: 0.01ms !important;
-            animation-iteration-count: 1 !important;
-            transition-duration: 0.01ms !important;
-        }
-
-        }
-
-        /* High Contrast Mode */
-        @@media (prefers-contrast: high) {
-            : root
-
-        {
-            --neon-cyan: #00e5ff;
-            --neon-blue: #4d9fff;
-            --neon-green: #4dff88;
-            --dark-300: #ffffff;
-            --dark-400: #cccccc;
-        }
-
-        .processing-card,
-        .results-section,
-        .log-section {
-            border-width: 2px;
-        }
-
-        }
+        .ctrl-foot{padding:1.2rem 1.8rem;background:rgba(15,23,42,0.4);border-top:1px solid rgba(255,255,255,0.06);display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap}
+        .ctrl-status{display:flex;align-items:center;gap:.7rem;color:var(--dark-300);font-size:.78rem;flex:1}
+        .ctrl-status i{color:var(--neon-cyan);font-size:.8rem}
+        .ctrl-btns{display:flex;gap:.7rem}
+
+        .btn-go{display:flex;align-items:center;gap:.5rem;padding:.6rem 1.4rem;border-radius:8px;font-family:var(--font-mono);font-size:.65rem;font-weight:600;letter-spacing:.05em;cursor:pointer;transition:all .25s;border:1px solid;text-decoration:none}
+        .btn-go:hover{transform:translateY(-1px)}
+        .btn-go.green{background:rgba(52,211,153,0.1);border-color:rgba(52,211,153,0.3);color:var(--neon-green)}
+        .btn-go.green:hover{background:rgba(52,211,153,0.2)}
+        .btn-go.red{background:rgba(248,113,113,0.1);border-color:rgba(248,113,113,0.3);color:var(--neon-red)}
+        .btn-go.red:hover{background:rgba(248,113,113,0.2)}
+        .btn-go.pri{background:linear-gradient(135deg,var(--neon-indigo),var(--neon-purple));border-color:transparent;color:#fff}
+        .btn-go.pri:hover{box-shadow:0 10px 24px rgba(129,140,248,0.25);color:#fff}
+        .btn-go.cyan{background:linear-gradient(135deg,var(--neon-cyan),var(--neon-blue));border-color:transparent;color:#fff}
+        .btn-go.cyan:hover{box-shadow:0 10px 24px rgba(34,211,238,0.25);color:#fff}
+        .btn-go:disabled{opacity:.4;cursor:not-allowed;transform:none}
+
+        /* ===== RESULTS ===== */
+        .results-head{background:linear-gradient(135deg,rgba(30,41,59,0.95),rgba(51,65,85,0.95));padding:1.5rem 1.8rem;display:flex;align-items:center;gap:1rem;border-bottom:1px solid rgba(52,211,153,0.15);position:relative}
+        .results-head::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(52,211,153,0.08) 0%,transparent 60%)}
+        .results-head h3{font-family:var(--font-mono);font-size:.95rem;font-weight:700;letter-spacing:.05em;color:#e2e8f0;display:flex;align-items:center;gap:.8rem;position:relative;z-index:2}
+        .results-head .r-icon{width:40px;height:40px;background:linear-gradient(135deg,var(--neon-green),var(--neon-teal));border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1rem;position:relative;z-index:2;flex-shrink:0}
+
+        .results-body{padding:1.8rem}
+        .results-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1.2rem;margin-bottom:1.8rem}
+        .r-stat{text-align:center}
+        .r-stat-icon{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:#fff;margin:0 auto .8rem}
+        .r-stat-icon.blue{background:linear-gradient(135deg,var(--neon-indigo),var(--neon-blue))}
+        .r-stat-icon.red{background:linear-gradient(135deg,var(--neon-red),var(--neon-amber))}
+        .r-stat-icon.green{background:linear-gradient(135deg,var(--neon-green),var(--neon-teal))}
+        .r-stat-icon.cyan{background:linear-gradient(135deg,var(--neon-cyan),var(--neon-blue))}
+        .r-stat-val{font-family:var(--font-mono);font-size:1.6rem;font-weight:700;color:#fff;margin-bottom:.3rem}
+        .r-stat-lbl{font-family:var(--font-mono);font-size:.55rem;color:var(--dark-400);text-transform:uppercase;letter-spacing:.08em}
+
+        .done-alert{background:rgba(52,211,153,0.06);border:1px solid rgba(52,211,153,0.2);border-radius:14px;padding:1.8rem;margin-bottom:1.5rem}
+        .done-alert h4{font-family:var(--font-mono);font-size:.9rem;font-weight:700;color:var(--neon-green);display:flex;align-items:center;gap:.8rem;margin-bottom:.8rem}
+        .done-alert p{color:var(--dark-200);font-size:.85rem;line-height:1.6;margin-bottom:1.5rem}
+        .done-actions{display:flex;justify-content:center;gap:.8rem;flex-wrap:wrap}
+
+        /* ===== LOG ===== */
+        .log-head{padding:1.2rem 1.8rem;border-bottom:1px solid rgba(255,255,255,0.05);display:flex;justify-content:space-between;align-items:center}
+        .log-title{font-family:var(--font-mono);font-size:.78rem;font-weight:600;color:#fff;display:flex;align-items:center;gap:.7rem}
+        .log-title i{color:var(--neon-purple);font-size:.75rem}
+        .log-toggle{display:flex;align-items:center;gap:.4rem;padding:.4rem .8rem;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:6px;color:var(--dark-300);font-family:var(--font-mono);font-size:.6rem;cursor:pointer;transition:all .2s}
+        .log-toggle:hover{background:rgba(255,255,255,0.08);color:#fff}
+        .log-body{background:rgba(15,23,42,0.6);padding:1.2rem 1.5rem;max-height:260px;overflow-y:auto;border-top:1px solid rgba(255,255,255,0.04)}
+        .log-entry{font-family:var(--font-mono);font-size:.7rem;line-height:1.5;margin-bottom:.3rem;animation:fadeUp .3s ease}
+        .log-entry.info{color:var(--neon-cyan)}.log-entry.success{color:var(--neon-green)}.log-entry.warning{color:var(--neon-yellow)}.log-entry.error{color:var(--neon-red)}
+        .log-entry .ts{color:var(--dark-500);font-weight:600}
+
+        /* ===== RESPONSIVE ===== */
+        @@media(max-width:1200px){.pipe-grid{grid-template-columns:1fr}}
+        @@media(max-width:768px){
+            .header-row{flex-direction:column}.header-title{font-size:2rem}
+            .results-stats{grid-template-columns:repeat(2,1fr)}.ctrl-foot{flex-direction:column;align-items:stretch}
+            .ctrl-btns{justify-content:center}.done-actions{flex-direction:column}
+        }
+        @@media(max-width:480px){.results-stats{grid-template-columns:1fr}.stats-grid{grid-template-columns:1fr}}
+        @@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
     </style>
 }
 
-<div class="nexgen-batch-dashboard">
-    <!-- Dynamic Background -->
-    <div class="bg-pattern">
-        <div class="grid-overlay"></div>
-        <div class="gradient-mesh"></div>
+<div class="nex-bg"><div class="grid"></div><div class="mesh"></div></div>
+
+<!-- Header -->
+<section class="page-header">
+    <div class="container">
+        <div class="breadcrumb-nex">
+            <a href="@Url.Action("Index")"><i class="fa-solid fa-brain"></i> Analysis Dashboard</a>
+            <i class="fa-solid fa-chevron-right sep"></i>
+            <a href="@Url.Action("AnalyzeQuestionnaire", new { id = ViewBag.QuestionnaireId })">@ViewBag.QuestionnaireName</a>
+            <i class="fa-solid fa-chevron-right sep"></i>
+            <span class="current">Batch Analysis</span>
+        </div>
+        <div class="header-row">
+            <div class="header-left">
+                <div class="header-badge"><span class="dot"></span> CLAUDE AI BATCH PROCESSOR</div>
+                <h1 class="header-title">Batch <span class="grad">Analysis</span></h1>
+                <p class="header-sub">Processing @ViewBag.TotalRequests mental health survey responses through the Claude AI pipeline</p>
+            </div>
+            <div class="header-actions">
+                <button type="button" class="h-btn sec" onclick="goBack()"><i class="fa-solid fa-arrow-left"></i> Back</button>
+            </div>
+        </div>
     </div>
+</section>
 
-    <!-- Top Navigation Bar -->
-    <nav class="top-nav">
-        <div class="nav-container">
-            <div class="nav-brand">
-                <div class="brand-icon">
-                    <i class="fas fa-layer-group"></i>
+<!-- Processing Card -->
+<section style="position:relative;z-index:10;padding:2rem 0">
+    <div class="container">
+        <div class="nex-card">
+            <!-- Header -->
+            <div class="proc-head">
+                <div class="proc-head-info">
+                    <h3><i class="fa-solid fa-sparkles"></i> Claude AI Analysis Pipeline</h3>
+                    <p>Sentiment, risk assessment, key phrases, and workplace insights</p>
                 </div>
-                <div class="brand-text">
-                    <span class="brand-name">BATCH PROCESSOR</span>
-                    <span class="brand-version">v1.0</span>
+                <div id="statusBadge" class="status-chip init"><i class="fa-solid fa-clock"></i> INITIALIZING</div>
+            </div>
+
+            <!-- Progress -->
+            <div class="prog-section">
+                <div class="prog-top">
+                    <div class="prog-label">Analysis Progress</div>
+                    <div id="progressPercentage" class="prog-pct">0%</div>
+                </div>
+                <div class="prog-bar-wrap">
+                    <div class="prog-bar">
+                        <div id="progressBar" class="prog-fill animated" style="width:0%">
+                            <div id="progressText" class="prog-text">Starting…</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="prog-info">
+                    <div class="prog-count"><span id="processedCount">0</span> of @ViewBag.TotalRequests responses</div>
+                    <div id="estimatedTime" class="prog-eta">Estimated: Calculating…</div>
                 </div>
             </div>
 
-            <div class="nav-center">
-                <nav class="breadcrumb-nexgen">
-                    <a href="@Url.Action("Index")" class="crumb">
-                        <i class="fas fa-brain"></i> ANALYSIS DASHBOARD
-                    </a>
-                    <i class="fas fa-chevron-right"></i>
-                    <a href="@Url.Action("AnalyzeQuestionnaire", new { id = ViewBag.QuestionnaireId })" class="crumb">
-                        @ViewBag.QuestionnaireName?.ToUpper()
-                    </a>
-                    <i class="fas fa-chevron-right"></i>
-                    <span class="crumb active">BATCH ANALYSIS</span>
-                </nav>
+            <!-- Pipeline + Stats -->
+            <div class="pipe-grid">
+                <div class="pipe-box">
+                    <div class="pipe-title"><i class="fa-solid fa-list-check"></i> Processing Pipeline</div>
+                    <div id="step1" class="pipe-step"><div class="s-icon"><i class="fa-solid fa-circle"></i></div><span>Connecting to Claude AI…</span></div>
+                    <div id="step2" class="pipe-step"><div class="s-icon"><i class="fa-solid fa-circle"></i></div><span>Anonymizing personal information…</span></div>
+                    <div id="step3" class="pipe-step"><div class="s-icon"><i class="fa-solid fa-circle"></i></div><span>Running sentiment analysis…</span></div>
+                    <div id="step4" class="pipe-step"><div class="s-icon"><i class="fa-solid fa-circle"></i></div><span>Extracting key phrases & themes…</span></div>
+                    <div id="step5" class="pipe-step"><div class="s-icon"><i class="fa-solid fa-circle"></i></div><span>Assessing mental health risk levels…</span></div>
+                    <div id="step6" class="pipe-step"><div class="s-icon"><i class="fa-solid fa-circle"></i></div><span>Generating workplace insights…</span></div>
+                    <div id="step7" class="pipe-step"><div class="s-icon"><i class="fa-solid fa-circle"></i></div><span>Creating executive summary…</span></div>
+                </div>
+                <div class="pipe-box">
+                    <div class="pipe-title"><i class="fa-solid fa-chart-column"></i> Real-time Statistics</div>
+                    <div class="stats-grid">
+                        <div class="stat-card pos"><div class="stat-icon"><i class="fa-solid fa-face-smile"></i></div><div id="positiveCount" class="stat-val">0</div><div class="stat-lbl">Positive</div></div>
+                        <div class="stat-card neg"><div class="stat-icon"><i class="fa-solid fa-face-frown"></i></div><div id="negativeCount" class="stat-val">0</div><div class="stat-lbl">Negative</div></div>
+                        <div class="stat-card low"><div class="stat-icon"><i class="fa-solid fa-shield-halved"></i></div><div id="lowRiskCount" class="stat-val">0</div><div class="stat-lbl">Low Risk</div></div>
+                        <div class="stat-card high"><div class="stat-icon"><i class="fa-solid fa-triangle-exclamation"></i></div><div id="highRiskCount" class="stat-val">0</div><div class="stat-lbl">High Risk</div></div>
+                    </div>
+                </div>
             </div>
 
-            <div class="nav-actions">
-                <button type="button" class="nav-btn" onclick="goBack()">
-                    <i class="fas fa-arrow-left"></i>
-                    <span>Back to Analysis</span>
-                </button>
+            <!-- Controls -->
+            <div class="ctrl-foot">
+                <div id="currentStatus" class="ctrl-status"><i class="fa-solid fa-circle-info"></i> Ready to start batch processing…</div>
+                <div class="ctrl-btns">
+                    <button id="startButton" type="button" class="btn-go green" onclick="startBatchAnalysis()"><i class="fa-solid fa-play"></i> START</button>
+                    <button id="stopButton" type="button" class="btn-go red d-none" onclick="stopBatchAnalysis()"><i class="fa-solid fa-stop"></i> STOP</button>
+                </div>
             </div>
         </div>
-    </nav>
 
-    <!-- Hero Section -->
-    <section class="hero-nexgen">
-        <div class="container-fluid">
-            <div class="hero-content">
-                <div class="hero-badge">
-                    <span class="badge-dot"></span>
-                    <span>AI BATCH PROCESSING SYSTEM</span>
-                </div>
-                <h1 class="hero-title">
-                    Batch AI
-                    <span class="title-gradient">Analysis</span>
-                    Processing
-                </h1>
-                <p class="hero-description">
-                    Processing @ViewBag.TotalRequests mental health survey responses using advanced neural networks
-                </p>
+        <!-- Results (hidden until done) -->
+        <div id="resultsSection" class="nex-card d-none" style="overflow:hidden">
+            <div class="results-head">
+                <div class="r-icon"><i class="fa-solid fa-circle-check"></i></div>
+                <h3>Batch Analysis Complete</h3>
             </div>
-        </div>
-    </section>
-
-    <!-- Main Content -->
-    <main class="main-content">
-        <div class="container-fluid">
-            <!-- Processing Status Card -->
-            <div class="processing-card">
-                <div class="processing-header">
-                    <div class="header-content">
-                        <div class="header-info">
-                            <h2 class="header-title">
-                                <i class="fas fa-cogs"></i>
-                                AI Analysis in Progress
-                            </h2>
-                            <p class="header-subtitle">Analyzing responses using Azure Language Service and OpenAI</p>
-                        </div>
-                        <div id="statusBadge" class="status-badge">
-                            <i class="fas fa-clock"></i> INITIALIZING...
-                        </div>
-                    </div>
+            <div class="results-body">
+                <div class="results-stats">
+                    <div class="r-stat"><div class="r-stat-icon blue"><i class="fa-solid fa-check-double"></i></div><div id="totalProcessed" class="r-stat-val">0</div><div class="r-stat-lbl">Processed</div></div>
+                    <div class="r-stat"><div class="r-stat-icon red"><i class="fa-solid fa-triangle-exclamation"></i></div><div id="finalHighRisk" class="r-stat-val">0</div><div class="r-stat-lbl">High Risk</div></div>
+                    <div class="r-stat"><div class="r-stat-icon green"><i class="fa-solid fa-face-smile"></i></div><div id="finalPositive" class="r-stat-val">0</div><div class="r-stat-lbl">Positive</div></div>
+                    <div class="r-stat"><div class="r-stat-icon cyan"><i class="fa-solid fa-clock"></i></div><div id="processingTime" class="r-stat-val">0s</div><div class="r-stat-lbl">Duration</div></div>
                 </div>
-
-                <div class="progress-section">
-                    <div class="progress-header">
-                        <div class="progress-title">Analysis Progress</div>
-                        <div id="progressPercentage" class="progress-percentage">0%</div>
-                    </div>
-
-                    <div class="progress-container">
-                        <div class="progress-bar-nexgen">
-                            <div id="progressBar" class="progress-fill animated" style="width: 0%">
-                                <div id="progressText" class="progress-text">Starting...</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="progress-info">
-                        <div class="progress-count">
-                            <span id="processedCount">0</span> of @ViewBag.TotalRequests responses processed
-                        </div>
-                        <div id="estimatedTime" class="estimated-time">
-                            Estimated time: Calculating...
-                        </div>
-                    </div>
-                </div>
-
-                <div class="pipeline-section">
-                    <div class="pipeline-container">
-                        <h3 class="pipeline-title">
-                            <i class="fas fa-list-check"></i>
-                            Processing Pipeline
-                        </h3>
-                        <ul class="pipeline-steps">
-                            <li id="step1" class="pipeline-step">
-                                <div class="step-icon">
-                                    <i class="fas fa-circle-notch"></i>
-                                </div>
-                                <span>Connecting to Azure AI services...</span>
-                            </li>
-                            <li id="step2" class="pipeline-step">
-                                <div class="step-icon">
-                                    <i class="fas fa-circle"></i>
-                                </div>
-                                <span>Anonymizing personal information...</span>
-                            </li>
-                            <li id="step3" class="pipeline-step">
-                                <div class="step-icon">
-                                    <i class="fas fa-circle"></i>
-                                </div>
-                                <span>Running sentiment analysis...</span>
-                            </li>
-                            <li id="step4" class="pipeline-step">
-                                <div class="step-icon">
-                                    <i class="fas fa-circle"></i>
-                                </div>
-                                <span>Extracting key phrases and themes...</span>
-                            </li>
-                            <li id="step5" class="pipeline-step">
-                                <div class="step-icon">
-                                    <i class="fas fa-circle"></i>
-                                </div>
-                                <span>Assessing mental health risk levels...</span>
-                            </li>
-                            <li id="step6" class="pipeline-step">
-                                <div class="step-icon">
-                                    <i class="fas fa-circle"></i>
-                                </div>
-                                <span>Generating workplace insights...</span>
-                            </li>
-                            <li id="step7" class="pipeline-step">
-                                <div class="step-icon">
-                                    <i class="fas fa-circle"></i>
-                                </div>
-                                <span>Creating executive summary...</span>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <div class="pipeline-container">
-                        <h3 class="pipeline-title">
-                            <i class="fas fa-chart-bar"></i>
-                            Real-time Statistics
-                        </h3>
-                        <div class="stats-grid">
-                            <div class="stat-card positive">
-                                <div class="stat-icon">
-                                    <i class="fas fa-smile"></i>
-                                </div>
-                                <div id="positiveCount" class="stat-value">0</div>
-                                <div class="stat-label">Positive Responses</div>
-                            </div>
-                            <div class="stat-card negative">
-                                <div class="stat-icon">
-                                    <i class="fas fa-frown"></i>
-                                </div>
-                                <div id="negativeCount" class="stat-value">0</div>
-                                <div class="stat-label">Negative Responses</div>
-                            </div>
-                            <div class="stat-card low-risk">
-                                <div class="stat-icon">
-                                    <i class="fas fa-shield-alt"></i>
-                                </div>
-                                <div id="lowRiskCount" class="stat-value">0</div>
-                                <div class="stat-label">Low Risk</div>
-                            </div>
-                            <div class="stat-card high-risk">
-                                <div class="stat-icon">
-                                    <i class="fas fa-exclamation-triangle"></i>
-                                </div>
-                                <div id="highRiskCount" class="stat-value">0</div>
-                                <div class="stat-label">High Risk</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="control-footer">
-                    <div id="currentStatus" class="current-status">
-                        <i class="fas fa-info-circle"></i>
-                        Ready to start batch processing of mental health responses...
-                    </div>
-                    <div class="control-buttons">
-                        <button id="startButton" type="button" class="btn-nexgen success" onclick="startBatchAnalysis()">
-                            <i class="fas fa-play"></i>START ANALYSIS
-                        </button>
-                        <button id="stopButton" type="button" class="btn-nexgen danger d-none" onclick="stopBatchAnalysis()">
-                            <i class="fas fa-stop"></i>STOP PROCESSING
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Results Section (Hidden until complete) -->
-            <div id="resultsSection" class="results-section d-none">
-                <div class="results-header">
-                    <h2 class="results-title">
-                        <i class="fas fa-check-circle"></i>
-                        Batch Analysis Complete
-                    </h2>
-                </div>
-                <div class="results-body">
-                    <div class="results-stats">
-                        <div class="result-stat processed">
-                            <div class="result-icon">
-                                <i class="fas fa-check-double"></i>
-                            </div>
-                            <div id="totalProcessed" class="result-value">0</div>
-                            <div class="result-label">Responses Processed</div>
-                        </div>
-                        <div class="result-stat high-risk">
-                            <div class="result-icon">
-                                <i class="fas fa-exclamation-triangle"></i>
-                            </div>
-                            <div id="finalHighRisk" class="result-value">0</div>
-                            <div class="result-label">High Risk Cases Found</div>
-                        </div>
-                        <div class="result-stat positive">
-                            <div class="result-icon">
-                                <i class="fas fa-smile"></i>
-                            </div>
-                            <div id="finalPositive" class="result-value">0</div>
-                            <div class="result-label">Positive Responses</div>
-                        </div>
-                        <div class="result-stat time">
-                            <div class="result-icon">
-                                <i class="fas fa-clock"></i>
-                            </div>
-                            <div id="processingTime" class="result-value">0s</div>
-                            <div class="result-label">Total Processing Time</div>
-                        </div>
-                    </div>
-
-                    <div class="completion-alert">
-                        <h3 class="alert-title">
-                            <i class="fas fa-brain"></i>
-                            Analysis Successfully Completed!
-                        </h3>
-                        <p class="alert-description">
-                            Your mental health survey responses have been analyzed using advanced AI.
-                            The system has identified sentiment patterns, risk levels, and workplace insights
-                            to help NVKN provide targeted mental health interventions.
-                        </p>
-                        <div class="result-actions">
-                            <a id="viewResultsButton" href="@Url.Action("AnalyzeQuestionnaire", new { id = ViewBag.QuestionnaireId })" class="btn-nexgen primary">
-                                <i class="fas fa-chart-line"></i> VIEW COMPLETE ANALYSIS
-                            </a>
-                            <a id="viewHighRiskButton" href="@Url.Action("HighRiskResponses", new { id = ViewBag.QuestionnaireId })" class="btn-nexgen danger d-none">
-                                <i class="fas fa-shield-alt"></i> VIEW HIGH RISK CASES
-                            </a>
-                            <a id="generateReportButton" href="@Url.Action("GenerateReport", new { id = ViewBag.QuestionnaireId })" class="btn-nexgen success">
-                                <i class="fas fa-file-medical"></i> GENERATE REPORT
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Processing Log -->
-            <div class="log-section">
-                <div class="log-header">
-                    <h3 class="log-title">
-                        <i class="fas fa-terminal"></i>
-                        Processing Log
-                    </h3>
-                    <button type="button" class="log-toggle" onclick="toggleLog()">
-                        <i class="fas fa-chevron-down"></i> SHOW DETAILS
-                    </button>
-                </div>
-                <div id="logContainer" class="log-container d-none">
-                    <div id="processingLog">
-                        <div class="log-entry info">
-                            [<span class="timestamp"></span>] Batch analysis system initialized and ready...
-                        </div>
+                <div class="done-alert">
+                    <h4><i class="fa-solid fa-sparkles"></i> Analysis Successfully Completed</h4>
+                    <p>All responses have been analyzed through the Claude AI pipeline — sentiment patterns, risk levels, and workplace insights are ready for review.</p>
+                    <div class="done-actions">
+                        <a href="@Url.Action("AnalyzeQuestionnaire", new { id = ViewBag.QuestionnaireId })" class="btn-go pri"><i class="fa-solid fa-chart-line"></i> VIEW ANALYSIS</a>
+                        <a id="viewHighRiskButton" href="@Url.Action("HighRiskResponses", new { id = ViewBag.QuestionnaireId })" class="btn-go red d-none"><i class="fa-solid fa-shield-halved"></i> HIGH RISK CASES</a>
+                        <a href="@Url.Action("GenerateReport", new { id = ViewBag.QuestionnaireId })" class="btn-go cyan"><i class="fa-solid fa-file-lines"></i> GENERATE REPORT</a>
                     </div>
                 </div>
             </div>
         </div>
-    </main>
-</div>
+
+        <!-- Log -->
+        <div class="nex-card">
+            <div class="log-head">
+                <div class="log-title"><i class="fa-solid fa-terminal"></i> Processing Log</div>
+                <button type="button" class="log-toggle" onclick="toggleLog()"><i class="fa-solid fa-chevron-down"></i> SHOW</button>
+            </div>
+            <div id="logContainer" class="log-body d-none">
+                <div id="processingLog">
+                    <div class="log-entry info">[<span class="ts"></span>] Batch analysis system initialized…</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 
 @section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        let batchProcessing = false;
-        let startTime = null;
-        let processedCount = 0;
-        let totalRequests = @ViewBag.TotalRequests;
-        let questionnaireId = @ViewBag.QuestionnaireId;
+    let batchProcessing = false;
+    let startTime = null;
+    let processedCount = 0;
+    let totalRequests = @ViewBag.TotalRequests;
+    let questionnaireId = @ViewBag.QuestionnaireId;
 
-        // Start batch analysis
-        function startBatchAnalysis() {
-            if (batchProcessing) return;
+    function startBatchAnalysis() {
+        if (batchProcessing) return;
+        batchProcessing = true;
+        startTime = new Date();
+        processedCount = 0;
 
-            batchProcessing = true;
-            startTime = new Date();
-            processedCount = 0;
+        document.getElementById('startButton').classList.add('d-none');
+        document.getElementById('stopButton').classList.remove('d-none');
+        setStatus('processing', 'fa-spinner fa-spin', 'PROCESSING');
+        animateSteps();
+        addLog('Starting batch analysis of ' + totalRequests + ' responses…', 'info');
+        setCtrl('Connecting to Claude AI…');
+        processBatch();
+    }
 
-            // Update UI
-            document.getElementById('startButton').classList.add('d-none');
-            document.getElementById('stopButton').classList.remove('d-none');
-            updateStatusBadge('processing', 'fa-spinner fa-spin', 'PROCESSING...');
+    function stopBatchAnalysis() {
+        batchProcessing = false;
+        document.getElementById('startButton').classList.remove('d-none');
+        document.getElementById('stopButton').classList.add('d-none');
+        setStatus('init', 'fa-pause', 'STOPPED');
+        setCtrl('Processing stopped by user');
+        addLog('Batch processing stopped by user', 'warning');
+    }
 
-            // Start processing steps animation
-            animateProcessingSteps();
+    function processBatch() {
+        if (!batchProcessing) return;
+        addLog('Processing responses through Claude AI pipeline…', 'info');
+        setCtrl('Analyzing responses…');
 
-            // Add log entry
-            addLogEntry('Starting batch analysis of ' + totalRequests + ' mental health responses...', 'info');
-            updateCurrentStatus('Initializing Azure AI services...');
-
-            // Start the actual batch processing
-            processBatch();
-        }
-
-        // Stop batch analysis
-        function stopBatchAnalysis() {
-            batchProcessing = false;
-
-            document.getElementById('startButton').classList.remove('d-none');
-            document.getElementById('stopButton').classList.add('d-none');
-            updateStatusBadge('', 'fa-pause', 'STOPPED');
-
-            updateCurrentStatus('Batch processing stopped by user');
-            addLogEntry('Batch processing stopped by user', 'warning');
-        }
-
-        // Process batch via AJAX
-        function processBatch() {
-            if (!batchProcessing) return;
-
-            addLogEntry('Connecting to Azure AI services...', 'info');
-            updateCurrentStatus('Processing responses through AI pipeline...');
-
-            $.post('@Url.Action("ProcessBatchAnalysis")', { questionnaireId: questionnaireId })
-                .done(function(data) {
-                    if (data.success && batchProcessing) {
-                        addLogEntry(`Successfully processed ${data.processedCount} responses`, 'success');
-
-                        if (data.highRiskCount > 0) {
-                            addLogEntry(`🚨 ALERT: Found ${data.highRiskCount} high-risk cases requiring immediate attention`, 'warning');
-                        }
-
-                        completeBatchProcessing(data);
-                    } else {
-                        handleProcessingError(data.message || 'Unknown error occurred');
-                    }
-                })
-                .fail(function(xhr, status, error) {
-                    handleProcessingError('Network error: ' + error);
-                });
-        }
-
-        // Simulate progress for better UX (since processing happens server-side)
-        function simulateProgress(finalCount, highRiskCount) {
-            let currentProgress = 0;
-            const progressInterval = setInterval(() => {
-                if (!batchProcessing || currentProgress >= 95) {
-                    clearInterval(progressInterval);
-                    return;
+        $.post('@Url.Action("ProcessBatchAnalysis")', { questionnaireId: questionnaireId })
+            .done(function(data) {
+                if (data.success && batchProcessing) {
+                    addLog('Successfully processed ' + data.processedCount + ' responses', 'success');
+                    if (data.highRiskCount > 0)
+                        addLog('ALERT: Found ' + data.highRiskCount + ' high-risk cases', 'warning');
+                    completeBatch(data);
+                } else {
+                    handleError(data.message || 'Unknown error');
                 }
-
-                currentProgress += Math.random() * 12 + 3; // Random increment between 3-15
-                currentProgress = Math.min(currentProgress, 95); // Stop at 95% until actual completion
-
-                updateProgress(currentProgress);
-
-                // Update simulated stats
-                const simulatedProcessed = Math.floor((currentProgress / 100) * totalRequests);
-                document.getElementById('processedCount').textContent = simulatedProcessed;
-
-                // Simulate finding results
-                if (currentProgress > 50) {
-                    const simPositive = Math.floor(simulatedProcessed * 0.6);
-                    const simNegative = Math.floor(simulatedProcessed * 0.3);
-                    const simLowRisk = Math.floor(simulatedProcessed * 0.7);
-                    const simHighRisk = Math.floor(simulatedProcessed * 0.1);
-
-                    document.getElementById('positiveCount').textContent = simPositive;
-                    document.getElementById('negativeCount').textContent = simNegative;
-                    document.getElementById('lowRiskCount').textContent = simLowRisk;
-                    document.getElementById('highRiskCount').textContent = simHighRisk;
-                }
-
-                // Update estimated time
-                const elapsed = (new Date() - startTime) / 1000;
-                const estimated = Math.max(0, (elapsed / currentProgress) * (100 - currentProgress));
-                document.getElementById('estimatedTime').textContent = `Estimated time: ${Math.round(estimated)}s remaining`;
-
-            }, 800 + Math.random() * 1500); // Random interval between 0.8-2.3 seconds
-        }
-
-        // Complete batch processing
-        function completeBatchProcessing(data) {
-            batchProcessing = false;
-
-            // Final progress update
-            updateProgress(100);
-            document.getElementById('processedCount').textContent = data.processedCount;
-            document.getElementById('estimatedTime').textContent = 'Analysis Complete!';
-
-            // Update final stats
-            document.getElementById('totalProcessed').textContent = data.processedCount;
-            document.getElementById('finalHighRisk').textContent = data.highRiskCount;
-
-            // Calculate processing time
-            const processingTime = Math.round((new Date() - startTime) / 1000);
-            document.getElementById('processingTime').textContent = processingTime + 's';
-
-            // Update status
-            updateStatusBadge('success', 'fa-check', 'COMPLETE');
-
-            // Complete all steps
-            completeAllSteps();
-
-            // Show results section
-            document.getElementById('resultsSection').classList.remove('d-none');
-
-            // Show high risk button if needed
-            if (data.highRiskCount > 0) {
-                document.getElementById('viewHighRiskButton').classList.remove('d-none');
-            }
-
-            // Update UI
-            document.getElementById('stopButton').classList.add('d-none');
-            updateCurrentStatus(`✅ Successfully analyzed ${data.processedCount} mental health responses!`);
-
-            addLogEntry(`🎉 Batch processing completed successfully in ${processingTime} seconds`, 'success');
-
-            // Auto-scroll to results
-            setTimeout(() => {
-                document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
-            }, 1000);
-        }
-
-        // Handle processing errors
-        function handleProcessingError(message) {
-            batchProcessing = false;
-
-            updateStatusBadge('error', 'fa-times', 'ERROR');
-
-            document.getElementById('startButton').classList.remove('d-none');
-            document.getElementById('stopButton').classList.add('d-none');
-
-            updateCurrentStatus('❌ Error: ' + message);
-            addLogEntry('❌ Error: ' + message, 'error');
-
-            Swal.fire({
-                title: 'Processing Error',
-                text: message,
-                icon: 'error',
-                confirmButtonText: 'OK',
-                customClass: {
-                    popup: 'swal-nexgen',
-                    title: 'swal-title-nexgen'
-                }
+            })
+            .fail(function(xhr, status, error) {
+                handleError('Network error: ' + error);
             });
-        }
+    }
 
-        // Update progress bar
-        function updateProgress(percentage) {
-            const progressBar = document.getElementById('progressBar');
-            const progressPercentage = document.getElementById('progressPercentage');
-            const progressText = document.getElementById('progressText');
+    function simulateProgress() {
+        let cur = 0;
+        const iv = setInterval(() => {
+            if (!batchProcessing || cur >= 95) { clearInterval(iv); return; }
+            cur += Math.random() * 12 + 3;
+            cur = Math.min(cur, 95);
+            updateProgress(cur);
 
-            progressBar.style.width = percentage + '%';
-            progressPercentage.textContent = Math.round(percentage) + '%';
+            const sim = Math.floor((cur / 100) * totalRequests);
+            document.getElementById('processedCount').textContent = sim;
 
-            if (percentage >= 100) {
-                progressBar.classList.remove('animated');
-                progressBar.classList.add('complete');
-                progressText.textContent = 'Complete!';
-            } else {
-                progressText.textContent = 'Processing...';
+            if (cur > 40) {
+                document.getElementById('positiveCount').textContent = Math.floor(sim * 0.6);
+                document.getElementById('negativeCount').textContent = Math.floor(sim * 0.3);
+                document.getElementById('lowRiskCount').textContent = Math.floor(sim * 0.7);
+                document.getElementById('highRiskCount').textContent = Math.floor(sim * 0.1);
             }
-        }
 
-        // Update status badge
-        function updateStatusBadge(type, icon, text) {
-            const badge = document.getElementById('statusBadge');
+            const elapsed = (new Date() - startTime) / 1000;
+            const eta = Math.max(0, (elapsed / cur) * (100 - cur));
+            document.getElementById('estimatedTime').textContent = 'Estimated: ' + Math.round(eta) + 's remaining';
+        }, 900 + Math.random() * 1400);
+    }
 
-            badge.className = `status-badge ${type}`;
-            badge.innerHTML = `<i class="fas ${icon}"></i> ${text}`;
-        }
+    function completeBatch(data) {
+        batchProcessing = false;
+        updateProgress(100);
+        document.getElementById('processedCount').textContent = data.processedCount;
+        document.getElementById('estimatedTime').textContent = 'Complete!';
+        document.getElementById('totalProcessed').textContent = data.processedCount;
+        document.getElementById('finalHighRisk').textContent = data.highRiskCount;
 
-        // Animate processing steps
-        function animateProcessingSteps() {
-            const steps = ['step1', 'step2', 'step3', 'step4', 'step5', 'step6', 'step7'];
-            let currentStep = 0;
+        const t = Math.round((new Date() - startTime) / 1000);
+        document.getElementById('processingTime').textContent = t + 's';
 
-            const stepInterval = setInterval(() => {
-                if (!batchProcessing || currentStep >= steps.length) {
-                    clearInterval(stepInterval);
-                    return;
-                }
+        setStatus('success', 'fa-check', 'COMPLETE');
+        completeAllSteps();
 
-                // Complete previous step
-                if (currentStep > 0) {
-                    const prevStep = document.getElementById(steps[currentStep - 1]);
-                    prevStep.querySelector('.step-icon i').className = 'fas fa-check-circle';
-                    prevStep.classList.remove('active');
-                    prevStep.classList.add('completed');
-                }
+        document.getElementById('resultsSection').classList.remove('d-none');
+        if (data.highRiskCount > 0) document.getElementById('viewHighRiskButton').classList.remove('d-none');
+        document.getElementById('stopButton').classList.add('d-none');
+        setCtrl('Successfully analyzed ' + data.processedCount + ' responses!');
+        addLog('Batch completed in ' + t + 's', 'success');
 
-                // Start current step
-                if (currentStep < steps.length) {
-                    const nextStep = document.getElementById(steps[currentStep]);
-                    nextStep.querySelector('.step-icon i').className = 'fas fa-circle-notch';
-                    nextStep.classList.add('active');
-                }
+        setTimeout(() => {
+            document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+        }, 800);
+    }
 
-                currentStep++;
-            }, 1500 + Math.random() * 2000); // Random interval between 1.5-3.5 seconds
-        }
+    function handleError(msg) {
+        batchProcessing = false;
+        setStatus('error', 'fa-xmark', 'ERROR');
+        document.getElementById('startButton').classList.remove('d-none');
+        document.getElementById('stopButton').classList.add('d-none');
+        setCtrl('Error: ' + msg);
+        addLog('Error: ' + msg, 'error');
+        alert('Processing Error: ' + msg);
+    }
 
-        // Complete all steps
-        function completeAllSteps() {
-            const steps = ['step1', 'step2', 'step3', 'step4', 'step5', 'step6', 'step7'];
-            steps.forEach(stepId => {
-                const step = document.getElementById(stepId);
-                step.querySelector('.step-icon i').className = 'fas fa-check-circle';
-                step.classList.remove('active');
-                step.classList.add('completed');
-            });
-        }
+    function updateProgress(pct) {
+        const bar = document.getElementById('progressBar');
+        const txt = document.getElementById('progressText');
+        bar.style.width = pct + '%';
+        document.getElementById('progressPercentage').textContent = Math.round(pct) + '%';
+        if (pct >= 100) { bar.classList.remove('animated'); bar.classList.add('complete'); txt.textContent = 'Complete!'; }
+        else { txt.textContent = 'Processing…'; }
+    }
 
-        // Update current status message
-        function updateCurrentStatus(message) {
-            document.getElementById('currentStatus').innerHTML = '<i class="fas fa-info-circle"></i>' + message;
-        }
+    function setStatus(cls, icon, text) {
+        const b = document.getElementById('statusBadge');
+        b.className = 'status-chip ' + cls;
+        b.innerHTML = '<i class="fa-solid ' + icon + '"></i> ' + text;
+    }
 
-        // Add log entry
-        function addLogEntry(message, type = 'info') {
-            const log = document.getElementById('processingLog');
-            const timestamp = new Date().toLocaleTimeString();
+    function setCtrl(msg) {
+        document.getElementById('currentStatus').innerHTML = '<i class="fa-solid fa-circle-info"></i> ' + msg;
+    }
 
-            const entry = document.createElement('div');
-            entry.className = 'log-entry ' + type;
-            entry.innerHTML = `[<span class="timestamp">${timestamp}</span>] ${message}`;
+    const stepIds = ['step1','step2','step3','step4','step5','step6','step7'];
 
-            log.appendChild(entry);
-
-            // Auto-scroll to bottom
-            const container = document.getElementById('logContainer');
-            if (!container.classList.contains('d-none')) {
-                container.scrollTop = container.scrollHeight;
+    function animateSteps() {
+        let cur = 0;
+        const iv = setInterval(() => {
+            if (!batchProcessing || cur >= stepIds.length) { clearInterval(iv); return; }
+            if (cur > 0) {
+                const prev = document.getElementById(stepIds[cur - 1]);
+                prev.querySelector('.s-icon i').className = 'fa-solid fa-circle-check';
+                prev.classList.remove('active'); prev.classList.add('done');
             }
-        }
+            const step = document.getElementById(stepIds[cur]);
+            step.querySelector('.s-icon i').className = 'fa-solid fa-circle-notch';
+            step.classList.add('active');
+            cur++;
+        }, 1500 + Math.random() * 2000);
+    }
 
-        // Toggle log visibility
-        function toggleLog() {
-            const logContainer = document.getElementById('logContainer');
-            const toggleButton = event.target.closest('button');
+    function completeAllSteps() {
+        stepIds.forEach(id => {
+            const s = document.getElementById(id);
+            s.querySelector('.s-icon i').className = 'fa-solid fa-circle-check';
+            s.classList.remove('active'); s.classList.add('done');
+        });
+    }
 
-            logContainer.classList.toggle('d-none');
+    function addLog(msg, type) {
+        const log = document.getElementById('processingLog');
+        const ts = new Date().toLocaleTimeString();
+        const el = document.createElement('div');
+        el.className = 'log-entry ' + type;
+        el.innerHTML = '[<span class="ts">' + ts + '</span>] ' + msg;
+        log.appendChild(el);
+        const c = document.getElementById('logContainer');
+        if (!c.classList.contains('d-none')) c.scrollTop = c.scrollHeight;
+    }
 
-            if (logContainer.classList.contains('d-none')) {
-                toggleButton.innerHTML = '<i class="fas fa-chevron-down"></i> SHOW DETAILS';
-            } else {
-                toggleButton.innerHTML = '<i class="fas fa-chevron-up"></i> HIDE DETAILS';
-                logContainer.scrollTop = logContainer.scrollHeight;
-            }
-        }
+    function toggleLog() {
+        const c = document.getElementById('logContainer');
+        const btn = document.querySelector('.log-toggle');
+        c.classList.toggle('d-none');
+        btn.innerHTML = c.classList.contains('d-none')
+            ? '<i class="fa-solid fa-chevron-down"></i> SHOW'
+            : '<i class="fa-solid fa-chevron-up"></i> HIDE';
+        if (!c.classList.contains('d-none')) c.scrollTop = c.scrollHeight;
+    }
 
-        // Go back to analysis
-        function goBack() {
-            if (batchProcessing) {
-                Swal.fire({
-                    title: 'Processing in Progress',
-                    text: 'Batch analysis is currently running. Do you want to stop and go back?',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: 'Stop and Go Back',
-                    cancelButtonText: 'Continue Processing',
-                    customClass: {
-                        popup: 'swal-nexgen',
-                        title: 'swal-title-nexgen'
-                    }
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        stopBatchAnalysis();
-                        window.location.href = '@Url.Action("AnalyzeQuestionnaire", new { id = ViewBag.QuestionnaireId })';
-                    }
-                });
-            } else {
+    function goBack() {
+        if (batchProcessing) {
+            if (confirm('Analysis is running. Stop and go back?')) {
+                stopBatchAnalysis();
                 window.location.href = '@Url.Action("AnalyzeQuestionnaire", new { id = ViewBag.QuestionnaireId })';
             }
+        } else {
+            window.location.href = '@Url.Action("AnalyzeQuestionnaire", new { id = ViewBag.QuestionnaireId })';
         }
+    }
 
-        // Custom SweetAlert styling
-        const swalStyle = document.createElement('style');
-        swalStyle.textContent = `
-            .swal-nexgen {
-                background: rgba(15, 23, 42, 0.95) !important;
-                backdrop-filter: blur(20px) !important;
-                border: 1px solid rgba(34, 211, 238, 0.3) !important;
-                border-radius: 1rem !important;
-                color: #e2e8f0 !important;
-            }
-            .swal-title-nexgen {
-                color: #22d3ee !important;
-                font-weight: 700 !important;
-                letter-spacing: 0.05em !important;
-            }
-        `;
-        document.head.appendChild(swalStyle);
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.ts').forEach(el => { el.textContent = new Date().toLocaleTimeString(); });
+        if (totalRequests > 0) {
+            setTimeout(() => {
+                addLog('Auto-starting batch analysis…', 'info');
+                startBatchAnalysis();
+                simulateProgress();
+            }, 800);
+        }
+    });
 
-        // Initialize timestamps
-        document.addEventListener('DOMContentLoaded', function() {
-            document.querySelectorAll('.timestamp').forEach(el => {
-                el.textContent = new Date().toLocaleTimeString();
-            });
-
-            // Start processing automatically if we have responses
-            if (totalRequests > 0) {
-                setTimeout(() => {
-                    addLogEntry('Auto-starting batch analysis...', 'info');
-                    startBatchAnalysis();
-                    simulateProgress(totalRequests, 0); // Start UI simulation
-                }, 1000);
-            }
-        });
-
-        // Prevent page refresh during processing
-        window.addEventListener('beforeunload', function(e) {
-            if (batchProcessing) {
-                e.preventDefault();
-                e.returnValue = 'Mental health analysis is in progress. Leaving now may interrupt the process.';
-            }
-        });
+    window.addEventListener('beforeunload', function (e) {
+        if (batchProcessing) { e.preventDefault(); e.returnValue = 'Analysis is in progress.'; }
+    });
     </script>
 }

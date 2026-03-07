@@ -2,1887 +2,469 @@
 @model Services.AIViewModel.QuestionnaireAnalysisOverview
 
 @{
-    ViewData["Title"] = $"Executive Dashboard - {Model.QuestionnaireTitle}";
+    ViewData["Title"] = $"Executive Dashboard — {Model.QuestionnaireTitle}";
 }
 
 @section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <style>
         @@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
 
-        :root {
-            --neon-blue: #60a5fa;
-            --neon-purple: #c084fc;
-            --neon-green: #34d399;
-            --neon-pink: #f472b6;
-            --neon-yellow: #fbbf24;
-            --neon-red: #f87171;
-            --neon-cyan: #22d3ee;
-            --neon-orange: #fb923c;
-            
-            --dark-900: #0f172a;
-            --dark-800: #1e293b;
-            --dark-700: #334155;
-            --dark-600: #475569;
-            --dark-500: #64748b;
-            --dark-400: #94a3b8;
-            --dark-300: #cbd5e1;
-            --dark-200: #e2e8f0;
-            --dark-100: #f1f5f9;
-            
-            --glass-bg: rgba(255, 255, 255, 0.05);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-            
-            --font-main: 'Space Grotesk', sans-serif;
-            --font-mono: 'JetBrains Mono', monospace;
-            
-            --success-gradient: linear-gradient(135deg, var(--neon-green), var(--neon-cyan));
-            --warning-gradient: linear-gradient(135deg, var(--neon-yellow), var(--neon-orange));
-            --danger-gradient: linear-gradient(135deg, var(--neon-red), #dc2626);
-            --info-gradient: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
-            --primary-gradient: linear-gradient(135deg, var(--neon-blue), var(--neon-cyan));
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: var(--font-main);
-            background: var(--dark-900);
-            color: #e2e8f0;
-            overflow-x: hidden;
-        }
-
-        .nexgen-exec-dashboard {
-            min-height: 100vh;
-            position: relative;
-        }
-
-        /* Dynamic Background */
-        .bg-pattern {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: -1;
-            overflow: hidden;
-        }
-
-        .grid-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                linear-gradient(rgba(96, 165, 250, 0.1) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(96, 165, 250, 0.1) 1px, transparent 1px);
-            background-size: 60px 60px;
-            animation: gridMove 20s linear infinite;
-        }
-
-        .gradient-mesh {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                radial-gradient(circle at 20% 20%, rgba(96, 165, 250, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 80% 60%, rgba(192, 132, 252, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 40% 80%, rgba(52, 211, 153, 0.15) 0%, transparent 50%);
-            animation: meshShift 15s ease-in-out infinite;
-        }
-
-        /* Top Navigation */
-        .top-nav {
-            position: relative;
-            z-index: 100;
-            padding: 1rem 0;
-            background: rgba(15, 23, 42, 0.8);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(96, 165, 250, 0.2);
-        }
-
-        .nav-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 2rem;
-            display: flex;
-            align-items: center;
-            gap: 3rem;
-        }
-
-        .nav-brand {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .brand-icon {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.2rem;
-        }
-
-        .brand-name {
-            font-family: var(--font-mono);
-            font-weight: 700;
-            font-size: 1.1rem;
-            letter-spacing: 0.1em;
-            color: #e2e8f0;
-        }
-
-        .brand-version {
-            font-family: var(--font-mono);
-            font-size: 0.7rem;
-            color: var(--neon-blue);
-            background: rgba(96, 165, 250, 0.1);
-            padding: 0.2rem 0.5rem;
-            border-radius: 4px;
-            border: 1px solid rgba(96, 165, 250, 0.3);
-        }
-
-        .nav-center {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-        }
-
-        .breadcrumb-nexgen {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            font-family: var(--font-mono);
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .crumb {
-            color: var(--dark-400);
-            text-decoration: none;
-            transition: color 0.2s ease;
-        }
-
-        .crumb:hover {
-            color: var(--neon-blue);
-        }
-
-        .crumb.active {
-            color: var(--neon-blue);
-        }
-
-        .breadcrumb-nexgen i {
-            color: var(--dark-500);
-            font-size: 0.6rem;
-        }
-
-        .nav-actions {
-            display: flex;
-            gap: 1rem;
-        }
-
-        .nav-btn {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.6rem 1.2rem;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 8px;
-            color: #e2e8f0;
-            font-size: 0.8rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            backdrop-filter: blur(10px);
-            text-decoration: none;
-        }
-
-        .nav-btn:hover {
-            background: rgba(96, 165, 250, 0.1);
-            border-color: rgba(96, 165, 250, 0.3);
-            color: var(--neon-blue);
-        }
-
-        /* Hero Section */
-        .hero-nexgen {
-            padding: 4rem 0 2rem;
-            text-align: center;
-            position: relative;
-            z-index: 10;
-        }
-
-        .hero-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.6rem;
-            padding: 0.5rem 1.2rem;
-            background: rgba(96, 165, 250, 0.1);
-            border: 1px solid rgba(96, 165, 250, 0.3);
-            border-radius: 50px;
-            margin-bottom: 2rem;
-            font-family: var(--font-mono);
-            font-size: 0.7rem;
-            font-weight: 600;
-            letter-spacing: 0.1em;
-            color: var(--neon-blue);
-        }
-
-        .badge-dot {
-            width: 6px;
-            height: 6px;
-            background: var(--neon-blue);
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-
-        .hero-title {
-            font-size: 3.5rem;
-            font-weight: 700;
-            line-height: 1.1;
-            margin-bottom: 1.5rem;
-            color: #ffffff;
-        }
-
-        .title-gradient {
-            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple), var(--neon-cyan));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .hero-description {
-            font-size: 1.1rem;
-            color: var(--dark-300);
-            max-width: 600px;
-            margin: 0 auto 2rem;
-            line-height: 1.6;
-        }
-
-        /* KPI Cards */
-        .kpi-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 2rem;
-            margin-bottom: 3rem;
-        }
-
-        .kpi-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 2rem;
-            text-align: center;
-            position: relative;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            overflow: hidden;
-        }
-
-        .kpi-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 40px rgba(96, 165, 250, 0.1);
-        }
-
-        .kpi-card.primary .card-glow {
-            background: var(--primary-gradient);
-        }
-
-        .kpi-card.success .card-glow {
-            background: var(--success-gradient);
-        }
-
-        .kpi-card.warning .card-glow {
-            background: var(--warning-gradient);
-        }
-
-        .kpi-card.danger .card-glow {
-            background: var(--danger-gradient);
-        }
-
-        .kpi-card.info .card-glow {
-            background: var(--info-gradient);
-        }
-
-        .card-glow {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .kpi-card:hover .card-glow {
-            opacity: 1;
-        }
-
-        .kpi-icon {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 1.5rem;
-            font-size: 2rem;
-            color: white;
-            position: relative;
-        }
-
-        .kpi-card.primary .kpi-icon {
-            background: var(--primary-gradient);
-        }
-
-        .kpi-card.success .kpi-icon {
-            background: var(--success-gradient);
-        }
-
-        .kpi-card.warning .kpi-icon {
-            background: var(--warning-gradient);
-        }
-
-        .kpi-card.danger .kpi-icon {
-            background: var(--danger-gradient);
-        }
-
-        .kpi-card.info .kpi-icon {
-            background: var(--info-gradient);
-        }
-
-        .kpi-value {
-            font-family: var(--font-mono);
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: #ffffff;
-            margin-bottom: 0.5rem;
-            line-height: 1;
-        }
-
-        .kpi-label {
-            font-size: 1rem;
-            font-weight: 500;
-            color: var(--dark-300);
-            margin-bottom: 0.5rem;
-        }
-
-        .kpi-sublabel {
-            font-family: var(--font-mono);
-            font-size: 0.7rem;
-            color: var(--dark-400);
-            letter-spacing: 0.05em;
-        }
-
-        /* Chart Cards */
-        .chart-section {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 2rem;
-            margin-bottom: 3rem;
-        }
-
-        .chart-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: var(--glass-shadow);
-        }
-
-        .chart-header {
-            padding: 2rem 2rem 1rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .chart-title {
-            font-family: var(--font-mono);
-            font-size: 1.1rem;
-            font-weight: 700;
-            letter-spacing: 0.05em;
-            color: #ffffff;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .chart-title i {
-            color: var(--neon-blue);
-        }
-
-        .chart-body {
-            padding: 2rem;
-        }
-
-        /* Risk Distribution */
-        .risk-stats {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1rem;
-            margin-bottom: 2rem;
-            text-align: center;
-        }
-
-        .risk-stat {
-            padding: 1rem;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .risk-stat.low {
-            border-color: rgba(52, 211, 153, 0.3);
-        }
-
-        .risk-stat.moderate {
-            border-color: rgba(251, 191, 36, 0.3);
-        }
-
-        .risk-stat.high {
-            border-color: rgba(248, 113, 113, 0.3);
-        }
-
-        .risk-stat.critical {
-            border-color: rgba(127, 29, 29, 0.3);
-        }
-
-        .risk-icon {
-            font-size: 1.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .risk-stat.low .risk-icon {
-            color: var(--neon-green);
-        }
-
-        .risk-stat.moderate .risk-icon {
-            color: var(--neon-yellow);
-        }
-
-        .risk-stat.high .risk-icon {
-            color: var(--neon-red);
-        }
-
-        .risk-stat.critical .risk-icon {
-            color: #7f1d1d;
-        }
-
-        .risk-value {
-            font-family: var(--font-mono);
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #ffffff;
-            margin-bottom: 0.3rem;
-        }
-
-        .risk-label {
-            font-size: 0.7rem;
-            color: var(--dark-400);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .chart-container {
-            position: relative;
-            height: 250px;
-            margin-top: 1rem;
-        }
-
-        /* Sentiment Chart */
-        .sentiment-chart-container {
-            position: relative;
-            height: 280px;
-            margin-bottom: 1.5rem;
-        }
-
-        .sentiment-legend {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .legend-item {
-            display: flex;
-            justify-content: between;
-            align-items: center;
-            padding: 0.8rem;
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 8px;
-        }
-
-        .legend-color {
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            margin-right: 1rem;
-        }
-
-        .legend-color.positive {
-            background: var(--neon-green);
-        }
-
-        .legend-color.neutral {
-            background: var(--dark-500);
-        }
-
-        .legend-color.negative {
-            background: var(--neon-red);
-        }
-
-        .legend-label {
-            flex: 1;
-            font-size: 0.9rem;
-            color: var(--dark-300);
-        }
-
-        .legend-value {
-            font-family: var(--font-mono);
-            font-weight: 700;
-            color: #ffffff;
-        }
-
-        /* Strategic Insights */
-        .insights-section {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 2rem;
-            margin-bottom: 3rem;
-        }
-
-        .insights-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: var(--glass-shadow);
-        }
-
-        .insights-header {
-            padding: 2rem 2rem 1rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .insights-title {
-            font-family: var(--font-mono);
-            font-size: 1.1rem;
-            font-weight: 700;
-            letter-spacing: 0.05em;
-            color: #ffffff;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .insights-title i {
-            color: var(--neon-yellow);
-        }
-
-        .insights-body {
-            padding: 2rem;
-        }
-
-        .issue-item {
-            padding: 1.5rem;
-            margin-bottom: 1rem;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.03);
-            border-left: 4px solid;
-            position: relative;
-        }
-
-        .issue-item.priority-5 {
-            border-left-color: var(--neon-red);
-            background: rgba(248, 113, 113, 0.05);
-        }
-
-        .issue-item.priority-4 {
-            border-left-color: var(--neon-yellow);
-            background: rgba(251, 191, 36, 0.05);
-        }
-
-        .issue-item.priority-3 {
-            border-left-color: var(--neon-blue);
-            background: rgba(96, 165, 250, 0.05);
-        }
-
-        .issue-header {
-            display: flex;
-            justify-content: between;
-            align-items: flex-start;
-            margin-bottom: 1rem;
-        }
-
-        .issue-category {
-            font-weight: 600;
-            color: #ffffff;
-            margin-bottom: 0.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-        }
-
-        .issue-category i {
-            color: var(--neon-blue);
-        }
-
-        .issue-description {
-            font-size: 0.8rem;
-            color: var(--dark-300);
-            margin-bottom: 0.8rem;
-            line-height: 1.5;
-        }
-
-        .issue-action {
-            font-size: 0.8rem;
-            color: var(--dark-200);
-            line-height: 1.4;
-        }
-
-        .issue-meta {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            gap: 0.5rem;
-        }
-
-        .priority-badge {
-            padding: 0.3rem 0.8rem;
-            border-radius: 20px;
-            font-family: var(--font-mono);
-            font-size: 0.6rem;
-            font-weight: 700;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
-        }
-
-        .priority-badge.priority-5 {
-            background: rgba(248, 113, 113, 0.2);
-            border: 1px solid var(--neon-red);
-            color: var(--neon-red);
-        }
-
-        .priority-badge.priority-4 {
-            background: rgba(251, 191, 36, 0.2);
-            border: 1px solid var(--neon-yellow);
-            color: var(--neon-yellow);
-        }
-
-        .priority-badge.priority-3 {
-            background: rgba(96, 165, 250, 0.2);
-            border: 1px solid var(--neon-blue);
-            color: var(--neon-blue);
-        }
-
-        .issue-date {
-            font-family: var(--font-mono);
-            font-size: 0.6rem;
-            color: var(--dark-400);
-            letter-spacing: 0.05em;
-        }
-
-        .no-issues {
-            text-align: center;
-            padding: 3rem;
-            color: var(--dark-400);
-        }
-
-        .no-issues-icon {
-            font-size: 3rem;
-            color: var(--neon-green);
-            margin-bottom: 1rem;
-        }
-
-        /* Key Metrics Panel */
-        .metrics-panel {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: var(--glass-shadow);
-        }
-
-        .metrics-header {
-            padding: 2rem 2rem 1rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .metrics-title {
-            font-family: var(--font-mono);
-            font-size: 1.1rem;
-            font-weight: 700;
-            letter-spacing: 0.05em;
-            color: #ffffff;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .metrics-title i {
-            color: var(--neon-purple);
-        }
-
-        .metrics-body {
-            padding: 2rem;
-        }
-
-        .metric-item {
-            margin-bottom: 2rem;
-        }
-
-        .metric-header {
-            display: flex;
-            justify-content: between;
-            align-items: center;
-            margin-bottom: 0.8rem;
-        }
-
-        .metric-label {
-            font-size: 0.8rem;
-            color: var(--dark-400);
-        }
-
-        .metric-value {
-            font-family: var(--font-mono);
-            font-weight: 700;
-            font-size: 1rem;
-        }
-
-        .metric-value.success {
-            color: var(--neon-green);
-        }
-
-        .metric-value.warning {
-            color: var(--neon-yellow);
-        }
-
-        .metric-value.danger {
-            color: var(--neon-red);
-        }
-
-        .metric-value.info {
-            color: var(--neon-blue);
-        }
-
-        .progress-bar-nexgen {
-            height: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 4px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .progress-fill {
-            height: 100%;
-            border-radius: 4px;
-            transition: width 0.3s ease;
-            position: relative;
-        }
-
-        .progress-fill.success {
-            background: var(--success-gradient);
-        }
-
-        .progress-fill.warning {
-            background: var(--warning-gradient);
-        }
-
-        .progress-fill.danger {
-            background: var(--danger-gradient);
-        }
-
-        .progress-fill.info {
-            background: var(--info-gradient);
-        }
-
-        /* Executive Summary */
-        .executive-summary {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: var(--glass-shadow);
-            margin-bottom: 3rem;
-        }
-
-        .summary-header {
-            background: var(--primary-gradient);
-            padding: 2rem;
-            position: relative;
-        }
-
-        .summary-header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
-        }
-
-        .summary-title-group {
-            position: relative;
-            z-index: 2;
-            display: flex;
-            justify-content: between;
-            align-items: center;
-        }
-
-        .summary-title {
-            font-family: var(--font-mono);
-            font-size: 1.2rem;
-            font-weight: 700;
-            letter-spacing: 0.05em;
-            color: white;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .exec-badge {
-            background: rgba(255, 255, 255, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 20px;
-            padding: 0.4rem 1rem;
-            font-family: var(--font-mono);
-            font-size: 0.6rem;
-            font-weight: 600;
-            letter-spacing: 0.1em;
-            color: white;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .summary-content {
-            padding: 2rem;
-            font-size: 1.05rem;
-            line-height: 1.8;
-            color: var(--dark-200);
-        }
-
-        /* Action Items Section */
-        .actions-section {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-            margin-bottom: 3rem;
-        }
-
-        .actions-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: var(--glass-shadow);
-        }
-
-        .actions-header {
-            padding: 2rem 2rem 1rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .actions-title {
-            font-family: var(--font-mono);
-            font-size: 1.1rem;
-            font-weight: 700;
-            letter-spacing: 0.05em;
-            color: #ffffff;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .actions-title.immediate i {
-            color: var(--neon-red);
-        }
-
-        .actions-title.strategic i {
-            color: var(--neon-green);
-        }
-
-        .actions-body {
-            padding: 2rem;
-        }
-
-        .action-item {
-            padding: 1.5rem;
-            margin-bottom: 1rem;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.03);
-            border-left: 4px solid;
-            display: flex;
-            align-items: flex-start;
-            gap: 1rem;
-        }
-
-        .action-item.urgent {
-            border-left-color: var(--neon-red);
-            background: rgba(248, 113, 113, 0.05);
-        }
-
-        .action-item.warning {
-            border-left-color: var(--neon-yellow);
-            background: rgba(251, 191, 36, 0.05);
-        }
-
-        .action-item.info {
-            border-left-color: var(--neon-blue);
-            background: rgba(96, 165, 250, 0.05);
-        }
-
-        .action-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.1rem;
-            color: white;
-            flex-shrink: 0;
-        }
-
-        .action-item.urgent .action-icon {
-            background: var(--danger-gradient);
-        }
-
-        .action-item.warning .action-icon {
-            background: var(--warning-gradient);
-        }
-
-        .action-item.info .action-icon {
-            background: var(--info-gradient);
-        }
-
-        .action-content {
-            flex: 1;
-        }
-
-        .action-title {
-            font-weight: 600;
-            color: #ffffff;
-            margin-bottom: 0.5rem;
-        }
-
-        .action-title.urgent {
-            color: var(--neon-red);
-        }
-
-        .action-title.warning {
-            color: var(--neon-yellow);
-        }
-
-        .action-description {
-            font-size: 0.85rem;
-            color: var(--dark-300);
-            line-height: 1.5;
-            margin-bottom: 1rem;
-        }
-
-        .action-button {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.6rem 1.2rem;
-            border-radius: 8px;
-            font-family: var(--font-mono);
-            font-size: 0.7rem;
-            font-weight: 600;
-            letter-spacing: 0.05em;
-            text-decoration: none;
-            transition: all 0.2s ease;
-        }
-
-        .action-button.danger {
-            background: rgba(248, 113, 113, 0.2);
-            border: 1px solid var(--neon-red);
-            color: var(--neon-red);
-        }
-
-        .action-button.danger:hover {
-            background: rgba(248, 113, 113, 0.3);
-            color: var(--neon-red);
-            transform: translateY(-1px);
-        }
-
-        .strategic-item {
-            padding: 1.5rem;
-            margin-bottom: 1rem;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.03);
-            border-left: 4px solid var(--neon-cyan);
-        }
-
-        .strategic-header {
-            display: flex;
-            justify-content: between;
-            align-items: flex-start;
-            margin-bottom: 1rem;
-        }
-
-        .strategic-title {
-            font-weight: 600;
-            color: var(--neon-cyan);
-            margin-bottom: 0.5rem;
-        }
-
-        .timeline-badge {
-            background: rgba(34, 211, 238, 0.2);
-            border: 1px solid var(--neon-cyan);
-            border-radius: 20px;
-            padding: 0.3rem 0.8rem;
-            font-family: var(--font-mono);
-            font-size: 0.6rem;
-            font-weight: 700;
-            letter-spacing: 0.05em;
-            color: var(--neon-cyan);
-        }
-
-        .strategic-description {
-            font-size: 0.85rem;
-            color: var(--dark-300);
-            line-height: 1.5;
-        }
-
-        .no-actions {
-            text-align: center;
-            padding: 3rem;
-            color: var(--dark-400);
-        }
-
-        .no-actions-icon {
-            font-size: 3rem;
-            color: var(--neon-green);
-            margin-bottom: 1rem;
-        }
-
-        /* Key Phrases Section */
-        .phrases-section {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: var(--glass-shadow);
-            margin-bottom: 3rem;
-        }
-
-        .phrases-header {
-            padding: 2rem 2rem 1rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .phrases-title {
-            font-family: var(--font-mono);
-            font-size: 1.1rem;
-            font-weight: 700;
-            letter-spacing: 0.05em;
-            color: #ffffff;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .phrases-title i {
-            color: var(--neon-pink);
-        }
-
-        .phrases-body {
-            padding: 2rem;
-        }
-
-        .tag-cloud {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-            justify-content: center;
-        }
-
-        .phrase-tag {
-            padding: 0.8rem 1.5rem;
-            background: rgba(96, 165, 250, 0.1);
-            border: 1px solid rgba(96, 165, 250, 0.3);
-            border-radius: 50px;
-            font-family: var(--font-mono);
-            font-weight: 600;
-            color: var(--neon-blue);
-            transition: all 0.3s ease;
-            font-size: 0.8rem;
-            letter-spacing: 0.05em;
-        }
-
-        .phrase-tag:hover {
-            background: rgba(96, 165, 250, 0.2);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(96, 165, 250, 0.3);
-        }
-
-        /* Footer Summary */
-        .footer-summary {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 2rem;
-            box-shadow: var(--glass-shadow);
-        }
-
-        .summary-content-wrapper {
-            display: flex;
-            justify-content: between;
-            align-items: center;
-            gap: 2rem;
-        }
-
-        .summary-info {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-            flex: 1;
-        }
-
-        .summary-icon {
-            width: 50px;
-            height: 50px;
-            background: var(--info-gradient);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.2rem;
-            flex-shrink: 0;
-        }
-
-        .summary-text {
-            flex: 1;
-        }
-
-        .summary-title-text {
-            font-weight: 600;
-            color: #ffffff;
-            margin-bottom: 0.3rem;
-        }
-
-        .summary-description {
-            color: var(--dark-300);
-            line-height: 1.5;
-        }
-
-        .summary-actions {
-            display: flex;
-            gap: 1rem;
-        }
-
-        .summary-btn {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.8rem 1.5rem;
-            border-radius: 8px;
-            font-family: var(--font-mono);
-            font-size: 0.7rem;
-            font-weight: 600;
-            letter-spacing: 0.05em;
-            text-decoration: none;
-            transition: all 0.2s ease;
-            border: 1px solid;
-        }
-
-        .summary-btn.primary {
-            background: rgba(96, 165, 250, 0.1);
-            border-color: rgba(96, 165, 250, 0.3);
-            color: var(--neon-blue);
-        }
-
-        .summary-btn.primary:hover {
-            background: rgba(96, 165, 250, 0.2);
-            color: var(--neon-blue);
-            transform: translateY(-1px);
-        }
-
-        .summary-btn.info {
-            background: rgba(34, 211, 238, 0.1);
-            border-color: rgba(34, 211, 238, 0.3);
-            color: var(--neon-cyan);
-        }
-
-        .summary-btn.info:hover {
-            background: rgba(34, 211, 238, 0.2);
-            color: var(--neon-cyan);
-            transform: translateY(-1px);
-        }
-
-        /* Animations */
-        @@keyframes gridMove {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(60px, 60px); }
-        }
-
-        @@keyframes meshShift {
-            0%, 100% { 
-                filter: hue-rotate(0deg);
-                transform: scale(1);
-            }
-            50% { 
-                filter: hue-rotate(30deg);
-                transform: scale(1.05);
-            }
-        }
-
-        @@keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.7; transform: scale(1.1); }
-        }
-
-        /* Responsive Design */
-        @@media (max-width: 1200px) {
-            .chart-section {
-                grid-template-columns: 1fr;
-            }
-            
-            .insights-section {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @@media (max-width: 768px) {
-            .nav-container {
-                flex-wrap: wrap;
-                gap: 1rem;
-            }
-            
-            .nav-center {
-                order: 3;
-                flex-basis: 100%;
-                justify-content: flex-start;
-            }
-            
-            .hero-title {
-                font-size: 2.5rem;
-            }
-            
-            .kpi-grid {
-                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-                gap: 1.5rem;
-            }
-            
-            .risk-stats {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .actions-section {
-                grid-template-columns: 1fr;
-            }
-            
-            .summary-content-wrapper {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            
-            .summary-actions {
-                width: 100%;
-                flex-direction: column;
-            }
-            
-            .chart-container,
-            .sentiment-chart-container {
-                height: 200px;
-            }
-        }
-
-        @@media (max-width: 480px) {
-            .kpi-grid,
-            .chart-section,
-            .insights-section,
-            .actions-section {
-                padding: 0 1rem;
-            }
-            
-            .kpi-card,
-            .chart-card,
-            .insights-card,
-            .actions-card {
-                margin-bottom: 1.5rem;
-            }
-            
-            .risk-stats {
-                grid-template-columns: 1fr;
-            }
-            
-            .tag-cloud {
-                justify-content: flex-start;
-            }
-        }
-
-        /* Print Styles */
-        @@media print {
-            .bg-pattern,
-            .top-nav,
-            .nav-btn,
-            .action-button {
-                display: none !important;
-            }
-            
-            .kpi-card,
-            .chart-card,
-            .insights-card {
-                break-inside: avoid;
-                border: 1px solid #333;
-                background: white;
-                color: black;
-            }
-            
-            .nexgen-exec-dashboard {
-                background: white;
-            }
-        }
-
-        /* Accessibility */
-        @@media (prefers-reduced-motion: reduce) {
-            *,
-            *::before,
-            *::after {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-            }
-        }
-
-        /* High Contrast Mode */
-        @@media (prefers-contrast: high) {
-            :root {
-                --neon-blue: #4d9fff;
-                --neon-purple: #d499ff;
-                --neon-green: #4dff88;
-                --dark-300: #ffffff;
-                --dark-400: #cccccc;
-            }
-            
-            .kpi-card,
-            .chart-card,
-            .insights-card {
-                border-width: 2px;
-            }
-        }
+        :root{
+            --neon-blue:#60a5fa;--neon-purple:#c084fc;--neon-green:#34d399;--neon-pink:#f472b6;
+            --neon-yellow:#fbbf24;--neon-red:#f87171;--neon-cyan:#22d3ee;--neon-indigo:#818cf8;
+            --neon-teal:#33b3ae;--neon-amber:#f59e0b;--neon-orange:#fb923c;
+            --dark-900:#0f172a;--dark-800:#1e293b;--dark-700:#334155;--dark-600:#475569;
+            --dark-500:#64748b;--dark-400:#94a3b8;--dark-300:#cbd5e1;--dark-200:#e2e8f0;
+            --glass-bg:rgba(255,255,255,0.04);--glass-border:rgba(255,255,255,0.08);
+            --font-main:'Space Grotesk',sans-serif;--font-mono:'JetBrains Mono',monospace;
+        }
+
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:var(--font-main);background:var(--dark-900);color:#e2e8f0;overflow-x:hidden}
+
+        /* ===== BG — indigo/blue executive ===== */
+        .nex-bg{position:fixed;inset:0;z-index:-1;overflow:hidden}
+        .nex-bg .grid{position:absolute;inset:0;background-image:linear-gradient(rgba(129,140,248,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(129,140,248,0.04) 1px,transparent 1px);background-size:60px 60px;animation:gridDrift 25s linear infinite}
+        .nex-bg .mesh{position:absolute;inset:0;background:radial-gradient(ellipse at 20% 20%,rgba(96,165,250,0.06) 0%,transparent 55%),radial-gradient(ellipse at 80% 55%,rgba(192,132,252,0.05) 0%,transparent 55%),radial-gradient(ellipse at 45% 85%,rgba(52,211,153,0.04) 0%,transparent 55%);animation:meshFloat 18s ease-in-out infinite}
+
+        @@keyframes gridDrift{0%{transform:translate(0,0)}100%{transform:translate(60px,60px)}}
+        @@keyframes meshFloat{0%,100%{filter:hue-rotate(0deg);transform:scale(1)}50%{filter:hue-rotate(8deg);transform:scale(1.02)}}
+        @@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.15)}}
+        @@keyframes barGrow{from{width:0}to{width:var(--w)}}
+
+        .container{max-width:1400px;margin:0 auto;padding:0 2rem}
+
+        /* ===== HEADER ===== */
+        .page-header{position:relative;z-index:10;padding:2rem 0 1.5rem;border-bottom:1px solid rgba(129,140,248,0.12)}
+        .breadcrumb-nex{display:flex;align-items:center;gap:.7rem;margin-bottom:1.8rem;font-family:var(--font-mono);font-size:.65rem;letter-spacing:.08em;flex-wrap:wrap}
+        .breadcrumb-nex a{color:var(--dark-400);text-decoration:none;display:flex;align-items:center;gap:.4rem;transition:color .2s}
+        .breadcrumb-nex a:hover{color:var(--neon-indigo)}
+        .breadcrumb-nex .sep{color:var(--dark-600);font-size:.5rem}
+        .breadcrumb-nex .current{color:var(--neon-indigo);font-weight:600}
+
+        .header-row{display:flex;justify-content:space-between;align-items:flex-start;gap:2rem}
+        .header-left{flex:1}
+        .header-badge{display:inline-flex;align-items:center;gap:.5rem;padding:.4rem 1rem;background:rgba(129,140,248,0.08);border:1px solid rgba(129,140,248,0.25);border-radius:50px;margin-bottom:1.5rem;font-family:var(--font-mono);font-size:.6rem;font-weight:600;letter-spacing:.1em;color:var(--neon-indigo)}
+        .header-badge .dot{width:6px;height:6px;background:var(--neon-indigo);border-radius:50%;animation:pulse 1.5s infinite}
+        .header-title{font-size:2.8rem;font-weight:700;line-height:1.1;margin-bottom:.8rem;color:#fff}
+        .header-title .grad{background:linear-gradient(135deg,var(--neon-blue),var(--neon-indigo),var(--neon-cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+        .header-sub{font-size:.95rem;color:var(--dark-300);line-height:1.6}
+
+        .header-actions{display:flex;flex-wrap:wrap;gap:.7rem;align-items:flex-start;padding-top:.5rem}
+        .h-btn{display:flex;align-items:center;gap:.6rem;padding:.65rem 1.2rem;border-radius:10px;text-decoration:none;font-family:var(--font-mono);font-size:.68rem;font-weight:600;letter-spacing:.04em;transition:all .25s;border:1px solid;cursor:pointer;background:none}
+        .h-btn:hover{transform:translateY(-2px);text-decoration:none}
+        .h-btn.sec{background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.1);color:var(--dark-300)}.h-btn.sec:hover{background:rgba(129,140,248,0.08);border-color:rgba(129,140,248,0.25);color:var(--neon-indigo)}
+        .h-btn.indigo{background:rgba(129,140,248,0.08);border-color:rgba(129,140,248,0.25);color:var(--neon-indigo)}.h-btn.indigo:hover{background:rgba(129,140,248,0.15)}
+        .h-btn.red-fill{background:linear-gradient(135deg,var(--neon-red),#dc2626);border-color:transparent;color:#fff}.h-btn.red-fill:hover{box-shadow:0 10px 24px rgba(248,113,113,0.25);color:#fff}
+
+        /* ===== CARDS ===== */
+        .nex-card{background:rgba(30,41,59,0.45);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.07);border-radius:18px;overflow:hidden;position:relative;margin-bottom:1.5rem}
+        .nex-card .top-glow{position:absolute;top:0;left:0;right:0;height:2px;opacity:0;transition:opacity .3s}
+        .nex-card:hover .top-glow{opacity:1}
+        .c-head{padding:1.5rem 1.8rem 1rem;display:flex;align-items:center;gap:1.2rem;border-bottom:1px solid rgba(255,255,255,0.05)}
+        .c-icon{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1rem;flex-shrink:0}
+        .c-icon.blue{background:linear-gradient(135deg,var(--neon-blue),var(--neon-cyan))}
+        .c-icon.green{background:linear-gradient(135deg,var(--neon-green),var(--neon-teal))}
+        .c-icon.red{background:linear-gradient(135deg,var(--neon-red),#dc2626)}
+        .c-icon.indigo{background:linear-gradient(135deg,var(--neon-indigo),var(--neon-purple))}
+        .c-icon.amber{background:linear-gradient(135deg,var(--neon-amber),var(--neon-orange))}
+        .c-icon.pink{background:linear-gradient(135deg,var(--neon-pink),var(--neon-purple))}
+        .c-head h3{font-size:1rem;font-weight:700;color:#fff;margin-bottom:.15rem}
+        .c-head p{color:var(--dark-400);font-size:.72rem}
+        .c-body{padding:1.5rem 1.8rem 1.8rem}
+
+        /* ===== KPI GRID ===== */
+        .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem;margin-bottom:1.5rem}
+        .kpi-card{text-align:center;padding:1.8rem 1.2rem;position:relative}
+        .kpi-card .top-glow.blue{background:linear-gradient(90deg,var(--neon-blue),var(--neon-cyan))}
+        .kpi-card .top-glow.green{background:linear-gradient(90deg,var(--neon-green),var(--neon-teal))}
+        .kpi-card .top-glow.red{background:linear-gradient(90deg,var(--neon-red),#dc2626)}
+        .kpi-card .top-glow.indigo{background:linear-gradient(90deg,var(--neon-indigo),var(--neon-purple))}
+        .kpi-card .top-glow.amber{background:linear-gradient(90deg,var(--neon-amber),var(--neon-orange))}
+        .kpi-circle{width:68px;height:68px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.2rem;font-size:1.6rem;color:#fff}
+        .kpi-circle.blue{background:linear-gradient(135deg,var(--neon-blue),var(--neon-cyan))}
+        .kpi-circle.green{background:linear-gradient(135deg,var(--neon-green),var(--neon-teal))}
+        .kpi-circle.red{background:linear-gradient(135deg,var(--neon-red),#dc2626)}
+        .kpi-circle.indigo{background:linear-gradient(135deg,var(--neon-indigo),var(--neon-purple))}
+        .kpi-circle.amber{background:linear-gradient(135deg,var(--neon-amber),var(--neon-orange))}
+        .kpi-val{font-family:var(--font-mono);font-size:2.2rem;font-weight:700;color:#fff;line-height:1;margin-bottom:.4rem}
+        .kpi-lbl{font-size:.88rem;font-weight:500;color:var(--dark-300);margin-bottom:.3rem}
+        .kpi-sub{font-family:var(--font-mono);font-size:.58rem;color:var(--dark-500);letter-spacing:.06em}
+
+        /* ===== CHART SECTION ===== */
+        .chart-row{display:grid;grid-template-columns:2fr 1fr;gap:1.5rem;margin-bottom:1.5rem}
+        .chart-box{position:relative;height:250px}
+        .sent-chart-box{position:relative;height:260px;margin-bottom:1.2rem}
+
+        /* Risk stat chips */
+        .risk-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;margin-bottom:1.2rem}
+        .risk-stat{text-align:center;padding:.8rem .5rem;border-radius:10px;background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.06)}
+        .risk-stat.low{border-color:rgba(52,211,153,0.25)}.risk-stat.moderate{border-color:rgba(251,191,36,0.25)}.risk-stat.high{border-color:rgba(248,113,113,0.25)}.risk-stat.critical{border-color:rgba(127,29,29,0.25)}
+        .risk-stat .rs-icon{font-size:1.2rem;margin-bottom:.3rem}
+        .risk-stat.low .rs-icon{color:var(--neon-green)}.risk-stat.moderate .rs-icon{color:var(--neon-yellow)}.risk-stat.high .rs-icon{color:var(--neon-red)}.risk-stat.critical .rs-icon{color:#ef4444}
+        .risk-stat .rs-val{font-family:var(--font-mono);font-size:1.3rem;font-weight:700;color:#fff;margin-bottom:.15rem}
+        .risk-stat .rs-lbl{font-size:.55rem;color:var(--dark-500);text-transform:uppercase;letter-spacing:.08em}
+
+        /* Sentiment legend */
+        .sent-leg{display:flex;flex-direction:column;gap:.6rem}
+        .leg-item{display:flex;align-items:center;gap:.8rem;padding:.6rem .8rem;background:rgba(255,255,255,0.025);border-radius:8px}
+        .leg-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+        .leg-dot.pos{background:var(--neon-green)}.leg-dot.neu{background:var(--dark-500)}.leg-dot.neg{background:var(--neon-red)}
+        .leg-lbl{flex:1;font-size:.78rem;color:var(--dark-300)}
+        .leg-val{font-family:var(--font-mono);font-weight:700;color:#fff;font-size:.82rem}
+
+        /* ===== INSIGHTS SECTION ===== */
+        .insights-row{display:grid;grid-template-columns:2fr 1fr;gap:1.5rem;margin-bottom:1.5rem}
+        .issue-item{padding:1.2rem;margin-bottom:.8rem;border-radius:12px;background:rgba(255,255,255,0.025);border-left:4px solid;position:relative}
+        .issue-item:last-child{margin-bottom:0}
+        .issue-item.p5{border-color:var(--neon-red);background:rgba(248,113,113,0.03)}
+        .issue-item.p4{border-color:var(--neon-yellow);background:rgba(251,191,36,0.03)}
+        .issue-item.p3{border-color:var(--neon-blue);background:rgba(96,165,250,0.03)}
+        .issue-item.p2{border-color:var(--neon-cyan);background:rgba(34,211,238,0.03)}
+        .issue-top{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;margin-bottom:.6rem}
+        .issue-cat{font-weight:600;color:#fff;font-size:.82rem;display:flex;align-items:center;gap:.5rem}
+        .issue-cat i{color:var(--neon-blue);font-size:.7rem}
+        .issue-desc{font-size:.72rem;color:var(--dark-400);margin-bottom:.5rem;line-height:1.5}
+        .issue-action{font-size:.72rem;color:var(--dark-200);line-height:1.5}
+        .p-badge{padding:.2rem .6rem;border-radius:12px;font-family:var(--font-mono);font-size:.5rem;font-weight:700;letter-spacing:.05em;border:1px solid;white-space:nowrap}
+        .p-badge.p5{background:rgba(248,113,113,0.12);border-color:rgba(248,113,113,0.3);color:var(--neon-red)}
+        .p-badge.p4{background:rgba(251,191,36,0.12);border-color:rgba(251,191,36,0.3);color:var(--neon-yellow)}
+        .p-badge.p3{background:rgba(96,165,250,0.12);border-color:rgba(96,165,250,0.3);color:var(--neon-blue)}
+        .p-badge.p2{background:rgba(34,211,238,0.12);border-color:rgba(34,211,238,0.3);color:var(--neon-cyan)}
+        .issue-date{font-family:var(--font-mono);font-size:.5rem;color:var(--dark-500);letter-spacing:.05em;margin-top:.3rem}
+
+        .no-data{text-align:center;padding:2.5rem 1rem;color:var(--dark-400)}
+        .no-data i{font-size:2.2rem;color:var(--neon-green);margin-bottom:.8rem;display:block}
+        .no-data h4{font-size:.95rem;color:#fff;margin-bottom:.4rem}
+        .no-data p{font-size:.78rem}
+
+        /* Metrics panel */
+        .metric-item{margin-bottom:1.4rem}
+        .metric-item:last-child{margin-bottom:0}
+        .metric-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem}
+        .metric-lbl{font-size:.72rem;color:var(--dark-400)}
+        .metric-val{font-family:var(--font-mono);font-weight:700;font-size:.88rem}
+        .metric-val.green{color:var(--neon-green)}.metric-val.yellow{color:var(--neon-yellow)}.metric-val.red{color:var(--neon-red)}.metric-val.blue{color:var(--neon-blue)}.metric-val.white{color:#fff}
+        .bar-track{height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden}
+        .bar-fill{height:100%;border-radius:3px;animation:barGrow .8s ease both}
+        .bar-fill.green{background:linear-gradient(90deg,var(--neon-green),var(--neon-teal))}
+        .bar-fill.yellow{background:linear-gradient(90deg,var(--neon-yellow),var(--neon-orange))}
+        .bar-fill.red{background:linear-gradient(90deg,var(--neon-red),#dc2626)}
+        .bar-fill.blue{background:linear-gradient(90deg,var(--neon-blue),var(--neon-indigo))}
+
+        /* ===== EXECUTIVE SUMMARY ===== */
+        .exec-head{background:linear-gradient(135deg,rgba(129,140,248,0.9),rgba(96,165,250,0.9));padding:1.5rem 1.8rem;display:flex;justify-content:space-between;align-items:center;position:relative}
+        .exec-head::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.08) 0%,transparent 50%)}
+        .exec-head h3{position:relative;z-index:2;font-family:var(--font-mono);font-size:.88rem;font-weight:700;letter-spacing:.05em;color:#fff;display:flex;align-items:center;gap:.7rem}
+        .exec-badge{position:relative;z-index:2;background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.25);border-radius:20px;padding:.3rem .8rem;font-family:var(--font-mono);font-size:.5rem;font-weight:700;letter-spacing:.08em;color:#fff;display:flex;align-items:center;gap:.4rem}
+        .exec-body{padding:1.8rem;font-size:.92rem;line-height:1.8;color:var(--dark-200)}
+
+        /* ===== ACTIONS SECTION ===== */
+        .actions-row{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem}
+        .act-item{padding:1.2rem;margin-bottom:.8rem;border-radius:12px;background:rgba(255,255,255,0.025);border-left:4px solid;display:flex;align-items:flex-start;gap:1rem}
+        .act-item:last-child{margin-bottom:0}
+        .act-item.urgent{border-color:var(--neon-red);background:rgba(248,113,113,0.03)}
+        .act-item.warning{border-color:var(--neon-yellow);background:rgba(251,191,36,0.03)}
+        .act-item.info{border-color:var(--neon-blue);background:rgba(96,165,250,0.03)}
+        .act-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.9rem;flex-shrink:0}
+        .act-icon.red{background:linear-gradient(135deg,var(--neon-red),#dc2626)}.act-icon.yellow{background:linear-gradient(135deg,var(--neon-yellow),var(--neon-orange))}.act-icon.blue{background:linear-gradient(135deg,var(--neon-blue),var(--neon-indigo))}
+        .act-title{font-weight:600;font-size:.82rem;margin-bottom:.4rem}
+        .act-title.red{color:var(--neon-red)}.act-title.yellow{color:var(--neon-yellow)}.act-title.white{color:#fff}
+        .act-desc{font-size:.72rem;color:var(--dark-300);line-height:1.5;margin-bottom:.6rem}
+
+        .strat-item{padding:1.2rem;margin-bottom:.8rem;border-radius:12px;background:rgba(255,255,255,0.025);border-left:4px solid var(--neon-cyan)}
+        .strat-item:last-child{margin-bottom:0}
+        .strat-top{display:flex;justify-content:space-between;align-items:flex-start;gap:.8rem;margin-bottom:.5rem}
+        .strat-title{font-weight:600;color:var(--neon-cyan);font-size:.82rem}
+        .strat-badge{background:rgba(34,211,238,0.12);border:1px solid rgba(34,211,238,0.3);border-radius:12px;padding:.2rem .6rem;font-family:var(--font-mono);font-size:.5rem;font-weight:700;letter-spacing:.05em;color:var(--neon-cyan);white-space:nowrap}
+        .strat-desc{font-size:.72rem;color:var(--dark-300);line-height:1.5}
+
+        /* ===== PHRASES CLOUD ===== */
+        .tag-cloud{display:flex;flex-wrap:wrap;gap:.7rem;justify-content:center}
+        .phrase-tag{padding:.6rem 1.2rem;background:rgba(129,140,248,0.08);border:1px solid rgba(129,140,248,0.25);border-radius:50px;font-family:var(--font-mono);font-weight:600;color:var(--neon-indigo);transition:all .25s;font-size:.72rem;letter-spacing:.04em}
+        .phrase-tag:hover{background:rgba(129,140,248,0.15);transform:translateY(-2px);box-shadow:0 8px 20px rgba(129,140,248,0.2)}
+
+        /* ===== FOOTER ===== */
+        .foot-row{display:flex;align-items:center;gap:1.5rem}
+        .foot-icon{width:44px;height:44px;background:linear-gradient(135deg,var(--neon-indigo),var(--neon-purple));border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1rem;flex-shrink:0}
+        .foot-text{flex:1}
+        .foot-text strong{color:#fff;font-size:.85rem}
+        .foot-text span{color:var(--dark-300);font-size:.78rem}
+        .foot-btns{display:flex;gap:.6rem;flex-shrink:0}
+
+        /* ===== RESPONSIVE ===== */
+        @@media(max-width:1200px){.kpi-grid{grid-template-columns:repeat(2,1fr)}.chart-row,.insights-row,.actions-row{grid-template-columns:1fr}}
+        @@media(max-width:768px){.header-row{flex-direction:column}.header-title{font-size:2rem}.kpi-grid{grid-template-columns:1fr}.risk-stats{grid-template-columns:repeat(2,1fr)}.foot-row{flex-direction:column;text-align:center}.foot-btns{width:100%;justify-content:center}.exec-head{flex-direction:column;gap:.8rem;text-align:center}}
+        @@media(max-width:480px){.risk-stats{grid-template-columns:1fr}.foot-btns{flex-direction:column}}
+        @@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+        @@media print{.nex-bg,.h-btn,.foot-btns,.header-actions{display:none!important}body{background:#fff;color:#000}.nex-card{border:1px solid #ccc;background:#fff}}
     </style>
 }
 
-<div class="nexgen-exec-dashboard">
-    <!-- Dynamic Background -->
-    <div class="bg-pattern">
-        <div class="grid-overlay"></div>
-        <div class="gradient-mesh"></div>
+<div class="nex-bg"><div class="grid"></div><div class="mesh"></div></div>
+
+<!-- Header -->
+<section class="page-header">
+    <div class="container">
+        <div class="breadcrumb-nex">
+            <a href="@Url.Action("Index")"><i class="fa-solid fa-brain"></i> Analysis Dashboard</a>
+            <i class="fa-solid fa-chevron-right sep"></i>
+            <span class="current">Executive Dashboard</span>
+        </div>
+        <div class="header-row">
+            <div class="header-left">
+                <div class="header-badge"><span class="dot"></span> CLAUDE AI EXECUTIVE INTELLIGENCE</div>
+                <h1 class="header-title">Executive <span class="grad">Intelligence</span> Dashboard</h1>
+                <p class="header-sub">Strategic overview of workplace mental health metrics for C-level decision making — @Model.QuestionnaireTitle</p>
+            </div>
+            <div class="header-actions">
+                <a href="@Url.Action("GenerateReport", new { id = Model.QuestionnaireId })" class="h-btn indigo"><i class="fa-solid fa-file-lines"></i> Executive Report</a>
+                <a href="@Url.Action("ExportAnalysis", new { id = Model.QuestionnaireId })" class="h-btn sec"><i class="fa-solid fa-chart-pie"></i> Export</a>
+            </div>
+        </div>
     </div>
+</section>
 
-    <!-- Top Navigation Bar -->
-    <nav class="top-nav">
-        <div class="nav-container">
-            <div class="nav-brand">
-                <div class="brand-icon">
-                    <i class="fas fa-tachometer-alt"></i>
-                </div>
-                <div class="brand-text">
-                    <span class="brand-name">EXEC COMMAND</span>
-                    <span class="brand-version">v1.0</span>
-                </div>
-            </div>
-            
-            <div class="nav-center">
-                <nav class="breadcrumb-nexgen">
-                    <a href="@Url.Action("Index")" class="crumb">
-                        <i class="fas fa-brain"></i> ANALYSIS DASHBOARD
-                    </a>
-                    <i class="fas fa-chevron-right"></i>
-                    <span class="crumb active">EXECUTIVE DASHBOARD</span>
-                </nav>
-            </div>
-            
-            <div class="nav-actions">
-                <a href="@Url.Action("GenerateReport", new { id = Model.QuestionnaireId })" class="nav-btn">
-                    <i class="fas fa-file-contract"></i>
-                    <span>Executive Report</span>
-                </a>
-                <a href="@Url.Action("ExportAnalysis", new { id = Model.QuestionnaireId })" class="nav-btn">
-                    <i class="fas fa-chart-pie"></i>
-                    <span>Export Analytics</span>
-                </a>
-            </div>
-        </div>
-    </nav>
+<section style="position:relative;z-index:10;padding:2rem 0 3rem">
+    <div class="container">
 
-    <!-- Hero Section -->
-    <section class="hero-nexgen">
-        <div class="container-fluid">
-            <div class="hero-content">
-                <div class="hero-badge">
-                    <span class="badge-dot"></span>
-                    <span>STRATEGIC MENTAL HEALTH OVERVIEW</span>
+        @* ===== KPIs ===== *@
+        <div class="kpi-grid">
+            <div class="nex-card kpi-card"><div class="top-glow blue"></div>
+                <div class="kpi-circle blue"><i class="fa-solid fa-users"></i></div>
+                <div class="kpi-val">@Model.TotalResponses</div>
+                <div class="kpi-lbl">Total Participants</div>
+                <div class="kpi-sub">@Model.AnalyzedResponses AI ANALYZED</div>
+            </div>
+
+            <div class="nex-card kpi-card"><div class="top-glow @GetHealthGlowClass()"></div>
+                <div class="kpi-circle @GetHealthGlowClass()"><i class="fa-solid @GetOverallHealthIcon()"></i></div>
+                <div class="kpi-val">@GetOverallHealthScore()%</div>
+                <div class="kpi-lbl">Mental Health Score</div>
+                <div class="kpi-sub">@GetOverallHealthStatus().ToUpper()</div>
+            </div>
+
+            <div class="nex-card kpi-card"><div class="top-glow @(Model.HighRiskResponses + Model.CriticalRiskResponses > 0 ? "red" : "green")"></div>
+                <div class="kpi-circle @(Model.HighRiskResponses + Model.CriticalRiskResponses > 0 ? "red" : "green")"><i class="fa-solid fa-shield-halved"></i></div>
+                <div class="kpi-val">@(Model.HighRiskResponses + Model.CriticalRiskResponses)</div>
+                <div class="kpi-lbl">High Risk Cases</div>
+                <div class="kpi-sub">
+                    @if (Model.CriticalRiskResponses > 0) { <text>@Model.CriticalRiskResponses CRITICAL</text> }
+                    else if (Model.HighRiskResponses > 0) { <text>IMMEDIATE ATTENTION</text> }
+                    else { <text>NO CRITICAL CASES</text> }
                 </div>
-                <h1 class="hero-title">
-                    Executive
-                    <span class="title-gradient">Intelligence</span>
-                    Dashboard
-                </h1>
-                <p class="hero-description">
-                    Strategic overview of workplace mental health metrics for C-level decision making
-                </p>
+            </div>
+
+            <div class="nex-card kpi-card"><div class="top-glow indigo"></div>
+                <div class="kpi-circle indigo"><i class="fa-solid fa-chart-line"></i></div>
+                <div class="kpi-val">@Math.Round(Model.OverallPositiveSentiment * 100, 0)%</div>
+                <div class="kpi-lbl">Positive Sentiment</div>
+                <div class="kpi-sub">EMPLOYEE SATISFACTION</div>
             </div>
         </div>
-    </section>
 
-    <!-- Main Content -->
-    <main class="main-content">
-        <div class="container-fluid">
-            <!-- Key Performance Indicators -->
-            <div class="kpi-grid">
-                <div class="kpi-card primary">
-                    <div class="card-glow"></div>
-                    <div class="kpi-icon">
-                        <i class="fas fa-users"></i>
+        @* ===== CHARTS ===== *@
+        <div class="chart-row">
+            <div class="nex-card"><div class="top-glow blue"></div>
+                <div class="c-head"><div class="c-icon blue"><i class="fa-solid fa-chart-column"></i></div><div><h3>Mental Health Risk Distribution</h3><p>Breakdown by risk level</p></div></div>
+                <div class="c-body">
+                    <div class="risk-stats">
+                        <div class="risk-stat low"><div class="rs-icon"><i class="fa-solid fa-face-smile"></i></div><div class="rs-val">@Model.LowRiskResponses</div><div class="rs-lbl">Low Risk</div></div>
+                        <div class="risk-stat moderate"><div class="rs-icon"><i class="fa-solid fa-face-meh"></i></div><div class="rs-val">@Model.ModerateRiskResponses</div><div class="rs-lbl">Moderate</div></div>
+                        <div class="risk-stat high"><div class="rs-icon"><i class="fa-solid fa-face-frown"></i></div><div class="rs-val">@Model.HighRiskResponses</div><div class="rs-lbl">High Risk</div></div>
+                        <div class="risk-stat critical"><div class="rs-icon"><i class="fa-solid fa-triangle-exclamation"></i></div><div class="rs-val">@Model.CriticalRiskResponses</div><div class="rs-lbl">Critical</div></div>
                     </div>
-                    <div class="kpi-value">@Model.TotalResponses</div>
-                    <div class="kpi-label">Total Participants</div>
-                    <div class="kpi-sublabel">@Model.AnalyzedResponses AI ANALYZED</div>
-                </div>
-
-                <div class="kpi-card @GetOverallHealthCardClass()">
-                    <div class="card-glow"></div>
-                    <div class="kpi-icon">
-                        <i class="fas @GetOverallHealthIcon()"></i>
-                    </div>
-                    <div class="kpi-value">@GetOverallHealthScore()%</div>
-                    <div class="kpi-label">Mental Health Score</div>
-                    <div class="kpi-sublabel">@GetOverallHealthStatus().ToUpper()</div>
-                </div>
-
-                <div class="kpi-card @(Model.HighRiskResponses + Model.CriticalRiskResponses > 0 ? "danger" : "success")">
-                    <div class="card-glow"></div>
-                    <div class="kpi-icon">
-                        <i class="fas fa-shield-alt"></i>
-                    </div>
-                    <div class="kpi-value">@(Model.HighRiskResponses + Model.CriticalRiskResponses)</div>
-                    <div class="kpi-label">High Risk Cases</div>
-                    <div class="kpi-sublabel">
-                        @if (Model.CriticalRiskResponses > 0)
-                        {
-                            <text>@Model.CriticalRiskResponses CRITICAL</text>
-                        }
-                        else if (Model.HighRiskResponses > 0)
-                        {
-                            <text>IMMEDIATE ATTENTION</text>
-                        }
-                        else
-                        {
-                            <text>NO CRITICAL CASES</text>
-                        }
-                    </div>
-                </div>
-
-                <div class="kpi-card info">
-                    <div class="card-glow"></div>
-                    <div class="kpi-icon">
-                        <i class="fas fa-chart-line"></i>
-                    </div>
-                    <div class="kpi-value">@Math.Round(Model.OverallPositiveSentiment * 100, 0)%</div>
-                    <div class="kpi-label">Positive Sentiment</div>
-                    <div class="kpi-sublabel">EMPLOYEE SATISFACTION</div>
+                    <div class="chart-box"><canvas id="riskDistributionChart"></canvas></div>
                 </div>
             </div>
 
-            <!-- Mental Health Overview Charts -->
-            <div class="chart-section">
-                <div class="chart-card">
-                    <div class="chart-header">
-                        <h2 class="chart-title">
-                            <i class="fas fa-chart-bar"></i>
-                            Mental Health Risk Distribution
-                        </h2>
-                    </div>
-                    <div class="chart-body">
-                        <div class="risk-stats">
-                            <div class="risk-stat low">
-                                <div class="risk-icon">
-                                    <i class="fas fa-smile"></i>
-                                </div>
-                                <div class="risk-value">@Model.LowRiskResponses</div>
-                                <div class="risk-label">Low Risk</div>
-                            </div>
-                            <div class="risk-stat moderate">
-                                <div class="risk-icon">
-                                    <i class="fas fa-meh"></i>
-                                </div>
-                                <div class="risk-value">@Model.ModerateRiskResponses</div>
-                                <div class="risk-label">Moderate</div>
-                            </div>
-                            <div class="risk-stat high">
-                                <div class="risk-icon">
-                                    <i class="fas fa-frown"></i>
-                                </div>
-                                <div class="risk-value">@Model.HighRiskResponses</div>
-                                <div class="risk-label">High Risk</div>
-                            </div>
-                            <div class="risk-stat critical">
-                                <div class="risk-icon">
-                                    <i class="fas fa-exclamation-triangle"></i>
-                                </div>
-                                <div class="risk-value">@Model.CriticalRiskResponses</div>
-                                <div class="risk-label">Critical</div>
-                            </div>
-                        </div>
-
-                        <div class="chart-container">
-                            <canvas id="riskDistributionChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="chart-card">
-                    <div class="chart-header">
-                        <h2 class="chart-title">
-                            <i class="fas fa-heart"></i>
-                            Sentiment Overview
-                        </h2>
-                    </div>
-                    <div class="chart-body">
-                        <div class="sentiment-chart-container">
-                            <canvas id="sentimentChart"></canvas>
-                        </div>
-
-                        <div class="sentiment-legend">
-                            <div class="legend-item">
-                                <div class="legend-color positive"></div>
-                                <div class="legend-label">Positive</div>
-                                <div class="legend-value">@Math.Round(Model.OverallPositiveSentiment * 100, 1)%</div>
-                            </div>
-                            <div class="legend-item">
-                                <div class="legend-color neutral"></div>
-                                <div class="legend-label">Neutral</div>
-                                <div class="legend-value">@Math.Round(Model.OverallNeutralSentiment * 100, 1)%</div>
-                            </div>
-                            <div class="legend-item">
-                                <div class="legend-color negative"></div>
-                                <div class="legend-label">Negative</div>
-                                <div class="legend-value">@Math.Round(Model.OverallNegativeSentiment * 100, 1)%</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Strategic Insights -->
-            <div class="insights-section">
-                <div class="insights-card">
-                    <div class="insights-header">
-                        <h2 class="insights-title">
-                            <i class="fas fa-lightbulb"></i>
-                            Strategic Workplace Interventions
-                        </h2>
-                    </div>
-                    <div class="insights-body">
-                        @if (Model.TopWorkplaceIssues?.Any() == true)
-                        {
-                            @foreach (var issue in Model.TopWorkplaceIssues.Take(4))
-                            {
-                                <div class="issue-item priority-@issue.Priority">
-                                    <div class="issue-header">
-                                        <div class="issue-content">
-                                            <div class="issue-category">
-                                                <i class="fas fa-arrow-right"></i>
-                                                @issue.Category
-                                            </div>
-                                            <div class="issue-description">@issue.Issue</div>
-                                            <div class="issue-action">
-                                                <strong>Action:</strong> @issue.RecommendedIntervention
-                                            </div>
-                                        </div>
-                                        <div class="issue-meta">
-                                            <div class="priority-badge priority-@issue.Priority">
-                                                PRIORITY @issue.Priority
-                                            </div>
-                                            <div class="issue-date">
-                                                @issue.IdentifiedAt.ToString("MMM dd").ToUpper()
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            }
-                        }
-                        else
-                        {
-                            <div class="no-issues">
-                                <div class="no-issues-icon">
-                                    <i class="fas fa-check-circle"></i>
-                                </div>
-                                <h3>No Major Issues Identified</h3>
-                                <p>The AI analysis indicates a generally healthy workplace mental health environment.</p>
-                            </div>
-                        }
-                    </div>
-                </div>
-
-                <div class="metrics-panel">
-                    <div class="metrics-header">
-                        <h2 class="metrics-title">
-                            <i class="fas fa-bullseye"></i>
-                            Key Metrics
-                        </h2>
-                    </div>
-                    <div class="metrics-body">
-                        <div class="metric-item">
-                            <div class="metric-header">
-                                <div class="metric-label">Mental Health Score</div>
-                                <div class="metric-value @GetOverallHealthTextClass()">@GetOverallHealthScore()%</div>
-                            </div>
-                            <div class="progress-bar-nexgen">
-                                <div class="progress-fill @GetOverallHealthProgressClass()" style="width: @GetOverallHealthScore()%"></div>
-                            </div>
-                        </div>
-
-                        <div class="metric-item">
-                            <div class="metric-header">
-                                <div class="metric-label">Response Rate</div>
-                                <div class="metric-value info">@Math.Round((double)Model.AnalyzedResponses / Model.TotalResponses * 100, 1)%</div>
-                            </div>
-                            <div class="progress-bar-nexgen">
-                                <div class="progress-fill info" style="width: @((double)Model.AnalyzedResponses / Model.TotalResponses * 100)%"></div>
-                            </div>
-                        </div>
-
-                        <div class="metric-item">
-                            <div class="metric-header">
-                                <div class="metric-label">Cases Requiring Attention</div>
-                                <div class="metric-value @(Model.HighRiskResponses + Model.CriticalRiskResponses > 0 ? "danger" : "success")">
-                                    @(Model.HighRiskResponses + Model.CriticalRiskResponses)
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="metric-item">
-                            <div class="metric-header">
-                                <div class="metric-label">Last Analysis</div>
-                                <div class="metric-value">@Model.LastAnalyzedAt.ToString("MMM dd, HH:mm").ToUpper()</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Executive Summary -->
-            @if (!string.IsNullOrEmpty(Model.ExecutiveSummary))
-            {
-                <div class="executive-summary">
-                    <div class="summary-header">
-                        <div class="summary-title-group">
-                            <h2 class="summary-title">
-                                <i class="fas fa-clipboard-list"></i>
-                                Executive Summary for Leadership
-                            </h2>
-                            <div class="exec-badge">
-                                <i class="fas fa-user-tie"></i>
-                                C-LEVEL SUMMARY
-                            </div>
-                        </div>
-                    </div>
-                    <div class="summary-content">
-                        @Html.Raw(Model.ExecutiveSummary.Replace("\n", "<br />"))
-                    </div>
-                </div>
-            }
-
-            <!-- Action Items and Recommendations -->
-            <div class="actions-section">
-                <div class="actions-card">
-                    <div class="actions-header">
-                        <h2 class="actions-title immediate">
-                            <i class="fas fa-tasks"></i>
-                            Immediate Action Items
-                        </h2>
-                    </div>
-                    <div class="actions-body">
-                        @if (Model.CriticalRiskResponses > 0 || Model.HighRiskResponses > 0)
-                        {
-                            <div class="action-item urgent">
-                                <div class="action-icon">
-                                    <i class="fas fa-exclamation-triangle"></i>
-                                </div>
-                                <div class="action-content">
-                                    <div class="action-title urgent">URGENT: Mental Health Interventions Required</div>
-                                    <div class="action-description">
-                                        @(Model.CriticalRiskResponses + Model.HighRiskResponses) employees require immediate professional attention.
-                                    </div>
-                                    <a href="@Url.Action("HighRiskResponses", new { id = Model.QuestionnaireId })" class="action-button danger">
-                                        <i class="fas fa-user-md"></i> REVIEW HIGH RISK CASES
-                                    </a>
-                                </div>
-                            </div>
-                        }
-
-                        @if (Model.TopWorkplaceIssues?.Any() == true)
-                        {
-                            @foreach (var issue in Model.TopWorkplaceIssues.Where(i => i.Priority >= 4).Take(3))
-                            {
-                                <div class="action-item warning">
-                                    <div class="action-icon">
-                                        <i class="fas fa-arrow-right"></i>
-                                    </div>
-                                    <div class="action-content">
-                                        <div class="action-title warning">@issue.Category</div>
-                                        <div class="action-description">@issue.RecommendedIntervention</div>
-                                        <div class="priority-badge priority-@issue.Priority">
-                                            PRIORITY @issue.Priority
-                                        </div>
-                                    </div>
-                                </div>
-                            }
-                        }
-
-                        @if (Model.CriticalRiskResponses == 0 && Model.HighRiskResponses == 0 && !Model.TopWorkplaceIssues.Any(i => i.Priority >= 4))
-                        {
-                            <div class="no-actions">
-                                <div class="no-actions-icon">
-                                    <i class="fas fa-check-circle"></i>
-                                </div>
-                                <h3>No Immediate Actions Required</h3>
-                                <p>Mental health status is stable with no urgent interventions needed.</p>
-                            </div>
-                        }
-                    </div>
-                </div>
-
-                <div class="actions-card">
-                    <div class="actions-header">
-                        <h2 class="actions-title strategic">
-                            <i class="fas fa-trending-up"></i>
-                            Strategic Recommendations
-                        </h2>
-                    </div>
-                    <div class="actions-body">
-                        @{
-                            var strategicActions = GetStrategicRecommendations();
-                        }
-
-                        @foreach (var action in strategicActions)
-                        {
-                            <div class="strategic-item">
-                                <div class="strategic-header">
-                                    <div class="strategic-content">
-                                        <div class="strategic-title">@action.Title</div>
-                                        <div class="strategic-description">@action.Description</div>
-                                    </div>
-                                    <div class="timeline-badge">@action.Timeline</div>
-                                </div>
-                            </div>
-                        }
-                    </div>
-                </div>
-            </div>
-
-            <!-- Most Common Themes -->
-            @if (Model.MostCommonKeyPhrases?.Any() == true)
-            {
-                <div class="phrases-section">
-                    <div class="phrases-header">
-                        <h2 class="phrases-title">
-                            <i class="fas fa-cloud"></i>
-                            Most Common Employee Concerns
-                        </h2>
-                    </div>
-                    <div class="phrases-body">
-                        <div class="tag-cloud">
-                            @foreach (var phrase in Model.MostCommonKeyPhrases.Take(12))
-                            {
-                                <span class="phrase-tag">@phrase</span>
-                            }
-                        </div>
-                    </div>
-                </div>
-            }
-
-            <!-- Footer Summary -->
-            <div class="footer-summary">
-                <div class="summary-content-wrapper">
-                    <div class="summary-info">
-                        <div class="summary-icon">
-                            <i class="fas fa-info-circle"></i>
-                        </div>
-                        <div class="summary-text">
-                            <div class="summary-title-text">Dashboard Summary</div>
-                            <div class="summary-description">
-                                Analysis of @Model.TotalResponses employee responses shows
-                                @GetOverallHealthStatus().ToLower() workplace mental health with
-                                @(Model.HighRiskResponses + Model.CriticalRiskResponses) cases requiring attention.
-                            </div>
-                        </div>
-                    </div>
-                    <div class="summary-actions">
-                        <a href="@Url.Action("AnalyzeTrends", new { id = Model.QuestionnaireId })" class="summary-btn primary">
-                            <i class="fas fa-chart-area"></i> VIEW TRENDS
-                        </a>
-                        <a href="@Url.Action("AnalyzeQuestionnaire", new { id = Model.QuestionnaireId })" class="summary-btn info">
-                            <i class="fas fa-search"></i> DETAILED ANALYSIS
-                        </a>
+            <div class="nex-card"><div class="top-glow green"></div>
+                <div class="c-head"><div class="c-icon green"><i class="fa-solid fa-heart-pulse"></i></div><div><h3>Sentiment Overview</h3><p>Emotional health distribution</p></div></div>
+                <div class="c-body">
+                    <div class="sent-chart-box"><canvas id="sentimentChart"></canvas></div>
+                    <div class="sent-leg">
+                        <div class="leg-item"><div class="leg-dot pos"></div><div class="leg-lbl">Positive</div><div class="leg-val">@Math.Round(Model.OverallPositiveSentiment * 100, 1)%</div></div>
+                        <div class="leg-item"><div class="leg-dot neu"></div><div class="leg-lbl">Neutral</div><div class="leg-val">@Math.Round(Model.OverallNeutralSentiment * 100, 1)%</div></div>
+                        <div class="leg-item"><div class="leg-dot neg"></div><div class="leg-lbl">Negative</div><div class="leg-val">@Math.Round(Model.OverallNegativeSentiment * 100, 1)%</div></div>
                     </div>
                 </div>
             </div>
         </div>
-    </main>
-</div>
+
+        @* ===== INSIGHTS + METRICS ===== *@
+        <div class="insights-row">
+            <div class="nex-card"><div class="top-glow amber"></div>
+                <div class="c-head"><div class="c-icon amber"><i class="fa-solid fa-lightbulb"></i></div><div><h3>Strategic Workplace Interventions</h3><p>AI-identified priorities</p></div></div>
+                <div class="c-body">
+                    @if (Model.TopWorkplaceIssues?.Any() == true)
+                    {
+                        @foreach (var issue in Model.TopWorkplaceIssues.Take(4))
+                        {
+                            <div class="issue-item p@(issue.Priority)">
+                                <div class="issue-top">
+                                    <div>
+                                        <div class="issue-cat"><i class="fa-solid fa-arrow-right"></i> @issue.Category</div>
+                                        <div class="issue-desc">@issue.Issue</div>
+                                        <div class="issue-action"><strong>Action:</strong> @issue.RecommendedIntervention</div>
+                                    </div>
+                                    <div style="text-align:right">
+                                        <span class="p-badge p@(issue.Priority)">P@issue.Priority</span>
+                                        <div class="issue-date">@issue.IdentifiedAt.ToString("MMM dd").ToUpper()</div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="no-data"><i class="fa-solid fa-circle-check"></i><h4>No Major Issues Identified</h4><p>Claude AI indicates a generally healthy workplace mental health environment.</p></div>
+                    }
+                </div>
+            </div>
+
+            <div class="nex-card"><div class="top-glow indigo"></div>
+                <div class="c-head"><div class="c-icon indigo"><i class="fa-solid fa-bullseye"></i></div><div><h3>Key Metrics</h3><p>Performance indicators</p></div></div>
+                <div class="c-body">
+                    <div class="metric-item">
+                        <div class="metric-row"><span class="metric-lbl">Mental Health Score</span><span class="metric-val @GetHealthMetricClass()">@GetOverallHealthScore()%</span></div>
+                        <div class="bar-track"><div class="bar-fill @GetHealthMetricClass()" style="--w:@(GetOverallHealthScore())%;width:var(--w)"></div></div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-row"><span class="metric-lbl">Response Rate</span><span class="metric-val blue">@Math.Round((double)Model.AnalyzedResponses / Model.TotalResponses * 100, 1)%</span></div>
+                        <div class="bar-track"><div class="bar-fill blue" style="--w:@((double)Model.AnalyzedResponses / Model.TotalResponses * 100)%;width:var(--w)"></div></div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-row"><span class="metric-lbl">Cases Requiring Attention</span><span class="metric-val @(Model.HighRiskResponses + Model.CriticalRiskResponses > 0 ? "red" : "green")">@(Model.HighRiskResponses + Model.CriticalRiskResponses)</span></div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-row"><span class="metric-lbl">Last Analysis</span><span class="metric-val white">@Model.LastAnalyzedAt.ToString("MMM dd, HH:mm").ToUpper()</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @* ===== EXECUTIVE SUMMARY ===== *@
+        @if (!string.IsNullOrEmpty(Model.ExecutiveSummary))
+        {
+            <div class="nex-card">
+                <div class="exec-head">
+                    <h3><i class="fa-solid fa-clipboard-list"></i> Executive Summary for Leadership</h3>
+                    <div class="exec-badge"><i class="fa-solid fa-user-tie"></i> C-LEVEL SUMMARY</div>
+                </div>
+                <div class="exec-body">@Html.Raw(Model.ExecutiveSummary.Replace("\n", "<br />"))</div>
+            </div>
+        }
+
+        @* ===== ACTIONS ===== *@
+        <div class="actions-row">
+            <div class="nex-card"><div class="top-glow red"></div>
+                <div class="c-head"><div class="c-icon red"><i class="fa-solid fa-list-check"></i></div><div><h3>Immediate Action Items</h3><p>Urgent interventions needed</p></div></div>
+                <div class="c-body">
+                    @if (Model.CriticalRiskResponses > 0 || Model.HighRiskResponses > 0)
+                    {
+                        <div class="act-item urgent">
+                            <div class="act-icon red"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                            <div>
+                                <div class="act-title red">URGENT: Mental Health Interventions Required</div>
+                                <div class="act-desc">@(Model.CriticalRiskResponses + Model.HighRiskResponses) employees require immediate professional attention.</div>
+                                <a href="@Url.Action("HighRiskResponses", new { id = Model.QuestionnaireId })" class="h-btn red-fill" style="display:inline-flex;padding:.5rem 1rem;font-size:.6rem"><i class="fa-solid fa-user-doctor"></i> REVIEW HIGH RISK CASES</a>
+                            </div>
+                        </div>
+                    }
+
+                    @if (Model.TopWorkplaceIssues?.Any() == true)
+                    {
+                        @foreach (var issue in Model.TopWorkplaceIssues.Where(i => i.Priority >= 4).Take(3))
+                        {
+                            <div class="act-item warning">
+                                <div class="act-icon yellow"><i class="fa-solid fa-arrow-right"></i></div>
+                                <div>
+                                    <div class="act-title yellow">@issue.Category</div>
+                                    <div class="act-desc">@issue.RecommendedIntervention</div>
+                                    <span class="p-badge p@(issue.Priority)">P@issue.Priority</span>
+                                </div>
+                            </div>
+                        }
+                    }
+
+                    @if (Model.CriticalRiskResponses == 0 && Model.HighRiskResponses == 0 && !Model.TopWorkplaceIssues.Any(i => i.Priority >= 4))
+                    {
+                        <div class="no-data"><i class="fa-solid fa-circle-check"></i><h4>No Immediate Actions Required</h4><p>Mental health status is stable with no urgent interventions needed.</p></div>
+                    }
+                </div>
+            </div>
+
+            <div class="nex-card"><div class="top-glow green"></div>
+                <div class="c-head"><div class="c-icon green"><i class="fa-solid fa-arrow-trend-up"></i></div><div><h3>Strategic Recommendations</h3><p>Long-term improvements</p></div></div>
+                <div class="c-body">
+                    @{ var strategicActions = GetStrategicRecommendations(); }
+                    @foreach (var action in strategicActions)
+                    {
+                        <div class="strat-item">
+                            <div class="strat-top"><div class="strat-title">@action.Title</div><span class="strat-badge">@action.Timeline</span></div>
+                            <div class="strat-desc">@action.Description</div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        @* ===== KEY PHRASES ===== *@
+        @if (Model.MostCommonKeyPhrases?.Any() == true)
+        {
+            <div class="nex-card"><div class="top-glow" style="background:linear-gradient(90deg,var(--neon-pink),var(--neon-purple))"></div>
+                <div class="c-head"><div class="c-icon pink"><i class="fa-solid fa-cloud"></i></div><div><h3>Most Common Employee Concerns</h3><p>Trending themes from responses</p></div></div>
+                <div class="c-body"><div class="tag-cloud">@foreach (var phrase in Model.MostCommonKeyPhrases.Take(12)) { <span class="phrase-tag">@phrase</span> }</div></div>
+            </div>
+        }
+
+        @* ===== FOOTER ===== *@
+        <div class="nex-card">
+            <div class="c-body">
+                <div class="foot-row">
+                    <div class="foot-icon"><i class="fa-solid fa-circle-info"></i></div>
+                    <div class="foot-text">
+                        <strong>Dashboard Summary</strong><br />
+                        <span>Analysis of @Model.TotalResponses employee responses shows @GetOverallHealthStatus().ToLower() workplace mental health with @(Model.HighRiskResponses + Model.CriticalRiskResponses) cases requiring attention.</span>
+                    </div>
+                    <div class="foot-btns">
+                        <a href="@Url.Action("AnalyzeTrends", new { id = Model.QuestionnaireId })" class="h-btn indigo"><i class="fa-solid fa-chart-area"></i> Trends</a>
+                        <a href="@Url.Action("AnalyzeQuestionnaire", new { id = Model.QuestionnaireId })" class="h-btn sec"><i class="fa-solid fa-magnifying-glass"></i> Detail</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 
 @functions {
-    private string GetOverallHealthCardClass()
+    private string GetHealthGlowClass()
     {
         var score = GetOverallHealthScore();
-        if (score >= 75) return "success";
-        if (score >= 50) return "warning";
-        return "danger";
+        if (score >= 75) return "green";
+        if (score >= 50) return "amber";
+        return "red";
+    }
+
+    private string GetHealthMetricClass()
+    {
+        var score = GetOverallHealthScore();
+        if (score >= 75) return "green";
+        if (score >= 50) return "yellow";
+        return "red";
     }
 
     private string GetOverallHealthIcon()
     {
         var score = GetOverallHealthScore();
         if (score >= 75) return "fa-heart";
-        if (score >= 50) return "fa-heartbeat";
-        return "fa-heart-broken";
-    }
-
-    private string GetOverallHealthTextClass()
-    {
-        var score = GetOverallHealthScore();
-        if (score >= 75) return "success";
-        if (score >= 50) return "warning";
-        return "danger";
-    }
-
-    private string GetOverallHealthProgressClass()
-    {
-        var score = GetOverallHealthScore();
-        if (score >= 75) return "success";
-        if (score >= 50) return "warning";
-        return "danger";
+        if (score >= 50) return "fa-heart-pulse";
+        return "fa-heart-crack";
     }
 
     private int GetOverallHealthScore()
     {
-        // Calculate overall health score based on positive sentiment and low risk
         var sentimentScore = Model.OverallPositiveSentiment * 100;
         var riskPenalty = (Model.HighRiskResponses + Model.CriticalRiskResponses * 2) * 10;
         return Math.Max(0, (int)(sentimentScore - riskPenalty));
@@ -1899,7 +481,6 @@
 
     private double GetTagSize(string phrase)
     {
-        // Vary tag size based on importance (simple implementation)
         return phrase.Length > 10 ? 1.1 : 0.9;
     }
 
@@ -1909,37 +490,16 @@
 
         if (Model.HighRiskResponses + Model.CriticalRiskResponses > 0)
         {
-            recommendations.Add(new
-            {
-                Title = "Immediate Mental Health Support",
-                Description = "Deploy emergency mental health resources and professional counseling",
-                Timeline = "24-48 HOURS"
-            });
+            recommendations.Add(new { Title = "Immediate Mental Health Support", Description = "Deploy emergency mental health resources and professional counseling", Timeline = "24-48 HOURS" });
         }
 
         if (Model.OverallNegativeSentiment > 0.4)
         {
-            recommendations.Add(new
-            {
-                Title = "Workplace Culture Assessment",
-                Description = "Conduct comprehensive review of workplace environment and management practices",
-                Timeline = "2-4 WEEKS"
-            });
+            recommendations.Add(new { Title = "Workplace Culture Assessment", Description = "Conduct comprehensive review of workplace environment and management practices", Timeline = "2-4 WEEKS" });
         }
 
-        recommendations.Add(new
-        {
-            Title = "Preventive Mental Health Program",
-            Description = "Implement ongoing mental health awareness and stress management programs",
-            Timeline = "1-3 MONTHS"
-        });
-
-        recommendations.Add(new
-        {
-            Title = "Regular Mental Health Monitoring",
-            Description = "Establish quarterly mental health assessments and trend monitoring",
-            Timeline = "ONGOING"
-        });
+        recommendations.Add(new { Title = "Preventive Mental Health Program", Description = "Implement ongoing mental health awareness and stress management programs", Timeline = "1-3 MONTHS" });
+        recommendations.Add(new { Title = "Regular Mental Health Monitoring", Description = "Establish quarterly mental health assessments and trend monitoring", Timeline = "ONGOING" });
 
         return recommendations;
     }
@@ -1948,133 +508,51 @@
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Chart.js default color settings for dark theme
-            Chart.defaults.color = '#cbd5e1';
-            Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.1)';
-            Chart.defaults.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+    document.addEventListener('DOMContentLoaded', function () {
+        Chart.defaults.color = '#94a3b8';
+        Chart.defaults.borderColor = 'rgba(255,255,255,0.04)';
 
-            // Risk Distribution Chart
-            const riskCtx = document.getElementById('riskDistributionChart').getContext('2d');
-            new Chart(riskCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['Low Risk', 'Moderate', 'High Risk', 'Critical'],
-                    datasets: [{
-                        label: 'Number of Responses',
-                        data: [@Model.LowRiskResponses, @Model.ModerateRiskResponses, @Model.HighRiskResponses, @Model.CriticalRiskResponses],
-                        backgroundColor: [
-                            'rgba(52, 211, 153, 0.8)',   // Neon Green
-                            'rgba(251, 191, 36, 0.8)',   // Neon Yellow
-                            'rgba(248, 113, 113, 0.8)',  // Neon Red
-                            'rgba(127, 29, 29, 0.8)'     // Dark Red
-                        ],
-                        borderColor: [
-                            '#34d399',  // Neon Green
-                            '#fbbf24',  // Neon Yellow
-                            '#f87171',  // Neon Red
-                            '#7f1d1d'   // Dark Red
-                        ],
-                        borderWidth: 2,
-                        borderRadius: 8,
-                        borderSkipped: false,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false }
-                    },
-                    scales: {
-                        x: {
-                            grid: {
-                                color: 'rgba(255, 255, 255, 0.1)',
-                                borderColor: 'rgba(255, 255, 255, 0.2)'
-                            },
-                            ticks: {
-                                color: '#cbd5e1',
-                                font: {
-                                    family: 'JetBrains Mono',
-                                    size: 11
-                                }
-                            }
-                        },
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                color: 'rgba(255, 255, 255, 0.1)',
-                                borderColor: 'rgba(255, 255, 255, 0.2)'
-                            },
-                            ticks: {
-                                stepSize: 1,
-                                color: '#cbd5e1',
-                                font: {
-                                    family: 'JetBrains Mono',
-                                    size: 11
-                                }
-                            }
-                        }
-                    }
+        // Risk Distribution Bar Chart
+        new Chart(document.getElementById('riskDistributionChart').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: ['Low Risk', 'Moderate', 'High Risk', 'Critical'],
+                datasets: [{
+                    label: 'Responses',
+                    data: [@Model.LowRiskResponses, @Model.ModerateRiskResponses, @Model.HighRiskResponses, @Model.CriticalRiskResponses],
+                    backgroundColor: ['rgba(52,211,153,0.35)','rgba(251,191,36,0.35)','rgba(248,113,113,0.35)','rgba(239,68,68,0.35)'],
+                    borderColor: ['rgba(52,211,153,0.6)','rgba(251,191,36,0.6)','rgba(248,113,113,0.6)','rgba(239,68,68,0.6)'],
+                    borderWidth: 2, borderRadius: 8, borderSkipped: false
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(15,23,42,0.92)', titleFont: { family: 'JetBrains Mono', weight: 'bold' }, bodyFont: { family: 'Space Grotesk' }, borderColor: 'rgba(129,140,248,0.3)', borderWidth: 1, cornerRadius: 8 } },
+                scales: {
+                    x: { grid: { display: false }, ticks: { font: { family: 'JetBrains Mono', size: 10 } } },
+                    y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { stepSize: 1, font: { family: 'JetBrains Mono', size: 10 } } }
                 }
-            });
-
-            // Sentiment Pie Chart
-            const sentimentCtx = document.getElementById('sentimentChart').getContext('2d');
-            new Chart(sentimentCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Positive', 'Neutral', 'Negative'],
-                    datasets: [{
-                        data: [
-                            @Math.Round(Model.OverallPositiveSentiment * 100, 1),
-                            @Math.Round(Model.OverallNeutralSentiment * 100, 1),
-                            @Math.Round(Model.OverallNegativeSentiment * 100, 1)
-                        ],
-                        backgroundColor: [
-                            '#34d399',  // Neon Green
-                            '#64748b',  // Gray
-                            '#f87171'   // Neon Red
-                        ],
-                        borderColor: [
-                            '#34d399',
-                            '#64748b',
-                            '#f87171'
-                        ],
-                        borderWidth: 2,
-                        hoverBorderWidth: 3,
-                        hoverBorderColor: '#ffffff'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            backgroundColor: 'rgba(15, 23, 42, 0.95)',
-                            titleColor: '#ffffff',
-                            bodyColor: '#cbd5e1',
-                            borderColor: 'rgba(96, 165, 250, 0.3)',
-                            borderWidth: 1,
-                            cornerRadius: 8,
-                            titleFont: {
-                                family: 'JetBrains Mono',
-                                weight: 'bold'
-                            },
-                            bodyFont: {
-                                family: 'Space Grotesk'
-                            }
-                        }
-                    },
-                    cutout: '70%',
-                    elements: {
-                        arc: {
-                            borderWidth: 0
-                        }
-                    }
-                }
-            });
+            }
         });
+
+        // Sentiment Doughnut
+        new Chart(document.getElementById('sentimentChart').getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Positive', 'Neutral', 'Negative'],
+                datasets: [{
+                    data: [@Math.Round(Model.OverallPositiveSentiment * 100, 1), @Math.Round(Model.OverallNeutralSentiment * 100, 1), @Math.Round(Model.OverallNegativeSentiment * 100, 1)],
+                    backgroundColor: ['rgba(52,211,153,0.8)','rgba(100,116,139,0.6)','rgba(248,113,113,0.8)'],
+                    borderColor: ['#34d399','#64748b','#f87171'],
+                    borderWidth: 2, hoverBorderWidth: 3, hoverBorderColor: '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(15,23,42,0.92)', titleFont: { family: 'JetBrains Mono', weight: 'bold' }, bodyFont: { family: 'Space Grotesk' }, borderColor: 'rgba(129,140,248,0.3)', borderWidth: 1, cornerRadius: 8 } },
+                cutout: '70%'
+            }
+        });
+    });
     </script>
 }

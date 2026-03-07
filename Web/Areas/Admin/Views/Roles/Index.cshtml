@@ -1,58 +1,746 @@
-﻿@model IEnumerable<RoleViewModel>
+﻿@* Views/Admin/Roles/Index.cshtml *@
+@model IEnumerable<RoleViewModel>
+
+@using Web.ViewModel.AccountVM
+@using Web.Authorization
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Role Management";
+    var permissionGroups = ViewBag.PermissionGroups as Dictionary<string, List<PermissionItem>>;
 }
 
+@section Styles {
+<style>
+    @@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
 
+    :root {
+        --nex-orange: #fb923c;
+        --nex-amber: #fbbf24;
+        --nex-yellow: #facc15;
+        --nex-blue: #60a5fa;
+        --nex-cyan: #22d3ee;
+        --nex-purple: #c084fc;
+        --nex-red: #f87171;
+        --nex-emerald: #34d399;
+        --nex-teal: #14b8a6;
+        --dark-900: #0f172a;
+        --dark-800: #1e293b;
+        --dark-700: #334155;
+        --dark-600: #475569;
+        --dark-500: #64748b;
+        --dark-400: #94a3b8;
+        --dark-300: #cbd5e1;
+        --glass-bg: rgba(255,255,255,0.04);
+        --glass-border: rgba(255,255,255,0.08);
+        --font-main: 'Space Grotesk', sans-serif;
+        --font-mono: 'JetBrains Mono', monospace;
+    }
 
-<div class="container mt-5">
-    <partial name="_Notification" />
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:var(--font-main); background:var(--dark-900); color:#e2e8f0; overflow-x:hidden; }
 
-    <div class="card bg-default mb-3">
-        <div class="card-header">Roles</div>
-        <div class="card-body">
-            <p>
-                <a asp-action="Create" class="btn btn-primary">Create New</a>
-            </p>
-            <h4 class="card-title">Roles List</h4>
-            <form asp-action="DeleteMultiple" method="post">
-                <table class="table table-responsive w-100 d-block d-md-table">
-                    <thead class="w-100">
-                        <tr>
-                            <th>
-                                <input type="checkbox" onclick="selectAll(this)" title="Select/Deselect All" />
-                            </th>
-                            <th>Role Name</th>
-                            <th class="text-end">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody class="w-100">
-                        @foreach (var item in Model)
+    .nex-bg { position:fixed; inset:0; z-index:-1; overflow:hidden; }
+    .nex-bg .grid { position:absolute; inset:0; background-image:linear-gradient(rgba(251,146,60,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(251,146,60,0.04) 1px,transparent 1px); background-size:60px 60px; }
+    .nex-bg .mesh { position:absolute; inset:0; background:radial-gradient(circle at 15% 25%,rgba(251,146,60,0.08) 0%,transparent 50%),radial-gradient(circle at 85% 55%,rgba(192,132,252,0.06) 0%,transparent 50%),radial-gradient(circle at 50% 85%,rgba(96,165,250,0.05) 0%,transparent 50%); }
+
+    .page-header { position:relative; z-index:10; padding:2.5rem 0 1.5rem; }
+    .container { max-width:1400px; margin:0 auto; padding:0 2rem; }
+
+    .breadcrumb-nex { display:flex; align-items:center; gap:0.75rem; font-family:var(--font-mono); font-size:0.72rem; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:1.5rem; flex-wrap:wrap; }
+    .breadcrumb-nex a { color:var(--dark-400); text-decoration:none; transition:color .2s; }
+    .breadcrumb-nex a:hover { color:var(--nex-orange); }
+    .breadcrumb-nex .sep { color:var(--dark-600); font-size:0.55rem; }
+    .breadcrumb-nex .current { color:var(--nex-orange); }
+
+    .header-row { display:flex; align-items:flex-start; justify-content:space-between; gap:2rem; flex-wrap:wrap; }
+    .header-badge { display:inline-flex; align-items:center; gap:0.5rem; padding:0.4rem 1rem; background:rgba(251,146,60,0.1); border:1px solid rgba(251,146,60,0.25); border-radius:50px; font-family:var(--font-mono); font-size:0.65rem; font-weight:600; color:var(--nex-orange); letter-spacing:0.1em; margin-bottom:1rem; }
+    .header-badge .dot { width:6px; height:6px; border-radius:50%; background:var(--nex-orange); animation:pulse-dot 2s ease infinite; }
+    @@keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+    .header-title { font-size:2.2rem; font-weight:700; color:#f8fafc; line-height:1.2; margin-bottom:0.5rem; }
+    .header-title .grad { background:linear-gradient(135deg, var(--nex-orange), var(--nex-amber)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .header-sub { color:var(--dark-400); font-size:0.9rem; }
+    .header-actions { display:flex; gap:0.75rem; flex-wrap:wrap; padding-top:0.5rem; }
+
+    .h-btn { display:inline-flex; align-items:center; gap:0.5rem; padding:0.6rem 1.3rem; border-radius:10px; font-family:var(--font-main); font-size:0.82rem; font-weight:600; border:none; cursor:pointer; transition:all .25s; text-decoration:none; }
+    .h-btn.pri { background:linear-gradient(135deg, var(--nex-orange), var(--nex-amber)); color:#fff; }
+    .h-btn.pri:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(251,146,60,0.3); }
+    .h-btn.sec { background:var(--glass-bg); border:1px solid var(--glass-border); color:#e2e8f0; }
+    .h-btn.sec:hover { background:rgba(251,146,60,0.1); border-color:rgba(251,146,60,0.3); color:var(--nex-orange); }
+    .h-btn.danger { background:rgba(248,113,113,0.15); border:1px solid rgba(248,113,113,0.3); color:var(--nex-red); }
+    .h-btn.danger:hover { background:rgba(248,113,113,0.25); transform:translateY(-2px); }
+    .h-btn:disabled { opacity:0.5; cursor:not-allowed; transform:none !important; }
+
+    /* Stats */
+    .stats-row { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin-bottom:2rem; }
+    .stat-chip { background:var(--glass-bg); border:1px solid var(--glass-border); border-radius:14px; padding:1.2rem 1.5rem; display:flex; align-items:center; gap:1rem; transition:all .3s; }
+    .stat-chip:hover { border-color:rgba(251,146,60,0.2); transform:translateY(-2px); }
+    .stat-chip .s-icon { width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0; }
+    .stat-chip .s-icon.orange { background:rgba(251,146,60,0.15); color:var(--nex-orange); }
+    .stat-chip .s-icon.purple { background:rgba(192,132,252,0.15); color:var(--nex-purple); }
+    .stat-chip .s-icon.blue { background:rgba(96,165,250,0.15); color:var(--nex-blue); }
+    .stat-chip .s-val { font-size:1.6rem; font-weight:700; color:#f8fafc; line-height:1; }
+    .stat-chip .s-lbl { font-size:0.72rem; color:var(--dark-400); text-transform:uppercase; letter-spacing:0.05em; font-family:var(--font-mono); margin-top:2px; }
+
+    /* Card */
+    .nex-card { background:var(--glass-bg); border:1px solid var(--glass-border); border-radius:16px; backdrop-filter:blur(12px); position:relative; overflow:hidden; }
+    .nex-card .top-glow { position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,transparent,var(--nex-orange),transparent); opacity:0.6; }
+
+    .tbl-head { display:flex; align-items:center; justify-content:space-between; padding:1.25rem 1.5rem; border-bottom:1px solid var(--glass-border); flex-wrap:wrap; gap:1rem; }
+    .tbl-title { display:flex; align-items:center; gap:0.75rem; font-size:1rem; font-weight:600; color:#f8fafc; }
+    .tbl-title i { color:var(--nex-orange); }
+    .tbl-count { font-family:var(--font-mono); font-size:0.7rem; color:var(--dark-400); background:rgba(251,146,60,0.1); padding:0.25rem 0.65rem; border-radius:6px; border:1px solid rgba(251,146,60,0.2); }
+
+    /* Table */
+    .role-table { width:100%; border-collapse:collapse; }
+    .role-table thead th { padding:0.85rem 1.5rem; text-align:left; font-family:var(--font-mono); font-size:0.68rem; font-weight:600; color:var(--dark-400); text-transform:uppercase; letter-spacing:0.08em; border-bottom:1px solid var(--glass-border); background:rgba(255,255,255,0.02); }
+    .role-table thead th:first-child { width:50px; text-align:center; }
+    .role-table thead th:last-child { text-align:right; }
+    .role-table tbody tr { border-bottom:1px solid rgba(255,255,255,0.04); transition:background .2s; }
+    .role-table tbody tr:hover { background:rgba(251,146,60,0.04); }
+    .role-table tbody tr:last-child { border-bottom:none; }
+    .role-table tbody td { padding:0.9rem 1.5rem; font-size:0.88rem; vertical-align:middle; }
+    .role-table tbody td:first-child { text-align:center; }
+    .role-table tbody td:last-child { text-align:right; }
+
+    .nex-check { width:18px; height:18px; accent-color:var(--nex-orange); cursor:pointer; }
+
+    .role-icon { width:38px; height:38px; border-radius:10px; display:inline-flex; align-items:center; justify-content:center; font-size:1rem; margin-right:0.75rem; vertical-align:middle; }
+    .role-name { font-weight:600; color:#f1f5f9; }
+
+    /* Permission pills in table */
+    .perm-pill { display:inline-flex; align-items:center; gap:0.25rem; padding:0.2rem 0.55rem; border-radius:5px; font-size:0.65rem; font-weight:600; font-family:var(--font-mono); margin:0.15rem; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); color:var(--dark-300); }
+    .perm-pill.has { background:rgba(52,211,153,0.1); border-color:rgba(52,211,153,0.2); color:var(--nex-emerald); }
+    .perm-more { font-size:0.7rem; color:var(--dark-400); cursor:pointer; padding:0.2rem 0.5rem; border-radius:5px; background:rgba(255,255,255,0.05); }
+    .perm-more:hover { color:var(--nex-orange); }
+
+    .act-btn { display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:8px; border:1px solid var(--glass-border); background:var(--glass-bg); color:var(--dark-300); cursor:pointer; transition:all .2s; font-size:0.82rem; margin-left:0.35rem; }
+    .act-btn:hover { transform:translateY(-1px); }
+    .act-btn.edit:hover { background:rgba(96,165,250,0.15); border-color:rgba(96,165,250,0.3); color:var(--nex-blue); }
+    .act-btn.del:hover { background:rgba(248,113,113,0.15); border-color:rgba(248,113,113,0.3); color:var(--nex-red); }
+
+    .tbl-foot { display:flex; align-items:center; justify-content:space-between; padding:1rem 1.5rem; border-top:1px solid var(--glass-border); flex-wrap:wrap; gap:0.75rem; }
+    .selected-info { font-family:var(--font-mono); font-size:0.72rem; color:var(--dark-400); }
+    .selected-info span { color:var(--nex-orange); font-weight:600; }
+
+    /* Modal */
+    .modal-overlay { display:none; position:fixed; inset:0; z-index:9999; background:rgba(2,6,23,0.8); backdrop-filter:blur(8px); align-items:center; justify-content:center; padding:2rem; }
+    .modal-overlay.active { display:flex; animation:fadeIn .25s ease; }
+    @@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+
+    .modal-box { background:var(--dark-800); border:1px solid var(--glass-border); border-radius:20px; width:100%; max-width:620px; max-height:90vh; overflow-y:auto; position:relative; animation:slideUp .3s ease; }
+    @@keyframes slideUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+
+    .modal-box .m-glow { position:absolute; top:0; left:0; right:0; height:3px; border-radius:20px 20px 0 0; }
+    .modal-box .m-glow.orange { background:linear-gradient(90deg,var(--nex-orange),var(--nex-amber)); }
+    .modal-box .m-glow.blue { background:linear-gradient(90deg,var(--nex-blue),var(--nex-cyan)); }
+    .modal-box .m-glow.red { background:linear-gradient(90deg,var(--nex-red),#dc2626); }
+
+    .m-header { display:flex; align-items:center; justify-content:space-between; padding:1.5rem 1.75rem 1rem; }
+    .m-header-left { display:flex; align-items:center; gap:0.85rem; }
+    .m-header-icon { width:42px; height:42px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.1rem; }
+    .m-header-icon.orange { background:rgba(251,146,60,0.15); color:var(--nex-orange); }
+    .m-header-icon.blue { background:rgba(96,165,250,0.15); color:var(--nex-blue); }
+    .m-header-icon.red { background:rgba(248,113,113,0.15); color:var(--nex-red); }
+    .m-header h3 { font-size:1.1rem; font-weight:700; color:#f8fafc; }
+    .m-header p { font-size:0.78rem; color:var(--dark-400); margin-top:2px; }
+    .m-close { width:36px; height:36px; border-radius:10px; border:1px solid var(--glass-border); background:none; color:var(--dark-400); display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all .2s; font-size:0.9rem; }
+    .m-close:hover { background:rgba(248,113,113,0.15); border-color:rgba(248,113,113,0.3); color:var(--nex-red); }
+
+    .m-body { padding:0.5rem 1.75rem 1.5rem; }
+
+    .f-group { margin-bottom:1.1rem; }
+    .f-label { display:block; font-family:var(--font-mono); font-size:0.7rem; font-weight:600; color:var(--dark-300); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:0.45rem; }
+    .f-input { width:100%; padding:0.65rem 1rem; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); border-radius:10px; color:#e2e8f0; font-family:var(--font-main); font-size:0.88rem; outline:none; transition:border-color .2s, box-shadow .2s; }
+    .f-input:focus { border-color:rgba(251,146,60,0.5); box-shadow:0 0 0 3px rgba(251,146,60,0.1); }
+    .f-input::placeholder { color:var(--dark-500); }
+
+    /* Permission groups */
+    .perm-groups { max-height:350px; overflow-y:auto; padding-right:0.5rem; }
+    .perm-groups::-webkit-scrollbar { width:4px; }
+    .perm-groups::-webkit-scrollbar-track { background:transparent; }
+    .perm-groups::-webkit-scrollbar-thumb { background:var(--dark-600); border-radius:4px; }
+
+    .perm-group { margin-bottom:1rem; }
+    .perm-group-head { display:flex; align-items:center; justify-content:space-between; padding:0.5rem 0.75rem; background:rgba(255,255,255,0.03); border:1px solid var(--glass-border); border-radius:10px 10px 0 0; cursor:pointer; }
+    .perm-group-head h5 { font-size:0.78rem; font-weight:700; color:var(--dark-200); display:flex; align-items:center; gap:0.5rem; }
+    .perm-group-head h5 i { color:var(--nex-orange); font-size:0.75rem; }
+    .perm-group-toggle { font-size:0.65rem; color:var(--nex-orange); cursor:pointer; font-family:var(--font-mono); font-weight:600; background:none; border:none; padding:0.2rem 0.5rem; border-radius:4px; }
+    .perm-group-toggle:hover { background:rgba(251,146,60,0.1); }
+
+    .perm-group-body { border:1px solid var(--glass-border); border-top:none; border-radius:0 0 10px 10px; padding:0.6rem 0.75rem; display:flex; flex-wrap:wrap; gap:0.4rem; }
+
+    .perm-chip { position:relative; }
+    .perm-chip input { position:absolute; opacity:0; pointer-events:none; }
+    .perm-chip label { display:inline-flex; align-items:center; gap:0.35rem; padding:0.35rem 0.7rem; border-radius:7px; border:1px solid var(--glass-border); background:var(--glass-bg); color:var(--dark-400); font-size:0.72rem; font-weight:600; cursor:pointer; transition:all .2s; font-family:var(--font-mono); }
+    .perm-chip input:checked + label { background:rgba(251,146,60,0.15); border-color:rgba(251,146,60,0.4); color:var(--nex-orange); }
+    .perm-chip label:hover { border-color:rgba(251,146,60,0.3); }
+    .perm-chip label i { font-size:0.65rem; }
+
+    .m-footer { display:flex; align-items:center; justify-content:flex-end; gap:0.75rem; padding:1rem 1.75rem 1.5rem; border-top:1px solid var(--glass-border); }
+
+    .modal-errors { margin-bottom:1rem; padding:0.75rem 1rem; background:rgba(248,113,113,0.1); border:1px solid rgba(248,113,113,0.25); border-radius:10px; display:none; }
+    .modal-errors ul { list-style:none; padding:0; margin:0; }
+    .modal-errors li { font-size:0.8rem; color:var(--nex-red); padding:0.15rem 0; display:flex; align-items:center; gap:0.4rem; }
+    .modal-errors li i { font-size:0.7rem; }
+
+    .nex-toast { position:fixed; top:1.5rem; right:1.5rem; z-index:99999; padding:0.85rem 1.5rem; border-radius:12px; font-size:0.85rem; font-weight:600; display:flex; align-items:center; gap:0.6rem; animation:slideIn .3s ease,fadeOut .3s ease 2.7s forwards; pointer-events:none; }
+    .nex-toast.success { background:rgba(52,211,153,0.15); border:1px solid rgba(52,211,153,0.3); color:var(--nex-emerald); backdrop-filter:blur(12px); }
+    .nex-toast.error { background:rgba(248,113,113,0.15); border:1px solid rgba(248,113,113,0.3); color:var(--nex-red); backdrop-filter:blur(12px); }
+    @@keyframes slideIn { from{opacity:0;transform:translateX(30px)} to{opacity:1;transform:translateX(0)} }
+    @@keyframes fadeOut { to{opacity:0;transform:translateY(-10px)} }
+
+    .del-warning { font-size:0.82rem; color:var(--dark-300); line-height:1.6; }
+    .del-warning strong { color:var(--nex-red); }
+
+    .btn-spinner { display:none; width:16px; height:16px; border:2px solid rgba(255,255,255,0.3); border-top-color:#fff; border-radius:50%; animation:spin .6s linear infinite; }
+    @@keyframes spin { to{transform:rotate(360deg)} }
+
+    .empty-state { text-align:center; padding:4rem 2rem; }
+    .empty-state i { font-size:3rem; color:var(--dark-600); margin-bottom:1rem; }
+    .empty-state h4 { color:var(--dark-300); font-size:1.1rem; margin-bottom:0.5rem; }
+    .empty-state p { color:var(--dark-500); font-size:0.85rem; }
+
+    @@media(max-width:768px) {
+        .header-row { flex-direction:column; }
+        .stats-row { grid-template-columns:1fr; }
+        .tbl-head { flex-direction:column; align-items:flex-start; }
+        .role-table { display:block; overflow-x:auto; }
+        .modal-box { max-width:100%; }
+    }
+</style>
+}
+
+<div class="nex-bg"><div class="grid"></div><div class="mesh"></div></div>
+
+<!-- Header -->
+<section class="page-header">
+    <div class="container">
+        <div class="breadcrumb-nex">
+            <a href="@Url.Action("Index", "Dashboard")"><i class="fa-solid fa-gauge-high"></i> Admin</a>
+            <i class="fa-solid fa-chevron-right sep"></i>
+            <span class="current">Role Management</span>
+        </div>
+        <div class="header-row">
+            <div>
+                <div class="header-badge"><span class="dot"></span> PERMISSION & ACCESS CONTROL</div>
+                <h1 class="header-title">Role <span class="grad">Management</span></h1>
+                <p class="header-sub">Define roles and assign granular permissions for system access</p>
+            </div>
+            <div class="header-actions">
+                <button type="button" class="h-btn pri" onclick="if(checkPermission(rolePermissions.canCreate)) openCreateModal()">
+    <i class="fa-solid fa-plus"></i> New Role
+</button>
+              <button type="button" class="h-btn danger d-none" id="bulkDeleteBtn"
+        onclick="if(checkPermission(rolePermissions.canDelete)) confirmBulkDelete()">
+    <i class="fa-solid fa-trash-can"></i> Delete Selected
+</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats -->
+<section style="position:relative;z-index:10;padding:0 0 1.5rem">
+    <div class="container">
+        @{
+            var totalRoles = Model.Count();
+            var totalPerms = Permissions.GetAll().Count;
+            var avgPerms = totalRoles > 0 ? (int)Model.Average(r => r.SelectedPermissions?.Count ?? 0) : 0;
+        }
+        <div class="stats-row">
+            <div class="stat-chip">
+                <div class="s-icon orange"><i class="fa-solid fa-shield-halved"></i></div>
+                <div><div class="s-val">@totalRoles</div><div class="s-lbl">Total Roles</div></div>
+            </div>
+            <div class="stat-chip">
+                <div class="s-icon purple"><i class="fa-solid fa-key"></i></div>
+                <div><div class="s-val">@totalPerms</div><div class="s-lbl">Available Permissions</div></div>
+            </div>
+            <div class="stat-chip">
+                <div class="s-icon blue"><i class="fa-solid fa-chart-bar"></i></div>
+                <div><div class="s-val">@avgPerms</div><div class="s-lbl">Avg Permissions / Role</div></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Roles Table -->
+<section style="position:relative;z-index:10;padding-bottom:3rem;">
+    <div class="container">
+        <partial name="_Notification" />
+
+        <form asp-action="DeleteMultiple" method="post" id="deleteForm">
+            @Html.AntiForgeryToken()
+            <div class="nex-card">
+                <div class="top-glow"></div>
+
+                <div class="tbl-head">
+                    <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+                        <div class="tbl-title"><i class="fa-solid fa-shield-halved"></i> System Roles</div>
+                        <div class="tbl-count">@totalRoles defined</div>
+                    </div>
+                </div>
+
+              @if (Model.Any())
+{
+    <table class="role-table" id="roleTable">
+        <thead>
+            <tr>
+                <th><input type="checkbox" class="nex-check" id="selectAll" onclick="toggleAll(this.checked)" /></th>
+                <th>Role</th>
+                <th>Permissions</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                var roleColors = new Dictionary<string, string> {
+                    {"admin", "#f87171"}, {"user", "#60a5fa"}, {"manager", "#fbbf24"},
+                    {"developer", "#c084fc"}, {"viewer", "#34d399"}, {"editor", "#22d3ee"}
+                };
+                var roleIcons = new Dictionary<string, string> {
+                    {"admin", "fa-solid fa-crown"}, {"user", "fa-solid fa-user"},
+                    {"manager", "fa-solid fa-user-tie"}, {"developer", "fa-solid fa-code"},
+                    {"viewer", "fa-solid fa-eye"}, {"editor", "fa-solid fa-pen-nib"}
+                };
+            }
+            @foreach (var role in Model)
+            {
+                var key = role.Name?.ToLower() ?? "";
+                var color = roleColors.ContainsKey(key) ? roleColors[key] : "#fb923c";
+                var icon = roleIcons.ContainsKey(key) ? roleIcons[key] : "fa-solid fa-shield-halved";
+                var permCount = role.SelectedPermissions?.Count ?? 0;
+                var permsStr = role.SelectedPermissions != null ? string.Join(",", role.SelectedPermissions) : "";
+
+                <tr>
+                    <td><input type="checkbox" class="nex-check" name="selectedRoles" value="@role.Id" onchange="updateSelectionCount()" /></td>
+                    <td>
+                        <div class="role-icon" style="background:@(color)20; color:@color"><i class="@icon"></i></div>
+                        <span class="role-name">@role.Name</span>
+                    </td>
+                    <td>
+                        @if (permCount == 0)
                         {
-                            <tr>
-                                <td><input type="checkbox" name="selectedRoles" value="@item.Id" /></td>
-                                <td>@item.Name</td>
-                                <td class="text-end">
-                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-info btn-sm">Edit</a>
-                                </td>
-                            </tr>
+                            <span style="font-size:0.78rem;color:var(--dark-500);font-style:italic"><i class="fa-solid fa-lock"></i> No permissions assigned</span>
                         }
-                    </tbody>
-                </table>
-                <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete the selected roles?');">Delete Selected</button>
+                        else if (permCount == totalPerms)
+                        {
+                            <span class="perm-pill has"><i class="fa-solid fa-check"></i> All permissions (@permCount)</span>
+                        }
+                        else
+                        {
+                            @foreach (var perm in role.SelectedPermissions!.Take(4))
+                            {
+                                <span class="perm-pill has"><i class="fa-solid fa-check"></i> @perm.Split('.').Last()</span>
+                            }
+                            @if (permCount > 4)
+                            {
+                                <span class="perm-more" onclick="if(checkPermission(rolePermissions.canEdit)) openEditModal('@role.Id')">+@(permCount - 4) more</span>
+                            }
+                        }
+                    </td>
+                    <td>
+                        <button type="button" class="act-btn edit" title="Edit role"
+                                onclick="if(checkPermission(rolePermissions.canEdit)) openEditModal('@role.Id')">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </button>
+                        <button type="button" class="act-btn del" title="Delete role"
+                                onclick="if(checkPermission(rolePermissions.canDelete)) openDeleteModal('@role.Id', '@Html.Raw(role.Name?.Replace("'", "\\'"))')">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+                else
+                {
+                    <div class="empty-state">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <h4>No roles defined</h4>
+                        <p>Create your first role to start managing access</p>
+                    </div>
+                }
+
+                <div class="tbl-foot">
+                    <div class="selected-info"><span id="selCount">0</span> of @totalRoles selected</div>
+                    <div style="font-family:var(--font-mono);font-size:0.7rem;color:var(--dark-500);">@DateTime.Now.ToString("MMM dd, yyyy HH:mm")</div>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+
+<!-- ═══════════ CREATE MODAL ═══════════ -->
+<div class="modal-overlay" id="createModal">
+    <div class="modal-box">
+        <div class="m-glow orange"></div>
+        <div class="m-header">
+            <div class="m-header-left">
+                <div class="m-header-icon orange"><i class="fa-solid fa-plus"></i></div>
+                <div><h3>Create New Role</h3><p>Define a role with specific permissions</p></div>
+            </div>
+            <button type="button" class="m-close" onclick="closeModal('createModal')"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <form id="createForm" novalidate>
+            @Html.AntiForgeryToken()
+            <div class="m-body">
+                <div id="createErrors" class="modal-errors"><ul></ul></div>
+                <div class="f-group">
+                    <label class="f-label"><i class="fa-solid fa-shield-halved"></i> Role Name *</label>
+                    <input type="text" name="Name" class="f-input" placeholder="e.g. Developer, Viewer, Manager" required />
+                </div>
+                <div class="f-group">
+                    <label class="f-label"><i class="fa-solid fa-key"></i> Permissions</label>
+                    <div class="perm-groups" id="createPermGroups">
+                        @if (permissionGroups != null)
+                        {
+                            @foreach (var group in permissionGroups)
+                            {
+                                <div class="perm-group">
+                                    <div class="perm-group-head">
+                                        <h5><i class="fa-solid fa-folder"></i> @group.Key</h5>
+                                        <button type="button" class="perm-group-toggle" onclick="toggleGroupPerms(this, 'create')">Select All</button>
+                                    </div>
+                                    <div class="perm-group-body">
+                                        @foreach (var perm in group.Value)
+                                        {
+                                            <div class="perm-chip">
+                                                <input type="checkbox" name="SelectedPermissions" value="@perm.Value" id="create_@perm.Value.Replace(".", "_")" />
+                                                <label for="create_@perm.Value.Replace(".", "_")"><i class="@perm.Icon"></i> @perm.DisplayName</label>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="m-footer">
+                <button type="button" class="h-btn sec" onclick="closeModal('createModal')"><i class="fa-solid fa-xmark"></i> Cancel</button>
+                <button type="submit" class="h-btn pri" id="createSubmitBtn">
+                    <div class="btn-spinner" id="createSpinner"></div>
+                    <i class="fa-solid fa-plus" id="createIcon"></i> Create Role
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ═══════════ EDIT MODAL ═══════════ -->
+<div class="modal-overlay" id="editModal">
+    <div class="modal-box">
+        <div class="m-glow blue"></div>
+        <div class="m-header">
+            <div class="m-header-left">
+                <div class="m-header-icon blue"><i class="fa-solid fa-pen-to-square"></i></div>
+                <div><h3>Edit Role</h3><p>Update role name and permissions</p></div>
+            </div>
+            <button type="button" class="m-close" onclick="closeModal('editModal')"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <form id="editForm" novalidate>
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="Id" id="editId" />
+            <div class="m-body">
+                <div id="editErrors" class="modal-errors"><ul></ul></div>
+                <div class="f-group">
+                    <label class="f-label"><i class="fa-solid fa-shield-halved"></i> Role Name *</label>
+                    <input type="text" name="Name" id="editName" class="f-input" required />
+                </div>
+                <div class="f-group">
+                    <label class="f-label"><i class="fa-solid fa-key"></i> Permissions</label>
+                    <div class="perm-groups" id="editPermGroups">
+                        @if (permissionGroups != null)
+                        {
+                            @foreach (var group in permissionGroups)
+                            {
+                                <div class="perm-group">
+                                    <div class="perm-group-head">
+                                        <h5><i class="fa-solid fa-folder"></i> @group.Key</h5>
+                                        <button type="button" class="perm-group-toggle" onclick="toggleGroupPerms(this, 'edit')">Select All</button>
+                                    </div>
+                                    <div class="perm-group-body">
+                                        @foreach (var perm in group.Value)
+                                        {
+                                            <div class="perm-chip">
+                                                <input type="checkbox" name="SelectedPermissions" value="@perm.Value" id="edit_@perm.Value.Replace(".", "_")" />
+                                                <label for="edit_@perm.Value.Replace(".", "_")"><i class="@perm.Icon"></i> @perm.DisplayName</label>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="m-footer">
+                <button type="button" class="h-btn sec" onclick="closeModal('editModal')"><i class="fa-solid fa-xmark"></i> Cancel</button>
+                <button type="submit" class="h-btn pri" id="editSubmitBtn" style="background:linear-gradient(135deg,var(--nex-blue),var(--nex-cyan))">
+                    <div class="btn-spinner" id="editSpinner"></div>
+                    <i class="fa-solid fa-floppy-disk" id="editIcon"></i> Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ═══════════ DELETE MODAL ═══════════ -->
+<div class="modal-overlay" id="deleteModal">
+    <div class="modal-box" style="max-width:460px">
+        <div class="m-glow red"></div>
+        <div class="m-header">
+            <div class="m-header-left">
+                <div class="m-header-icon red"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                <div><h3>Delete Role</h3><p>This action cannot be undone</p></div>
+            </div>
+            <button type="button" class="m-close" onclick="closeModal('deleteModal')"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="m-body">
+            <p class="del-warning">
+                <i class="fa-solid fa-circle-exclamation"></i> You are about to <strong>permanently delete</strong> the role
+                "<strong id="delRoleName">Role</strong>". All users currently assigned this role will lose its associated permissions.
+                This action is <strong>irreversible</strong>.
+            </p>
+        </div>
+        <div class="m-footer">
+            <button type="button" class="h-btn sec" onclick="closeModal('deleteModal')"><i class="fa-solid fa-xmark"></i> Cancel</button>
+            <form id="singleDeleteForm" asp-action="DeleteMultiple" method="post" style="display:inline">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="selectedRoles" id="delRoleId" />
+                <button type="submit" class="h-btn danger"><i class="fa-solid fa-trash-can"></i> Delete Role</button>
             </form>
         </div>
     </div>
 </div>
 
+<!-- ═══════════ BULK DELETE MODAL ═══════════ -->
+<div class="modal-overlay" id="bulkDeleteModal">
+    <div class="modal-box" style="max-width:460px">
+        <div class="m-glow red"></div>
+        <div class="m-header">
+            <div class="m-header-left">
+                <div class="m-header-icon red"><i class="fa-solid fa-shield-halved"></i></div>
+                <div><h3>Delete Selected Roles</h3><p>Bulk removal confirmation</p></div>
+            </div>
+            <button type="button" class="m-close" onclick="closeModal('bulkDeleteModal')"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="m-body">
+            <p class="del-warning">
+                <i class="fa-solid fa-circle-exclamation"></i> You are about to <strong>permanently delete <span id="bulkCount">0</span> roles</strong>.
+                All users assigned these roles will lose their associated permissions. This is <strong>irreversible</strong>.
+            </p>
+        </div>
+        <div class="m-footer">
+            <button type="button" class="h-btn sec" onclick="closeModal('bulkDeleteModal')"><i class="fa-solid fa-xmark"></i> Cancel</button>
+            <button type="button" class="h-btn danger" onclick="submitBulkDelete()"><i class="fa-solid fa-trash-can"></i> Delete All</button>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
+
     <script>
-        function selectAll(source) {
-            checkboxes = document.querySelectorAll('input[name="selectedRoles"]');
-            for (var i = 0; i < checkboxes.length; i++) {
-                checkboxes[i].checked = source.checked;
-            }
+    const rolePermissions = {
+        canCreate: @User.HasPermission(Permissions.Roles.Create).ToString().ToLower(),
+        canEdit: @User.HasPermission(Permissions.Roles.Edit).ToString().ToLower(),
+        canDelete: @User.HasPermission(Permissions.Roles.Delete).ToString().ToLower()
+    };
+    const accessDeniedUrl = '@Url.Action("Index", "AccessDenied", new { area = "Admin" })';
+
+    function checkPermission(permission) {
+        if (!permission) {
+            window.location.href = accessDeniedUrl;
+            return false;
         }
-    </script>
+        return true;
+    }
+</script>
+<script>
+    function showToast(message, type) {
+        const toast = document.createElement('div');
+        toast.className = 'nex-toast ' + type;
+        const icon = type === 'success' ? 'fa-circle-check' : 'fa-circle-xmark';
+        toast.innerHTML = '<i class="fa-solid ' + icon + '"></i> ' + message;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3200);
+    }
+
+    // Selection
+    function toggleAll(checked) {
+        document.querySelectorAll('input[name="selectedRoles"]').forEach(cb => cb.checked = checked);
+        updateSelectionCount();
+    }
+
+    function updateSelectionCount() {
+        const checked = document.querySelectorAll('input[name="selectedRoles"]:checked').length;
+        document.getElementById('selCount').textContent = checked;
+        const bulkBtn = document.getElementById('bulkDeleteBtn');
+        if (checked > 0) bulkBtn.classList.remove('d-none');
+        else bulkBtn.classList.add('d-none');
+    }
+
+    // Modal helpers
+    function openModal(id) { document.getElementById(id).classList.add('active'); document.body.style.overflow = 'hidden'; }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); document.body.style.overflow = ''; }
+
+    document.querySelectorAll('.modal-overlay').forEach(o => {
+        o.addEventListener('click', e => { if (e.target === o) closeModal(o.id); });
+    });
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.active').forEach(m => closeModal(m.id));
+    });
+
+    function showModalErrors(containerId, errors) {
+        const c = document.getElementById(containerId);
+        const ul = c.querySelector('ul');
+        ul.innerHTML = '';
+        errors.forEach(err => {
+            const li = document.createElement('li');
+            li.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> ' + err;
+            ul.appendChild(li);
+        });
+        c.style.display = 'block';
+    }
+    function hideModalErrors(id) { document.getElementById(id).style.display = 'none'; }
+
+    function setLoading(btnId, spinnerId, iconId, loading) {
+        const btn = document.getElementById(btnId);
+        const spinner = document.getElementById(spinnerId);
+        const icon = document.getElementById(iconId);
+        btn.disabled = loading;
+        spinner.style.display = loading ? 'block' : 'none';
+        if (icon) icon.style.display = loading ? 'none' : '';
+    }
+
+    // Toggle group permissions
+    function toggleGroupPerms(btn, prefix) {
+        const body = btn.closest('.perm-group').querySelector('.perm-group-body');
+        const checkboxes = body.querySelectorAll('input[type="checkbox"]');
+        const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+
+        checkboxes.forEach(cb => cb.checked = !allChecked);
+        btn.textContent = allChecked ? 'Select All' : 'Deselect All';
+    }
+
+    // ── CREATE ──
+    function openCreateModal() {
+        document.getElementById('createForm').reset();
+        hideModalErrors('createErrors');
+        openModal('createModal');
+    }
+
+    document.getElementById('createForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        hideModalErrors('createErrors');
+
+        const name = this.querySelector('[name="Name"]').value.trim();
+        if (!name) { showModalErrors('createErrors', ['Role name is required.']); return; }
+
+        setLoading('createSubmitBtn', 'createSpinner', 'createIcon', true);
+
+        fetch('@Url.Action("CreateAjax")', { method: 'POST', body: new FormData(this) })
+            .then(res => res.json())
+            .then(data => {
+                setLoading('createSubmitBtn', 'createSpinner', 'createIcon', false);
+                if (data.success) {
+                    closeModal('createModal');
+                    showToast(data.message, 'success');
+                    setTimeout(() => location.reload(), 800);
+                } else {
+                    showModalErrors('createErrors', data.errors || ['An error occurred.']);
+                }
+            })
+            .catch(() => {
+                setLoading('createSubmitBtn', 'createSpinner', 'createIcon', false);
+                showModalErrors('createErrors', ['Network error. Please try again.']);
+            });
+    });
+
+    // ── EDIT ──
+    function openEditModal(roleId) {
+        hideModalErrors('editErrors');
+        document.querySelectorAll('#editPermGroups input[type="checkbox"]').forEach(cb => cb.checked = false);
+
+        // Fetch role data with permissions
+        fetch('@Url.Action("GetRolePermissions")' + '?id=' + roleId)
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('editId').value = data.id;
+                    document.getElementById('editName').value = data.name;
+
+                    // Check matching permissions
+                    if (data.permissions) {
+                        data.permissions.forEach(p => {
+                            const cb = document.getElementById('edit_' + p.replace(/\./g, '_'));
+                            if (cb) cb.checked = true;
+                        });
+                    }
+
+                    // Update group toggle buttons
+                    document.querySelectorAll('#editPermGroups .perm-group').forEach(group => {
+                        const cbs = group.querySelectorAll('.perm-group-body input[type="checkbox"]');
+                        const btn = group.querySelector('.perm-group-toggle');
+                        const allChecked = Array.from(cbs).every(cb => cb.checked);
+                        btn.textContent = allChecked ? 'Deselect All' : 'Select All';
+                    });
+
+                    openModal('editModal');
+                } else {
+                    showToast('Failed to load role data.', 'error');
+                }
+            })
+            .catch(() => showToast('Network error.', 'error'));
+    }
+
+    document.getElementById('editForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        hideModalErrors('editErrors');
+
+        const name = this.querySelector('[name="Name"]').value.trim();
+        if (!name) { showModalErrors('editErrors', ['Role name is required.']); return; }
+
+        setLoading('editSubmitBtn', 'editSpinner', 'editIcon', true);
+
+        fetch('@Url.Action("EditAjax")', { method: 'POST', body: new FormData(this) })
+            .then(res => res.json())
+            .then(data => {
+                setLoading('editSubmitBtn', 'editSpinner', 'editIcon', false);
+                if (data.success) {
+                    closeModal('editModal');
+                    showToast(data.message, 'success');
+                    setTimeout(() => location.reload(), 800);
+                } else {
+                    showModalErrors('editErrors', data.errors || ['An error occurred.']);
+                }
+            })
+            .catch(() => {
+                setLoading('editSubmitBtn', 'editSpinner', 'editIcon', false);
+                showModalErrors('editErrors', ['Network error. Please try again.']);
+            });
+    });
+
+    // ── DELETE ──
+    function openDeleteModal(roleId, roleName) {
+        document.getElementById('delRoleId').value = roleId;
+        document.getElementById('delRoleName').textContent = roleName;
+        openModal('deleteModal');
+    }
+
+    function confirmBulkDelete() {
+        const count = document.querySelectorAll('input[name="selectedRoles"]:checked').length;
+        if (count === 0) return;
+        document.getElementById('bulkCount').textContent = count;
+        openModal('bulkDeleteModal');
+    }
+
+    function submitBulkDelete() {
+        closeModal('bulkDeleteModal');
+        document.getElementById('deleteForm').submit();
+    }
+</script>
 }

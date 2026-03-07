@@ -2,2046 +2,438 @@
 @model List<Services.AIViewModel.WorkplaceInsight>
 
 @{
-    ViewData["Title"] = $"Mental Health Trends - {ViewBag.QuestionnaireName}";
+    ViewData["Title"] = $"Mental Health Trends — {ViewBag.QuestionnaireName}";
 }
 
 @section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <style>
         @@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
 
-        :root {
-            --neon-blue: #60a5fa;
-            --neon-purple: #c084fc;
-            --neon-green: #34d399;
-            --neon-pink: #f472b6;
-            --neon-yellow: #fbbf24;
-            --neon-red: #f87171;
-            --neon-cyan: #22d3ee;
-            --neon-orange: #fb923c;
-            --dark-900: #0f172a;
-            --dark-800: #1e293b;
-            --dark-700: #334155;
-            --dark-600: #475569;
-            --dark-500: #64748b;
-            --dark-400: #94a3b8;
-            --dark-300: #cbd5e1;
-            --dark-200: #e2e8f0;
-            --dark-100: #f1f5f9;
-            --glass-bg: rgba(255, 255, 255, 0.05);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-            --font-main: 'Space Grotesk', sans-serif;
-            --font-mono: 'JetBrains Mono', monospace;
-            --success-gradient: linear-gradient(135deg, var(--neon-green), var(--neon-cyan));
-            --warning-gradient: linear-gradient(135deg, var(--neon-yellow), var(--neon-orange));
-            --danger-gradient: linear-gradient(135deg, var(--neon-red), #dc2626);
-            --info-gradient: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
-            --primary-gradient: linear-gradient(135deg, var(--neon-green), var(--neon-blue));
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: var(--font-main);
-            background: var(--dark-900);
-            color: #e2e8f0;
-            overflow-x: hidden;
-        }
-
-        .nexgen-trends-dashboard {
-            min-height: 100vh;
-            position: relative;
-        }
-
-        /* Dynamic Background */
-        .bg-pattern {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: -1;
-            overflow: hidden;
-        }
-
-        .grid-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: linear-gradient(rgba(52, 211, 153, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(52, 211, 153, 0.1) 1px, transparent 1px);
-            background-size: 60px 60px;
-            animation: gridMove 20s linear infinite;
-        }
-
-        .gradient-mesh {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at 20% 20%, rgba(52, 211, 153, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 60%, rgba(34, 211, 238, 0.15) 0%, transparent 50%), radial-gradient(circle at 40% 80%, rgba(96, 165, 250, 0.15) 0%, transparent 50%);
-            animation: meshShift 15s ease-in-out infinite;
-        }
-
-        /* Top Navigation */
-        .top-nav {
-            position: relative;
-            z-index: 100;
-            padding: 1rem 0;
-            background: rgba(15, 23, 42, 0.8);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(52, 211, 153, 0.2);
-        }
-
-        .nav-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 2rem;
-            display: flex;
-            align-items: center;
-            gap: 3rem;
-        }
-
-        .nav-brand {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .brand-icon {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, var(--neon-green), var(--neon-cyan));
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.2rem;
-        }
-
-        .brand-name {
-            font-family: var(--font-mono);
-            font-weight: 700;
-            font-size: 1.1rem;
-            letter-spacing: 0.1em;
-            color: #e2e8f0;
-        }
-
-        .brand-version {
-            font-family: var(--font-mono);
-            font-size: 0.7rem;
-            color: var(--neon-green);
-            background: rgba(52, 211, 153, 0.1);
-            padding: 0.2rem 0.5rem;
-            border-radius: 4px;
-            border: 1px solid rgba(52, 211, 153, 0.3);
-        }
-
-        .nav-center {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-        }
-
-        .breadcrumb-nexgen {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            font-family: var(--font-mono);
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .crumb {
-            color: var(--dark-400);
-            text-decoration: none;
-            transition: color 0.2s ease;
-        }
-
-            .crumb:hover {
-                color: var(--neon-green);
-            }
-
-            .crumb.active {
-                color: var(--neon-green);
-            }
-
-        .breadcrumb-nexgen i {
-            color: var(--dark-500);
-            font-size: 0.6rem;
-        }
-
-        .nav-actions {
-            display: flex;
-            gap: 1rem;
-        }
-
-        .nav-btn {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.6rem 1.2rem;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 8px;
-            color: #e2e8f0;
-            font-size: 0.8rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            backdrop-filter: blur(10px);
-            text-decoration: none;
-        }
-
-            .nav-btn:hover {
-                background: rgba(52, 211, 153, 0.1);
-                border-color: rgba(52, 211, 153, 0.3);
-                color: var(--neon-green);
-            }
-
-        /* Hero Section */
-        .hero-nexgen {
-            padding: 4rem 0 2rem;
-            text-align: center;
-            position: relative;
-            z-index: 10;
-        }
-
-        .hero-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.6rem;
-            padding: 0.5rem 1.2rem;
-            background: rgba(52, 211, 153, 0.1);
-            border: 1px solid rgba(52, 211, 153, 0.3);
-            border-radius: 50px;
-            margin-bottom: 2rem;
-            font-family: var(--font-mono);
-            font-size: 0.7rem;
-            font-weight: 600;
-            letter-spacing: 0.1em;
-            color: var(--neon-green);
-        }
-
-        .badge-dot {
-            width: 6px;
-            height: 6px;
-            background: var(--neon-green);
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-
-        .hero-title {
-            font-size: 3.5rem;
-            font-weight: 700;
-            line-height: 1.1;
-            margin-bottom: 1.5rem;
-            color: #ffffff;
-        }
-
-        .title-gradient {
-            background: linear-gradient(135deg, var(--neon-green), var(--neon-cyan), var(--neon-blue));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .hero-description {
-            font-size: 1.1rem;
-            color: var(--dark-300);
-            max-width: 600px;
-            margin: 0 auto 2rem;
-            line-height: 1.6;
-        }
-
-        /* Date Range Card */
-        .date-range-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            padding: 1.5rem 2rem;
-            margin-bottom: 3rem;
-            box-shadow: var(--glass-shadow);
-        }
-
-        .date-range-content {
-            display: flex;
-            justify-content: between;
-            align-items: center;
-        }
-
-        .date-range-title {
-            font-family: var(--font-mono);
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: #ffffff;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-            .date-range-title i {
-                color: var(--neon-green);
-            }
-
-        .date-badge {
-            background: var(--primary-gradient);
-            color: white;
-            padding: 0.6rem 1.2rem;
-            border-radius: 20px;
-            font-family: var(--font-mono);
-            font-size: 0.8rem;
-            font-weight: 600;
-            letter-spacing: 0.05em;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        /* Chart Cards */
-        .chart-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: var(--glass-shadow);
-            margin-bottom: 2rem;
-            transition: all 0.3s ease;
-        }
-
-            .chart-card:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 20px 40px rgba(52, 211, 153, 0.1);
-            }
-
-        .chart-header {
-            padding: 2rem 2rem 1rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .chart-title {
-            font-family: var(--font-mono);
-            font-size: 1.1rem;
-            font-weight: 700;
-            letter-spacing: 0.05em;
-            color: #ffffff;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 0;
-        }
-
-            .chart-title i {
-                color: var(--neon-green);
-            }
-
-        .chart-body {
-            padding: 2rem;
-        }
-
-        .chart-container {
-            position: relative;
-            height: 300px;
-            margin-bottom: 1rem;
-        }
-
-        .chart-info {
-            text-align: center;
-            color: var(--dark-400);
-            font-size: 0.8rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-
-        /* Sentiment Indicators */
-        .sentiment-indicators {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1rem;
-            margin-top: 2rem;
-        }
-
-        .sentiment-indicator {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 12px;
-            padding: 1.5rem;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-
-            .sentiment-indicator:hover {
-                background: rgba(255, 255, 255, 0.05);
-                transform: translateY(-2px);
-            }
-
-        .sentiment-icon {
-            font-size: 1.5rem;
-            margin-bottom: 0.8rem;
-        }
-
-        .sentiment-indicator.positive .sentiment-icon {
-            color: var(--neon-green);
-        }
-
-        .sentiment-indicator.neutral .sentiment-icon {
-            color: var(--neon-yellow);
-        }
-
-        .sentiment-indicator.negative .sentiment-icon {
-            color: var(--neon-red);
-        }
-
-        .sentiment-title {
-            font-weight: 600;
-            color: #ffffff;
-            margin-bottom: 0.5rem;
-        }
-
-        .sentiment-change {
-            font-family: var(--font-mono);
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-
-        .sentiment-indicator.positive .sentiment-change {
-            color: var(--neon-green);
-        }
-
-        .sentiment-indicator.neutral .sentiment-change {
-            color: var(--neon-yellow);
-        }
-
-        .sentiment-indicator.negative .sentiment-change {
-            color: var(--neon-red);
-        }
-
-        /* Improvement Items */
-        .improvement-item {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            transition: all 0.3s ease;
-        }
-
-            .improvement-item:hover {
-                background: rgba(255, 255, 255, 0.05);
-                transform: translateX(5px);
-            }
-
-        .improvement-header {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .improvement-icon {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.9rem;
-            color: white;
-        }
-
-        .improvement-item.positive .improvement-icon {
-            background: var(--success-gradient);
-        }
-
-        .improvement-item.negative .improvement-icon {
-            background: var(--danger-gradient);
-        }
-
-        .improvement-item.neutral .improvement-icon {
-            background: var(--warning-gradient);
-        }
-
-        .improvement-title {
-            font-weight: 600;
-            color: #ffffff;
-        }
-
-            .improvement-title.positive {
-                color: var(--neon-green);
-            }
-
-            .improvement-title.negative {
-                color: var(--neon-red);
-            }
-
-            .improvement-title.neutral {
-                color: var(--neon-yellow);
-            }
-
-        .progress-bar-nexgen {
-            height: 10px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 5px;
-            overflow: hidden;
-            margin-bottom: 0.5rem;
-        }
-
-        .progress-fill {
-            height: 100%;
-            border-radius: 5px;
-            transition: width 0.3s ease;
-        }
-
-            .progress-fill.success {
-                background: var(--success-gradient);
-            }
-
-            .progress-fill.danger {
-                background: var(--danger-gradient);
-            }
-
-            .progress-fill.warning {
-                background: var(--warning-gradient);
-            }
-
-        .improvement-change {
-            font-family: var(--font-mono);
-            font-size: 0.8rem;
-            color: var(--dark-400);
-        }
-
-        /* Intervention Effectiveness */
-        .intervention-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: var(--glass-shadow);
-            margin-bottom: 2rem;
-        }
-
-        .intervention-header {
-            background: var(--success-gradient);
-            padding: 2rem;
-            position: relative;
-        }
-
-            .intervention-header::before {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
-            }
-
-        .intervention-title-group {
-            position: relative;
-            z-index: 2;
-            display: flex;
-            justify-content: between;
-            align-items: center;
-        }
-
-        .intervention-title {
-            font-family: var(--font-mono);
-            font-size: 1.2rem;
-            font-weight: 700;
-            letter-spacing: 0.05em;
-            color: white;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .clinical-badge {
-            background: rgba(255, 255, 255, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 20px;
-            padding: 0.4rem 1rem;
-            font-family: var(--font-mono);
-            font-size: 0.6rem;
-            font-weight: 600;
-            letter-spacing: 0.1em;
-            color: white;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .intervention-body {
-            padding: 2rem;
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 2rem;
-        }
-
-        .intervention-results {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 12px;
-            padding: 1.5rem;
-        }
-
-        .results-title {
-            font-family: var(--font-mono);
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: #ffffff;
-            margin-bottom: 1.5rem;
-        }
-
-        .intervention-result {
-            margin-bottom: 1.5rem;
-        }
-
-        .result-header {
-            display: flex;
-            justify-content: between;
-            align-items: center;
-            margin-bottom: 0.8rem;
-        }
-
-        .result-name {
-            font-size: 0.8rem;
-            color: var(--dark-200);
-        }
-
-        .result-badge {
-            padding: 0.3rem 0.8rem;
-            border-radius: 20px;
-            font-family: var(--font-mono);
-            font-size: 0.6rem;
-            font-weight: 700;
-            letter-spacing: 0.05em;
-        }
-
-            .result-badge.success {
-                background: rgba(52, 211, 153, 0.2);
-                border: 1px solid var(--neon-green);
-                color: var(--neon-green);
-            }
-
-            .result-badge.primary {
-                background: rgba(96, 165, 250, 0.2);
-                border: 1px solid var(--neon-blue);
-                color: var(--neon-blue);
-            }
-
-            .result-badge.info {
-                background: rgba(34, 211, 238, 0.2);
-                border: 1px solid var(--neon-cyan);
-                color: var(--neon-cyan);
-            }
-
-            .result-badge.warning {
-                background: rgba(251, 191, 36, 0.2);
-                border: 1px solid var(--neon-yellow);
-                color: var(--neon-yellow);
-            }
-
-        .result-effectiveness {
-            font-size: 0.7rem;
-            color: var(--dark-400);
-        }
-
-        /* Insights Section */
-        .insights-section {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        .insights-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: var(--glass-shadow);
-        }
-
-        .insights-header {
-            padding: 2rem 2rem 1rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .insights-title {
-            font-family: var(--font-mono);
-            font-size: 1.1rem;
-            font-weight: 700;
-            letter-spacing: 0.05em;
-            color: #ffffff;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-            .insights-title i {
-                color: var(--neon-purple);
-            }
-
-        .insights-body {
-            padding: 2rem;
-        }
-
-        .insight-item {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            transition: all 0.3s ease;
-        }
-
-            .insight-item:hover {
-                background: rgba(255, 255, 255, 0.05);
-            }
-
-        .insight-header {
-            display: flex;
-            align-items: flex-start;
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .insight-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.1rem;
-            color: white;
-            flex-shrink: 0;
-        }
-
-        .insight-item.positive .insight-icon {
-            background: var(--success-gradient);
-        }
-
-        .insight-item.warning .insight-icon {
-            background: var(--warning-gradient);
-        }
-
-        .insight-item.info .insight-icon {
-            background: var(--info-gradient);
-        }
-
-        .insight-content {
-            flex: 1;
-        }
-
-        .insight-title {
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-
-            .insight-title.positive {
-                color: var(--neon-green);
-            }
-
-            .insight-title.warning {
-                color: var(--neon-yellow);
-            }
-
-            .insight-title.info {
-                color: var(--neon-cyan);
-            }
-
-        .insight-description {
-            font-size: 0.85rem;
-            color: var(--dark-300);
-            line-height: 1.5;
-            margin-bottom: 1rem;
-        }
-
-        .insight-badge {
-            padding: 0.3rem 0.8rem;
-            border-radius: 20px;
-            font-family: var(--font-mono);
-            font-size: 0.6rem;
-            font-weight: 700;
-            letter-spacing: 0.05em;
-        }
-
-            .insight-badge.positive {
-                background: rgba(52, 211, 153, 0.2);
-                border: 1px solid var(--neon-green);
-                color: var(--neon-green);
-            }
-
-            .insight-badge.warning {
-                background: rgba(251, 191, 36, 0.2);
-                border: 1px solid var(--neon-yellow);
-                color: var(--neon-yellow);
-            }
-
-            .insight-badge.info {
-                background: rgba(34, 211, 238, 0.2);
-                border: 1px solid var(--neon-cyan);
-                color: var(--neon-cyan);
-            }
-
-        /* KPI Items */
-        .kpi-item {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            transition: all 0.3s ease;
-        }
-
-            .kpi-item:hover {
-                background: rgba(255, 255, 255, 0.05);
-                transform: scale(1.02);
-            }
-
-        .kpi-header {
-            display: flex;
-            justify-content: between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .kpi-info {
-            flex: 1;
-        }
-
-        .kpi-title {
-            font-weight: 600;
-            color: #ffffff;
-            margin-bottom: 0.3rem;
-        }
-
-        .kpi-subtitle {
-            font-size: 0.8rem;
-            color: var(--dark-400);
-        }
-
-        .kpi-value-section {
-            text-align: right;
-        }
-
-        .kpi-value {
-            font-family: var(--font-mono);
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: #ffffff;
-            margin-bottom: 0.3rem;
-        }
-
-            .kpi-value.success {
-                color: var(--neon-green);
-            }
-
-            .kpi-value.primary {
-                color: var(--neon-blue);
-            }
-
-            .kpi-value.info {
-                color: var(--neon-cyan);
-            }
-
-            .kpi-value.warning {
-                color: var(--neon-yellow);
-            }
-
-        .kpi-change {
-            font-family: var(--font-mono);
-            font-size: 0.7rem;
-            font-weight: 600;
-            color: var(--neon-green);
-            display: flex;
-            align-items: center;
-            gap: 0.3rem;
-            justify-content: flex-end;
-        }
-
-        /* Trending Topics */
-        .trending-section {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: var(--glass-shadow);
-            margin-bottom: 2rem;
-        }
-
-        .trending-header {
-            padding: 2rem 2rem 1rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .trending-title {
-            font-family: var(--font-mono);
-            font-size: 1.1rem;
-            font-weight: 700;
-            letter-spacing: 0.05em;
-            color: #ffffff;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-            .trending-title i {
-                color: var(--neon-orange);
-            }
-
-        .trending-body {
-            padding: 2rem;
-        }
-
-        .trending-columns {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-        }
-
-        .trending-category {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 12px;
-            padding: 1.5rem;
-        }
-
-        .category-title {
-            font-family: var(--font-mono);
-            font-size: 0.9rem;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-            .category-title.improving {
-                color: var(--neon-green);
-            }
-
-            .category-title.attention {
-                color: var(--neon-yellow);
-            }
-
-        .trending-topic {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            transition: all 0.3s ease;
-        }
-
-            .trending-topic:hover {
-                background: rgba(255, 255, 255, 0.05);
-            }
-
-        .topic-content {
-            display: flex;
-            justify-content: between;
-            align-items: center;
-        }
-
-        .topic-indicator {
-            padding: 0.2rem 0.5rem;
-            border-radius: 4px;
-            font-family: var(--font-mono);
-            font-size: 0.7rem;
-            font-weight: 700;
-            margin-right: 1rem;
-        }
-
-            .topic-indicator.up {
-                background: rgba(52, 211, 153, 0.2);
-                border: 1px solid var(--neon-green);
-                color: var(--neon-green);
-            }
-
-            .topic-indicator.down {
-                background: rgba(248, 113, 113, 0.2);
-                border: 1px solid var(--neon-red);
-                color: var(--neon-red);
-            }
-
-            .topic-indicator.stable {
-                background: rgba(251, 191, 36, 0.2);
-                border: 1px solid var(--neon-yellow);
-                color: var(--neon-yellow);
-            }
-
-        .topic-name {
-            flex: 1;
-            color: var(--dark-200);
-        }
-
-        .topic-change {
-            font-family: var(--font-mono);
-            font-size: 0.8rem;
-            font-weight: 700;
-        }
-
-            .topic-change.positive {
-                color: var(--neon-green);
-            }
-
-            .topic-change.negative {
-                color: var(--neon-red);
-            }
-
-            .topic-change.neutral {
-                color: var(--neon-yellow);
-            }
-
-        /* Action Recommendations */
-        .recommendations-section {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: var(--glass-shadow);
-            margin-bottom: 2rem;
-        }
-
-        .recommendations-header {
-            background: var(--primary-gradient);
-            padding: 2rem;
-            position: relative;
-        }
-
-            .recommendations-header::before {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
-            }
-
-        .recommendations-title {
-            position: relative;
-            z-index: 2;
-            font-family: var(--font-mono);
-            font-size: 1.2rem;
-            font-weight: 700;
-            letter-spacing: 0.05em;
-            color: white;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .recommendations-body {
-            padding: 2rem;
-        }
-
-        .recommendations-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 2rem;
-        }
-
-        .action-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid;
-            border-radius: 12px;
-            padding: 1.5rem;
-            transition: all 0.3s ease;
-        }
-
-            .action-card:hover {
-                transform: translateY(-2px);
-                background: rgba(255, 255, 255, 0.05);
-            }
-
-            .action-card.success {
-                border-color: rgba(52, 211, 153, 0.3);
-            }
-
-            .action-card.warning {
-                border-color: rgba(251, 191, 36, 0.3);
-            }
-
-            .action-card.primary {
-                border-color: rgba(96, 165, 250, 0.3);
-            }
-
-        .action-header {
-            font-family: var(--font-mono);
-            font-size: 0.9rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-            .action-header.success {
-                color: var(--neon-green);
-            }
-
-            .action-header.warning {
-                color: var(--neon-yellow);
-            }
-
-            .action-header.primary {
-                color: var(--neon-blue);
-            }
-
-        .action-list {
-            list-style: none;
-            padding: 0;
-        }
-
-            .action-list li {
-                font-size: 0.8rem;
-                color: var(--dark-300);
-                line-height: 1.5;
-                margin-bottom: 0.5rem;
-                padding-left: 1rem;
-                position: relative;
-            }
-
-                .action-list li::before {
-                    content: '→';
-                    position: absolute;
-                    left: 0;
-                    color: var(--neon-cyan);
-                    font-weight: bold;
-                }
-
-        /* Modal Styling */
-        .modal-nexgen {
-            background: rgba(15, 23, 42, 0.95);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(52, 211, 153, 0.2);
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
-        }
-
-        .modal-header-nexgen {
-            background: var(--primary-gradient);
-            padding: 2rem;
-            position: relative;
-        }
-
-            .modal-header-nexgen::before {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
-            }
-
-        .modal-title-nexgen {
-            position: relative;
-            z-index: 2;
-            font-family: var(--font-mono);
-            font-size: 1.1rem;
-            font-weight: 700;
-            letter-spacing: 0.05em;
-            color: white;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .modal-body-nexgen {
-            padding: 2rem;
-        }
-
-        .modal-footer-nexgen {
-            background: rgba(30, 41, 59, 0.8);
-            border: none;
-            padding: 1.5rem 2rem;
-            display: flex;
-            gap: 1rem;
-            justify-content: flex-end;
-        }
-
-        .btn-nexgen {
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
-            padding: 0.8rem 1.5rem;
-            border-radius: 8px;
-            font-family: var(--font-mono);
-            font-size: 0.7rem;
-            font-weight: 600;
-            letter-spacing: 0.05em;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            border: 1px solid;
-            text-decoration: none;
-        }
-
-            .btn-nexgen.secondary {
-                background: rgba(255, 255, 255, 0.05);
-                border-color: rgba(255, 255, 255, 0.2);
-                color: var(--dark-300);
-            }
-
-                .btn-nexgen.secondary:hover {
-                    background: rgba(255, 255, 255, 0.1);
-                    color: #e2e8f0;
-                }
-
-            .btn-nexgen.primary {
-                background: var(--primary-gradient);
-                border-color: transparent;
-                color: white;
-            }
-
-                .btn-nexgen.primary:hover {
-                    transform: translateY(-1px);
-                    box-shadow: 0 10px 20px rgba(52, 211, 153, 0.3);
-                    color: white;
-                }
-
-        .form-control-nexgen {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
-            color: #e2e8f0;
-            padding: 0.8rem;
-            transition: all 0.2s ease;
-        }
-
-            .form-control-nexgen:focus {
-                outline: none;
-                border-color: rgba(52, 211, 153, 0.5);
-                background: rgba(255, 255, 255, 0.08);
-                box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.1);
-            }
-
-        .form-label-nexgen {
-            color: var(--dark-300);
-            font-weight: 500;
-            margin-bottom: 0.5rem;
-        }
-
-        .quick-select-group {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 0.5rem;
-            margin-top: 1rem;
-        }
-
-        .quick-select-btn {
-            padding: 0.6rem;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 6px;
-            color: var(--dark-300);
-            font-size: 0.8rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-            .quick-select-btn:hover {
-                background: rgba(52, 211, 153, 0.1);
-                border-color: rgba(52, 211, 153, 0.3);
-                color: var(--neon-green);
-            }
-
-        /* Animations */
-        @@keyframes gridMove {
-            0%
-
-        {
-            transform: translate(0, 0);
-        }
-
-        100% {
-            transform: translate(60px, 60px);
-        }
-
-        }
-
-        @@keyframes meshShift {
-            0%, 100%
-
-        {
-            filter: hue-rotate(0deg);
-            transform: scale(1);
-        }
-
-        50% {
-            filter: hue-rotate(30deg);
-            transform: scale(1.05);
-        }
-
-        }
-
-        @@keyframes pulse {
-            0%, 100%
-
-        {
-            opacity: 1;
-            transform: scale(1);
-        }
-
-        50% {
-            opacity: 0.7;
-            transform: scale(1.1);
-        }
-
-        }
-
-        /* Responsive Design */
-        @@media (max-width: 1200px) {
-            .insights-section
-
-        {
-            grid-template-columns: 1fr;
-        }
-
-        .intervention-body {
-            grid-template-columns: 1fr;
-        }
-
-        .trending-columns {
-            grid-template-columns: 1fr;
-        }
-
-        }
-
-        @@media (max-width: 768px) {
-            .nav-container
-
-        {
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-
-        .nav-center {
-            order: 3;
-            flex-basis: 100%;
-            justify-content: flex-start;
-        }
-
-        .hero-title {
-            font-size: 2.5rem;
-        }
-
-        .date-range-content {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 1rem;
-        }
-
-        .sentiment-indicators {
-            grid-template-columns: 1fr;
-        }
-
-        .recommendations-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .chart-container {
-            height: 250px;
-        }
-
-        .quick-select-group {
-            grid-template-columns: repeat(2, 1fr);
-        }
-
-        }
-
-        @@media (max-width: 480px) {
-            .chart-card, .intervention-card, .insights-card, .trending-section, .recommendations-section
-
-        {
-            margin-left: 1rem;
-            margin-right: 1rem;
-        }
-
-        .quick-select-group {
-            grid-template-columns: 1fr;
-        }
-
-        }
-
-        /* Print Styles */
-        @@media print {
-            .bg-pattern, .top-nav, .btn-nexgen, .nav-btn
-
-        {
-            display: none !important;
-        }
-
-        .chart-card,
-        .intervention-card,
-        .insights-card {
-            break-inside: avoid;
-            border: 1px solid #333;
-            background: white;
-            color: black;
-        }
-
-        .nexgen-trends-dashboard {
-            background: white;
-        }
-
-        }
-
-        /* Accessibility */
-        @@media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after
-
-        {
-            animation-duration: 0.01ms !important;
-            animation-iteration-count: 1 !important;
-            transition-duration: 0.01ms !important;
-        }
-
-        }
-
-        /* High Contrast Mode */
-        @@media (prefers-contrast: high) {
-            : root
-
-        {
-            --neon-green: #4dff88;
-            --neon-cyan: #00e5ff;
-            --neon-blue: #4d9fff;
-            --dark-300: #ffffff;
-            --dark-400: #cccccc;
-        }
-
-        .chart-card,
-        .intervention-card,
-        .insights-card {
-            border-width: 2px;
-        }
-
-        }
+        :root{
+            --neon-blue:#60a5fa;--neon-purple:#c084fc;--neon-green:#34d399;--neon-pink:#f472b6;
+            --neon-yellow:#fbbf24;--neon-red:#f87171;--neon-cyan:#22d3ee;--neon-indigo:#818cf8;
+            --neon-teal:#33b3ae;--neon-amber:#f59e0b;--neon-orange:#fb923c;
+            --dark-900:#0f172a;--dark-800:#1e293b;--dark-700:#334155;--dark-600:#475569;
+            --dark-500:#64748b;--dark-400:#94a3b8;--dark-300:#cbd5e1;--dark-200:#e2e8f0;
+            --glass-bg:rgba(255,255,255,0.04);--glass-border:rgba(255,255,255,0.08);
+            --font-main:'Space Grotesk',sans-serif;--font-mono:'JetBrains Mono',monospace;
+        }
+
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:var(--font-main);background:var(--dark-900);color:#e2e8f0;overflow-x:hidden}
+
+        /* ===== BG ===== */
+        .nex-bg{position:fixed;inset:0;z-index:-1;overflow:hidden}
+        .nex-bg .grid{position:absolute;inset:0;background-image:linear-gradient(rgba(52,211,153,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(52,211,153,0.04) 1px,transparent 1px);background-size:60px 60px;animation:gridDrift 25s linear infinite}
+        .nex-bg .mesh{position:absolute;inset:0;background:radial-gradient(ellipse at 25% 20%,rgba(52,211,153,0.06) 0%,transparent 55%),radial-gradient(ellipse at 75% 60%,rgba(34,211,238,0.05) 0%,transparent 55%),radial-gradient(ellipse at 50% 90%,rgba(96,165,250,0.04) 0%,transparent 55%);animation:meshFloat 18s ease-in-out infinite}
+
+        @@keyframes gridDrift{0%{transform:translate(0,0)}100%{transform:translate(60px,60px)}}
+        @@keyframes meshFloat{0%,100%{filter:hue-rotate(0deg);transform:scale(1)}50%{filter:hue-rotate(12deg);transform:scale(1.02)}}
+        @@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(1.12)}}
+        @@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+        @@keyframes barGrow{from{width:0}to{width:var(--w)}}
+        @@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+
+        .container{max-width:1400px;margin:0 auto;padding:0 2rem}
+
+        /* ===== HEADER ===== */
+        .page-header{position:relative;z-index:10;padding:2rem 0 1.5rem;border-bottom:1px solid rgba(52,211,153,0.12)}
+        .breadcrumb-nex{display:flex;align-items:center;gap:.7rem;margin-bottom:1.8rem;font-family:var(--font-mono);font-size:.65rem;letter-spacing:.08em;flex-wrap:wrap}
+        .breadcrumb-nex a{color:var(--dark-400);text-decoration:none;display:flex;align-items:center;gap:.4rem;transition:color .2s}
+        .breadcrumb-nex a:hover{color:var(--neon-green)}
+        .breadcrumb-nex .sep{color:var(--dark-600);font-size:.5rem}
+        .breadcrumb-nex .current{color:var(--neon-green);font-weight:600}
+
+        .header-row{display:flex;justify-content:space-between;align-items:flex-start;gap:2rem}
+        .header-left{flex:1}
+        .header-badge{display:inline-flex;align-items:center;gap:.5rem;padding:.4rem 1rem;background:rgba(52,211,153,0.08);border:1px solid rgba(52,211,153,0.2);border-radius:50px;margin-bottom:1.5rem;font-family:var(--font-mono);font-size:.6rem;font-weight:600;letter-spacing:.1em;color:var(--neon-green)}
+        .header-badge .dot{width:6px;height:6px;background:var(--neon-green);border-radius:50%;animation:pulse 2s infinite}
+        .header-title{font-size:2.8rem;font-weight:700;line-height:1.1;margin-bottom:.8rem;color:#fff}
+        .header-title .grad{background:linear-gradient(135deg,var(--neon-green),var(--neon-cyan),var(--neon-blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+        .header-sub{font-size:.95rem;color:var(--dark-300);line-height:1.6;max-width:550px}
+        .header-sub .q-name{color:var(--neon-green);font-weight:600}
+
+        .header-actions{display:flex;flex-wrap:wrap;gap:.7rem;align-items:flex-start;padding-top:.5rem}
+        .h-btn{display:flex;align-items:center;gap:.6rem;padding:.65rem 1.2rem;border-radius:10px;text-decoration:none;font-family:var(--font-mono);font-size:.68rem;font-weight:600;letter-spacing:.04em;transition:all .25s;border:1px solid;cursor:pointer;background:none}
+        .h-btn:hover{transform:translateY(-2px);text-decoration:none}
+        .h-btn.pri{background:linear-gradient(135deg,var(--neon-green),var(--neon-teal));border-color:transparent;color:#fff}
+        .h-btn.pri:hover{box-shadow:0 12px 28px rgba(52,211,153,0.25);color:#fff}
+        .h-btn.sec{background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.1);color:var(--dark-300)}
+        .h-btn.sec:hover{background:rgba(52,211,153,0.08);border-color:rgba(52,211,153,0.25);color:var(--neon-green)}
+
+        /* ===== DATE RANGE ===== */
+        .date-bar{background:rgba(30,41,59,0.45);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:1.2rem 1.8rem;display:flex;align-items:center;justify-content:space-between;gap:1.5rem;margin:2rem 0;flex-wrap:wrap}
+        .date-info{display:flex;align-items:center;gap:1rem}
+        .date-info i{color:var(--neon-green);font-size:1rem}
+        .date-info span{font-family:var(--font-mono);font-size:.78rem;color:var(--dark-300);font-weight:600}
+        .date-chip{background:linear-gradient(135deg,var(--neon-green),var(--neon-teal));color:#fff;padding:.5rem 1.2rem;border-radius:20px;font-family:var(--font-mono);font-size:.72rem;font-weight:600;letter-spacing:.04em;display:flex;align-items:center;gap:.5rem}
+
+        /* ===== CARDS ===== */
+        .nex-card{background:rgba(30,41,59,0.45);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.07);border-radius:18px;overflow:hidden;position:relative;transition:all .3s;margin-bottom:1.5rem}
+        .nex-card:hover{border-color:rgba(52,211,153,0.2)}
+        .nex-card .top-glow{position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--neon-green),var(--neon-cyan));opacity:0;transition:opacity .3s}
+        .nex-card:hover .top-glow{opacity:1}
+        .c-head{padding:1.6rem 1.8rem 1rem;display:flex;align-items:center;gap:1.2rem;border-bottom:1px solid rgba(255,255,255,0.05)}
+        .c-icon{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1rem;flex-shrink:0}
+        .c-icon.green{background:linear-gradient(135deg,var(--neon-green),var(--neon-teal))}
+        .c-icon.red{background:linear-gradient(135deg,var(--neon-red),var(--neon-amber))}
+        .c-icon.blue{background:linear-gradient(135deg,var(--neon-blue),var(--neon-cyan))}
+        .c-icon.purple{background:linear-gradient(135deg,var(--neon-purple),var(--neon-pink))}
+        .c-icon.amber{background:linear-gradient(135deg,var(--neon-amber),var(--neon-orange))}
+        .c-icon.indigo{background:linear-gradient(135deg,var(--neon-indigo),var(--neon-purple))}
+        .c-head h3{font-size:1rem;font-weight:700;color:#fff;margin-bottom:.15rem}
+        .c-head p{color:var(--dark-400);font-size:.72rem}
+        .c-body{padding:1.5rem 1.8rem 1.8rem}
+
+        .chart-wrap{position:relative;height:280px;margin-bottom:.8rem}
+        .chart-note{text-align:center;font-family:var(--font-mono);font-size:.6rem;color:var(--dark-500);display:flex;align-items:center;justify-content:center;gap:.4rem}
+
+        /* ===== GRIDS ===== */
+        .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+        .grid-8-4{display:grid;grid-template-columns:2fr 1fr;gap:1.5rem}
+        .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem}
+
+        /* ===== SENTIMENT INDICATORS ===== */
+        .sent-chips{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.5rem}
+        .sent-chip{background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:1.2rem;text-align:center;transition:all .2s}
+        .sent-chip:hover{background:rgba(255,255,255,0.04);transform:translateY(-2px)}
+        .sent-chip-icon{font-size:1.3rem;margin-bottom:.5rem}
+        .sent-chip.pos .sent-chip-icon{color:var(--neon-green)}.sent-chip.neu .sent-chip-icon{color:var(--neon-yellow)}.sent-chip.neg .sent-chip-icon{color:var(--neon-red)}
+        .sent-chip-title{font-weight:600;color:#fff;font-size:.82rem;margin-bottom:.3rem}
+        .sent-chip-val{font-family:var(--font-mono);font-size:.72rem;font-weight:600}
+        .sent-chip.pos .sent-chip-val{color:var(--neon-green)}.sent-chip.neu .sent-chip-val{color:var(--neon-yellow)}.sent-chip.neg .sent-chip-val{color:var(--neon-red)}
+
+        /* ===== IMPROVEMENT ITEMS ===== */
+        .imp-item{background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:1.2rem;margin-bottom:.8rem;transition:all .2s}
+        .imp-item:last-child{margin-bottom:0}
+        .imp-item:hover{background:rgba(255,255,255,0.04);transform:translateX(4px)}
+        .imp-top{display:flex;align-items:center;gap:.8rem;margin-bottom:.7rem}
+        .imp-dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.6rem;flex-shrink:0}
+        .imp-dot.up{background:linear-gradient(135deg,var(--neon-green),var(--neon-teal))}
+        .imp-dot.down{background:linear-gradient(135deg,var(--neon-red),var(--neon-amber))}
+        .imp-dot.flat{background:linear-gradient(135deg,var(--neon-yellow),var(--neon-orange))}
+        .imp-name{font-weight:600;color:#fff;font-size:.82rem}
+        .imp-bar{height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden;margin-bottom:.4rem}
+        .imp-fill{height:100%;border-radius:3px;animation:barGrow .8s ease both}
+        .imp-fill.green{background:linear-gradient(90deg,var(--neon-green),var(--neon-cyan))}
+        .imp-fill.red{background:linear-gradient(90deg,var(--neon-red),var(--neon-amber))}
+        .imp-fill.yellow{background:linear-gradient(90deg,var(--neon-yellow),var(--neon-orange))}
+        .imp-change{font-family:var(--font-mono);font-size:.6rem;color:var(--dark-400)}
+
+        /* ===== INTERVENTION CARD ===== */
+        .intv-head{background:linear-gradient(135deg,rgba(30,41,59,0.95),rgba(51,65,85,0.95));padding:1.5rem 1.8rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;border-bottom:1px solid rgba(52,211,153,0.15);position:relative;flex-wrap:wrap}
+        .intv-head::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(52,211,153,0.08) 0%,transparent 60%)}
+        .intv-head h3{font-family:var(--font-mono);font-size:.9rem;font-weight:700;letter-spacing:.05em;color:#e2e8f0;display:flex;align-items:center;gap:.8rem;position:relative;z-index:2}
+        .clinical-chip{background:rgba(52,211,153,0.12);border:1px solid rgba(52,211,153,0.25);border-radius:20px;padding:.3rem .8rem;font-family:var(--font-mono);font-size:.5rem;font-weight:600;letter-spacing:.1em;color:var(--neon-green);display:flex;align-items:center;gap:.4rem;position:relative;z-index:2}
+        .intv-body{display:grid;grid-template-columns:2fr 1fr;gap:1.5rem;padding:1.5rem 1.8rem}
+
+        .intv-result{margin-bottom:1.2rem}
+        .intv-result:last-child{margin-bottom:0}
+        .intv-result-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem}
+        .intv-result-name{font-size:.78rem;color:var(--dark-200)}
+        .intv-badge{padding:.2rem .6rem;border-radius:20px;font-family:var(--font-mono);font-size:.55rem;font-weight:700;letter-spacing:.04em}
+        .intv-badge.green{background:rgba(52,211,153,0.15);border:1px solid rgba(52,211,153,0.3);color:var(--neon-green)}
+        .intv-badge.blue{background:rgba(96,165,250,0.15);border:1px solid rgba(96,165,250,0.3);color:var(--neon-blue)}
+        .intv-badge.cyan{background:rgba(34,211,238,0.15);border:1px solid rgba(34,211,238,0.3);color:var(--neon-cyan)}
+        .intv-badge.yellow{background:rgba(251,191,36,0.15);border:1px solid rgba(251,191,36,0.3);color:var(--neon-yellow)}
+        .intv-eff{font-size:.6rem;color:var(--dark-500);margin-top:.3rem}
+
+        /* ===== INSIGHTS & KPIs ===== */
+        .insight-item{background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:1.4rem;margin-bottom:1rem;transition:all .2s}
+        .insight-item:last-child{margin-bottom:0}
+        .insight-item:hover{background:rgba(255,255,255,0.04)}
+        .insight-top{display:flex;align-items:flex-start;gap:1rem}
+        .insight-dot{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.9rem;flex-shrink:0}
+        .insight-dot.green{background:linear-gradient(135deg,var(--neon-green),var(--neon-teal))}
+        .insight-dot.yellow{background:linear-gradient(135deg,var(--neon-yellow),var(--neon-orange))}
+        .insight-dot.cyan{background:linear-gradient(135deg,var(--neon-cyan),var(--neon-blue))}
+        .insight-title{font-weight:700;margin-bottom:.3rem;font-size:.88rem}
+        .insight-title.green{color:var(--neon-green)}.insight-title.yellow{color:var(--neon-yellow)}.insight-title.cyan{color:var(--neon-cyan)}
+        .insight-desc{font-size:.78rem;color:var(--dark-300);line-height:1.6;margin-bottom:.6rem}
+        .insight-chip{padding:.2rem .7rem;border-radius:20px;font-family:var(--font-mono);font-size:.55rem;font-weight:600;letter-spacing:.04em;display:inline-block}
+        .insight-chip.green{background:rgba(52,211,153,0.12);border:1px solid rgba(52,211,153,0.25);color:var(--neon-green)}
+        .insight-chip.yellow{background:rgba(251,191,36,0.12);border:1px solid rgba(251,191,36,0.25);color:var(--neon-yellow)}
+        .insight-chip.cyan{background:rgba(34,211,238,0.12);border:1px solid rgba(34,211,238,0.25);color:var(--neon-cyan)}
+
+        .kpi-item{background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:1.4rem;margin-bottom:1rem;transition:all .2s}
+        .kpi-item:last-child{margin-bottom:0}
+        .kpi-item:hover{background:rgba(255,255,255,0.04);transform:scale(1.01)}
+        .kpi-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:.8rem}
+        .kpi-name{font-weight:600;color:#fff;font-size:.85rem;margin-bottom:.15rem}
+        .kpi-sub{font-size:.68rem;color:var(--dark-400)}
+        .kpi-val{font-family:var(--font-mono);font-size:1.6rem;font-weight:700;line-height:1}
+        .kpi-val.green{color:var(--neon-green)}.kpi-val.blue{color:var(--neon-blue)}.kpi-val.cyan{color:var(--neon-cyan)}.kpi-val.yellow{color:var(--neon-yellow)}
+        .kpi-delta{font-family:var(--font-mono);font-size:.6rem;font-weight:600;color:var(--neon-green);text-align:right;display:flex;align-items:center;gap:.3rem;justify-content:flex-end}
+        .kpi-bar{height:5px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden}
+        .kpi-fill{height:100%;border-radius:3px;animation:barGrow .8s ease both}
+        .kpi-fill.green{background:linear-gradient(90deg,var(--neon-green),var(--neon-cyan))}
+        .kpi-fill.blue{background:linear-gradient(90deg,var(--neon-blue),var(--neon-cyan))}
+        .kpi-fill.cyan{background:linear-gradient(90deg,var(--neon-cyan),var(--neon-blue))}
+        .kpi-fill.yellow{background:linear-gradient(90deg,var(--neon-yellow),var(--neon-orange))}
+
+        /* ===== TRENDING ===== */
+        .trend-col{background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:1.4rem}
+        .trend-col-head{font-family:var(--font-mono);font-size:.72rem;font-weight:600;display:flex;align-items:center;gap:.6rem;margin-bottom:1.2rem;letter-spacing:.06em}
+        .trend-col-head.up{color:var(--neon-green)}.trend-col-head.attn{color:var(--neon-yellow)}
+        .trend-row{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.04);border-radius:8px;padding:.8rem 1rem;margin-bottom:.5rem;display:flex;align-items:center;gap:.8rem;transition:all .2s}
+        .trend-row:last-child{margin-bottom:0}
+        .trend-row:hover{background:rgba(255,255,255,0.05)}
+        .trend-arrow{font-family:var(--font-mono);font-size:.7rem;font-weight:700;width:24px;height:24px;border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+        .trend-arrow.up{background:rgba(52,211,153,0.15);color:var(--neon-green)}.trend-arrow.down{background:rgba(248,113,113,0.15);color:var(--neon-red)}.trend-arrow.flat{background:rgba(251,191,36,0.15);color:var(--neon-yellow)}
+        .trend-name{flex:1;font-size:.78rem;color:var(--dark-200)}
+        .trend-pct{font-family:var(--font-mono);font-size:.72rem;font-weight:700}
+        .trend-pct.green{color:var(--neon-green)}.trend-pct.red{color:var(--neon-red)}.trend-pct.yellow{color:var(--neon-yellow)}
+
+        /* ===== RECOMMENDATIONS ===== */
+        .rec-head{background:linear-gradient(135deg,rgba(30,41,59,0.95),rgba(51,65,85,0.95));padding:1.5rem 1.8rem;display:flex;align-items:center;gap:1rem;border-bottom:1px solid rgba(52,211,153,0.15);position:relative}
+        .rec-head::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(52,211,153,0.08) 0%,transparent 60%)}
+        .rec-head h3{font-family:var(--font-mono);font-size:.9rem;font-weight:700;letter-spacing:.05em;color:#e2e8f0;display:flex;align-items:center;gap:.8rem;position:relative;z-index:2}
+        .rec-body{padding:1.5rem 1.8rem}
+        .rec-card{background:rgba(255,255,255,0.025);border:1px solid;border-radius:14px;padding:1.4rem;transition:all .2s}
+        .rec-card:hover{background:rgba(255,255,255,0.04);transform:translateY(-2px)}
+        .rec-card.green{border-color:rgba(52,211,153,0.2)}.rec-card.yellow{border-color:rgba(251,191,36,0.2)}.rec-card.blue{border-color:rgba(96,165,250,0.2)}
+        .rec-title{font-family:var(--font-mono);font-size:.78rem;font-weight:600;display:flex;align-items:center;gap:.6rem;margin-bottom:1rem}
+        .rec-title.green{color:var(--neon-green)}.rec-title.yellow{color:var(--neon-yellow)}.rec-title.blue{color:var(--neon-blue)}
+        .rec-list{list-style:none;padding:0}
+        .rec-list li{font-size:.75rem;color:var(--dark-300);line-height:1.6;margin-bottom:.4rem;padding-left:1.2rem;position:relative}
+        .rec-list li::before{content:'→';position:absolute;left:0;color:var(--neon-cyan);font-weight:700;font-size:.7rem}
+
+        /* ===== MODAL ===== */
+        .modal{padding-left:0!important}
+        .modal-dialog{margin-left:auto!important;margin-right:auto!important}
+        .modal-nex{background:rgba(15,23,42,0.97);backdrop-filter:blur(20px);border:1px solid rgba(52,211,153,0.15);border-radius:18px;overflow:hidden;box-shadow:0 25px 50px rgba(0,0,0,0.5)}
+        .modal-nex-head{background:linear-gradient(135deg,rgba(30,41,59,0.95),rgba(51,65,85,0.95));padding:1.5rem 1.8rem;display:flex;align-items:center;gap:1rem;border-bottom:1px solid rgba(52,211,153,0.15);position:relative}
+        .modal-nex-head::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(52,211,153,0.08) 0%,transparent 60%)}
+        .modal-nex-head h3{font-family:var(--font-mono);font-size:.9rem;font-weight:700;letter-spacing:.05em;color:#e2e8f0;position:relative;z-index:2;display:flex;align-items:center;gap:.8rem}
+        .modal-nex-head .m-icon{width:38px;height:38px;background:linear-gradient(135deg,var(--neon-green),var(--neon-teal));border-radius:9px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.9rem;position:relative;z-index:2;flex-shrink:0}
+        .modal-nex-body{padding:1.8rem}
+        .modal-nex-foot{background:rgba(15,23,42,0.9);border-top:1px solid rgba(255,255,255,0.06);padding:1.2rem 1.8rem;display:flex;gap:.7rem;justify-content:flex-end}
+        .close-x{position:absolute;top:1rem;right:1rem;background:rgba(255,255,255,0.06);border:none;color:var(--dark-400);width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;z-index:3;font-size:.7rem}
+        .close-x:hover{background:rgba(255,255,255,0.12);color:#fff}
+
+        .form-lbl{color:var(--dark-300);font-weight:500;font-size:.78rem;margin-bottom:.4rem;display:block}
+        .form-input{background:rgba(15,23,42,0.6);border:1px solid rgba(255,255,255,0.12);border-radius:8px;color:#e2e8f0;padding:.7rem .9rem;width:100%;font-family:var(--font-main);font-size:.82rem;transition:all .2s}
+        .form-input:focus{outline:none;border-color:rgba(52,211,153,0.4);background:rgba(15,23,42,0.8);box-shadow:0 0 0 3px rgba(52,211,153,0.08)}
+
+        .quick-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-top:.8rem}
+        .quick-btn{padding:.5rem;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:6px;color:var(--dark-300);font-size:.7rem;font-family:var(--font-mono);cursor:pointer;transition:all .2s;text-align:center}
+        .quick-btn:hover{background:rgba(52,211,153,0.08);border-color:rgba(52,211,153,0.25);color:var(--neon-green)}
+
+        /* ===== RESPONSIVE ===== */
+        @@media(max-width:1200px){.grid-2,.grid-8-4,.intv-body{grid-template-columns:1fr}.grid-3{grid-template-columns:1fr}}
+        @@media(max-width:768px){
+            .header-row{flex-direction:column}.header-title{font-size:2rem}
+            .sent-chips{grid-template-columns:1fr}.quick-grid{grid-template-columns:repeat(2,1fr)}
+            .date-bar{flex-direction:column;text-align:center}
+        }
+        @@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
     </style>
 }
 
-<div class="nexgen-trends-dashboard">
-    <!-- Dynamic Background -->
-    <div class="bg-pattern">
-        <div class="grid-overlay"></div>
-        <div class="gradient-mesh"></div>
+<div class="nex-bg"><div class="grid"></div><div class="mesh"></div></div>
+
+<!-- Header -->
+<section class="page-header">
+    <div class="container">
+        <div class="breadcrumb-nex">
+            <a href="@Url.Action("Index")"><i class="fa-solid fa-brain"></i> Analysis Dashboard</a>
+            <i class="fa-solid fa-chevron-right sep"></i>
+            <a href="@Url.Action("AnalyzeQuestionnaire", new { id = ViewBag.QuestionnaireId })">@ViewBag.QuestionnaireName</a>
+            <i class="fa-solid fa-chevron-right sep"></i>
+            <span class="current">Trends Analysis</span>
+        </div>
+        <div class="header-row">
+            <div class="header-left">
+                <div class="header-badge"><span class="dot"></span> PREDICTIVE ANALYTICS</div>
+                <h1 class="header-title">Mental Health <span class="grad">Trends</span></h1>
+                <p class="header-sub">Track workplace mental health patterns and intervention effectiveness for <span class="q-name">@ViewBag.QuestionnaireName</span></p>
+            </div>
+            <div class="header-actions">
+                <button type="button" class="h-btn pri" data-bs-toggle="modal" data-bs-target="#dateRangeModal"><i class="fa-solid fa-calendar-days"></i> Change Period</button>
+                <button type="button" class="h-btn sec" onclick="exportTrendsData()"><i class="fa-solid fa-download"></i> Export</button>
+                <a href="@Url.Action("AnalyzeQuestionnaire", new { id = ViewBag.QuestionnaireId })" class="h-btn sec"><i class="fa-solid fa-arrow-left"></i> Back</a>
+            </div>
+        </div>
     </div>
+</section>
 
-    <!-- Top Navigation Bar -->
-    <nav class="top-nav">
-        <div class="nav-container">
-            <div class="nav-brand">
-                <div class="brand-icon">
-                    <i class="fas fa-chart-line"></i>
-                </div>
-                <div class="brand-text">
-                    <span class="brand-name">TRENDS ANALYZER</span>
-                    <span class="brand-version">v1.0</span>
-                </div>
+<!-- Date Range -->
+<section style="position:relative;z-index:10">
+    <div class="container">
+        <div class="date-bar">
+            <div class="date-info"><i class="fa-solid fa-calendar-check"></i><span>Analysis Period</span></div>
+            <div class="date-chip"><i class="fa-solid fa-calendar"></i> @ViewBag.FromDate.ToString("MMM dd, yyyy") — @ViewBag.ToDate.ToString("MMM dd, yyyy")</div>
+        </div>
+    </div>
+</section>
+
+<!-- Charts Row 1 -->
+<section style="position:relative;z-index:10">
+    <div class="container">
+        <div class="grid-2">
+            <div class="nex-card"><div class="top-glow"></div>
+                <div class="c-head"><div class="c-icon green"><i class="fa-solid fa-heart-pulse"></i></div><div><h3>Mental Health Score Trends</h3><p>Overall wellbeing score progression</p></div></div>
+                <div class="c-body"><div class="chart-wrap"><canvas id="mentalHealthTrendChart"></canvas></div><div class="chart-note"><i class="fa-solid fa-circle-info"></i> Score trend over the analysis period</div></div>
             </div>
-
-            <div class="nav-center">
-                <nav class="breadcrumb-nexgen">
-                    <a href="@Url.Action("Index")" class="crumb">
-                        <i class="fas fa-brain"></i> ANALYSIS DASHBOARD
-                    </a>
-                    <i class="fas fa-chevron-right"></i>
-                    <a href="@Url.Action("AnalyzeQuestionnaire", new { id = ViewBag.QuestionnaireId })" class="crumb">
-                        @ViewBag.QuestionnaireName?.ToUpper()
-                    </a>
-                    <i class="fas fa-chevron-right"></i>
-                    <span class="crumb active">TRENDS ANALYSIS</span>
-                </nav>
-            </div>
-
-            <div class="nav-actions">
-                <button type="button" class="nav-btn" data-bs-toggle="modal" data-bs-target="#dateRangeModal">
-                    <i class="fas fa-calendar-alt"></i>
-                    <span>Change Period</span>
-                </button>
-                <button type="button" class="nav-btn" onclick="exportTrendsData()">
-                    <i class="fas fa-download"></i>
-                    <span>Export Trends</span>
-                </button>
+            <div class="nex-card"><div class="top-glow"></div>
+                <div class="c-head"><div class="c-icon red"><i class="fa-solid fa-shield-halved"></i></div><div><h3>Risk Level Distribution</h3><p>Employee risk level changes over time</p></div></div>
+                <div class="c-body"><div class="chart-wrap"><canvas id="riskTrendChart"></canvas></div><div class="chart-note"><i class="fa-solid fa-circle-info"></i> Stacked risk category evolution</div></div>
             </div>
         </div>
-    </nav>
+    </div>
+</section>
 
-    <!-- Hero Section -->
-    <section class="hero-nexgen">
-        <div class="container-fluid">
-            <div class="hero-content">
-                <div class="hero-badge">
-                    <span class="badge-dot"></span>
-                    <span>PREDICTIVE MENTAL HEALTH ANALYTICS</span>
+<!-- Charts Row 2: Sentiment + Improvements -->
+<section style="position:relative;z-index:10">
+    <div class="container">
+        <div class="grid-8-4">
+            <div class="nex-card"><div class="top-glow"></div>
+                <div class="c-head"><div class="c-icon purple"><i class="fa-solid fa-face-smile"></i></div><div><h3>Sentiment Evolution</h3><p>Positive / Neutral / Negative tracking</p></div></div>
+                <div class="c-body">
+                    <div class="chart-wrap"><canvas id="sentimentTrendChart"></canvas></div>
+                    <div class="sent-chips">
+                        <div class="sent-chip pos"><div class="sent-chip-icon"><i class="fa-solid fa-face-smile"></i></div><div class="sent-chip-title">Positive Trend</div><div class="sent-chip-val">+15% this period</div></div>
+                        <div class="sent-chip neu"><div class="sent-chip-icon"><i class="fa-solid fa-face-meh"></i></div><div class="sent-chip-title">Neutral Stable</div><div class="sent-chip-val">−2% this period</div></div>
+                        <div class="sent-chip neg"><div class="sent-chip-icon"><i class="fa-solid fa-face-frown"></i></div><div class="sent-chip-title">Negative Decline</div><div class="sent-chip-val">−13% this period</div></div>
+                    </div>
                 </div>
-                <h1 class="hero-title">
-                    Mental Health
-                    <span class="title-gradient">Trends</span>
-                    Analysis
-                </h1>
-                <p class="hero-description">
-                    Track workplace mental health patterns and intervention effectiveness over time
-                </p>
+            </div>
+            <div class="nex-card"><div class="top-glow"></div>
+                <div class="c-head"><div class="c-icon amber"><i class="fa-solid fa-arrow-trend-up"></i></div><div><h3>Key Improvements</h3><p>Notable changes this period</p></div></div>
+                <div class="c-body">
+                    <div class="imp-item"><div class="imp-top"><div class="imp-dot up"><i class="fa-solid fa-arrow-up"></i></div><span class="imp-name">Work-Life Balance</span></div><div class="imp-bar"><div class="imp-fill green" style="--w:78%;width:var(--w)"></div></div><div class="imp-change">+23% improvement</div></div>
+                    <div class="imp-item"><div class="imp-top"><div class="imp-dot up"><i class="fa-solid fa-arrow-up"></i></div><span class="imp-name">Team Communication</span></div><div class="imp-bar"><div class="imp-fill green" style="--w:65%;width:var(--w)"></div></div><div class="imp-change">+18% improvement</div></div>
+                    <div class="imp-item"><div class="imp-top"><div class="imp-dot down"><i class="fa-solid fa-arrow-down"></i></div><span class="imp-name">Workload Stress</span></div><div class="imp-bar"><div class="imp-fill red" style="--w:45%;width:var(--w)"></div></div><div class="imp-change">−12% (reduced stress)</div></div>
+                    <div class="imp-item"><div class="imp-top"><div class="imp-dot flat"><i class="fa-solid fa-minus"></i></div><span class="imp-name">Management Support</span></div><div class="imp-bar"><div class="imp-fill yellow" style="--w:55%;width:var(--w)"></div></div><div class="imp-change">No significant change</div></div>
+                </div>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 
-    <!-- Main Content -->
-    <main class="main-content">
-        <div class="container-fluid">
-            <!-- Date Range Display -->
-            <div class="date-range-card">
-                <div class="date-range-content">
-                    <h3 class="date-range-title">
-                        <i class="fas fa-calendar-check"></i>
-                        Analysis Period
-                    </h3>
-                    <div class="date-badge">
-                        <i class="fas fa-calendar"></i>
-                        @ViewBag.FromDate.ToString("MMM dd, yyyy") - @ViewBag.ToDate.ToString("MMM dd, yyyy")
-                    </div>
+<!-- Intervention Effectiveness -->
+<section style="position:relative;z-index:10">
+    <div class="container">
+        <div class="nex-card" style="overflow:hidden">
+            <div class="intv-head">
+                <h3><i class="fa-solid fa-chart-area"></i> Intervention Effectiveness Tracking</h3>
+                <div class="clinical-chip"><i class="fa-solid fa-user-doctor"></i> CLINICAL INSIGHTS</div>
+            </div>
+            <div class="intv-body">
+                <div class="chart-wrap"><canvas id="interventionEffectivenessChart"></canvas></div>
+                <div>
+                    <div style="font-family:var(--font-mono);font-size:.78rem;font-weight:600;color:#fff;margin-bottom:1.2rem">Intervention Impact</div>
+                    <div class="intv-result"><div class="intv-result-top"><span class="intv-result-name">Stress Management Workshops</span><span class="intv-badge green">+34%</span></div><div class="imp-bar"><div class="imp-fill green" style="--w:85%;width:var(--w)"></div></div><div class="intv-eff">Highly effective</div></div>
+                    <div class="intv-result"><div class="intv-result-top"><span class="intv-result-name">Manager Training Program</span><span class="intv-badge blue">+28%</span></div><div class="imp-bar"><div class="imp-fill green" style="--w:75%;width:var(--w);background:linear-gradient(90deg,var(--neon-blue),var(--neon-cyan))"></div></div><div class="intv-eff">Very effective</div></div>
+                    <div class="intv-result"><div class="intv-result-top"><span class="intv-result-name">Flexible Work Arrangements</span><span class="intv-badge cyan">+22%</span></div><div class="imp-bar"><div class="imp-fill green" style="--w:65%;width:var(--w);background:linear-gradient(90deg,var(--neon-cyan),var(--neon-blue))"></div></div><div class="intv-eff">Effective</div></div>
+                    <div class="intv-result"><div class="intv-result-top"><span class="intv-result-name">Team Building Activities</span><span class="intv-badge yellow">+12%</span></div><div class="imp-bar"><div class="imp-fill yellow" style="--w:45%;width:var(--w)"></div></div><div class="intv-eff">Moderate impact</div></div>
                 </div>
             </div>
+        </div>
+    </div>
+</section>
 
-            <!-- Trend Charts Row -->
-            <div class="row">
-                <div class="col-lg-6">
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <h2 class="chart-title">
-                                <i class="fas fa-heart"></i>
-                                Mental Health Score Trends
-                            </h2>
-                        </div>
-                        <div class="chart-body">
-                            <div class="chart-container">
-                                <canvas id="mentalHealthTrendChart"></canvas>
-                            </div>
-                            <div class="chart-info">
-                                <i class="fas fa-info-circle"></i>
-                                Shows overall mental health score progression over time
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-6">
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <h2 class="chart-title">
-                                <i class="fas fa-shield-alt"></i>
-                                Risk Level Distribution Trends
-                            </h2>
-                        </div>
-                        <div class="chart-body">
-                            <div class="chart-container">
-                                <canvas id="riskTrendChart"></canvas>
-                            </div>
-                            <div class="chart-info">
-                                <i class="fas fa-info-circle"></i>
-                                Tracks changes in employee risk levels over time
-                            </div>
-                        </div>
-                    </div>
+<!-- Insights + KPIs -->
+<section style="position:relative;z-index:10">
+    <div class="container">
+        <div class="grid-2">
+            <div class="nex-card"><div class="top-glow"></div>
+                <div class="c-head"><div class="c-icon indigo"><i class="fa-solid fa-wand-magic-sparkles"></i></div><div><h3>Trend Insights & Predictions</h3><p>AI-powered pattern recognition</p></div></div>
+                <div class="c-body">
+                    <div class="insight-item"><div class="insight-top"><div class="insight-dot green"><i class="fa-solid fa-arrow-trend-up"></i></div><div><div class="insight-title green">Positive Trajectory</div><div class="insight-desc">Mental health scores improved 18% over the analyzed period, indicating successful intervention strategies.</div><span class="insight-chip green">Predicted: Continued improvement</span></div></div></div>
+                    <div class="insight-item"><div class="insight-top"><div class="insight-dot yellow"><i class="fa-solid fa-triangle-exclamation"></i></div><div><div class="insight-title yellow">Area of Concern</div><div class="insight-desc">Management support scores remain static. This may become a limiting factor for further improvements.</div><span class="insight-chip yellow">Action needed: Manager training</span></div></div></div>
+                    <div class="insight-item"><div class="insight-top"><div class="insight-dot cyan"><i class="fa-solid fa-calendar-week"></i></div><div><div class="insight-title cyan">Seasonal Pattern</div><div class="insight-desc">Mental health scores typically dip during Q4 (holiday stress) and peak in Q2 (post-intervention period).</div><span class="insight-chip cyan">Plan: Preventive Q4 interventions</span></div></div></div>
                 </div>
             </div>
-
-            <!-- Sentiment and Workplace Factors -->
-            <div class="row">
-                <div class="col-lg-8">
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <h2 class="chart-title">
-                                <i class="fas fa-smile"></i>
-                                Sentiment Evolution
-                            </h2>
-                        </div>
-                        <div class="chart-body">
-                            <div class="chart-container">
-                                <canvas id="sentimentTrendChart"></canvas>
-                            </div>
-                            <div class="sentiment-indicators">
-                                <div class="sentiment-indicator positive">
-                                    <div class="sentiment-icon">
-                                        <i class="fas fa-smile"></i>
-                                    </div>
-                                    <div class="sentiment-title">Positive Trend</div>
-                                    <div class="sentiment-change">+15% this period</div>
-                                </div>
-                                <div class="sentiment-indicator neutral">
-                                    <div class="sentiment-icon">
-                                        <i class="fas fa-meh"></i>
-                                    </div>
-                                    <div class="sentiment-title">Neutral Stable</div>
-                                    <div class="sentiment-change">-2% this period</div>
-                                </div>
-                                <div class="sentiment-indicator negative">
-                                    <div class="sentiment-icon">
-                                        <i class="fas fa-frown"></i>
-                                    </div>
-                                    <div class="sentiment-title">Negative Decline</div>
-                                    <div class="sentiment-change">-13% this period</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-4">
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <h2 class="chart-title">
-                                <i class="fas fa-trending-up"></i>
-                                Key Improvements
-                            </h2>
-                        </div>
-                        <div class="chart-body">
-                            <div class="improvement-item positive">
-                                <div class="improvement-header">
-                                    <div class="improvement-icon">
-                                        <i class="fas fa-arrow-up"></i>
-                                    </div>
-                                    <div class="improvement-title positive">Work-Life Balance</div>
-                                </div>
-                                <div class="progress-bar-nexgen">
-                                    <div class="progress-fill success" style="width: 78%"></div>
-                                </div>
-                                <div class="improvement-change">+23% improvement</div>
-                            </div>
-
-                            <div class="improvement-item positive">
-                                <div class="improvement-header">
-                                    <div class="improvement-icon">
-                                        <i class="fas fa-arrow-up"></i>
-                                    </div>
-                                    <div class="improvement-title positive">Team Communication</div>
-                                </div>
-                                <div class="progress-bar-nexgen">
-                                    <div class="progress-fill success" style="width: 65%"></div>
-                                </div>
-                                <div class="improvement-change">+18% improvement</div>
-                            </div>
-
-                            <div class="improvement-item negative">
-                                <div class="improvement-header">
-                                    <div class="improvement-icon">
-                                        <i class="fas fa-arrow-down"></i>
-                                    </div>
-                                    <div class="improvement-title negative">Workload Stress</div>
-                                </div>
-                                <div class="progress-bar-nexgen">
-                                    <div class="progress-fill danger" style="width: 45%"></div>
-                                </div>
-                                <div class="improvement-change">-12% (reduced stress)</div>
-                            </div>
-
-                            <div class="improvement-item neutral">
-                                <div class="improvement-header">
-                                    <div class="improvement-icon">
-                                        <i class="fas fa-minus"></i>
-                                    </div>
-                                    <div class="improvement-title neutral">Management Support</div>
-                                </div>
-                                <div class="progress-bar-nexgen">
-                                    <div class="progress-fill warning" style="width: 55%"></div>
-                                </div>
-                                <div class="improvement-change">No significant change</div>
-                            </div>
-                        </div>
-                    </div>
+            <div class="nex-card"><div class="top-glow"></div>
+                <div class="c-head"><div class="c-icon blue"><i class="fa-solid fa-bullseye"></i></div><div><h3>Key Performance Indicators</h3><p>Mental health program metrics</p></div></div>
+                <div class="c-body">
+                    <div class="kpi-item"><div class="kpi-row"><div><div class="kpi-name">Response Rate</div><div class="kpi-sub">Employee participation</div></div><div style="text-align:right"><div class="kpi-val green">87%</div><div class="kpi-delta"><i class="fa-solid fa-arrow-up"></i> +12%</div></div></div><div class="kpi-bar"><div class="kpi-fill green" style="--w:87%;width:var(--w)"></div></div></div>
+                    <div class="kpi-item"><div class="kpi-row"><div><div class="kpi-name">High-Risk Resolution</div><div class="kpi-sub">Successful interventions</div></div><div style="text-align:right"><div class="kpi-val blue">73%</div><div class="kpi-delta"><i class="fa-solid fa-arrow-up"></i> +8%</div></div></div><div class="kpi-bar"><div class="kpi-fill blue" style="--w:73%;width:var(--w)"></div></div></div>
+                    <div class="kpi-item"><div class="kpi-row"><div><div class="kpi-name">Workplace Satisfaction</div><div class="kpi-sub">Overall satisfaction score</div></div><div style="text-align:right"><div class="kpi-val cyan">76%</div><div class="kpi-delta"><i class="fa-solid fa-arrow-up"></i> +19%</div></div></div><div class="kpi-bar"><div class="kpi-fill cyan" style="--w:76%;width:var(--w)"></div></div></div>
+                    <div class="kpi-item"><div class="kpi-row"><div><div class="kpi-name">Early Warning Detection</div><div class="kpi-sub">AI risk identification rate</div></div><div style="text-align:right"><div class="kpi-val yellow">92%</div><div class="kpi-delta"><i class="fa-solid fa-arrow-up"></i> +5%</div></div></div><div class="kpi-bar"><div class="kpi-fill yellow" style="--w:92%;width:var(--w)"></div></div></div>
                 </div>
             </div>
+        </div>
+    </div>
+</section>
 
-            <!-- Intervention Effectiveness -->
-            <div class="intervention-card">
-                <div class="intervention-header">
-                    <div class="intervention-title-group">
-                        <h2 class="intervention-title">
-                            <i class="fas fa-chart-area"></i>
-                            NVKN Intervention Effectiveness Tracking
-                        </h2>
-                        <div class="clinical-badge">
-                            <i class="fas fa-user-md"></i>
-                            CLINICAL INSIGHTS
-                        </div>
+<!-- Trending Topics -->
+<section style="position:relative;z-index:10">
+    <div class="container">
+        <div class="nex-card"><div class="top-glow"></div>
+            <div class="c-head"><div class="c-icon amber"><i class="fa-solid fa-fire"></i></div><div><h3>Trending Mental Health Topics</h3><p>Improving areas vs areas needing attention</p></div></div>
+            <div class="c-body">
+                <div class="grid-2">
+                    <div class="trend-col">
+                        <div class="trend-col-head up"><i class="fa-solid fa-arrow-up"></i> IMPROVING AREAS</div>
+                        <div class="trend-row"><div class="trend-arrow up">↗</div><span class="trend-name">Remote Work Satisfaction</span><span class="trend-pct green">+31%</span></div>
+                        <div class="trend-row"><div class="trend-arrow up">↗</div><span class="trend-name">Team Collaboration</span><span class="trend-pct green">+24%</span></div>
+                        <div class="trend-row"><div class="trend-arrow up">↗</div><span class="trend-name">Mental Health Awareness</span><span class="trend-pct green">+28%</span></div>
                     </div>
-                </div>
-                <div class="intervention-body">
-                    <div class="chart-container">
-                        <canvas id="interventionEffectivenessChart"></canvas>
-                    </div>
-                    <div class="intervention-results">
-                        <h3 class="results-title">Intervention Impact</h3>
-
-                        <div class="intervention-result">
-                            <div class="result-header">
-                                <div class="result-name">Stress Management Workshops</div>
-                                <div class="result-badge success">+34%</div>
-                            </div>
-                            <div class="progress-bar-nexgen">
-                                <div class="progress-fill success" style="width: 85%"></div>
-                            </div>
-                            <div class="result-effectiveness">Highly effective</div>
-                        </div>
-
-                        <div class="intervention-result">
-                            <div class="result-header">
-                                <div class="result-name">Manager Training Program</div>
-                                <div class="result-badge primary">+28%</div>
-                            </div>
-                            <div class="progress-bar-nexgen">
-                                <div class="progress-fill" style="width: 75%; background: var(--info-gradient);"></div>
-                            </div>
-                            <div class="result-effectiveness">Very effective</div>
-                        </div>
-
-                        <div class="intervention-result">
-                            <div class="result-header">
-                                <div class="result-name">Flexible Work Arrangements</div>
-                                <div class="result-badge info">+22%</div>
-                            </div>
-                            <div class="progress-bar-nexgen">
-                                <div class="progress-fill" style="width: 65%; background: var(--info-gradient);"></div>
-                            </div>
-                            <div class="result-effectiveness">Effective</div>
-                        </div>
-
-                        <div class="intervention-result">
-                            <div class="result-header">
-                                <div class="result-name">Team Building Activities</div>
-                                <div class="result-badge warning">+12%</div>
-                            </div>
-                            <div class="progress-bar-nexgen">
-                                <div class="progress-fill warning" style="width: 45%"></div>
-                            </div>
-                            <div class="result-effectiveness">Moderate impact</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Trend Insights and KPIs -->
-            <div class="insights-section">
-                <div class="insights-card">
-                    <div class="insights-header">
-                        <h2 class="insights-title">
-                            <i class="fas fa-crystal-ball"></i>
-                            Trend Insights & Predictions
-                        </h2>
-                    </div>
-                    <div class="insights-body">
-                        <div class="insight-item positive">
-                            <div class="insight-header">
-                                <div class="insight-icon">
-                                    <i class="fas fa-trending-up"></i>
-                                </div>
-                                <div class="insight-content">
-                                    <div class="insight-title positive">Positive Trajectory</div>
-                                    <div class="insight-description">
-                                        Mental health scores have improved 18% over the analyzed period,
-                                        indicating successful intervention strategies.
-                                    </div>
-                                    <div class="insight-badge positive">Predicted: Continued improvement</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="insight-item warning">
-                            <div class="insight-header">
-                                <div class="insight-icon">
-                                    <i class="fas fa-exclamation-triangle"></i>
-                                </div>
-                                <div class="insight-content">
-                                    <div class="insight-title warning">Area of Concern</div>
-                                    <div class="insight-description">
-                                        Management support scores remain static.
-                                        This may become a limiting factor for further improvements.
-                                    </div>
-                                    <div class="insight-badge warning">Action needed: Manager training</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="insight-item info">
-                            <div class="insight-header">
-                                <div class="insight-icon">
-                                    <i class="fas fa-calendar-week"></i>
-                                </div>
-                                <div class="insight-content">
-                                    <div class="insight-title info">Seasonal Pattern</div>
-                                    <div class="insight-description">
-                                        Mental health scores typically dip during Q4 (holiday stress)
-                                        and peak in Q2 (post-intervention period).
-                                    </div>
-                                    <div class="insight-badge info">Plan: Preventive Q4 interventions</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="insights-card">
-                    <div class="insights-header">
-                        <h2 class="insights-title">
-                            <i class="fas fa-bullseye"></i>
-                            Key Performance Indicators
-                        </h2>
-                    </div>
-                    <div class="insights-body">
-                        <div class="kpi-item">
-                            <div class="kpi-header">
-                                <div class="kpi-info">
-                                    <div class="kpi-title">Mental Health Response Rate</div>
-                                    <div class="kpi-subtitle">Employee participation in assessments</div>
-                                </div>
-                                <div class="kpi-value-section">
-                                    <div class="kpi-value success">87%</div>
-                                    <div class="kpi-change">
-                                        <i class="fas fa-arrow-up"></i> +12%
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="progress-bar-nexgen">
-                                <div class="progress-fill success" style="width: 87%"></div>
-                            </div>
-                        </div>
-
-                        <div class="kpi-item">
-                            <div class="kpi-header">
-                                <div class="kpi-info">
-                                    <div class="kpi-title">High-Risk Case Resolution</div>
-                                    <div class="kpi-subtitle">Successful intervention outcomes</div>
-                                </div>
-                                <div class="kpi-value-section">
-                                    <div class="kpi-value primary">73%</div>
-                                    <div class="kpi-change">
-                                        <i class="fas fa-arrow-up"></i> +8%
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="progress-bar-nexgen">
-                                <div class="progress-fill" style="width: 73%; background: var(--info-gradient);"></div>
-                            </div>
-                        </div>
-
-                        <div class="kpi-item">
-                            <div class="kpi-header">
-                                <div class="kpi-info">
-                                    <div class="kpi-title">Workplace Satisfaction</div>
-                                    <div class="kpi-subtitle">Overall employee satisfaction score</div>
-                                </div>
-                                <div class="kpi-value-section">
-                                    <div class="kpi-value info">76%</div>
-                                    <div class="kpi-change">
-                                        <i class="fas fa-arrow-up"></i> +19%
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="progress-bar-nexgen">
-                                <div class="progress-fill" style="width: 76%; background: var(--info-gradient);"></div>
-                            </div>
-                        </div>
-
-                        <div class="kpi-item">
-                            <div class="kpi-header">
-                                <div class="kpi-info">
-                                    <div class="kpi-title">Early Warning Detection</div>
-                                    <div class="kpi-subtitle">AI-powered risk identification rate</div>
-                                </div>
-                                <div class="kpi-value-section">
-                                    <div class="kpi-value warning">92%</div>
-                                    <div class="kpi-change">
-                                        <i class="fas fa-arrow-up"></i> +5%
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="progress-bar-nexgen">
-                                <div class="progress-fill warning" style="width: 92%"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Trending Topics -->
-            <div class="trending-section">
-                <div class="trending-header">
-                    <h2 class="trending-title">
-                        <i class="fas fa-fire"></i>
-                        Trending Mental Health Topics
-                    </h2>
-                </div>
-                <div class="trending-body">
-                    <div class="trending-columns">
-                        <div class="trending-category">
-                            <h3 class="category-title improving">
-                                <i class="fas fa-arrow-up"></i>Improving Areas
-                            </h3>
-                            <div class="trending-topic">
-                                <div class="topic-content">
-                                    <div class="topic-indicator up">↗</div>
-                                    <div class="topic-name">Remote Work Satisfaction</div>
-                                    <div class="topic-change positive">+31%</div>
-                                </div>
-                            </div>
-                            <div class="trending-topic">
-                                <div class="topic-content">
-                                    <div class="topic-indicator up">↗</div>
-                                    <div class="topic-name">Team Collaboration</div>
-                                    <div class="topic-change positive">+24%</div>
-                                </div>
-                            </div>
-                            <div class="trending-topic">
-                                <div class="topic-content">
-                                    <div class="topic-indicator up">↗</div>
-                                    <div class="topic-name">Mental Health Awareness</div>
-                                    <div class="topic-change positive">+28%</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="trending-category">
-                            <h3 class="category-title attention">
-                                <i class="fas fa-eye"></i>Areas Needing Attention
-                            </h3>
-                            <div class="trending-topic">
-                                <div class="topic-content">
-                                    <div class="topic-indicator stable">→</div>
-                                    <div class="topic-name">Deadline Pressure</div>
-                                    <div class="topic-change neutral">0%</div>
-                                </div>
-                            </div>
-                            <div class="trending-topic">
-                                <div class="topic-content">
-                                    <div class="topic-indicator down">↘</div>
-                                    <div class="topic-name">Sleep Quality</div>
-                                    <div class="topic-change negative">-8%</div>
-                                </div>
-                            </div>
-                            <div class="trending-topic">
-                                <div class="topic-content">
-                                    <div class="topic-indicator stable">→</div>
-                                    <div class="topic-name">Career Development Clarity</div>
-                                    <div class="topic-change neutral">-2%</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Action Recommendations -->
-            <div class="recommendations-section">
-                <div class="recommendations-header">
-                    <h2 class="recommendations-title">
-                        <i class="fas fa-lightbulb"></i>
-                        Trend-Based Action Recommendations
-                    </h2>
-                </div>
-                <div class="recommendations-body">
-                    <div class="recommendations-grid">
-                        <div class="action-card success">
-                            <h3 class="action-header success">
-                                <i class="fas fa-check-circle"></i>Continue Success
-                            </h3>
-                            <ul class="action-list">
-                                <li>Maintain current work-life balance initiatives</li>
-                                <li>Expand successful stress management programs</li>
-                                <li>Share best practices across departments</li>
-                            </ul>
-                        </div>
-                        <div class="action-card warning">
-                            <h3 class="action-header warning">
-                                <i class="fas fa-exclamation-triangle"></i>Address Concerns
-                            </h3>
-                            <ul class="action-list">
-                                <li>Implement sleep hygiene education programs</li>
-                                <li>Review deadline setting processes</li>
-                                <li>Enhance manager support training</li>
-                            </ul>
-                        </div>
-                        <div class="action-card primary">
-                            <h3 class="action-header primary">
-                                <i class="fas fa-rocket"></i>Strategic Focus
-                            </h3>
-                            <ul class="action-list">
-                                <li>Develop career development clarity initiatives</li>
-                                <li>Create predictive mental health models</li>
-                                <li>Establish quarterly trend review meetings</li>
-                            </ul>
-                        </div>
+                    <div class="trend-col">
+                        <div class="trend-col-head attn"><i class="fa-solid fa-eye"></i> NEEDS ATTENTION</div>
+                        <div class="trend-row"><div class="trend-arrow flat">→</div><span class="trend-name">Deadline Pressure</span><span class="trend-pct yellow">0%</span></div>
+                        <div class="trend-row"><div class="trend-arrow down">↘</div><span class="trend-name">Sleep Quality</span><span class="trend-pct red">−8%</span></div>
+                        <div class="trend-row"><div class="trend-arrow flat">→</div><span class="trend-name">Career Development Clarity</span><span class="trend-pct yellow">−2%</span></div>
                     </div>
                 </div>
             </div>
         </div>
-    </main>
-</div>
+    </div>
+</section>
 
-<!-- Date Range Selection Modal -->
-<div class="modal fade" id="dateRangeModal" tabindex="-1" data-bs-backdrop="true" data-bs-keyboard="true">
+<!-- Recommendations -->
+<section style="position:relative;z-index:10;padding-bottom:3rem">
+    <div class="container">
+        <div class="nex-card" style="overflow:hidden">
+            <div class="rec-head"><h3><i class="fa-solid fa-lightbulb"></i> Trend-Based Action Recommendations</h3></div>
+            <div class="rec-body">
+                <div class="grid-3">
+                    <div class="rec-card green">
+                        <div class="rec-title green"><i class="fa-solid fa-circle-check"></i> Continue Success</div>
+                        <ul class="rec-list"><li>Maintain current work-life balance initiatives</li><li>Expand successful stress management programs</li><li>Share best practices across departments</li></ul>
+                    </div>
+                    <div class="rec-card yellow">
+                        <div class="rec-title yellow"><i class="fa-solid fa-triangle-exclamation"></i> Address Concerns</div>
+                        <ul class="rec-list"><li>Implement sleep hygiene education programs</li><li>Review deadline setting processes</li><li>Enhance manager support training</li></ul>
+                    </div>
+                    <div class="rec-card blue">
+                        <div class="rec-title blue"><i class="fa-solid fa-rocket"></i> Strategic Focus</div>
+                        <ul class="rec-list"><li>Develop career development clarity initiatives</li><li>Create predictive mental health models</li><li>Establish quarterly trend review meetings</li></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Date Range Modal -->
+<div class="modal fade" id="dateRangeModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-nexgen">
-            <div class="modal-header-nexgen">
-                <h2 class="modal-title-nexgen">
-                    <i class="fas fa-calendar-alt"></i>
-                    Select Analysis Period
-                </h2>
+        <div class="modal-nex">
+            <div class="modal-nex-head">
+                <div class="m-icon"><i class="fa-solid fa-calendar-days"></i></div>
+                <h3>Select Analysis Period</h3>
+                <button type="button" class="close-x" data-bs-dismiss="modal"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div class="modal-body-nexgen">
-                <form id="dateRangeForm">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="fromDate" class="form-label-nexgen">From Date</label>
-                                <input type="date" class="form-control-nexgen" id="fromDate" value="@ViewBag.FromDate.ToString("yyyy-MM-dd")">
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="toDate" class="form-label-nexgen">To Date</label>
-                                <input type="date" class="form-control-nexgen" id="toDate" value="@ViewBag.ToDate.ToString("yyyy-MM-dd")">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label-nexgen">Quick Select:</label>
-                        <div class="quick-select-group">
-                            <button type="button" class="quick-select-btn" onclick="setDateRange(30)">Last 30 Days</button>
-                            <button type="button" class="quick-select-btn" onclick="setDateRange(90)">Last 3 Months</button>
-                            <button type="button" class="quick-select-btn" onclick="setDateRange(180)">Last 6 Months</button>
-                            <button type="button" class="quick-select-btn" onclick="setDateRange(365)">Last Year</button>
-                        </div>
-                    </div>
-                </form>
+            <div class="modal-nex-body">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.2rem">
+                    <div><label class="form-lbl">From Date</label><input type="date" class="form-input" id="fromDate" value="@ViewBag.FromDate.ToString("yyyy-MM-dd")"></div>
+                    <div><label class="form-lbl">To Date</label><input type="date" class="form-input" id="toDate" value="@ViewBag.ToDate.ToString("yyyy-MM-dd")"></div>
+                </div>
+                <label class="form-lbl">Quick Select</label>
+                <div class="quick-grid">
+                    <button type="button" class="quick-btn" onclick="setDateRange(30)">30 Days</button>
+                    <button type="button" class="quick-btn" onclick="setDateRange(90)">3 Months</button>
+                    <button type="button" class="quick-btn" onclick="setDateRange(180)">6 Months</button>
+                    <button type="button" class="quick-btn" onclick="setDateRange(365)">1 Year</button>
+                </div>
             </div>
-            <div class="modal-footer-nexgen">
-                <button type="button" class="btn-nexgen secondary" data-bs-dismiss="modal">CANCEL</button>
-                <button type="button" class="btn-nexgen primary" onclick="applyDateRange()">
-                    <i class="fas fa-chart-line"></i> ANALYZE PERIOD
-                </button>
+            <div class="modal-nex-foot">
+                <button type="button" class="h-btn sec" data-bs-dismiss="modal">CANCEL</button>
+                <button type="button" class="h-btn pri" onclick="applyDateRange()"><i class="fa-solid fa-chart-line"></i> ANALYZE</button>
             </div>
         </div>
     </div>
@@ -2049,347 +441,121 @@
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeTrendCharts();
+    document.addEventListener('DOMContentLoaded', function () {
+        Chart.defaults.color = '#94a3b8';
+        Chart.defaults.borderColor = 'rgba(255,255,255,0.05)';
+
+        var ttip = {
+            backgroundColor: 'rgba(15,23,42,0.92)',
+            titleColor: '#fff',
+            bodyColor: '#cbd5e1',
+            borderColor: 'rgba(52,211,153,0.2)',
+            borderWidth: 1,
+            cornerRadius: 8,
+            padding: 10,
+            titleFont: { family: "'JetBrains Mono',monospace", size: 11, weight: '600' },
+            bodyFont: { family: "'Space Grotesk',sans-serif", size: 12 }
+        };
+        var gridOpts = { color: 'rgba(255,255,255,0.04)' };
+        var yPct = { ...gridOpts, ticks: { color: '#64748b', callback: v => Number.isInteger(v) ? v + '%' : '' } };
+        var xDef = { grid: { display: false }, ticks: { color: '#64748b', font: { size: 11 } } };
+
+        // 1) Mental Health Score
+        new Chart(document.getElementById('mentalHealthTrendChart'), {
+            type: 'line',
+            data: {
+                labels: ['Week 1','Week 2','Week 3','Week 4','Week 5','Week 6'],
+                datasets: [{
+                    label: 'Mental Health Score',
+                    data: [65,68,72,75,78,82],
+                    borderColor: '#34d399',
+                    backgroundColor: 'rgba(52,211,153,0.1)',
+                    tension: .4, fill: true, borderWidth: 2,
+                    pointBackgroundColor: '#34d399', pointBorderColor: '#0f172a', pointBorderWidth: 2, pointRadius: 5, pointHoverRadius: 7
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false }, tooltip: ttip },
+                scales: { x: xDef, y: { ...yPct, beginAtZero: true, max: 100, grid: gridOpts } }
+            }
         });
 
-        function initializeTrendCharts() {
-            // Chart.js default color settings for dark theme
-            Chart.defaults.color = '#cbd5e1';
-            Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.1)';
-            Chart.defaults.backgroundColor = 'rgba(255, 255, 255, 0.05)';
-
-            // Mental Health Score Trend Chart
-            const mentalHealthCtx = document.getElementById('mentalHealthTrendChart').getContext('2d');
-            new Chart(mentalHealthCtx, {
-                type: 'line',
-                data: {
-                    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6'],
-                    datasets: [{
-                        label: 'Mental Health Score',
-                        data: [65, 68, 72, 75, 78, 82],
-                        borderColor: '#34d399',
-                        backgroundColor: 'rgba(52, 211, 153, 0.1)',
-                        tension: 0.4,
-                        fill: true,
-                        pointBackgroundColor: '#34d399',
-                        pointBorderColor: '#ffffff',
-                        pointBorderWidth: 2,
-                        pointRadius: 6,
-                        pointHoverRadius: 8
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            backgroundColor: 'rgba(15, 23, 42, 0.95)',
-                            titleColor: '#ffffff',
-                            bodyColor: '#cbd5e1',
-                            borderColor: 'rgba(52, 211, 153, 0.3)',
-                            borderWidth: 1,
-                            cornerRadius: 8
-                        }
-                    },
-                    scales: {
-                        x: {
-                            grid: {
-                                color: 'rgba(255, 255, 255, 0.1)',
-                                borderColor: 'rgba(255, 255, 255, 0.2)'
-                            },
-                            ticks: {
-                                color: '#cbd5e1'
-                            }
-                        },
-                        y: {
-                            beginAtZero: true,
-                            max: 100,
-                            grid: {
-                                color: 'rgba(255, 255, 255, 0.1)',
-                                borderColor: 'rgba(255, 255, 255, 0.2)'
-                            },
-                            ticks: {
-                                color: '#cbd5e1',
-                                callback: function(value) {
-                                    return value + '%';
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-
-            // Risk Level Trends Chart
-            const riskTrendCtx = document.getElementById('riskTrendChart').getContext('2d');
-            new Chart(riskTrendCtx, {
-                type: 'line',
-                data: {
-                    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6'],
-                    datasets: [
-                        {
-                            label: 'Low Risk',
-                            data: [45, 48, 52, 58, 62, 68],
-                            borderColor: '#34d399',
-                            backgroundColor: 'rgba(52, 211, 153, 0.2)',
-                            tension: 0.4,
-                            fill: true
-                        },
-                        {
-                            label: 'Moderate Risk',
-                            data: [25, 23, 21, 18, 16, 14],
-                            borderColor: '#fbbf24',
-                            backgroundColor: 'rgba(251, 191, 36, 0.2)',
-                            tension: 0.4,
-                            fill: true
-                        },
-                        {
-                            label: 'High Risk',
-                            data: [15, 12, 10, 8, 6, 4],
-                            borderColor: '#f87171',
-                            backgroundColor: 'rgba(248, 113, 113, 0.2)',
-                            tension: 0.4,
-                            fill: true
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        tooltip: {
-                            backgroundColor: 'rgba(15, 23, 42, 0.95)',
-                            titleColor: '#ffffff',
-                            bodyColor: '#cbd5e1',
-                            borderColor: 'rgba(52, 211, 153, 0.3)',
-                            borderWidth: 1,
-                            cornerRadius: 8
-                        }
-                    },
-                    scales: {
-                        x: {
-                            grid: {
-                                color: 'rgba(255, 255, 255, 0.1)'
-                            },
-                            ticks: {
-                                color: '#cbd5e1'
-                            }
-                        },
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                color: 'rgba(255, 255, 255, 0.1)'
-                            },
-                            ticks: {
-                                color: '#cbd5e1'
-                            }
-                        }
-                    }
-                }
-            });
-
-            // Sentiment Evolution Chart
-            const sentimentCtx = document.getElementById('sentimentTrendChart').getContext('2d');
-            new Chart(sentimentCtx, {
-                type: 'line',
-                data: {
-                    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6'],
-                    datasets: [
-                        {
-                            label: 'Positive',
-                            data: [45, 48, 52, 58, 62, 68],
-                            borderColor: '#34d399',
-                            backgroundColor: 'rgba(52, 211, 153, 0.3)',
-                            tension: 0.4,
-                            fill: true
-                        },
-                        {
-                            label: 'Neutral',
-                            data: [35, 34, 33, 30, 28, 25],
-                            borderColor: '#64748b',
-                            backgroundColor: 'rgba(100, 116, 139, 0.3)',
-                            tension: 0.4,
-                            fill: true
-                        },
-                        {
-                            label: 'Negative',
-                            data: [20, 18, 15, 12, 10, 7],
-                            borderColor: '#f87171',
-                            backgroundColor: 'rgba(248, 113, 113, 0.3)',
-                            tension: 0.4,
-                            fill: true
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        tooltip: {
-                            backgroundColor: 'rgba(15, 23, 42, 0.95)',
-                            titleColor: '#ffffff',
-                            bodyColor: '#cbd5e1',
-                            borderColor: 'rgba(52, 211, 153, 0.3)',
-                            borderWidth: 1,
-                            cornerRadius: 8
-                        }
-                    },
-                    scales: {
-                        x: {
-                            grid: {
-                                color: 'rgba(255, 255, 255, 0.1)'
-                            },
-                            ticks: {
-                                color: '#cbd5e1'
-                            }
-                        },
-                        y: {
-                            beginAtZero: true,
-                            max: 100,
-                            grid: {
-                                color: 'rgba(255, 255, 255, 0.1)'
-                            },
-                            ticks: {
-                                color: '#cbd5e1'
-                            }
-                        }
-                    }
-                }
-            });
-
-            // Intervention Effectiveness Chart
-            const interventionCtx = document.getElementById('interventionEffectivenessChart').getContext('2d');
-            new Chart(interventionCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['Pre-Intervention', 'Month 1', 'Month 2', 'Month 3', 'Current'],
-                    datasets: [{
-                        label: 'Mental Health Score',
-                        data: [58, 65, 72, 78, 84],
-                        backgroundColor: [
-                            '#f87171', // Red for pre-intervention
-                            '#fbbf24', // Yellow for month 1
-                            '#22d3ee', // Cyan for month 2
-                            '#34d399', // Green for month 3
-                            '#60a5fa'  // Blue for current
-                        ],
-                        borderRadius: 8,
-                        borderSkipped: false
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            backgroundColor: 'rgba(15, 23, 42, 0.95)',
-                            titleColor: '#ffffff',
-                            bodyColor: '#cbd5e1',
-                            borderColor: 'rgba(52, 211, 153, 0.3)',
-                            borderWidth: 1,
-                            cornerRadius: 8
-                        }
-                    },
-                    scales: {
-                        x: {
-                            grid: {
-                                color: 'rgba(255, 255, 255, 0.1)'
-                            },
-                            ticks: {
-                                color: '#cbd5e1'
-                            }
-                        },
-                        y: {
-                            beginAtZero: true,
-                            max: 100,
-                            grid: {
-                                color: 'rgba(255, 255, 255, 0.1)'
-                            },
-                            ticks: {
-                                color: '#cbd5e1',
-                                callback: function(value) {
-                                    return value + '%';
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Date range functions
-        function setDateRange(days) {
-            const toDate = new Date();
-            const fromDate = new Date();
-            fromDate.setDate(toDate.getDate() - days);
-
-            document.getElementById('fromDate').value = fromDate.toISOString().split('T')[0];
-            document.getElementById('toDate').value = toDate.toISOString().split('T')[0];
-        }
-
-        function applyDateRange() {
-            const fromDate = document.getElementById('fromDate').value;
-            const toDate = document.getElementById('toDate').value;
-
-            if (!fromDate || !toDate) {
-                Swal.fire({
-                    title: 'Invalid Date Range',
-                    text: 'Please select both from and to dates.',
-                    icon: 'warning',
-                    customClass: {
-                        popup: 'swal-nexgen',
-                        title: 'swal-title-nexgen'
-                    }
-                });
-                return;
+        // 2) Risk Level
+        new Chart(document.getElementById('riskTrendChart'), {
+            type: 'line',
+            data: {
+                labels: ['Week 1','Week 2','Week 3','Week 4','Week 5','Week 6'],
+                datasets: [
+                    { label: 'Low Risk', data: [45,48,52,58,62,68], borderColor: '#34d399', backgroundColor: 'rgba(52,211,153,0.15)', tension: .4, fill: true, borderWidth: 2 },
+                    { label: 'Moderate', data: [25,23,21,18,16,14], borderColor: '#fbbf24', backgroundColor: 'rgba(251,191,36,0.15)', tension: .4, fill: true, borderWidth: 2 },
+                    { label: 'High Risk', data: [15,12,10,8,6,4], borderColor: '#f87171', backgroundColor: 'rgba(248,113,113,0.15)', tension: .4, fill: true, borderWidth: 2 }
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { tooltip: ttip, legend: { labels: { usePointStyle: true, pointStyle: 'circle', padding: 16, font: { size: 11 } } } },
+                scales: { x: xDef, y: { beginAtZero: true, grid: gridOpts, ticks: { color: '#64748b', callback: v => Number.isInteger(v) ? v : '' } } }
             }
+        });
 
-            const url = '@Url.Action("AnalyzeTrends", new { id = ViewBag.QuestionnaireId })' +
-                        `?fromDate=${fromDate}&toDate=${toDate}`;
-
-            window.location.href = url;
-        }
-
-        // Export trends data
-        function exportTrendsData() {
-            Swal.fire({
-                title: 'Export Trends Data',
-                text: 'This will export mental health trends data in CSV format for further analysis.',
-                icon: 'info',
-                showCancelButton: true,
-                confirmButtonText: 'Export CSV',
-                cancelButtonText: 'Cancel',
-                customClass: {
-                    popup: 'swal-nexgen',
-                    title: 'swal-title-nexgen'
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location.href = '@Url.Action("ExportAnalysis", new { id = ViewBag.QuestionnaireId })';
-                }
-            });
-        }
-
-        // Custom SweetAlert styling
-        const swalStyle = document.createElement('style');
-        swalStyle.textContent = `
-            .swal-nexgen {
-                background: rgba(15, 23, 42, 0.95) !important;
-                backdrop-filter: blur(20px) !important;
-                border: 1px solid rgba(52, 211, 153, 0.3) !important;
-                border-radius: 1rem !important;
-                color: #e2e8f0 !important;
+        // 3) Sentiment
+        new Chart(document.getElementById('sentimentTrendChart'), {
+            type: 'line',
+            data: {
+                labels: ['Week 1','Week 2','Week 3','Week 4','Week 5','Week 6'],
+                datasets: [
+                    { label: 'Positive', data: [45,48,52,58,62,68], borderColor: '#34d399', backgroundColor: 'rgba(52,211,153,0.2)', tension: .4, fill: true, borderWidth: 2 },
+                    { label: 'Neutral', data: [35,34,33,30,28,25], borderColor: '#64748b', backgroundColor: 'rgba(100,116,139,0.2)', tension: .4, fill: true, borderWidth: 2 },
+                    { label: 'Negative', data: [20,18,15,12,10,7], borderColor: '#f87171', backgroundColor: 'rgba(248,113,113,0.2)', tension: .4, fill: true, borderWidth: 2 }
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { tooltip: ttip, legend: { labels: { usePointStyle: true, pointStyle: 'circle', padding: 16, font: { size: 11 } } } },
+                scales: { x: xDef, y: { ...yPct, beginAtZero: true, max: 100, grid: gridOpts } }
             }
-            .swal-title-nexgen {
-                color: #34d399 !important;
-                font-weight: 700 !important;
-                letter-spacing: 0.05em !important;
+        });
+
+        // 4) Intervention Effectiveness
+        new Chart(document.getElementById('interventionEffectivenessChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Pre-Intervention','Month 1','Month 2','Month 3','Current'],
+                datasets: [{
+                    label: 'Score',
+                    data: [58,65,72,78,84],
+                    backgroundColor: ['rgba(248,113,113,0.35)','rgba(251,191,36,0.35)','rgba(34,211,238,0.35)','rgba(52,211,153,0.35)','rgba(96,165,250,0.35)'],
+                    borderColor: ['rgba(248,113,113,0.6)','rgba(251,191,36,0.6)','rgba(34,211,238,0.6)','rgba(52,211,153,0.6)','rgba(96,165,250,0.6)'],
+                    borderWidth: 1, borderRadius: 8, borderSkipped: false
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false }, tooltip: ttip },
+                scales: { x: xDef, y: { ...yPct, beginAtZero: true, max: 100, grid: gridOpts } }
             }
-        `;
-        document.head.appendChild(swalStyle);
+        });
+    });
+
+    function setDateRange(days) {
+        var to = new Date(), fr = new Date();
+        fr.setDate(to.getDate() - days);
+        document.getElementById('fromDate').value = fr.toISOString().split('T')[0];
+        document.getElementById('toDate').value = to.toISOString().split('T')[0];
+    }
+
+    function applyDateRange() {
+        var f = document.getElementById('fromDate').value, t = document.getElementById('toDate').value;
+        if (!f || !t) { alert('Please select both dates.'); return; }
+        window.location.href = '@Url.Action("AnalyzeTrends", new { id = ViewBag.QuestionnaireId })' + '?fromDate=' + f + '&toDate=' + t;
+    }
+
+    function exportTrendsData() {
+        if (confirm('Export trends data as JSON for further analysis?')) {
+            window.location.href = '@Url.Action("ExportAnalysis", new { id = ViewBag.QuestionnaireId })';
+        }
+    }
     </script>
 }

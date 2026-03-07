@@ -1,1264 +1,544 @@
-﻿@using Newtonsoft.Json
-@model UserResponsesViewModel
+﻿@model UserResponsesViewModel
 
 @{
     ViewData["Title"] = "User Response Details";
+
+    var totalResponses = Model.Responses.Count();
+    var totalQuestions = Model.Responses.Sum(r => r.ResponseDetails.Count);
+    var totalAnswered = Model.Responses.Sum(r => r.ResponseDetails.Count(d => d.Status == ResponseStatus.Answered));
+    var totalSkipped = Model.Responses.Sum(r => r.ResponseDetails.Count(d => d.Status == ResponseStatus.Skipped));
+    var totalShown = Model.Responses.Sum(r => r.ResponseDetails.Count(d => d.Status == ResponseStatus.Shown));
+    var completionRate = totalQuestions > 0 ? Math.Round((double)totalAnswered / totalQuestions * 100, 1) : 0;
+    var uniqueSurveys = Model.Responses.Select(r => r.Questionnaire?.Title).Distinct().Count();
+    var latestDate = Model.Responses.Any() ? Model.Responses.Max(r => r.SubmissionDate).ToString("MMM dd, yyyy") : "—";
 }
 
-<style>
-    /* Modern Design System */
-    @@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-
-    :root {
-        --primary-color: #6366f1;
-        --primary-light: #8b5cf6;
-        --primary-dark: #4338ca;
-        --success-color: #10b981;
-        --success-light: #34d399;
-        --success-dark: #059669;
-        --info-color: #06b6d4;
-        --info-light: #22d3ee;
-        --info-dark: #0891b2;
-        --warning-color: #f59e0b;
-        --warning-light: #fbbf24;
-        --warning-dark: #d97706;
-        --danger-color: #ef4444;
-        --danger-light: #fca5a5;
-        --danger-dark: #dc2626;
-        --gray-50: #f8fafc;
-        --gray-100: #f1f5f9;
-        --gray-200: #e2e8f0;
-        --gray-300: #cbd5e1;
-        --gray-400: #94a3b8;
-        --gray-500: #64748b;
-        --gray-600: #475569;
-        --gray-700: #334155;
-        --gray-800: #1e293b;
-        --gray-900: #0f172a;
-        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-        --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-        --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
-        --border-radius-sm: 8px;
-        --border-radius-md: 12px;
-        --border-radius-lg: 16px;
-        --border-radius-xl: 24px;
-    }
-
-    * {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    }
-
-    body {
-        background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
-        min-height: 100vh;
-    }
-
-    .container-fluid {
-        max-width: 1400px;
-        margin: 0 auto;
-        padding: 2rem 1rem;
-    }
-
-    /* Back Button */
-    .back-button {
-        background: linear-gradient(135deg, var(--gray-500) 0%, var(--gray-600) 100%);
-        color: white;
-        border: none;
-        padding: 0.75rem 1.5rem;
-        border-radius: var(--border-radius-md);
-        font-weight: 600;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        transition: all 0.3s ease;
-        box-shadow: var(--shadow-md);
-        margin-bottom: 2rem;
-    }
-
-        .back-button:hover {
-            background: linear-gradient(135deg, var(--gray-600) 0%, var(--gray-700) 100%);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
-            color: white;
-            text-decoration: none;
-        }
-
-    /* Header Section */
-    .user-header {
-        background: white;
-        border-radius: var(--border-radius-xl);
-        box-shadow: var(--shadow-xl);
-        overflow: hidden;
-        margin-bottom: 2rem;
-        position: relative;
-    }
-
-        .user-header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, var(--primary-color), var(--info-color), var(--success-color));
-        }
-
-    .user-info-section {
-        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
-        color: white;
-        padding: 2.5rem;
-        position: relative;
-        overflow: hidden;
-    }
-
-        .user-info-section::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20"><defs><radialGradient id="a" cx="50%" cy="0%" r="100%"><stop offset="0%" stop-color="white" stop-opacity="0.1"/><stop offset="100%" stop-color="white" stop-opacity="0"/></radialGradient></defs><rect width="100" height="20" fill="url(%23a)"/></svg>');
-            opacity: 0.3;
-        }
-
-    .user-info-content {
-        display: grid;
-        grid-template-columns: auto 1fr auto;
-        gap: 2rem;
-        align-items: center;
-        position: relative;
-        z-index: 1;
-    }
-
-    .user-avatar {
-        background: rgba(255, 255, 255, 0.2);
-        width: 80px;
-        height: 80px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 2rem;
-        font-weight: 800;
-        backdrop-filter: blur(10px);
-        box-shadow: var(--shadow-lg);
-    }
-
-    .user-details h2 {
-        font-size: 1.75rem;
-        font-weight: 800;
-        margin: 0 0 0.5rem;
-    }
-
-    .user-email {
-        font-size: 1.1rem;
-        opacity: 0.9;
-        font-weight: 500;
-        margin: 0 0 1rem;
-    }
-
-    .response-count {
-        background: rgba(255, 255, 255, 0.2);
-        padding: 0.75rem 1.25rem;
-        border-radius: var(--border-radius-md);
-        backdrop-filter: blur(10px);
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-weight: 600;
-    }
-
-    .export-buttons {
-        display: flex;
-        gap: 1rem;
-        flex-wrap: wrap;
-    }
-
-    .export-btn {
-        background: rgba(255, 255, 255, 0.2);
-        color: white;
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        padding: 0.75rem 1.25rem;
-        border-radius: var(--border-radius-md);
-        font-weight: 600;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        transition: all 0.3s ease;
-        backdrop-filter: blur(10px);
-    }
-
-        .export-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
-            color: white;
-            text-decoration: none;
-            box-shadow: var(--shadow-md);
-        }
-
-    /* Charts Section */
-    .charts-section {
-        background: white;
-        padding: 2rem;
-        border-top: 1px solid var(--gray-200);
-    }
-
-    .charts-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 2rem;
-        margin-bottom: 2rem;
-    }
-
-    .chart-container {
-        background: var(--gray-50);
-        border-radius: var(--border-radius-lg);
-        padding: 1.5rem;
-        border: 1px solid var(--gray-200);
-    }
-
-    .chart-title {
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: var(--gray-800);
-        margin-bottom: 1rem;
-        text-align: center;
-    }
-
-    .main-chart {
-        background: white;
-        border-radius: var(--border-radius-lg);
-        padding: 1.5rem;
-        border: 1px solid var(--gray-200);
-        box-shadow: var(--shadow-sm);
-    }
-
-    /* Timeline/Stepper Design */
-    .responses-timeline {
-        margin-top: 2rem;
-    }
-
-    .timeline-header {
-        background: white;
-        padding: 2rem;
-        border-radius: var(--border-radius-lg);
-        box-shadow: var(--shadow-lg);
-        margin-bottom: 2rem;
-        text-align: center;
-    }
-
-        .timeline-header h3 {
-            font-size: 1.75rem;
-            font-weight: 700;
-            color: var(--gray-800);
-            margin: 0 0 0.5rem;
-        }
-
-    .timeline-subtitle {
-        color: var(--gray-600);
-        font-weight: 500;
-    }
-
-    .stepper-wrapper {
-        position: relative;
-        padding-left: 3rem;
-    }
-
-        .stepper-wrapper::before {
-            content: '';
-            position: absolute;
-            left: 2rem;
-            top: 0;
-            bottom: 0;
-            width: 3px;
-            background: linear-gradient(180deg, var(--primary-color), var(--info-color), var(--success-color));
-            border-radius: 2px;
-        }
-
-    .stepper-item {
-        position: relative;
-        margin-bottom: 3rem;
-    }
-
-    .step-counter {
-        position: absolute;
-        left: -3rem;
-        top: 1.5rem;
-        width: 60px;
-        height: 60px;
-        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: var(--shadow-lg);
-        border: 4px solid white;
-        z-index: 2;
-    }
-
-        .step-counter i {
-            color: white;
-            font-size: 1.5rem;
-        }
-
-    .step-content {
-        margin-left: 1rem;
-    }
-
-    /* Response Card */
-    .response-card {
-        background: white;
-        border-radius: var(--border-radius-xl);
-        box-shadow: var(--shadow-xl);
-        overflow: hidden;
-        border: 1px solid var(--gray-200);
-        transition: all 0.3s ease;
-    }
-
-        .response-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-2xl);
-        }
-
-    .response-header {
-        background: linear-gradient(135deg, var(--gray-50) 0%, var(--gray-100) 100%);
-        padding: 2rem;
-        border-bottom: 1px solid var(--gray-200);
-    }
-
-    .response-info {
-        display: grid;
-        grid-template-columns: 1fr auto;
-        gap: 2rem;
-        align-items: start;
-    }
-
-    .response-details h4 {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: var(--gray-800);
-        margin: 0 0 1rem;
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-    }
-
-    .response-meta {
-        display: flex;
-        flex-direction: column;
-        gap: 0.75rem;
-    }
-
-    .meta-item {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-weight: 500;
-    }
-
-        .meta-item i {
-            color: var(--primary-color);
-            font-size: 1.1rem;
-        }
-
-    .submission-date {
-        color: var(--success-color);
-    }
-
-    .question-count {
-        color: var(--info-color);
-    }
-
-    .chart-mini {
-        width: 200px;
-        height: 120px;
-        background: white;
-        border-radius: var(--border-radius-md);
-        border: 1px solid var(--gray-200);
-    }
-
-    .response-actions {
-        background: var(--gray-50);
-        padding: 1.5rem 2rem;
-        border-top: 1px solid var(--gray-200);
-        display: flex;
-        gap: 1rem;
-        flex-wrap: wrap;
-        align-items: center;
-    }
-
-    .action-btn {
-        padding: 0.75rem 1.25rem;
-        border-radius: var(--border-radius-md);
-        font-weight: 600;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        transition: all 0.3s ease;
-        border: none;
-        box-shadow: var(--shadow-sm);
-        font-size: 0.875rem;
-    }
-
-        .action-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
-            text-decoration: none;
-        }
-
-    .btn-pdf {
-        background: linear-gradient(135deg, var(--danger-color) 0%, var(--danger-dark) 100%);
-        color: white;
-    }
-
-        .btn-pdf:hover {
-            background: linear-gradient(135deg, var(--danger-dark) 0%, #b91c1c 100%);
-            color: white;
-        }
-
-    .btn-excel {
-        background: linear-gradient(135deg, var(--success-color) 0%, var(--success-dark) 100%);
-        color: white;
-    }
-
-        .btn-excel:hover {
-            background: linear-gradient(135deg, var(--success-dark) 0%, #047857 100%);
-            color: white;
-        }
-
-    .btn-toggle {
-        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
-        color: white;
-        cursor: pointer;
-    }
-
-        .btn-toggle:hover {
-            background: linear-gradient(135deg, var(--primary-dark) 0%, #3730a3 100%);
-            color: white;
-        }
-
-        .btn-toggle.expanded {
-            background: linear-gradient(135deg, var(--info-color) 0%, var(--info-dark) 100%);
-        }
-
-            .btn-toggle.expanded:hover {
-                background: linear-gradient(135deg, var(--info-dark) 0%, #0e7490 100%);
-                color: white;
-            }
-
-    /* Response Details Table */
-    .response-details-section {
-        padding: 0;
-        background: white;
-    }
-
-    .details-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin: 0;
-    }
-
-        .details-table th {
-            background: linear-gradient(135deg, var(--gray-700) 0%, var(--gray-800) 100%);
-            color: white;
-            padding: 1.25rem;
-            font-weight: 600;
-            text-align: left;
-            border: none;
-        }
-
-        .details-table td {
-            padding: 1.5rem 1.25rem;
-            border-bottom: 1px solid var(--gray-200);
-            vertical-align: top;
-        }
-
-        .details-table tr:last-child td {
-            border-bottom: none;
-        }
-
-        .details-table tr:hover {
-            background: var(--gray-50);
-        }
-
-    .question-cell {
-        max-width: 300px;
-    }
-
-    .question-text {
-        font-weight: 600;
-        color: var(--gray-800);
-        margin-bottom: 0.5rem;
-        line-height: 1.4;
-    }
-
-    .question-type {
-        background: var(--gray-100);
-        color: var(--gray-600);
-        padding: 0.25rem 0.75rem;
-        border-radius: var(--border-radius-sm);
-        font-size: 0.75rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    /* Status Indicators */
-    .status-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.75rem 1rem;
-        border-radius: var(--border-radius-md);
-        font-weight: 600;
-        font-size: 0.875rem;
-        box-shadow: var(--shadow-sm);
-    }
-
-    .status-answered {
-        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-        color: #065f46;
-        border: 1px solid #34d399;
-    }
-
-    .status-shown {
-        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-        color: #92400e;
-        border: 1px solid #fbbf24;
-    }
-
-    .status-skipped {
-        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-        color: #1e40af;
-        border: 1px solid #60a5fa;
-    }
-
-    .status-unknown {
-        background: linear-gradient(135deg, var(--gray-100) 0%, var(--gray-200) 100%);
-        color: var(--gray-700);
-        border: 1px solid var(--gray-300);
-    }
-
-    .status-description {
-        font-size: 0.75rem;
-        opacity: 0.8;
-        margin-top: 0.25rem;
-    }
-
-    /* Response Display */
-    .response-display {
-        min-width: 250px;
-    }
-
-    .answer-container {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-        margin-bottom: 1rem;
-    }
-
-    .answer-badge {
-        background: linear-gradient(135deg, var(--success-color) 0%, var(--success-dark) 100%);
-        color: white;
-        padding: 0.5rem 1rem;
-        border-radius: var(--border-radius-md);
-        font-weight: 600;
-        font-size: 0.875rem;
-        box-shadow: var(--shadow-sm);
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .other-option-badge {
-        background: var(--warning-color);
-        color: var(--gray-900);
-        font-size: 0.7rem;
-        padding: 0.25rem 0.5rem;
-        border-radius: var(--border-radius-sm);
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    .text-response {
-        background: linear-gradient(135deg, var(--gray-50) 0%, var(--gray-100) 100%);
-        border: 1px solid var(--gray-200);
-        border-radius: var(--border-radius-md);
-        padding: 1rem;
-        font-weight: 500;
-        color: var(--gray-800);
-        box-shadow: var(--shadow-sm);
-    }
-
-    .text-response-label {
-        font-size: 0.875rem;
-        font-weight: 600;
-        color: var(--gray-600);
-        margin-bottom: 0.5rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    /* Other Text Response */
-    .other-text-response {
-        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-        border: 2px solid var(--warning-color);
-        border-radius: var(--border-radius-lg);
-        padding: 1.25rem;
-        margin-top: 1rem;
-        position: relative;
-    }
-
-        .other-text-response::before {
-            content: "CUSTOM RESPONSE";
-            position: absolute;
-            top: -12px;
-            left: 20px;
-            background: var(--warning-color);
-            color: white;
-            padding: 0.25rem 0.75rem;
-            border-radius: var(--border-radius-sm);
-            font-size: 0.7rem;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-        }
-
-    .other-text-label {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-weight: 600;
-        color: #92400e;
-        margin-bottom: 0.75rem;
-        font-size: 0.875rem;
-    }
-
-    .other-text-content {
-        background: white;
-        padding: 1rem;
-        border-radius: var(--border-radius-md);
-        border-left: 4px solid var(--warning-color);
-        color: var(--gray-800);
-        font-style: italic;
-        line-height: 1.5;
-        box-shadow: var(--shadow-sm);
-    }
-
-    .no-response {
-        color: var(--gray-500);
-        font-style: italic;
-        padding: 1rem;
-        text-align: center;
-        background: var(--gray-50);
-        border-radius: var(--border-radius-md);
-        border: 1px dashed var(--gray-300);
-    }
-
-    /* Responsive Design */
-    @@media (max-width: 1024px) {
-        .charts-grid
-
-    {
-        grid-template-columns: 1fr;
-    }
-
-    .user-info-content {
-        grid-template-columns: 1fr;
-        text-align: center;
-        gap: 1.5rem;
-    }
-
-    .response-info {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
-    }
-
-    }
-
-    @@media (max-width: 768px) {
-        .container-fluid
-
-    {
-        padding: 1rem;
-    }
-
-    .stepper-wrapper {
-        padding-left: 1.5rem;
-    }
-
-        .stepper-wrapper::before {
-            left: 1rem;
-        }
-
-    .step-counter {
-        left: -2rem;
-        width: 48px;
-        height: 48px;
-    }
-
-        .step-counter i {
-            font-size: 1.25rem;
-        }
-
-    .response-actions {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .action-btn {
-        justify-content: center;
-    }
-
-    .export-buttons {
-        flex-direction: column;
-    }
-
-    .details-table {
-        font-size: 0.875rem;
-    }
-
-        .details-table th,
-        .details-table td {
-            padding: 1rem 0.75rem;
-        }
-
-    }
-
-    /* Animations */
-    .fade-in {
-        animation: fadeIn 0.6s ease-out;
-    }
-
-    @@keyframes fadeIn {
-        from
-
-    {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-
-    }
-
-    .slide-in {
-        animation: slideIn 0.4s ease-out;
-    }
-
-    @@keyframes slideIn {
-        from
-
-    {
-        opacity: 0;
-        transform: translateX(-20px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-
-    }
-
-    .stagger-animation {
-        animation: fadeIn 0.6s ease-out;
-        animation-fill-mode: both;
-    }
-
-        .stagger-animation:nth-child(1) {
-            animation-delay: 0.1s;
-        }
-
-        .stagger-animation:nth-child(2) {
-            animation-delay: 0.2s;
-        }
-
-        .stagger-animation:nth-child(3) {
-            animation-delay: 0.3s;
-        }
-
-        .stagger-animation:nth-child(4) {
-            animation-delay: 0.4s;
-        }
-
-        .stagger-animation:nth-child(5) {
-            animation-delay: 0.5s;
-        }
-
-        .stagger-animation:nth-child(6) {
-            animation-delay: 0.6s;
-        }
-</style>
-
-<div class="container-fluid">
-    <!-- Back Button -->
-    <a asp-action="Index" class="back-button fade-in">
-        <i class="bi bi-arrow-left"></i>
-        Back to List
-    </a>
-
-    <!-- User Header Section -->
-    <div class="user-header fade-in">
-        <div class="user-info-section">
-            <div class="user-info-content">
-                <div class="user-avatar">
-                    @(Model.UserName?.Substring(0, 1).ToUpper() ?? "U")
-                </div>
-                <div class="user-details">
-                    <h2>@Model.UserName</h2>
-                    <p class="user-email">@Model.UserEmail</p>
-                    <div class="response-count">
-                        <i class="bi bi-clipboard-data"></i>
-                        Total Responses: @Model.Responses.Count()
+@section Styles {
+   <style>
+       @@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
+:root{--neon-blue:#60a5fa;--neon-purple:#c084fc;--neon-green:#34d399;--neon-pink:#f472b6;--neon-yellow:#fbbf24;--neon-red:#f87171;--neon-cyan:#22d3ee;--neon-teal:#33b3ae;--neon-indigo:#818cf8;--neon-orange:#fb923c;--dark-900:#0f172a;--dark-800:#1e293b;--dark-700:#334155;--dark-600:#475569;--dark-500:#64748b;--dark-400:#94a3b8;--dark-300:#cbd5e1;--dark-200:#e2e8f0;--glass-bg:rgba(255,255,255,0.05);--glass-border:rgba(255,255,255,0.1);--glass-shadow:0 8px 32px rgba(0,0,0,0.12);--font-main:'Space Grotesk',sans-serif;--font-mono:'JetBrains Mono',monospace}
+*{margin:0;padding:0;box-sizing:border-box}body{font-family:var(--font-main);background:var(--dark-900);color:#e2e8f0;overflow-x:hidden}.nexgen-urs{min-height:100vh;position:relative}
+
+/* BG */
+.bg-pattern{position:fixed;inset:0;z-index:-1;overflow:hidden}.grid-overlay{position:absolute;inset:0;background-image:linear-gradient(rgba(96,165,250,0.1) 1px,transparent 1px),linear-gradient(90deg,rgba(96,165,250,0.1) 1px,transparent 1px);background-size:60px 60px;animation:gridMove 20s linear infinite}.gradient-mesh{position:absolute;inset:0;background:radial-gradient(circle at 20% 20%,rgba(96,165,250,0.15) 0%,transparent 50%),radial-gradient(circle at 80% 60%,rgba(192,132,252,0.15) 0%,transparent 50%),radial-gradient(circle at 40% 80%,rgba(52,211,153,0.15) 0%,transparent 50%);animation:meshShift 15s ease-in-out infinite}
+@@keyframes gridMove{0%{transform:translate(0,0)}100%{transform:translate(60px,60px)}}
+@@keyframes meshShift{0%,100%{filter:hue-rotate(0deg);transform:scale(1)}50%{filter:hue-rotate(30deg);transform:scale(1.05)}}
+@@keyframes fadeInUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@@keyframes trajSpin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+
+/* Nav */
+.top-nav{position:sticky;top:0;z-index:100;background:rgba(15,23,42,0.85);backdrop-filter:blur(20px);border-bottom:1px solid rgba(96,165,250,0.15);padding:.8rem 2rem}.nav-container{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:1rem}.nav-brand{display:flex;align-items:center;gap:.8rem}.brand-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--neon-indigo),var(--neon-purple));display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;box-shadow:0 4px 16px rgba(129,140,248,0.3)}.brand-text{display:flex;flex-direction:column}.brand-name{font-family:var(--font-mono);font-size:.72rem;font-weight:700;color:#fff;letter-spacing:.1em}.brand-version{font-family:var(--font-mono);font-size:.58rem;color:var(--dark-500)}.breadcrumb-nex{display:flex;align-items:center;gap:.6rem;font-family:var(--font-mono);font-size:.7rem}.breadcrumb-nex .crumb{color:var(--dark-400);text-decoration:none;transition:color .2s}.breadcrumb-nex .crumb:hover{color:var(--neon-blue)}.breadcrumb-nex .crumb.active{color:var(--neon-indigo)}.breadcrumb-nex i.sep{font-size:.5rem;color:var(--dark-600)}.nav-btn{display:inline-flex;align-items:center;gap:.5rem;padding:.5rem 1.2rem;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:var(--dark-300);font-family:var(--font-mono);font-size:.7rem;font-weight:600;cursor:pointer;transition:all .2s;text-decoration:none}.nav-btn:hover{background:rgba(255,255,255,0.1);border-color:rgba(96,165,250,0.3);color:#fff;text-decoration:none}
+
+/* Hero */
+.urs-content{max-width:1100px;margin:0 auto;padding:2rem}
+.urs-hero{background:var(--glass-bg);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:20px;overflow:hidden;box-shadow:var(--glass-shadow);margin-bottom:1.5rem;position:relative;animation:fadeInUp .5s ease both}.urs-hero::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--neon-indigo),var(--neon-purple),var(--neon-pink))}.urs-hero-inner{padding:2rem 2.2rem}.urs-hero-top{display:flex;align-items:center;gap:1.2rem;margin-bottom:1.2rem;flex-wrap:wrap}.urs-hero-avatar{width:60px;height:60px;border-radius:16px;background:linear-gradient(135deg,var(--neon-indigo),var(--neon-purple));display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:#fff;flex-shrink:0;box-shadow:0 8px 24px rgba(129,140,248,0.3)}.urs-hero-name{font-size:1.4rem;font-weight:700;color:#fff;margin-bottom:.15rem}.urs-hero-email{font-size:.82rem;color:var(--dark-400);display:flex;align-items:center;gap:.4rem}.urs-hero-badge{margin-left:auto;background:rgba(255,255,255,0.06);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.12);border-radius:100px;padding:.4rem 1rem;font-family:var(--font-mono);font-size:.7rem;font-weight:700;color:var(--dark-300);display:flex;align-items:center;gap:.5rem}.urs-hero-badge .dot{width:7px;height:7px;border-radius:50%;background:var(--neon-green)}.urs-hero-actions{display:flex;gap:.5rem;flex-wrap:wrap}.urs-hero-btn{display:inline-flex;align-items:center;gap:.4rem;padding:.55rem 1.1rem;border-radius:10px;font-family:var(--font-mono);font-size:.7rem;font-weight:600;text-decoration:none;color:var(--dark-300);background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);transition:all .2s}.urs-hero-btn:hover{background:rgba(255,255,255,0.12);color:#fff;text-decoration:none;transform:translateY(-1px)}.urs-hero-btn.pdf{color:var(--neon-red);border-color:rgba(248,113,113,0.25)}.urs-hero-btn.pdf:hover{background:rgba(248,113,113,0.12)}.urs-hero-btn.excel{color:var(--neon-green);border-color:rgba(52,211,153,0.25)}.urs-hero-btn.excel:hover{background:rgba(52,211,153,0.12)}
+
+/* Stats */
+.urs-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:.7rem;margin-bottom:1.5rem;animation:fadeInUp .5s ease .06s both}.urs-stat{background:var(--glass-bg);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:14px;padding:1.1rem .8rem;text-align:center;box-shadow:var(--glass-shadow);position:relative;overflow:hidden;transition:all .3s}.urs-stat:hover{transform:translateY(-3px);border-color:rgba(255,255,255,0.15)}.urs-stat::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}.urs-stat:nth-child(1)::before{background:linear-gradient(90deg,var(--neon-indigo),var(--neon-purple))}.urs-stat:nth-child(2)::before{background:linear-gradient(90deg,var(--neon-blue),var(--neon-cyan))}.urs-stat:nth-child(3)::before{background:linear-gradient(90deg,var(--neon-green),var(--neon-teal))}.urs-stat:nth-child(4)::before{background:linear-gradient(90deg,var(--neon-yellow),var(--neon-pink))}.urs-stat:nth-child(5)::before{background:linear-gradient(90deg,var(--neon-red),var(--neon-pink))}.urs-stat-icon{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:14px;margin:0 auto .4rem}.urs-stat:nth-child(1) .urs-stat-icon{background:rgba(129,140,248,0.15);color:var(--neon-indigo)}.urs-stat:nth-child(2) .urs-stat-icon{background:rgba(96,165,250,0.15);color:var(--neon-blue)}.urs-stat:nth-child(3) .urs-stat-icon{background:rgba(52,211,153,0.15);color:var(--neon-green)}.urs-stat:nth-child(4) .urs-stat-icon{background:rgba(251,191,36,0.15);color:var(--neon-yellow)}.urs-stat:nth-child(5) .urs-stat-icon{background:rgba(248,113,113,0.15);color:var(--neon-red)}.urs-stat-num{font-size:1.4rem;font-weight:800;display:block;line-height:1.2}.urs-stat:nth-child(1) .urs-stat-num{background:linear-gradient(135deg,var(--neon-indigo),var(--neon-purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}.urs-stat:nth-child(2) .urs-stat-num{background:linear-gradient(135deg,var(--neon-blue),var(--neon-cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent}.urs-stat:nth-child(3) .urs-stat-num{background:linear-gradient(135deg,var(--neon-green),var(--neon-teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent}.urs-stat:nth-child(4) .urs-stat-num{background:linear-gradient(135deg,var(--neon-yellow),var(--neon-pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent}.urs-stat:nth-child(5) .urs-stat-num{background:linear-gradient(135deg,var(--neon-red),var(--neon-pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent}.urs-stat-label{font-family:var(--font-mono);font-size:.6rem;font-weight:700;color:var(--dark-500);text-transform:uppercase;letter-spacing:.06em;margin-top:.2rem}
+
+/* Response list */
+.urs-section-title{font-size:.95rem;font-weight:700;color:#fff;margin:1.5rem 0 1rem;display:flex;align-items:center;gap:.6rem;animation:fadeInUp .5s ease .1s both}.urs-section-title i{color:var(--neon-indigo)}.urs-section-title .sec-count{margin-left:auto;font-family:var(--font-mono);font-size:.65rem;color:var(--dark-500)}
+.urs-resp{background:var(--glass-bg);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:16px;margin-bottom:.8rem;overflow:hidden;box-shadow:var(--glass-shadow);transition:all .3s;animation:fadeInUp .5s ease .14s both}.urs-resp:hover{border-color:rgba(129,140,248,0.2);box-shadow:0 12px 48px rgba(0,0,0,0.2)}
+.urs-resp-head{padding:1.1rem 1.4rem;background:rgba(255,255,255,0.02);border-bottom:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;gap:.8rem;flex-wrap:wrap}.urs-resp-num{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--neon-indigo),var(--neon-purple));color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:.78rem;font-weight:700;flex-shrink:0;box-shadow:0 4px 12px rgba(129,140,248,0.25)}.urs-resp-title{font-size:.92rem;font-weight:700;flex:1;color:#fff}.urs-resp-date{font-family:var(--font-mono);font-size:.7rem;color:var(--neon-green);font-weight:600;display:flex;align-items:center;gap:.3rem}.urs-resp-qcount{font-family:var(--font-mono);font-size:.68rem;color:var(--dark-500);display:flex;align-items:center;gap:.3rem}.urs-resp-progress{margin-left:auto;display:flex;align-items:center;gap:.5rem}.urs-mini-bar{width:60px;height:5px;background:var(--dark-700);border-radius:100px;overflow:hidden}.urs-mini-fill{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--neon-green),var(--neon-teal))}.urs-mini-pct{font-family:var(--font-mono);font-size:.7rem;font-weight:700;color:var(--neon-green)}
+.urs-resp-actions{padding:.7rem 1.4rem;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;gap:.4rem;flex-wrap:wrap}.urs-btn{display:inline-flex;align-items:center;gap:.35rem;padding:.4rem .9rem;border-radius:8px;font-family:var(--font-mono);font-size:.68rem;font-weight:600;border:1px solid;cursor:pointer;transition:all .2s;background:transparent;text-decoration:none}.urs-btn.pdf{border-color:rgba(248,113,113,0.3);color:var(--neon-red);background:rgba(248,113,113,0.06)}.urs-btn.pdf:hover{background:var(--neon-red);color:#fff;border-color:var(--neon-red)}.urs-btn.excel{border-color:rgba(52,211,153,0.3);color:var(--neon-green);background:rgba(52,211,153,0.06)}.urs-btn.excel:hover{background:var(--neon-green);color:#fff;border-color:var(--neon-green)}.urs-btn.toggle{border-color:rgba(129,140,248,0.3);color:var(--neon-indigo);background:rgba(129,140,248,0.08)}.urs-btn.toggle:hover{background:var(--neon-indigo);color:#fff;border-color:var(--neon-indigo)}
+
+/* Table */
+.urs-table{width:100%;border-collapse:collapse}.urs-table th{background:rgba(255,255,255,0.04);padding:.7rem 1rem;font-family:var(--font-mono);font-size:.65rem;font-weight:700;color:var(--dark-400);text-transform:uppercase;letter-spacing:.05em;text-align:left;border-bottom:1px solid rgba(255,255,255,0.06)}.urs-table td{padding:.9rem 1rem;border-bottom:1px solid rgba(255,255,255,0.04);vertical-align:top;font-size:.85rem;color:var(--dark-300)}.urs-table tr:last-child td{border-bottom:none}.urs-table tr:hover{background:rgba(255,255,255,0.02)}
+.urs-q-text{font-weight:600;color:#fff;margin-bottom:.3rem;line-height:1.45;font-size:.85rem}.urs-q-type{font-family:var(--font-mono);font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--neon-blue);background:rgba(96,165,250,0.1);padding:.15rem .55rem;border-radius:100px;border:1px solid rgba(96,165,250,0.25);display:inline-block}
+.urs-status{display:inline-flex;align-items:center;gap:.35rem;padding:.35rem .7rem;border-radius:8px;font-family:var(--font-mono);font-size:.7rem;font-weight:600}.urs-status.answered{background:rgba(52,211,153,0.1);color:var(--neon-green);border:1px solid rgba(52,211,153,0.25)}.urs-status.shown{background:rgba(251,191,36,0.1);color:var(--neon-yellow);border:1px solid rgba(251,191,36,0.25)}.urs-status.skipped{background:rgba(96,165,250,0.1);color:var(--neon-blue);border:1px solid rgba(96,165,250,0.25)}.urs-status.unknown{background:rgba(255,255,255,0.04);color:var(--dark-500);border:1px solid rgba(255,255,255,0.08)}.urs-status-sub{font-size:.68rem;color:var(--dark-500);margin-top:.2rem}
+.urs-answers{display:flex;flex-wrap:wrap;gap:.35rem;margin-bottom:.3rem}.urs-ans-badge{background:rgba(52,211,153,0.08);border:1px solid rgba(52,211,153,0.25);color:var(--neon-green);padding:.35rem .8rem;border-radius:8px;font-size:.78rem;font-weight:600;display:inline-flex;align-items:center;gap:.4rem}.urs-other-tag{background:linear-gradient(135deg,var(--neon-yellow),#d97706);color:#000;font-family:var(--font-mono);font-size:.55rem;font-weight:700;padding:.1rem .4rem;border-radius:4px;text-transform:uppercase;letter-spacing:.04em}
+.urs-text-resp{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-left:3px solid var(--neon-teal);border-radius:0 10px 10px 0;padding:.8rem 1rem;font-size:.85rem;color:var(--dark-200);line-height:1.65}
+.urs-other-box{margin-top:.6rem;background:rgba(251,191,36,0.05);border:1.5px solid rgba(251,191,36,0.2);border-radius:10px;padding:1rem 1rem .8rem;position:relative}.urs-other-box::before{content:'CUSTOM RESPONSE';position:absolute;top:-.55rem;left:1rem;background:var(--neon-yellow);color:#000;padding:.1rem .5rem;border-radius:4px;font-family:var(--font-mono);font-size:.55rem;font-weight:700;letter-spacing:.05em}.urs-other-label{font-size:.72rem;font-weight:700;color:var(--neon-yellow);margin-bottom:.4rem;display:flex;align-items:center;gap:.35rem}.urs-other-content{background:rgba(255,255,255,0.03);padding:.6rem .9rem;border-radius:8px;border-left:3px solid var(--neon-yellow);font-size:.8rem;color:var(--dark-300);font-style:italic;line-height:1.6}
+.urs-no-resp{color:var(--dark-600);font-style:italic;font-size:.78rem;text-align:center;padding:.7rem;background:rgba(255,255,255,0.02);border-radius:8px;border:1px dashed rgba(255,255,255,0.08)}
+.urs-empty{text-align:center;padding:4rem 2rem;background:var(--glass-bg);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:20px;box-shadow:var(--glass-shadow);animation:fadeInUp .5s ease .14s both}.urs-empty-icon{width:64px;height:64px;border-radius:18px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:var(--dark-600);display:flex;align-items:center;justify-content:center;font-size:1.8rem;margin:0 auto 1rem}.urs-empty h3{font-size:1.1rem;font-weight:700;color:var(--dark-300);margin-bottom:.3rem}.urs-empty p{font-size:.85rem;color:var(--dark-500)}
+
+/* ═══ TRAJECTORY ═══ */
+
+/* Buttons */
+.traj-btn-bar{display:flex;justify-content:center;gap:.6rem;margin-bottom:1.5rem;flex-wrap:wrap;align-items:center;animation:fadeInUp .5s ease .08s both}
+.traj-trigger{display:inline-flex;align-items:center;gap:.5rem;padding:.55rem 1.5rem;border:1px solid rgba(129,140,248,0.3);border-radius:10px;background:rgba(129,140,248,0.08);color:var(--neon-indigo);font-family:var(--font-mono);font-size:.72rem;font-weight:600;letter-spacing:.05em;cursor:pointer;transition:all .25s;text-transform:uppercase}
+.traj-trigger:hover{background:rgba(129,140,248,0.15);border-color:rgba(129,140,248,0.5);color:#fff;transform:translateY(-1px);box-shadow:0 6px 20px rgba(129,140,248,0.15)}
+.traj-trigger.loading{pointer-events:none;opacity:.6}
+.traj-trigger .traj-spinner{display:none;animation:trajSpin 1s linear infinite}
+.traj-trigger.loading .traj-icon{display:none}
+.traj-trigger.loading .traj-spinner{display:inline-block}
+.traj-trigger.done{border-color:rgba(52,211,153,0.3);color:var(--neon-green);background:rgba(52,211,153,0.06);pointer-events:none}
+.traj-sm-btn{display:inline-flex;align-items:center;gap:.4rem;padding:.45rem .9rem;border:1px solid;border-radius:8px;font-family:var(--font-mono);font-size:.62rem;font-weight:600;letter-spacing:.04em;cursor:pointer;transition:all .25s;background:none;text-decoration:none}
+.traj-sm-btn:hover{transform:translateY(-1px);text-decoration:none}
+.traj-sm-btn.reanalyze{border-color:rgba(251,191,36,0.25);color:var(--neon-yellow);background:rgba(251,191,36,0.05)}.traj-sm-btn.reanalyze:hover{background:rgba(251,191,36,0.12);border-color:rgba(251,191,36,0.4);color:#fff}
+.traj-sm-btn.pdf{border-color:rgba(248,113,113,0.25);color:var(--neon-red);background:rgba(248,113,113,0.05)}.traj-sm-btn.pdf:hover{background:rgba(248,113,113,0.12);border-color:rgba(248,113,113,0.4);color:#fff}
+
+/* Loading */
+.traj-loading-panel{display:none;background:rgba(12,20,40,0.92);backdrop-filter:blur(30px);border:1px solid rgba(129,140,248,0.15);border-radius:22px;padding:3.5rem 2.5rem;text-align:center;margin-bottom:1.5rem;position:relative;overflow:hidden}
+.traj-loading-panel.visible{display:block;animation:fadeInUp .5s ease both}
+.traj-loading-panel::after{content:'';position:absolute;bottom:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--neon-indigo),var(--neon-purple),var(--neon-pink),var(--neon-cyan),var(--neon-indigo));background-size:400% 100%;animation:trajBar 2.5s linear infinite}
+@@keyframes trajBar{0%{background-position:0% 0}100%{background-position:400% 0}}
+.traj-load-brain{width:90px;height:90px;margin:0 auto 1.5rem;position:relative;z-index:2}
+.traj-load-brain-inner{width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg,rgba(129,140,248,0.2),rgba(192,132,252,0.2));display:flex;align-items:center;justify-content:center;animation:trajPulse 2s ease-in-out infinite;position:relative}
+.traj-load-brain-inner::before{content:'';position:absolute;inset:-7px;border-radius:50%;border:2px solid rgba(129,140,248,0.2);animation:trajRing 3s linear infinite}
+.traj-load-brain-inner::after{content:'';position:absolute;inset:-16px;border-radius:50%;border:1px solid rgba(192,132,252,0.1);animation:trajRing 4s linear infinite reverse}
+.traj-load-brain-inner i{font-size:2.2rem;color:var(--neon-indigo)}
+@@keyframes trajPulse{0%,100%{transform:scale(1);box-shadow:0 0 20px rgba(129,140,248,0.15)}50%{transform:scale(1.08);box-shadow:0 0 40px rgba(129,140,248,0.3)}}
+@@keyframes trajRing{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+.traj-load-title{font-family:var(--font-mono);font-size:1.15rem;font-weight:700;color:#fff;letter-spacing:.08em;margin-bottom:.6rem;position:relative;z-index:2}
+.traj-load-sub{font-size:1rem;color:var(--dark-300);line-height:1.7;margin-bottom:2rem;position:relative;z-index:2;max-width:520px;margin-left:auto;margin-right:auto}
+.traj-load-progress{max-width:420px;margin:0 auto 1.8rem;position:relative;z-index:2}
+.traj-load-bar-track{height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden;margin-bottom:.8rem}
+.traj-load-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--neon-indigo),var(--neon-purple));width:0%;transition:width .6s ease}
+.traj-load-steps{display:flex;justify-content:space-between;position:relative;z-index:2}
+.traj-load-step{display:flex;flex-direction:column;align-items:center;gap:.35rem;font-family:var(--font-mono);font-size:.62rem;color:var(--dark-500);transition:all .5s;flex:1}
+.traj-load-step .step-num{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,0.04);border:1.5px solid var(--dark-600);display:flex;align-items:center;justify-content:center;font-size:.62rem;font-weight:700;transition:all .5s}
+.traj-load-step.active{color:var(--neon-indigo)}.traj-load-step.active .step-num{background:rgba(129,140,248,0.15);border-color:var(--neon-indigo);color:var(--neon-indigo);box-shadow:0 0 12px rgba(129,140,248,0.3)}
+.traj-load-step.done{color:var(--neon-green)}.traj-load-step.done .step-num{background:rgba(52,211,153,0.15);border-color:var(--neon-green);color:var(--neon-green)}
+
+/* Panel */
+.traj-panel{display:none;animation:fadeInUp .6s ease both;margin-bottom:1.5rem}.traj-panel.visible{display:block}
+
+/* Hero */
+.traj-hero{background:rgba(20,30,52,0.88);backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,0.1);border-radius:20px;overflow:hidden;margin-bottom:1.5rem;position:relative}
+.traj-hero-glow{position:absolute;top:0;left:0;right:0;height:4px}
+.traj-hero-glow.improving{background:linear-gradient(90deg,var(--neon-green),var(--neon-teal),var(--neon-cyan))}.traj-hero-glow.stable{background:linear-gradient(90deg,var(--neon-blue),var(--neon-indigo),var(--neon-purple))}.traj-hero-glow.declining{background:linear-gradient(90deg,var(--neon-red),#dc2626,var(--neon-pink))}.traj-hero-glow.fluctuating{background:linear-gradient(90deg,var(--neon-yellow),var(--neon-orange),var(--neon-pink))}.traj-hero-glow.initial{background:linear-gradient(90deg,var(--neon-indigo),var(--neon-purple),var(--neon-pink))}
+.traj-hero-body{padding:2.5rem;display:flex;gap:2.5rem;align-items:center;flex-wrap:wrap}
+.traj-score-ring{width:140px;height:140px;position:relative;flex-shrink:0}
+.traj-score-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.traj-score-ring .ring-bg{fill:none;stroke:rgba(255,255,255,0.08);stroke-width:8}
+.traj-score-ring .ring-fill{fill:none;stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset 1.8s cubic-bezier(0.4,0,0.2,1)}
+.ring-fill.improving{stroke:var(--neon-green)}.ring-fill.stable{stroke:var(--neon-blue)}.ring-fill.declining{stroke:var(--neon-red)}.ring-fill.fluctuating{stroke:var(--neon-yellow)}.ring-fill.initial{stroke:var(--neon-indigo)}
+.traj-score-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.traj-score-num{font-family:var(--font-mono);font-size:2.4rem;font-weight:800;color:#fff;line-height:1}
+.traj-score-lbl{font-family:var(--font-mono);font-size:.6rem;font-weight:600;color:var(--dark-400);letter-spacing:.1em;margin-top:.3rem}
+.traj-hero-info{flex:1;min-width:240px}
+.traj-direction{display:inline-flex;align-items:center;gap:.5rem;padding:.45rem 1.2rem;border-radius:50px;font-family:var(--font-mono);font-size:.8rem;font-weight:700;letter-spacing:.06em;margin-bottom:1rem;border:1px solid}
+.traj-direction.improving{background:rgba(52,211,153,0.12);border-color:rgba(52,211,153,0.35);color:var(--neon-green)}.traj-direction.stable{background:rgba(96,165,250,0.12);border-color:rgba(96,165,250,0.35);color:var(--neon-blue)}.traj-direction.declining{background:rgba(248,113,113,0.12);border-color:rgba(248,113,113,0.35);color:var(--neon-red)}.traj-direction.fluctuating{background:rgba(251,191,36,0.12);border-color:rgba(251,191,36,0.35);color:var(--neon-yellow)}.traj-direction.initial{background:rgba(129,140,248,0.12);border-color:rgba(129,140,248,0.35);color:var(--neon-indigo)}
+.traj-direction .arrow{font-size:1.1rem}
+.traj-summary{font-size:1.08rem;color:var(--dark-200);line-height:1.85;margin-bottom:.8rem}
+.traj-meta{display:flex;gap:1.2rem;flex-wrap:wrap;font-family:var(--font-mono);font-size:.7rem;color:var(--dark-400)}.traj-meta span{display:flex;align-items:center;gap:.3rem}
+.traj-hero-side{display:flex;flex-direction:column;align-items:center;gap:.6rem;flex-shrink:0;min-width:110px}
+.traj-change{font-family:var(--font-mono);font-size:2rem;font-weight:800;line-height:1}.traj-change.pos{color:var(--neon-green)}.traj-change.neg{color:var(--neon-red)}.traj-change.zero{color:var(--dark-400)}
+.traj-change-lbl{font-family:var(--font-mono);font-size:.58rem;color:var(--dark-500);letter-spacing:.08em}
+.traj-risk-badge{padding:.4rem 1rem;border-radius:8px;font-family:var(--font-mono);font-size:.68rem;font-weight:700;letter-spacing:.05em;border:1px solid;margin-top:.3rem}
+.traj-risk-badge.Low{background:rgba(52,211,153,0.12);border-color:rgba(52,211,153,0.3);color:var(--neon-green)}.traj-risk-badge.Moderate{background:rgba(251,191,36,0.12);border-color:rgba(251,191,36,0.3);color:var(--neon-yellow)}.traj-risk-badge.High{background:rgba(248,113,113,0.12);border-color:rgba(248,113,113,0.3);color:var(--neon-red)}.traj-risk-badge.Critical{background:rgba(220,38,38,0.15);border-color:rgba(220,38,38,0.35);color:#fca5a5}
+
+/* Sections */
+.traj-section{background:rgba(20,30,52,0.88);backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,0.1);border-radius:20px;overflow:hidden;margin-bottom:1.5rem}
+.traj-sec-head{padding:1.5rem 2rem;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;gap:1rem}
+.traj-sec-icon{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1rem;color:#fff;flex-shrink:0}
+.traj-sec-head h4{font-family:var(--font-mono);font-size:1rem;font-weight:700;letter-spacing:.05em;color:#fff;margin:0}
+.traj-sec-head p{font-size:.8rem;color:var(--dark-400);margin:.15rem 0 0 0}
+.traj-sec-body{padding:1.8rem 2rem}
+.traj-chart-wrap{position:relative;height:240px;padding:.5rem 0}
+
+/* Snapshots */
+.snap-grid{display:flex;gap:1rem;overflow-x:auto;padding-bottom:.6rem;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,0.08) transparent}.snap-grid::-webkit-scrollbar{height:5px}.snap-grid::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:3px}
+.snap-card{min-width:260px;max-width:300px;background:rgba(15,23,42,0.75);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:1.5rem;flex-shrink:0;transition:all .25s;position:relative}
+.snap-card:hover{background:rgba(15,23,42,0.92);border-color:rgba(255,255,255,0.15);transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,0.2)}
+.snap-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:16px 16px 0 0}
+.snap-card.Low::before{background:var(--neon-green)}.snap-card.Moderate::before{background:var(--neon-yellow)}.snap-card.High::before{background:var(--neon-red)}.snap-card.Critical::before{background:#dc2626}
+.snap-date{font-family:var(--font-mono);font-size:.72rem;color:var(--dark-400);margin-bottom:.5rem;display:flex;align-items:center;gap:.3rem}
+.snap-name{font-weight:700;font-size:1rem;color:#fff;margin-bottom:.7rem;line-height:1.3}
+.snap-score-row{display:flex;align-items:center;gap:.6rem;margin-bottom:.6rem;flex-wrap:wrap}
+.snap-score{font-family:var(--font-mono);font-size:1.4rem;font-weight:800}
+.snap-score.Low{color:var(--neon-green)}.snap-score.Moderate{color:var(--neon-yellow)}.snap-score.High{color:var(--neon-red)}.snap-score.Critical{color:#fca5a5}
+.snap-risk{font-family:var(--font-mono);font-size:.58rem;font-weight:700;padding:.2rem .5rem;border-radius:5px;letter-spacing:.04em;border:1px solid}
+.snap-sent{font-family:var(--font-mono);font-size:.58rem;font-weight:600;padding:.2rem .5rem;border-radius:5px}
+.snap-sent.Positive{background:rgba(52,211,153,0.12);color:var(--neon-green)}.snap-sent.Negative{background:rgba(248,113,113,0.12);color:var(--neon-red)}.snap-sent.Mixed{background:rgba(251,191,36,0.12);color:var(--neon-yellow)}.snap-sent.Neutral{background:rgba(100,116,139,0.12);color:var(--dark-300)}
+.snap-themes{display:flex;flex-wrap:wrap;gap:.3rem;margin-bottom:.5rem}
+.snap-theme{font-family:var(--font-mono);font-size:.58rem;padding:.18rem .5rem;border-radius:5px;background:rgba(129,140,248,0.1);color:var(--neon-indigo);border:1px solid rgba(129,140,248,0.2)}
+.snap-brief{font-size:.9rem;color:var(--dark-300);line-height:1.6;font-style:italic}
+.snap-connector{display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;width:24px;color:var(--dark-500)}
+
+/* Grid items */
+.traj-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem}
+.traj-item{background:rgba(15,23,42,0.75);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:1.4rem 1.5rem;transition:all .25s}
+.traj-item:hover{background:rgba(15,23,42,0.92);border-color:rgba(255,255,255,0.14);transform:translateY(-2px)}
+.traj-item-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.5rem;gap:.6rem}
+.traj-item-text{font-size:1rem;color:var(--dark-200);line-height:1.7;flex:1}
+.traj-sev{font-family:var(--font-mono);font-size:.58rem;font-weight:700;padding:.22rem .55rem;border-radius:5px;letter-spacing:.04em;flex-shrink:0;border:1px solid;white-space:nowrap}
+.traj-sev.High,.traj-sev.Urgent,.traj-sev.Immediate{background:rgba(248,113,113,0.12);border-color:rgba(248,113,113,0.25);color:var(--neon-red)}
+.traj-sev.Medium,.traj-sev.Monitor{background:rgba(251,191,36,0.12);border-color:rgba(251,191,36,0.25);color:var(--neon-yellow)}
+.traj-sev.Low,.traj-sev.Normal{background:rgba(52,211,153,0.12);border-color:rgba(52,211,153,0.25);color:var(--neon-green)}
+.traj-item-sub{font-family:var(--font-mono);font-size:.68rem;color:var(--dark-400);margin-top:.4rem;display:flex;align-items:center;gap:.4rem}
+.traj-item-sub .dot{width:6px;height:6px;border-radius:50%}.traj-item-sub .dot.present{background:var(--neon-red)}.traj-item-sub .dot.resolved{background:var(--neon-green)}
+.traj-cat{font-family:var(--font-mono);font-size:.58rem;font-weight:600;padding:.2rem .5rem;border-radius:5px;letter-spacing:.04em;border:1px solid}
+.traj-cat.Workplace{background:rgba(96,165,250,0.1);border-color:rgba(96,165,250,0.2);color:var(--neon-blue)}.traj-cat.Personal{background:rgba(192,132,252,0.1);border-color:rgba(192,132,252,0.2);color:var(--neon-purple)}.traj-cat.Professional,.traj-cat.ProfessionalSupport{background:rgba(52,211,153,0.1);border-color:rgba(52,211,153,0.2);color:var(--neon-green)}
+
+/* Strengths / Concerns */
+.sc-item{display:flex;align-items:flex-start;gap:.8rem;padding:1rem 1.2rem;background:rgba(15,23,42,0.6);border:1px solid rgba(255,255,255,0.06);border-radius:10px;margin-bottom:.5rem;transition:all .25s}
+.sc-item:hover{background:rgba(15,23,42,0.8);border-color:rgba(255,255,255,0.12)}.sc-item:last-child{margin-bottom:0}
+.sc-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.75rem;flex-shrink:0;margin-top:2px}
+.sc-icon.green{background:rgba(52,211,153,0.15);color:var(--neon-green)}.sc-icon.red{background:rgba(248,113,113,0.15);color:var(--neon-red)}
+.sc-text{font-size:.95rem;color:var(--dark-200);line-height:1.65;flex:1}
+
+/* Narrative */
+.traj-narrative{background:rgba(15,23,42,0.6);border-left:4px solid var(--neon-indigo);border-radius:0 14px 14px 0;padding:2rem 2.2rem;font-size:1.05rem;color:var(--dark-200);line-height:1.95;font-style:italic}
+
+/* Responsive */
+@@media(max-width:768px){.traj-hero-body{flex-direction:column;text-align:center}.traj-grid-2{grid-template-columns:1fr}.snap-grid{flex-direction:column}.snap-card{min-width:unset;max-width:unset}.snap-connector{transform:rotate(90deg)}.traj-load-steps{flex-direction:column;gap:.6rem;align-items:center}.traj-btn-bar{flex-direction:column;align-items:center}.urs-content{padding:1rem}.urs-hero-inner{padding:1.3rem}.urs-hero-top{flex-direction:column;align-items:flex-start}.urs-hero-badge{margin-left:0}.urs-stats{grid-template-columns:repeat(2,1fr)}.urs-resp-head{flex-direction:column;align-items:flex-start;gap:.4rem}.urs-resp-progress{margin-left:0}.urs-table th,.urs-table td{padding:.6rem .7rem}.nav-container{flex-wrap:wrap}.breadcrumb-nex{order:3;flex-basis:100%}.urs-hero-actions{flex-direction:column}}
+@@media(max-width:480px){.urs-stats{grid-template-columns:1fr 1fr}}
+@@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+@@media print{.bg-pattern,.top-nav,.traj-btn-bar,.traj-loading-panel{display:none!important}.urs-resp,.urs-hero,.urs-stat,.traj-section,.traj-hero{background:white;color:black;border:1px solid #ccc;backdrop-filter:none}}
+   </style>
+
+
+}
+
+<div class="nexgen-urs">
+    <div class="bg-pattern"><div class="grid-overlay"></div><div class="gradient-mesh"></div></div>
+
+    <nav class="top-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <div class="brand-icon"><i class="bi bi-person-lines-fill"></i></div>
+                <div class="brand-text"><span class="brand-name">USER DETAILS</span><span class="brand-version">v1.0</span></div>
+            </div>
+            <nav class="breadcrumb-nex">
+                <a asp-action="Index" class="crumb"><i class="bi bi-people"></i> USERS</a>
+                <i class="bi bi-chevron-right sep"></i>
+                <span class="crumb active">@Model.UserName</span>
+            </nav>
+            <a asp-action="Index" class="nav-btn"><i class="bi bi-arrow-left"></i> Back to List</a>
+        </div>
+    </nav>
+
+    <div class="urs-content">
+        <div class="urs-hero">
+            <div class="urs-hero-inner">
+                <div class="urs-hero-top">
+                    <div class="urs-hero-avatar">@(Model.UserName?.Substring(0, 1).ToUpper() ?? "U")</div>
+                    <div>
+                        <h1 class="urs-hero-name">@Model.UserName</h1>
+                        <div class="urs-hero-email"><i class="bi bi-envelope"></i> @Model.UserEmail</div>
                     </div>
+                    <div class="urs-hero-badge"><span class="dot"></span>@totalResponses Response@(totalResponses != 1 ? "s" : "") · Last: @latestDate</div>
                 </div>
-                <div class="export-buttons">
-                    <a asp-action="GenerateReport" asp-route-userEmail="@Model.UserEmail" asp-route-format="pdf" class="export-btn">
-                        <i class="bi bi-filetype-pdf"></i>
-                        PDF Report
-                    </a>
-                    <a asp-action="GenerateReport" asp-route-userEmail="@Model.UserEmail" asp-route-format="excel" class="export-btn">
-                        <i class="bi bi-file-excel"></i>
-                        Excel Report
-                    </a>
+                <div class="urs-hero-actions">
+                    <a asp-action="GenerateReport" asp-route-userEmail="@Model.UserEmail" asp-route-format="pdf" class="urs-hero-btn pdf"><i class="bi bi-filetype-pdf"></i> PDF Report</a>
+                    <a asp-action="GenerateReport" asp-route-userEmail="@Model.UserEmail" asp-route-format="excel" class="urs-hero-btn excel"><i class="bi bi-file-excel"></i> Excel Report</a>
                 </div>
             </div>
         </div>
 
-        <!-- Charts Section -->
-        <div class="charts-section">
-            <div class="charts-grid">
-                <div class="chart-container">
-                    <h4 class="chart-title">Survey Summary</h4>
-                    <div id="user_survey_summary_chart_div" style="width: 100%; height: 200px;"></div>
-                </div>
-                <div class="chart-container">
-                    <h4 class="chart-title">Progress Overview</h4>
-                    <div style="height: 200px; display: flex; align-items: center; justify-content: center; color: var(--gray-500);">
-                        <i class="bi bi-graph-up" style="font-size: 3rem; margin-bottom: 1rem;"></i>
-                    </div>
-                </div>
-            </div>
-            <div class="main-chart">
-                <h4 class="chart-title">User Progress Timeline</h4>
-                <div id="chart_div" style="width: 100%; height: 400px;"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Responses Timeline -->
-    <div class="responses-timeline">
-        <div class="timeline-header fade-in">
-            <h3>Response Timeline</h3>
-            <p class="timeline-subtitle">Detailed view of all survey responses and interactions</p>
+        <div class="urs-stats">
+            <div class="urs-stat"><div class="urs-stat-icon"><i class="bi bi-clipboard-data"></i></div><span class="urs-stat-num">@totalResponses</span><span class="urs-stat-label">Surveys</span></div>
+            <div class="urs-stat"><div class="urs-stat-icon"><i class="bi bi-question-circle"></i></div><span class="urs-stat-num">@totalQuestions</span><span class="urs-stat-label">Questions</span></div>
+            <div class="urs-stat"><div class="urs-stat-icon"><i class="bi bi-check-circle"></i></div><span class="urs-stat-num">@completionRate%</span><span class="urs-stat-label">Completion</span></div>
+            <div class="urs-stat"><div class="urs-stat-icon"><i class="bi bi-skip-forward"></i></div><span class="urs-stat-num">@totalSkipped</span><span class="urs-stat-label">Skipped</span></div>
+            <div class="urs-stat"><div class="urs-stat-icon"><i class="bi bi-eye-slash"></i></div><span class="urs-stat-num">@totalShown</span><span class="urs-stat-label">Unanswered</span></div>
         </div>
 
-        <div class="stepper-wrapper">
-            @foreach (var response in Model.Responses.Select((r, index) => new { Response = r, Index = index }))
-            {
-                <div class="stepper-item stagger-animation">
-                    <div class="step-counter">
-                        <i class="bi bi-clipboard-check-fill"></i>
-                    </div>
-                    <div class="step-content">
-                        <div class="response-card">
-                            <!-- Response Header -->
-                            <div class="response-header">
-                                <div class="response-info">
-                                    <div class="response-details">
-                                        <h4>
-                                            <i class="bi bi-clipboard-data"></i>
-                                            @response.Response.Questionnaire.Title
-                                        </h4>
-                                        <div class="response-meta">
-                                            <div class="meta-item submission-date">
-                                                <i class="bi bi-calendar-check"></i>
-                                                Submitted: @response.Response.SubmissionDate.ToString("MMMM dd, yyyy 'at' HH:mm")
-                                            </div>
-                                            <div class="meta-item question-count">
-                                                <i class="bi bi-question-circle"></i>
-                                                Questions: @response.Response.Questionnaire.Questions.Count()
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="chart-mini">
-                                        <div id="survey_questions_answers_summary_chart_div_@response.Response.Questionnaire.Id" style="width: 100%; height: 100%;"></div>
-                                    </div>
-                                </div>
-                            </div>
+        <!-- ═══ TRAJECTORY: Button Bar ═══ -->
+        <div class="traj-btn-bar">
+            <button class="traj-trigger" id="trajBtn" onclick="analyzeTrajectory()">
+                <i class="bi bi-activity traj-icon"></i>
+                <i class="bi bi-arrow-repeat traj-spinner"></i>
+                ANALYZE WELLNESS TRAJECTORY
+            </button>
+            <button class="traj-sm-btn reanalyze" id="trajReanalyzeBtn" onclick="reanalyzeTrajectory()" style="display:none"><i class="bi bi-arrow-clockwise"></i> Re-analyze</button>
+            <a class="traj-sm-btn pdf" id="trajExportBtn" style="display:none" onclick="exportTrajectoryPdf()"><i class="bi bi-filetype-pdf"></i> Export PDF</a>
+        </div>
 
-                            <!-- Response Actions -->
-                            <div class="response-actions">
-                                <a asp-action="GenerateQuestionnairePdfReport" asp-route-questionnaireId="@response.Response.Questionnaire.Id" class="action-btn btn-pdf">
-                                    <i class="bi bi-filetype-pdf"></i>
-                                    PDF Report
-                                </a>
-                                <a asp-action="GenerateQuestionnaireExcelReport" asp-route-questionnaireId="@response.Response.Questionnaire.Id" class="action-btn btn-excel">
-                                    <i class="bi bi-file-excel"></i>
-                                    Excel Report
-                                </a>
-                                <button class="action-btn btn-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#collapseResponse-@response.Response.Id" aria-expanded="false" aria-controls="collapseResponse-@response.Response.Id">
-                                    <i class="bi bi-eye"></i>
-                                    <span class="toggle-text">View Details</span>
-                                </button>
-                            </div>
+        <!-- ═══ TRAJECTORY: Loading ═══ -->
+        <div class="traj-loading-panel" id="trajLoadingPanel">
+            <div class="traj-load-brain"><div class="traj-load-brain-inner"><i class="bi bi-stars"></i></div></div>
+            <div class="traj-load-title" id="trajLoadTitle">ANALYZING WELLNESS TRAJECTORY</div>
+            <div class="traj-load-sub" id="trajLoadSub">Claude AI is processing survey responses, detecting emotional patterns, and generating clinical insights...</div>
+            <div class="traj-load-progress">
+                <div class="traj-load-bar-track"><div class="traj-load-bar-fill" id="trajLoadBarFill"></div></div>
+                <div class="traj-load-steps">
+                    <div class="traj-load-step active" id="loadStep1"><div class="step-num">1</div><span>Collecting</span></div>
+                    <div class="traj-load-step" id="loadStep2"><div class="step-num">2</div><span>AI Analysis</span></div>
+                    <div class="traj-load-step" id="loadStep3"><div class="step-num">3</div><span>Risk Score</span></div>
+                    <div class="traj-load-step" id="loadStep4"><div class="step-num">4</div><span>Report</span></div>
+                </div>
+            </div>
+        </div>
 
-                            <!-- Collapsible Response Details -->
-                            <div class="collapse" id="collapseResponse-@response.Response.Id">
-                                <div class="response-details-section">
-                                    <table class="details-table">
-                                        <thead>
-                                            <tr>
-                                                <th style="width: 30%;">Question</th>
-                                                <th style="width: 25%;">Status</th>
-                                                <th style="width: 45%;">Response</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach (var question in response.Response.Questionnaire.Questions.OrderBy(q => q.Id))
-                                            {
-                                                var responseDetail = response.Response.ResponseDetails.FirstOrDefault(rd => rd.QuestionId == question.Id);
-
-                                                <tr>
-                                                    <td class="question-cell">
-                                                        <div class="question-text">@question.Text</div>
-                                                        <span class="question-type">@question.Type</span>
-                                                    </td>
-                                                    <td>
-                                                        @if (responseDetail != null)
-                                                        {
-                                                            @switch (responseDetail.Status)
-                                                            {
-                                                                case ResponseStatus.Answered:
-                                                                    <div class="status-badge status-answered">
-                                                                        <i class="bi bi-check-circle-fill"></i>
-                                                                        <div>
-                                                                            <div>Answered</div>
-                                                                            <div class="status-description">Completed successfully</div>
-                                                                        </div>
-                                                                    </div>
-                                                                    break;
-
-                                                                case ResponseStatus.Shown:
-                                                                    <div class="status-badge status-shown">
-                                                                        <i class="bi bi-exclamation-triangle-fill"></i>
-                                                                        <div>
-                                                                            <div>Shown</div>
-                                                                            <div class="status-description">Displayed but not answered</div>
-                                                                        </div>
-                                                                    </div>
-                                                                    break;
-
-                                                                case ResponseStatus.Skipped:
-                                                                    <div class="status-badge status-skipped">
-                                                                        <i class="bi bi-skip-forward-fill"></i>
-                                                                        <div>
-                                                                            <div>Skipped</div>
-                                                                            <div class="status-description">@responseDetail.SkipReason</div>
-                                                                        </div>
-                                                                    </div>
-                                                                    break;
-                                                            }
-                                                        }
-                                                        else
-                                                        {
-                                                            <div class="status-badge status-unknown">
-                                                                <i class="bi bi-question-circle-fill"></i>
-                                                                <div>
-                                                                    <div>Unknown</div>
-                                                                    <div class="status-description">No response data</div>
-                                                                </div>
-                                                            </div>
-                                                        }
-                                                    </td>
-                                                    <td class="response-display">
-                                                        @if (responseDetail != null && responseDetail.Status == ResponseStatus.Answered)
-                                                        {
-                                                            @if (responseDetail.QuestionType == QuestionType.Text || responseDetail.QuestionType == QuestionType.Slider || responseDetail.QuestionType == QuestionType.Open_ended)
-                                                            {
-                                                                <div class="text-response">
-                                                                    <div class="text-response-label">Text Response</div>
-                                                                    @responseDetail.TextResponse
-                                                                </div>
-                                                            }
-                                                            else if (responseDetail.ResponseAnswers.Any())
-                                                            {
-                                                                <div class="answer-container">
-                                                                    @foreach (var answer in responseDetail.ResponseAnswers)
-                                                                    {
-                                                                        var answerObj = question.Answers.FirstOrDefault(a => a.Id == answer.AnswerId);
-                                                                        var answerText = answerObj?.Text;
-                                                                        <span class="answer-badge">
-                                                                            @answerText
-                                                                            @if (answerObj?.IsOtherOption == true)
-                                                                            {
-                                                                                <span class="other-option-badge">Other</span>
-                                                                            }
-                                                                        </span>
-                                                                    }
-                                                                </div>
-                                                            }
-
-                                                            @* Display "Other" text if available *@
-                                                            @if (!string.IsNullOrEmpty(responseDetail.OtherText))
-                                                            {
-                                                                <div class="other-text-response">
-                                                                    <div class="other-text-label">
-                                                                        <i class="bi bi-pencil-square"></i>
-                                                                        Custom Response:
-                                                                    </div>
-                                                                    <div class="other-text-content">
-                                                                        @responseDetail.OtherText
-                                                                    </div>
-                                                                </div>
-                                                            }
-                                                        }
-                                                        else
-                                                        {
-                                                            <div class="no-response">
-                                                                <i class="bi bi-dash-circle"></i>
-                                                                No response provided
-                                                            </div>
-                                                        }
-                                                    </td>
-                                                </tr>
-                                            }
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
+        <!-- ═══ TRAJECTORY: Results ═══ -->
+        <div class="traj-panel" id="trajPanel">
+            <div id="trajResults" style="display:none">
+                <div class="traj-hero" id="trajHero">
+                    <div class="traj-hero-glow" id="trajHeroGlow"></div>
+                    <div class="traj-hero-body">
+                        <div class="traj-score-ring">
+                            <svg viewBox="0 0 120 120"><circle class="ring-bg" cx="60" cy="60" r="52"></circle><circle class="ring-fill" id="trajRingFill" cx="60" cy="60" r="52" stroke-dasharray="326.73" stroke-dashoffset="326.73"></circle></svg>
+                            <div class="traj-score-text"><span class="traj-score-num" id="trajScoreNum">0</span><span class="traj-score-lbl">WELLNESS</span></div>
+                        </div>
+                        <div class="traj-hero-info">
+                            <div class="traj-direction" id="trajDirection"><span class="arrow" id="trajArrow"></span><span id="trajDirectionText"></span></div>
+                            <div class="traj-summary" id="trajSummary"></div>
+                            <div class="traj-meta" id="trajMeta"></div>
+                        </div>
+                        <div class="traj-hero-side">
+                            <div class="traj-change" id="trajChange"></div>
+                            <div class="traj-change-lbl">SCORE CHANGE</div>
+                            <div class="traj-risk-badge" id="trajRisk"></div>
                         </div>
                     </div>
                 </div>
-            }
+                <div class="traj-section" id="trajChartSection">
+                    <div class="traj-sec-head"><div class="traj-sec-icon" style="background:linear-gradient(135deg,var(--neon-green),var(--neon-teal))"><i class="bi bi-graph-up"></i></div><div><h4>WELLNESS PROGRESSION</h4><p>Score trajectory across each assessment</p></div></div>
+                    <div class="traj-sec-body"><div class="traj-chart-wrap"><canvas id="trajChart"></canvas></div></div>
+                </div>
+                <div class="traj-section">
+                    <div class="traj-sec-head"><div class="traj-sec-icon" style="background:linear-gradient(135deg,var(--neon-blue),var(--neon-cyan))"><i class="bi bi-clock-history"></i></div><div><h4>RESPONSE TIMELINE</h4><p>Detailed breakdown per assessment</p></div></div>
+                    <div class="traj-sec-body"><div class="snap-grid" id="trajSnapGrid"></div></div>
+                </div>
+                <div class="traj-section">
+                    <div class="traj-sec-head"><div class="traj-sec-icon" style="background:linear-gradient(135deg,var(--neon-yellow),var(--neon-orange))"><i class="bi bi-diagram-3"></i></div><div><h4>PATTERN INSIGHTS</h4><p>Cross-response patterns detected by AI</p></div></div>
+                    <div class="traj-sec-body"><div class="traj-grid-2" id="trajPatternGrid"></div></div>
+                </div>
+                <div class="traj-section">
+                    <div class="traj-sec-head"><div class="traj-sec-icon" style="background:linear-gradient(135deg,var(--neon-green),var(--neon-teal))"><i class="bi bi-shield-check"></i></div><div><h4>STRENGTHS &amp; CONCERNS</h4><p>Balanced assessment of protective and risk factors</p></div></div>
+                    <div class="traj-sec-body">
+                        <div class="traj-grid-2">
+                            <div><div style="font-family:var(--font-mono);font-size:.72rem;font-weight:700;color:var(--neon-green);letter-spacing:.08em;margin-bottom:.8rem"><i class="bi bi-shield-fill-check" style="margin-right:.3rem"></i> PROTECTIVE STRENGTHS</div><div id="trajStrengths"></div></div>
+                            <div><div style="font-family:var(--font-mono);font-size:.72rem;font-weight:700;color:var(--neon-red);letter-spacing:.08em;margin-bottom:.8rem"><i class="bi bi-exclamation-triangle-fill" style="margin-right:.3rem"></i> AREAS OF CONCERN</div><div id="trajConcerns"></div></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="traj-section">
+                    <div class="traj-sec-head"><div class="traj-sec-icon" style="background:linear-gradient(135deg,var(--neon-indigo),var(--neon-purple))"><i class="bi bi-lightbulb"></i></div><div><h4>AI RECOMMENDATIONS</h4><p>Evidence-based intervention suggestions</p></div></div>
+                    <div class="traj-sec-body"><div class="traj-grid-2" id="trajRecGrid"></div></div>
+                </div>
+                <div class="traj-section">
+                    <div class="traj-sec-head"><div class="traj-sec-icon" style="background:linear-gradient(135deg,var(--neon-pink),var(--neon-purple))"><i class="bi bi-journal-richtext"></i></div><div><h4>PROFESSIONAL NARRATIVE</h4><p>Case summary for professional documentation</p></div></div>
+                    <div class="traj-sec-body"><div class="traj-narrative" id="trajNarrText"></div></div>
+                </div>
+                <div class="traj-section">
+                    <div class="traj-sec-head"><div class="traj-sec-icon" style="background:linear-gradient(135deg,var(--neon-cyan),var(--neon-blue))"><i class="bi bi-clipboard2-pulse"></i></div><div><h4>DETAILED ANALYSIS</h4><p>In-depth clinical observations</p></div></div>
+                    <div class="traj-sec-body"><div style="font-size:1.05rem;color:var(--dark-200);line-height:1.95" id="trajDetailedText"></div></div>
+                </div>
+            </div>
         </div>
-    </div>
+
+        <!-- ═══ RESPONSE HISTORY ═══ -->
+        @if (Model.Responses.Any())
+        {
+            <div class="urs-section-title"><i class="bi bi-clock-history"></i> Response History <span class="sec-count">@totalResponses ENTRIES</span></div>
+            @foreach (var response in Model.Responses.Select((r, i) => new { Response = r, Index = i }))
+            {
+                var rAnswered = response.Response.ResponseDetails.Count(d => d.Status == ResponseStatus.Answered);
+                var rTotal = response.Response.ResponseDetails.Count;
+                var rPct = rTotal > 0 ? Math.Round((double)rAnswered / rTotal * 100) : 0;
+                <div class="urs-resp">
+                    <div class="urs-resp-head">
+                        <span class="urs-resp-num">@(response.Index + 1)</span>
+                        <span class="urs-resp-title">@response.Response.Questionnaire.Title</span>
+                        <span class="urs-resp-date"><i class="bi bi-calendar-check"></i> @response.Response.SubmissionDate.ToString("MMM dd, yyyy HH:mm")</span>
+                        <span class="urs-resp-qcount"><i class="bi bi-question-circle"></i> @rTotal questions</span>
+                        <div class="urs-resp-progress"><div class="urs-mini-bar"><div class="urs-mini-fill" style="width:@(rPct)%"></div></div><span class="urs-mini-pct">@(rPct)%</span></div>
+                    </div>
+                    <div class="urs-resp-actions">
+                        <a asp-action="GenerateQuestionnairePdfReport" asp-route-questionnaireId="@response.Response.Questionnaire.Id" class="urs-btn pdf"><i class="bi bi-filetype-pdf"></i> PDF</a>
+                        <a asp-action="GenerateQuestionnaireExcelReport" asp-route-questionnaireId="@response.Response.Questionnaire.Id" class="urs-btn excel"><i class="bi bi-file-excel"></i> Excel</a>
+                        <button class="urs-btn toggle" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-@response.Response.Id" aria-expanded="false"><i class="bi bi-eye"></i> <span class="toggle-text">View Details</span></button>
+                    </div>
+                    <div class="collapse" id="collapse-@response.Response.Id">
+                        <table class="urs-table">
+                            <thead><tr><th style="width:30%;">Question</th><th style="width:18%;">Status</th><th style="width:52%;">Response</th></tr></thead>
+                            <tbody>
+                                @foreach (var question in response.Response.Questionnaire.Questions.OrderBy(q => q.Id))
+                                {
+                                    var rd = response.Response.ResponseDetails.FirstOrDefault(d => d.QuestionId == question.Id);
+                                    <tr>
+                                        <td><div class="urs-q-text">@question.Text</div><span class="urs-q-type">@question.Type</span></td>
+                                        <td>
+                                            @if (rd != null)
+                                            {
+                                                switch (rd.Status)
+                                                {
+                                                    case ResponseStatus.Answered:
+                                                        <div class="urs-status answered"><i class="bi bi-check-circle-fill"></i> Answered</div>
+                                                        break;
+                                                    case ResponseStatus.Shown:
+
+                                                        <div class="urs-status shown"><i class="bi bi-exclamation-triangle"></i> Shown</div>
+                                                        <div class="urs-status-sub">Not answered</div>
+                                                        break;
+                                                    case ResponseStatus.Skipped:
+                                                        <div class="urs-status skipped"><i class="bi bi-skip-forward-fill"></i> Skipped</div>
+                                                        if (!string.IsNullOrEmpty(rd.SkipReason))
+                                                        {
+
+                                                            <div class="urs-status-sub">@rd.SkipReason</div>
+                                                        }
+                                                        break;
+                                                }
+                                            }
+                                            else
+                                            {
+
+                                                <div class="urs-status unknown"><i class="bi bi-question-circle"></i> No data</div>
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (rd != null && rd.Status == ResponseStatus.Answered)
+                                            {
+                                                if (rd.QuestionType == QuestionType.Text || rd.QuestionType == QuestionType.Open_ended || rd.QuestionType == QuestionType.Slider)
+                                                {
+                                                    <div class="urs-text-resp">@rd.TextResponse</div>
+                                                }
+                                                else if (rd.ResponseAnswers.Any())
+                                                {
+
+                                                    <div class="urs-answers">@foreach (var ra in rd.ResponseAnswers) { var ans = question.Answers.FirstOrDefault(a => a.Id == ra.AnswerId);
+                                                        <span class="urs-ans-badge">@ans?.Text @if (ans?.IsOtherOption == true) {
+                                                            <span class="urs-other-tag">Other</span>
+                                                        }
+                                                    </span>
+                                                }
+                                            </div>
+                                        }
+                                        if (!string.IsNullOrEmpty(rd.OtherText))
+                                        {
+
+                                            <div class="urs-other-box"><div class="urs-other-label"><i class="bi bi-pencil-square"></i> Custom Response:</div><div class="urs-other-content">@rd.OtherText</div></div>
+                                        }
+                                    }
+                                            else
+                                    {
+
+                                        <div class="urs-no-resp"><i class="bi bi-dash-circle"></i> No response</div>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+}
+        else
+{
+    <div class="urs-empty"><div class="urs-empty-icon"><i class="bi bi-clipboard-x"></i></div><h3>No Responses Yet</h3><p>This user hasn't submitted any survey responses.</p></div>
+}
+</div>
 </div>
 
 @section Scripts {
-    <!-- Include Bootstrap 5 JS for collapse functionality -->
-    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-
-    <script type="text/javascript">
-        google.charts.load('current', { packages: ['corechart', 'line'] });
-        google.charts.setOnLoadCallback(drawChart);
-
-        function getDescriptiveValue(sliderValue) {
-            if (sliderValue >= 0 && sliderValue <= 10) {
-                return 1; // Normal
-            } else if (sliderValue > 10 && sliderValue <= 20) {
-                return 2; // Better
-            } else if (sliderValue > 20 && sliderValue <= 30) {
-                return 3; // Good
-            } else if (sliderValue > 30 && sliderValue <= 40) {
-                return 4; // Very Good
-            } else if (sliderValue > 40 && sliderValue <= 50) {
-                return 5; // Excellent
-            } else if (sliderValue > 50 && sliderValue <= 60) {
-                return 6; // Outstanding
-            } else if (sliderValue > 60 && sliderValue <= 70) {
-                return 7; // Remarkable
-            } else if (sliderValue > 70 && sliderValue <= 80) {
-                return 8; // Exceptional
-            } else if (sliderValue > 80 && sliderValue <= 90) {
-                return 9; // Superior
-            } else if (sliderValue > 90 && sliderValue <= 100) {
-                return 10; // Perfect
-            } else {
-                return 0; // Unknown
-            }
-        }
-
-        function drawChart() {
-            var data = new google.visualization.DataTable();
-            data.addColumn('string', 'Survey and Submission Date');
-            data.addColumn('number', 'Status');
-
-            var responsesData = [
-        @foreach (var response in Model.Responses)
-        {
-                        @foreach (var detail in response.ResponseDetails.Where(d => d.QuestionType == QuestionType.Slider))
-                        {
-                                        @:['@response.Questionnaire.Title - @response.SubmissionDate.ToString("yyyy-MMMM-dd HH:mm")', getDescriptiveValue(@(detail.TextResponse != null ? int.Parse(detail.TextResponse) : 0))],
-                        }
-        }
-             ];
-
-            responsesData.forEach(function (row) {
-                data.addRow(row);
-            });
-
-            var options = {
-                title: 'User Progress Over Time',
-                hAxis: {
-                    title: 'Questionnaire and Submission Date',
-                    titleTextStyle: { color: '#475569', fontSize: 12, bold: true }
-                },
-                vAxis: {
-                    title: 'Progress Level',
-                    titleTextStyle: { color: '#475569', fontSize: 12, bold: true },
-                    ticks: [
-                        { v: 0, f: 'Unknown' },
-                        { v: 1, f: 'Normal' },
-                        { v: 2, f: 'Better' },
-                        { v: 3, f: 'Good' },
-                        { v: 4, f: 'Very Good' },
-                        { v: 5, f: 'Excellent' },
-                        { v: 6, f: 'Outstanding' },
-                        { v: 7, f: 'Remarkable' },
-                        { v: 8, f: 'Exceptional' },
-                        { v: 9, f: 'Superior' },
-                        { v: 10, f: 'Perfect' }
-                    ]
-                },
-                titleTextStyle: { color: '#1e293b', fontSize: 16, bold: true },
-                backgroundColor: 'transparent',
-                colors: ['#6366f1'],
-                lineWidth: 3,
-                pointSize: 6
-            };
-
-            var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
-            chart.draw(data, options);
-        }
-    </script>
-
-    <script type="text/javascript">
-            google.charts.load('current', { packages: ['corechart', 'bar'] });
-            google.charts.setOnLoadCallback(drawUserSurveySummaryChart);
-
-            function drawUserSurveySummaryChart() {
-                var data = new google.visualization.DataTable();
-                data.addColumn('string', 'Metric');
-                data.addColumn('number', 'Count');
-
-                var userSurveySummaryData = @Html.Raw(JsonConvert.SerializeObject(
-                                                                            Model.Responses
-                                                                            .GroupBy(response => response.UserEmail)
-                                                                            .Select(g => new
-                                                                            {
-                                                                                            TotalSurveys = g.Count(),
-                                                                                            TotalQuestions = g.SelectMany(r => r.ResponseDetails).Count(),
-                                                                                            TotalAnswers = g.SelectMany(r => r.ResponseDetails.SelectMany(rd => rd.ResponseAnswers)).Count()
-                                                                            })
-                                                                            .FirstOrDefault()
-                                                                            ));
-
-    if (userSurveySummaryData) {
-        data.addRow(['Surveys', userSurveySummaryData.TotalSurveys]);
-        data.addRow(['Questions', userSurveySummaryData.TotalQuestions]);
-        data.addRow(['Answers', userSurveySummaryData.TotalAnswers]);
-    }
-
-                var options = {
-                    title: 'Response Summary',
-                    titleTextStyle: { color: '#1e293b', fontSize: 14, bold: true },
-                    backgroundColor: 'transparent',
-                    colors: ['#06b6d4', '#10b981', '#f59e0b'],
-                    legend: { position: 'none' },
-                    hAxis: {
-                        titleTextStyle: { color: '#475569', fontSize: 11 }
-                    },
-                    vAxis: {
-                        titleTextStyle: { color: '#475569', fontSize: 11 }
-                    }
-                };
-
-                var chart = new google.visualization.ColumnChart(document.getElementById('user_survey_summary_chart_div'));
-                chart.draw(data, options);
-            }
-    </script>
-
-    <script type="text/javascript">
-                google.charts.load('current', { packages: ['corechart'] });
-                google.charts.setOnLoadCallback(drawSurveyQuestionsAnswersSummaryCharts);
-
-                function drawSurveyQuestionsAnswersSummaryCharts() {
-                    var surveyQuestionsSummaryData = @Html.Raw(JsonConvert.SerializeObject(
-                                                                Model.Responses
-                                                                .GroupBy(response => response.Questionnaire.Title)
-                                                                .Select(g => new
-                                                                {
-                                                                                SurveyTitle = g.Key,
-                                                                                SurveyId = g.First().Questionnaire.Id,
-                                                                                TotalQuestions = g.SelectMany(r => r.ResponseDetails).Count(),
-                                                                                TotalAnswers = g.SelectMany(r => r.ResponseDetails.SelectMany(rd => rd.ResponseAnswers)).Count()
-                                                                })
-                                                                .ToList()
-                                                                ));
-
-        surveyQuestionsSummaryData.forEach(function (row) {
-            drawSingleSurveyChart(row.SurveyTitle, row.SurveyId, row.TotalQuestions, row.TotalAnswers);
-        });
-    }
-
-                function drawSingleSurveyChart(surveyTitle, surveyId, totalQuestions, totalAnswers) {
-                    var data = new google.visualization.DataTable();
-                    data.addColumn('string', 'Category');
-                    data.addColumn('number', 'Count');
-
-                    data.addRow(['Questions', totalQuestions]);
-                    data.addRow(['Answers', totalAnswers]);
-
-                    var options = {
-                        backgroundColor: 'transparent',
-                        is3D: false,
-                        colors: ['#6366f1', '#10b981'],
-                        legend: {
-                            position: 'bottom',
-                            textStyle: { fontSize: 10 }
-                        },
-                        chartArea: { width: '90%', height: '70%' }
-                    };
-
-                    var chart = new google.visualization.PieChart(document.getElementById('survey_questions_answers_summary_chart_div_' + surveyId));
-                    chart.draw(data, options);
-                }
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            var collapseElements = document.querySelectorAll('[data-bs-toggle="collapse"]');
-
-            collapseElements.forEach(function (element) {
-                var targetId = element.getAttribute('data-bs-target');
-                var targetElement = document.querySelector(targetId);
-                var toggleText = element.querySelector('.toggle-text');
-                var icon = element.querySelector('i');
-
-                // Initialize button state
-                if (targetElement.classList.contains('show')) {
-                    toggleText.textContent = 'Hide Details';
-                    element.classList.add('expanded');
-                    icon.className = 'bi bi-eye-slash';
-                } else {
-                    toggleText.textContent = 'View Details';
-                    element.classList.remove('expanded');
-                    icon.className = 'bi bi-eye';
-                }
-
-                targetElement.addEventListener('shown.bs.collapse', function () {
-                    toggleText.textContent = 'Hide Details';
-                    element.classList.add('expanded');
-                    icon.className = 'bi bi-eye-slash';
-                });
-
-                targetElement.addEventListener('hidden.bs.collapse', function () {
-                    toggleText.textContent = 'View Details';
-                    element.classList.remove('expanded');
-                    icon.className = 'bi bi-eye';
-                });
-            });
+        // Collapse toggles
+        document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('[data-bs-toggle="collapse"]').forEach(function(btn) {
+        var target = document.querySelector(btn.getAttribute('data-bs-target'));
+        var txt = btn.querySelector('.toggle-text'), icon = btn.querySelector('i');
+        if (target && txt) {
+        target.addEventListener('shown.bs.collapse', function() { txt.textContent = 'Hide Details'; icon.className = 'bi bi-eye-slash'; });
+        target.addEventListener('hidden.bs.collapse', function() { txt.textContent = 'View Details'; icon.className = 'bi bi-eye'; });
+        }
         });
+        });
+
+        // ═══ TRAJECTORY ═══
+        var trajEmail = '@Model.UserEmail';
+        var trajUrls = {
+        analyze: '@Url.Action("AnalyzeTrajectory", "UserResponseStatus")',
+        reanalyze: '@Url.Action("ReanalyzeTrajectory", "UserResponseStatus")',
+        exportPdf: '@Url.Action("ExportTrajectoryPdf", "UserResponseStatus")'
+        };
+        var dirArrows = {'Improving':'↑','Stable':'→','Declining':'↓','Fluctuating':'↕','Initial':'◉'};
+        var trajChart = null, trajData = null;
+
+        function animateSteps() {
+        var s = ['loadStep1','loadStep2','loadStep3','loadStep4'], b = document.getElementById('trajLoadBarFill');
+        [0,1500,3500,5500].forEach(function(d,i) {
+        setTimeout(function() { if(i>0){document.getElementById(s[i-1]).classList.remove('active');document.getElementById(s[i-1]).classList.add('done')} document.getElementById(s[i]).classList.add('active'); b.style.width=['25%','55%','80%','95%'][i]; }, d);
+        });
+        }
+        function resetLoad() {
+        document.getElementById('trajLoadTitle').textContent='ANALYZING WELLNESS TRAJECTORY';
+        document.getElementById('trajLoadSub').textContent='Claude AI is processing survey responses, detecting emotional patterns, and generating clinical insights...';
+        var br=document.querySelector('.traj-load-brain-inner i'); if(br){br.className='bi bi-stars';br.style.color=''}
+        ['loadStep1','loadStep2','loadStep3','loadStep4'].forEach(function(id){document.getElementById(id).classList.remove('active','done')});
+        var bf=document.getElementById('trajLoadBarFill'); bf.style.width='0%'; bf.style.background='';
+        }
+        function doneSteps() { ['loadStep1','loadStep2','loadStep3','loadStep4'].forEach(function(id){document.getElementById(id).classList.remove('active');document.getElementById(id).classList.add('done')}); document.getElementById('trajLoadBarFill').style.width='100%'; }
+        function loadErr(msg) {
+        var lp=document.getElementById('trajLoadingPanel'); lp.classList.add('visible');
+        document.getElementById('trajLoadTitle').textContent='ANALYSIS FAILED'; document.getElementById('trajLoadSub').textContent=msg;
+        var br=document.querySelector('.traj-load-brain-inner i'); if(br){br.className='bi bi-exclamation-triangle';br.style.color='var(--neon-red)'}
+        document.getElementById('trajLoadBarFill').style.width='100%'; document.getElementById('trajLoadBarFill').style.background='var(--neon-red)';
+        }
+
+        function analyzeTrajectory() {
+        var btn=document.getElementById('trajBtn'),lp=document.getElementById('trajLoadingPanel'),p=document.getElementById('trajPanel'),r=document.getElementById('trajResults');
+        resetLoad(); btn.classList.add('loading'); lp.classList.add('visible'); p.classList.remove('visible'); r.style.display='none'; animateSteps();
+        $.get(trajUrls.analyze,{userEmail:trajEmail}).done(function(d){ doneSteps(); setTimeout(function(){ btn.classList.remove('loading'); lp.classList.remove('visible');
+        if(d.success&&d.data){trajData=d.data;render(d.data);p.classList.add('visible');r.style.display='block';btn.classList.add('done');btn.innerHTML='<i class="bi bi-check-circle"></i> ANALYSIS COMPLETE';document.getElementById('trajReanalyzeBtn').style.display='inline-flex';document.getElementById('trajExportBtn').style.display='inline-flex';document.getElementById('trajHero').scrollIntoView({behavior:'smooth',block:'start'})}
+        else{loadErr(d.message||'Analysis failed.')}},500);}).fail(function(){btn.classList.remove('loading');loadErr('Connection error.')});
+        }
+        function reanalyzeTrajectory() {
+        var btn=document.getElementById('trajBtn'),lp=document.getElementById('trajLoadingPanel'),r=document.getElementById('trajResults');
+        btn.classList.remove('done');btn.classList.add('loading');btn.innerHTML='<i class="bi bi-activity traj-icon"></i><i class="bi bi-arrow-repeat traj-spinner"></i>RE-ANALYZING...';
+        resetLoad();document.getElementById('trajLoadTitle').textContent='RE-ANALYZING (FRESH)';document.getElementById('trajLoadSub').textContent='Sending all responses to Claude AI for fresh analysis...';
+        lp.classList.add('visible');r.style.display='none';animateSteps();
+        $.post(trajUrls.reanalyze,{userEmail:trajEmail}).done(function(d){doneSteps();setTimeout(function(){btn.classList.remove('loading');lp.classList.remove('visible');
+        if(d.success&&d.data){trajData=d.data;render(d.data);document.getElementById('trajPanel').classList.add('visible');r.style.display='block';btn.classList.add('done');btn.innerHTML='<i class="bi bi-check-circle"></i> ANALYSIS COMPLETE';document.getElementById('trajHero').scrollIntoView({behavior:'smooth',block:'start'})}
+        else{loadErr(d.message||'Failed.')}},500);}).fail(function(){btn.classList.remove('loading');loadErr('Connection error.')});
+        }
+        function exportTrajectoryPdf(){window.location.href=trajUrls.exportPdf+'?userEmail='+encodeURIComponent(trajEmail)}
+
+        function render(d) {
+        var dir=(d.trajectoryDirection||'Initial').toLowerCase();
+        document.getElementById('trajHeroGlow').className='traj-hero-glow '+dir;
+        document.getElementById('trajRingFill').className.baseVal='ring-fill '+dir;
+        var sc=d.trajectoryScore||0; setTimeout(function(){document.getElementById('trajRingFill').style.strokeDashoffset=326.73-(sc/100)*326.73},200);
+        document.getElementById('trajScoreNum').textContent=sc;
+        var de=document.getElementById('trajDirection');de.className='traj-direction '+dir;
+        document.getElementById('trajArrow').textContent=dirArrows[d.trajectoryDirection]||'◉';
+        document.getElementById('trajDirectionText').textContent=(d.trajectoryDirection||'Initial').toUpperCase();
+        document.getElementById('trajSummary').textContent=d.executiveSummary||'';
+        var m='<span><i class="bi bi-clipboard-data"></i> '+(d.totalResponsesAnalyzed||0)+' responses</span><span><i class="bi bi-calendar"></i> '+new Date(d.analyzedAt).toLocaleDateString()+'</span>';
+        if(d.isIncremental)m+='<span><i class="bi bi-lightning"></i> Incremental</span>';document.getElementById('trajMeta').innerHTML=m;
+        var ch=d.scoreChange||0,ce=document.getElementById('trajChange');ce.textContent=(ch>0?'+':'')+ch;ce.className='traj-change '+(ch>0?'pos':ch<0?'neg':'zero');
+        var rk=d.overallRiskLevel||'Low',re=document.getElementById('trajRisk');re.textContent=rk.toUpperCase()+' RISK';re.className='traj-risk-badge '+rk;
+
+        renderChart(d.responseSnapshots||[]);
+
+        // Snapshots
+        var h='',sn=d.responseSnapshots||[];
+        sn.forEach(function(s,i){if(i>0)h+='<div class="snap-connector">→</div>';var rl=s.riskLevel||'Low';
+        h+='<div class="snap-card '+rl+'"><div class="snap-date"><i class="bi bi-calendar3"></i> '+(s.responseDate||'')+'</div><div class="snap-name">'+(s.questionnaireName||'')+'</div><div class="snap-score-row"><span class="snap-score '+rl+'">'+(s.wellnessScore||0)+'/100</span><span class="snap-risk traj-risk-badge '+rl+'">'+rl.toUpperCase()+'</span><span class="snap-sent '+(s.sentimentLabel||'Neutral')+'">'+(s.sentimentLabel||'')+'</span></div>';
+        if(s.keyThemes&&s.keyThemes.length){h+='<div class="snap-themes">';s.keyThemes.forEach(function(t){h+='<span class="snap-theme">'+t+'</span>'});h+='</div>'}
+        h+='<div class="snap-brief">'+(s.briefSummary||'')+'</div></div>'});
+        document.getElementById('trajSnapGrid').innerHTML=h;
+
+        // Patterns
+        var p='';(d.patternInsights||[]).forEach(function(x){p+='<div class="traj-item"><div class="traj-item-top"><span class="traj-item-text">'+(x.pattern||'')+'</span><span class="traj-sev '+(x.severity||'')+'">'+(x.severity||'').toUpperCase()+'</span></div><div class="traj-item-sub"><span class="dot '+(x.stillPresent?'present':'resolved')+'"></span>'+(x.stillPresent?'Still present':'Resolved');if(x.firstSeen)p+=' · First seen: '+x.firstSeen;p+='</div></div>'});
+        document.getElementById('trajPatternGrid').innerHTML=p||'<div style="grid-column:1/-1;text-align:center;color:var(--dark-500);font-size:.9rem;padding:1.5rem">No patterns detected</div>';
+
+        // Strengths
+        var st='';(d.strengthFactors||[]).forEach(function(s){st+='<div class="sc-item"><div class="sc-icon green"><i class="bi bi-shield-fill-check"></i></div><div class="sc-text">'+(s.factor||'')+'</div></div>'});
+        document.getElementById('trajStrengths').innerHTML=st||'<div style="color:var(--dark-500);font-size:.9rem;padding:.8rem">No strengths identified</div>';
+
+        // Concerns
+        var c='';(d.concernFactors||[]).forEach(function(x){c+='<div class="sc-item"><div class="sc-icon red"><i class="bi bi-exclamation-triangle-fill"></i></div><div class="sc-text">'+(x.concern||'')+'</div><span class="traj-sev '+(x.urgency||'')+'" style="flex-shrink:0;margin-left:.5rem">'+(x.urgency||'').toUpperCase()+'</span></div>'});
+        document.getElementById('trajConcerns').innerHTML=c||'<div style="color:var(--dark-500);font-size:.9rem;padding:.8rem">No concerns identified</div>';
+
+        // Recommendations
+        var r='';(d.recommendations||[]).forEach(function(x){r+='<div class="traj-item"><div class="traj-item-top"><span class="traj-item-text"><i class="bi bi-arrow-right-circle" style="color:var(--neon-indigo);margin-right:.4rem"></i>'+(x.action||'')+'</span><span class="traj-sev '+(x.priority||'')+'">'+(x.priority||'').toUpperCase()+'</span></div><div class="traj-item-sub"><span class="traj-cat '+(x.category||'').replace(/\s/g,'')+ '">'+(x.category||'')+'</span></div></div>'});
+        document.getElementById('trajRecGrid').innerHTML=r||'<div style="grid-column:1/-1;text-align:center;color:var(--dark-500);font-size:.9rem;padding:1.5rem">No recommendations</div>';
+
+        document.getElementById('trajNarrText').textContent=d.timelineNarrative||'No narrative available.';
+        document.getElementById('trajDetailedText').textContent=d.detailedAnalysis||'No detailed analysis available.';
+        }
+
+        function renderChart(sn) {
+        if(!sn||!sn.length){document.getElementById('trajChartSection').style.display='none';return}
+        document.getElementById('trajChartSection').style.display='';
+        var lb=sn.map(function(s){return s.responseDate||''}),sc=sn.map(function(s){return s.wellnessScore||0}),rk=sn.map(function(s){return s.riskLevel||'Low'});
+        var cl=rk.map(function(r){return r==='Critical'?'#dc2626':r==='High'?'#f87171':r==='Moderate'?'#fbbf24':'#34d399'});
+        var ctx=document.getElementById('trajChart').getContext('2d'),grd=ctx.createLinearGradient(0,0,0,240);
+        var last=sc[sc.length-1],first=sc[0];
+        if(last>=first){grd.addColorStop(0,'rgba(52,211,153,0.3)');grd.addColorStop(1,'rgba(52,211,153,0.02)')}else{grd.addColorStop(0,'rgba(248,113,113,0.3)');grd.addColorStop(1,'rgba(248,113,113,0.02)')}
+        if(trajChart)trajChart.destroy();
+        trajChart=new Chart(ctx,{type:'line',data:{labels:lb,datasets:[{label:'Wellness',data:sc,fill:true,backgroundColor:grd,borderColor:last>=first?'#34d399':'#f87171',borderWidth:3,pointBackgroundColor:cl,pointBorderColor:cl,pointBorderWidth:2,pointRadius:9,pointHoverRadius:13,tension:.4}]},
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(15,23,42,0.95)',titleColor:'#fff',bodyColor:'#94a3b8',borderColor:'rgba(255,255,255,0.1)',borderWidth:1,cornerRadius:10,padding:14,titleFont:{family:"'JetBrains Mono',monospace",weight:'700',size:13},bodyFont:{family:"'Space Grotesk',sans-serif",size:14},callbacks:{title:function(i){return i[0].label},label:function(i){return 'Wellness: '+i.raw+'/100 ('+rk[i.dataIndex]+' Risk)'},afterLabel:function(i){var s=sn[i.dataIndex];return s?s.briefSummary:''}}}},
+        scales:{x:{grid:{color:'rgba(255,255,255,0.04)',drawBorder:false},ticks:{color:'#64748b',font:{family:"'JetBrains Mono',monospace",size:11},maxRotation:0}},y:{min:0,max:100,grid:{color:'rgba(255,255,255,0.04)',drawBorder:false},ticks:{color:'#64748b',font:{family:"'JetBrains Mono',monospace",size:11},stepSize:25,callback:function(v){return v+'%'}}}},interaction:{intersect:false,mode:'index'}}});
+        }
     </script>
 }

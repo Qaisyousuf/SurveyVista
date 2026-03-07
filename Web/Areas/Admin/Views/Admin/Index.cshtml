@@ -4,1617 +4,740 @@
 }
 
 @section Styles {
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
+        @@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
         :root {
-            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            --warning-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-            --danger-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-            --surface: #ffffff;
-            --background: #f8fafc;
-            --text-primary: #2d3748;
-            --text-secondary: #4a5568;
-            --border: #e2e8f0;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            --border-radius: 12px;
-        }
-
-        .dashboard-container {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--background);
-            color: var(--text-primary);
-            line-height: 1.6;
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-
-        .dashboard-header {
-            background: var(--surface);
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-            padding: 2rem;
-            margin-bottom: 2rem;
-            position: relative;
-            overflow: hidden;
-        }
-
-            .dashboard-header::before {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                height: 4px;
-                background: var(--primary-gradient);
-            }
-
-        .welcome-section {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-
-        .welcome-text h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 0.5rem;
-        }
-
-        .welcome-text p {
-            color: var(--text-secondary);
-            font-size: 1.1rem;
-        }
-
-        .user-avatar {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .avatar-circle {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: var(--primary-gradient);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.5rem;
-            font-weight: bold;
-        }
-
-        .user-info h3 {
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .user-info p {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .stat-card {
-            background: var(--surface);
-            border-radius: var(--border-radius);
-            padding: 2rem;
-            box-shadow: var(--shadow);
-            position: relative;
-            overflow: hidden;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-            .stat-card:hover {
-                transform: translateY(-2px);
-                box-shadow: var(--shadow-lg);
-            }
-
-            .stat-card::before {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                height: 3px;
-            }
-
-            .stat-card.primary::before {
-                background: var(--primary-gradient);
-            }
-
-            .stat-card.success::before {
-                background: var(--success-gradient);
-            }
-
-            .stat-card.warning::before {
-                background: var(--warning-gradient);
-            }
-
-            .stat-card.danger::before {
-                background: var(--danger-gradient);
-            }
-
-        .stat-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 1rem;
-        }
-
-        .stat-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.2rem;
-        }
-
-            .stat-icon.primary {
-                background: var(--primary-gradient);
-            }
-
-            .stat-icon.success {
-                background: var(--success-gradient);
-            }
-
-            .stat-icon.warning {
-                background: var(--warning-gradient);
-            }
-
-            .stat-icon.danger {
-                background: var(--danger-gradient);
-            }
-
-        .stat-value {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 0.5rem;
-        }
-
-        .stat-label {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-
-        .stat-trend {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-top: 1rem;
-        }
-
-        .trend-positive {
-            color: #10b981;
-        }
-
-        .trend-negative {
-            color: #ef4444;
-        }
-
-        .charts-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        .chart-card {
-            background: var(--surface);
-            border-radius: var(--border-radius);
-            padding: 1.5rem;
-            box-shadow: var(--shadow);
-        }
-
-        .chart-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .chart-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .chart-filter {
-            padding: 0.5rem 1rem;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            font-size: 0.9rem;
-            background: var(--surface);
-            color: var(--text-primary);
-        }
-
-        .chart-container {
-            position: relative;
-            height: 300px;
-        }
-
-        .performance-metrics {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        .metric-card {
-            background: var(--surface);
-            border-radius: var(--border-radius);
-            padding: 1.5rem;
-            box-shadow: var(--shadow);
-        }
-
-        .metric-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .progress-bar {
-            height: 8px;
-            background: var(--border);
-            border-radius: 4px;
-            overflow: hidden;
-            margin: 1rem 0;
-        }
-
-        .progress-fill {
-            height: 100%;
-            border-radius: 4px;
-            transition: width 0.3s ease;
-        }
-
-        .recent-activity {
-            background: var(--surface);
-            border-radius: var(--border-radius);
-            padding: 1.5rem;
-            box-shadow: var(--shadow);
-        }
-
-        .activity-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .activity-list {
-            list-style: none;
-        }
-
-        .activity-item {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 1rem 0;
-            border-bottom: 1px solid var(--border);
-        }
-
-            .activity-item:last-child {
-                border-bottom: none;
-            }
-
-        .activity-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.9rem;
-            color: white;
-        }
-
-        .activity-content {
-            flex: 1;
-        }
-
-        .activity-title {
-            font-weight: 500;
-            color: var(--text-primary);
-            margin-bottom: 0.25rem;
-        }
-
-        .activity-meta {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-        }
-
-        /* NEW: Notification Styles */
-        .notification-list {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .notification-item {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 1.5rem;
-            background: var(--background);
-            border-radius: 8px;
-            border-left: 4px solid var(--success-gradient);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-            .notification-item:hover {
-                transform: translateY(-1px);
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            }
-
-        .notification-icon {
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            background: var(--success-gradient);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.1rem;
-            flex-shrink: 0;
-        }
-
-        .notification-content {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .notification-title {
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 0.25rem;
-            font-size: 0.95rem;
-        }
-
-        .notification-meta {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-        }
-
-        .notification-actions {
-            display: flex;
-            gap: 0.75rem;
-            flex-shrink: 0;
-        }
-
-        .notification-btn {
-            padding: 0.5rem 1rem;
-            border: none;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: all 0.2s ease;
-            white-space: nowrap;
-        }
-
-            .notification-btn.btn-primary {
-                background: var(--primary-gradient);
-                color: white;
-            }
-
-            .notification-btn.btn-secondary {
-                background: var(--surface);
-                color: var(--text-primary);
-                border: 1px solid var(--border);
-            }
-
-            .notification-btn:hover {
-                transform: translateY(-1px);
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-                text-decoration: none;
-            }
-
-            .notification-btn.btn-primary:hover {
-                color: white;
-            }
-
-            .notification-btn.btn-secondary:hover {
-                color: var(--text-primary);
-            }
-
-        .data-table {
-            background: var(--surface);
-            border-radius: var(--border-radius);
-            overflow: hidden;
-            box-shadow: var(--shadow);
-            margin-top: 2rem;
-        }
-
-        .full-width-table {
-            grid-column: 1 / -1;
-            width: 100%;
-        }
-
-        .table-header {
-            padding: 1.5rem;
-            background: var(--background);
-            border-bottom: 1px solid var(--border);
-        }
-
-        .table-responsive {
-            overflow-x: auto;
-        }
-
-        .table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 800px;
-        }
-
-            .table th, .table td {
-                padding: 1rem;
-                text-align: left;
-                border-bottom: 1px solid var(--border);
-                vertical-align: middle;
-            }
-
-            .table th {
-                background: var(--background);
-                font-weight: 600;
-                color: var(--text-secondary);
-                font-size: 0.9rem;
-            }
-
-            .table tr:hover {
-                background: var(--background);
-                transition: background-color 0.2s ease;
-            }
-
-        .survey-title-cell strong {
-            color: var(--text-primary);
-            font-size: 0.95rem;
-        }
-
-        .survey-title-cell small {
-            color: var(--text-secondary);
-            font-size: 0.8rem;
-        }
-
-        .completion-cell {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .completion-text {
-            font-weight: 500;
-            font-size: 0.9rem;
-        }
-
-        .mini-progress-bar {
-            width: 100%;
-            height: 4px;
-            background: var(--border);
-            border-radius: 2px;
-            overflow: hidden;
-        }
-
-        .mini-progress-fill {
-            height: 100%;
-            border-radius: 2px;
-            transition: width 0.3s ease;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 0.3rem 0.6rem;
-            font-size: 0.8rem;
-            font-weight: 500;
-            border-radius: 6px;
-            text-align: center;
-            min-width: 40px;
-        }
-
-        .badge-info {
-            background: #e0f2fe;
-            color: #0369a1;
-        }
-
-        .badge-success {
-            background: #dcfce7;
-            color: #166534;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 0.5rem;
-            align-items: center;
-        }
-
-        .action-icon-btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 32px;
-            height: 32px;
-            border-radius: 6px;
-            background: var(--background);
-            color: var(--text-secondary);
-            text-decoration: none;
-            transition: all 0.2s ease;
-            border: 1px solid transparent;
-        }
-
-            .action-icon-btn:hover {
-                background: var(--primary-gradient);
-                color: white;
-                transform: translateY(-1px);
-                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-                text-decoration: none;
-            }
-
-        .status-badge {
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            font-weight: 500;
-        }
-
-        .status-active {
-            background: #dcfce7;
-            color: #166534;
-        }
-
-        .status-draft {
-            background: #fef3c7;
-            color: #92400e;
-        }
-
-        .status-closed {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 3rem 1rem;
-            color: var(--text-secondary);
-        }
-
-            .empty-state i {
-                font-size: 3rem;
-                margin-bottom: 1rem;
-                opacity: 0.5;
-            }
-
-            .empty-state h4 {
-                margin-bottom: 0.5rem;
-                color: var(--text-primary);
-            }
-
-            .empty-state p {
-                margin-bottom: 1.5rem;
-            }
-
-        .quick-actions {
-            display: flex;
-            gap: 1rem;
-            margin-top: 2rem;
-            flex-wrap: wrap;
-        }
-
-        .action-btn {
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 8px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .btn-primary {
-            background: var(--primary-gradient);
-            color: white;
-        }
-
-        .btn-secondary {
-            background: var(--surface);
-            color: var(--text-primary);
-            border: 1px solid var(--border);
-        }
-
-        .action-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: var(--shadow);
-            text-decoration: none;
-        }
-
-        .btn-primary:hover {
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            color: var(--text-primary);
-        }
-
-        .real-time-indicator {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-        }
-
-        .pulse {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #10b981;
-            animation: pulse 2s infinite;
-        }
-
-        @@keyframes pulse {
-            0% {
-                opacity: 1;
-            }
-
-            50% {
-                opacity: 0.5;
-            }
-
-            100% {
-                opacity: 1;
-            }
-        }
-
-        @@media (max-width: 768px) {
-            .dashboard-container {
-                padding: 1rem;
-            }
-
-            .welcome-section {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .charts-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .welcome-text h1 {
-                font-size: 2rem;
-            }
-
-            .quick-actions {
-                justify-content: center;
-            }
-            /* Notification responsive */
-            .notification-item {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 1rem;
-                padding: 1rem;
-            }
-
-            .notification-actions {
-                width: 100%;
-                justify-content: flex-start;
-            }
-
-            .notification-btn {
-                flex: 1;
-                justify-content: center;
-                min-width: 120px;
-            }
-            /* Table responsive */
-            .table {
-                font-size: 0.8rem;
-                min-width: 600px;
-            }
-
-                .table th, .table td {
-                    padding: 0.5rem;
-                }
-
-            .action-buttons {
-                flex-wrap: wrap;
-            }
-
-            .action-icon-btn {
-                width: 28px;
-                height: 28px;
-            }
-        }
-
-        @@media (max-width: 480px) {
-            .notification-actions {
-                flex-direction: column;
-            }
-
-            .notification-btn {
-                width: 100%;
-            }
-        }
+            --neon-blue:#60a5fa;--neon-purple:#c084fc;--neon-green:#34d399;--neon-pink:#f472b6;
+            --neon-yellow:#fbbf24;--neon-red:#f87171;--neon-cyan:#22d3ee;--neon-teal:#33b3ae;--neon-indigo:#818cf8;
+            --dark-900:#0f172a;--dark-800:#1e293b;--dark-700:#334155;--dark-600:#475569;
+            --dark-500:#64748b;--dark-400:#94a3b8;--dark-300:#cbd5e1;--dark-200:#e2e8f0;
+            --glass-bg:rgba(255,255,255,0.05);--glass-border:rgba(255,255,255,0.1);--glass-shadow:0 8px 32px rgba(0,0,0,0.12);
+            --font-main:'Space Grotesk',sans-serif;--font-mono:'JetBrains Mono',monospace;
+        }
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:var(--font-main);background:var(--dark-900);color:#e2e8f0;overflow-x:hidden}
+        .nex-dash{min-height:100vh;position:relative}
+
+        .bg-pattern{position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:-1;overflow:hidden}
+        .grid-overlay{position:absolute;inset:0;background-image:linear-gradient(rgba(96,165,250,0.1) 1px,transparent 1px),linear-gradient(90deg,rgba(96,165,250,0.1) 1px,transparent 1px);background-size:60px 60px;animation:gridMove 20s linear infinite}
+        .gradient-mesh{position:absolute;inset:0;background:radial-gradient(circle at 20% 20%,rgba(96,165,250,0.15) 0%,transparent 50%),radial-gradient(circle at 80% 60%,rgba(192,132,252,0.15) 0%,transparent 50%),radial-gradient(circle at 40% 80%,rgba(52,211,153,0.15) 0%,transparent 50%);animation:meshShift 15s ease-in-out infinite}
+        @@keyframes gridMove{0%{transform:translate(0,0)}100%{transform:translate(60px,60px)}}
+        @@keyframes meshShift{0%,100%{filter:hue-rotate(0deg);transform:scale(1)}50%{filter:hue-rotate(30deg);transform:scale(1.05)}}
+        @@keyframes fadeInUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+        @@keyframes pulseGlow{0%,100%{box-shadow:0 0 0 0 rgba(52,211,153,0.4)}50%{box-shadow:0 0 0 6px rgba(52,211,153,0)}}
+
+        /* NAV */
+        .top-nav{position:sticky;top:0;z-index:100;background:rgba(15,23,42,0.85);backdrop-filter:blur(20px);border-bottom:1px solid rgba(96,165,250,0.15);padding:0.8rem 2rem}
+        .nav-container{max-width:1400px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:1rem}
+        .nav-brand{display:flex;align-items:center;gap:0.8rem}
+        .brand-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--neon-indigo),var(--neon-purple));display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;box-shadow:0 4px 16px rgba(129,140,248,0.3)}
+        .brand-text{display:flex;flex-direction:column}
+        .brand-name{font-family:var(--font-mono);font-size:0.72rem;font-weight:700;color:#fff;letter-spacing:0.1em}
+        .brand-version{font-family:var(--font-mono);font-size:0.58rem;color:var(--dark-500)}
+        .nav-right{display:flex;align-items:center;gap:1rem}
+        .nav-live{display:flex;align-items:center;gap:0.4rem;font-family:var(--font-mono);font-size:0.65rem;color:var(--neon-green);font-weight:600}
+        .nav-live .dot{width:7px;height:7px;border-radius:50%;background:var(--neon-green);animation:pulseGlow 2s infinite}
+        .nav-user{display:flex;align-items:center;gap:0.6rem}
+        .nav-avatar{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--neon-indigo),var(--neon-purple));display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;color:#fff}
+        .nav-user-name{font-size:0.78rem;font-weight:600;color:#fff}
+        .nav-user-role{font-family:var(--font-mono);font-size:0.58rem;color:var(--dark-500)}
+
+        .dash-content{max-width:1400px;margin:0 auto;padding:1.5rem 2rem}
+
+        /* HERO */
+        .dash-hero{background:var(--glass-bg);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:20px;overflow:hidden;box-shadow:var(--glass-shadow);margin-bottom:1.5rem;position:relative;animation:fadeInUp 0.5s ease both}
+        .dash-hero::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--neon-indigo),var(--neon-purple),var(--neon-pink),var(--neon-cyan))}
+        .dash-hero-inner{padding:1.8rem 2rem;display:flex;align-items:center;justify-content:space-between;gap:1.2rem;flex-wrap:wrap}
+        .dash-hero-left{display:flex;align-items:center;gap:1rem}
+        .dash-hero-icon{width:52px;height:52px;border-radius:16px;background:linear-gradient(135deg,var(--neon-indigo),var(--neon-purple));display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;box-shadow:0 8px 24px rgba(129,140,248,0.3)}
+        .dash-hero h1{font-size:1.4rem;font-weight:700;color:#fff;margin-bottom:0.1rem}
+        .dash-hero p{font-size:0.8rem;color:var(--dark-400)}
+        .dash-hero-actions{display:flex;gap:0.4rem;flex-wrap:wrap}
+        .hero-action{display:inline-flex;align-items:center;gap:0.35rem;padding:0.5rem 1rem;border-radius:10px;font-family:var(--font-mono);font-size:0.7rem;font-weight:600;text-decoration:none;border:1px solid;transition:all 0.2s}
+        .hero-action.primary{color:#fff;background:linear-gradient(135deg,var(--neon-indigo),var(--neon-purple));border-color:transparent;box-shadow:0 4px 16px rgba(129,140,248,0.3)}
+        .hero-action.primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(129,140,248,0.4);color:#fff;text-decoration:none}
+        .hero-action.ghost{color:var(--dark-300);background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.12)}
+        .hero-action.ghost:hover{background:rgba(255,255,255,0.1);color:#fff;text-decoration:none}
+
+        /* STATS */
+        .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0.8rem;margin-bottom:1.5rem;animation:fadeInUp 0.5s ease 0.06s both}
+        .stat-card{background:var(--glass-bg);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:16px;padding:1.3rem 1.2rem;box-shadow:var(--glass-shadow);position:relative;overflow:hidden;transition:all 0.3s}
+        .stat-card:hover{transform:translateY(-3px);border-color:rgba(255,255,255,0.15)}
+        .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+        .stat-card:nth-child(1)::before{background:linear-gradient(90deg,var(--neon-indigo),var(--neon-purple))}
+        .stat-card:nth-child(2)::before{background:linear-gradient(90deg,var(--neon-blue),var(--neon-cyan))}
+        .stat-card:nth-child(3)::before{background:linear-gradient(90deg,var(--neon-green),var(--neon-teal))}
+        .stat-card:nth-child(4)::before{background:linear-gradient(90deg,var(--neon-pink),var(--neon-red))}
+        .stat-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:0.6rem}
+        .stat-icon-box{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:0.95rem;color:#fff}
+        .stat-card:nth-child(1) .stat-icon-box{background:linear-gradient(135deg,var(--neon-indigo),var(--neon-purple))}
+        .stat-card:nth-child(2) .stat-icon-box{background:linear-gradient(135deg,var(--neon-blue),var(--neon-cyan))}
+        .stat-card:nth-child(3) .stat-icon-box{background:linear-gradient(135deg,var(--neon-green),var(--neon-teal))}
+        .stat-card:nth-child(4) .stat-icon-box{background:linear-gradient(135deg,var(--neon-pink),var(--neon-red))}
+        .stat-val{font-size:1.8rem;font-weight:800;line-height:1.2;margin-bottom:0.2rem}
+        .stat-card:nth-child(1) .stat-val{background:linear-gradient(135deg,var(--neon-indigo),var(--neon-purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .stat-card:nth-child(2) .stat-val{background:linear-gradient(135deg,var(--neon-blue),var(--neon-cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .stat-card:nth-child(3) .stat-val{background:linear-gradient(135deg,var(--neon-green),var(--neon-teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .stat-card:nth-child(4) .stat-val{background:linear-gradient(135deg,var(--neon-pink),var(--neon-red));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .stat-lbl{font-family:var(--font-mono);font-size:0.62rem;font-weight:700;color:var(--dark-500);text-transform:uppercase;letter-spacing:0.05em}
+        .stat-trend{display:flex;align-items:center;gap:0.3rem;margin-top:0.5rem;font-size:0.72rem;font-weight:600}
+        .stat-trend.up{color:var(--neon-green)}
+        .stat-trend.down{color:var(--neon-red)}
+
+        /* METRICS */
+        .metrics-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.8rem;margin-bottom:1.5rem;animation:fadeInUp 0.5s ease 0.1s both}
+        .metric-card{background:var(--glass-bg);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:16px;padding:1.3rem 1.2rem;box-shadow:var(--glass-shadow)}
+        .metric-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem}
+        .metric-head h3{font-size:0.82rem;font-weight:700;color:#fff}
+        .metric-head span{font-family:var(--font-mono);font-size:0.6rem;color:var(--dark-500)}
+        .metric-val{font-size:1.5rem;font-weight:800;color:#fff;margin-bottom:0.15rem}
+        .metric-lbl{font-family:var(--font-mono);font-size:0.6rem;color:var(--dark-500);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:0.6rem}
+        .nex-progress{height:6px;background:var(--dark-700);border-radius:100px;overflow:hidden}
+        .nex-progress-fill{height:100%;border-radius:100px;transition:width 0.8s cubic-bezier(0.23,1,0.32,1)}
+        .prog-green{background:linear-gradient(90deg,var(--neon-green),var(--neon-teal))}
+        .prog-indigo{background:linear-gradient(90deg,var(--neon-indigo),var(--neon-purple))}
+        .prog-yellow{background:linear-gradient(90deg,var(--neon-yellow),var(--neon-pink))}
+
+        /* CHARTS */
+        .charts-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:0.8rem;margin-bottom:1.5rem;animation:fadeInUp 0.5s ease 0.14s both}
+        .chart-card{background:rgba(30,41,59,0.5);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:1.2rem;box-shadow:0 4px 20px rgba(0,0,0,0.15)}
+        .chart-head{display:flex;align-items:center;justify-content:space-between;padding-bottom:0.8rem;border-bottom:1px solid rgba(255,255,255,0.04);margin-bottom:0.8rem}
+        .chart-head h3{font-size:0.82rem;font-weight:700;color:#fff;display:flex;align-items:center;gap:0.4rem}
+        .chart-head h3 i{font-size:0.7rem}
+        .chart-tag{font-family:var(--font-mono);font-size:0.58rem;font-weight:700;padding:0.2rem 0.55rem;border-radius:6px;text-transform:uppercase;letter-spacing:0.04em}
+        .chart-tag.green{color:var(--neon-green);background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.2)}
+        .chart-tag.blue{color:var(--neon-blue);background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.2)}
+        .chart-tag.indigo{color:var(--neon-indigo);background:rgba(129,140,248,0.1);border:1px solid rgba(129,140,248,0.2)}
+        .chart-tag.yellow{color:var(--neon-yellow);background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.2)}
+        .chart-container{position:relative;height:280px}
+        .chart-empty-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2;background:rgba(15,23,42,0.9);border-radius:12px;pointer-events:none}
+        .chart-empty-overlay i{font-size:1.6rem;color:var(--dark-600);margin-bottom:0.5rem}
+        .chart-empty-overlay span{font-family:var(--font-mono);font-size:0.7rem;color:var(--dark-500);font-weight:600}
+
+        /* ACTIVITY */
+        .activity-section{background:var(--glass-bg);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:16px;padding:1.3rem;box-shadow:var(--glass-shadow);margin-bottom:1.5rem;animation:fadeInUp 0.5s ease 0.18s both}
+        .activity-head{display:flex;align-items:center;justify-content:space-between;padding-bottom:0.8rem;border-bottom:1px solid rgba(255,255,255,0.04);margin-bottom:0.8rem}
+        .activity-head h3{font-size:0.88rem;font-weight:700;color:#fff;display:flex;align-items:center;gap:0.5rem}
+        .activity-head h3 i{color:var(--neon-indigo)}
+        .activity-head span{font-family:var(--font-mono);font-size:0.6rem;color:var(--dark-500)}
+        .notif-list{display:flex;flex-direction:column;gap:0.5rem}
+        .notif-item{display:flex;align-items:center;gap:0.8rem;padding:0.9rem 1rem;border-radius:12px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.04);transition:all 0.2s}
+        .notif-item:hover{background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.08)}
+        .notif-item.response-activity{border-left:3px solid var(--neon-green)}
+        .notif-item.creation-activity{border-left:3px solid var(--neon-indigo)}
+        .notif-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.9rem;flex-shrink:0}
+        .notif-icon.response-icon{background:linear-gradient(135deg,var(--neon-green),var(--neon-teal))}
+        .notif-icon.creation-icon{background:linear-gradient(135deg,var(--neon-indigo),var(--neon-purple))}
+        .notif-icon.default-icon{background:linear-gradient(135deg,var(--neon-blue),var(--neon-cyan))}
+        .notif-body{flex:1;min-width:0}
+        .notif-title{font-size:0.82rem;font-weight:600;color:#fff;margin-bottom:0.15rem}
+        .notif-meta{font-family:var(--font-mono);font-size:0.65rem;color:var(--dark-500)}
+        .notif-actions{display:flex;gap:0.35rem;flex-shrink:0;flex-wrap:wrap}
+        .notif-btn{display:inline-flex;align-items:center;gap:0.3rem;padding:0.35rem 0.7rem;border-radius:8px;font-family:var(--font-mono);font-size:0.65rem;font-weight:600;text-decoration:none;border:1px solid;transition:all 0.2s}
+        .notif-btn.btn-p{color:#fff;background:linear-gradient(135deg,var(--neon-indigo),var(--neon-purple));border-color:transparent}
+        .notif-btn.btn-p:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(129,140,248,0.3);color:#fff;text-decoration:none}
+        .notif-btn.btn-s{color:var(--dark-300);background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.12)}
+        .notif-btn.btn-s:hover{background:rgba(255,255,255,0.1);color:#fff;text-decoration:none}
+        .notif-btn.btn-g{color:#fff;background:linear-gradient(135deg,var(--neon-green),var(--neon-teal));border-color:transparent}
+        .notif-btn.btn-g:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(52,211,153,0.3);color:#fff;text-decoration:none}
+        .notif-btn.btn-w{color:#fff;background:linear-gradient(135deg,var(--neon-yellow),#f59e0b);border-color:transparent}
+        .notif-btn.btn-w:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(251,191,36,0.3);color:#fff;text-decoration:none}
+
+        /* TABLE */
+        .nex-table-card{background:var(--glass-bg);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:16px;overflow:hidden;box-shadow:var(--glass-shadow);margin-bottom:1.5rem;animation:fadeInUp 0.5s ease 0.22s both}
+        .nex-table-head{padding:1rem 1.3rem;border-bottom:1px solid rgba(255,255,255,0.04);display:flex;align-items:center;justify-content:space-between}
+        .nex-table-head h3{font-size:0.88rem;font-weight:700;color:#fff;display:flex;align-items:center;gap:0.5rem}
+        .nex-table-head h3 i{color:var(--neon-indigo)}
+        .table-responsive{overflow-x:auto}
+        .nex-table{width:100%;border-collapse:collapse;min-width:800px}
+        .nex-table th{background:rgba(255,255,255,0.03);padding:0.7rem 1rem;font-family:var(--font-mono);font-size:0.65rem;font-weight:700;color:var(--dark-400);text-transform:uppercase;letter-spacing:0.05em;text-align:left;border-bottom:1px solid rgba(255,255,255,0.04)}
+        .nex-table td{padding:0.8rem 1rem;border-bottom:1px solid rgba(255,255,255,0.03);vertical-align:middle;font-size:0.82rem;color:var(--dark-300)}
+        .nex-table tr:hover{background:rgba(255,255,255,0.02)}
+        .nex-table tr:last-child td{border-bottom:none}
+        .survey-cell{display:flex;align-items:center;gap:0.7rem}
+        .survey-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:0.8rem;color:#fff;flex-shrink:0;background:linear-gradient(135deg,var(--neon-indigo),var(--neon-purple));box-shadow:0 4px 12px rgba(129,140,248,0.2)}
+        .survey-info{flex:1;min-width:0}
+        .survey-title{font-weight:700;color:#fff;font-size:0.88rem;margin-bottom:0.3rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-0.01em}
+        .survey-meta{display:flex;align-items:center;gap:0.4rem}
+        .survey-id-badge{display:inline-flex;align-items:center;gap:0.2rem;padding:0.12rem 0.5rem;border-radius:5px;font-family:var(--font-mono);font-size:0.58rem;font-weight:600;background:rgba(129,140,248,0.1);color:var(--neon-indigo);border:1px solid rgba(129,140,248,0.2)}
+        .survey-id-badge i{font-size:0.45rem}
+        .nex-badge{display:inline-flex;align-items:center;gap:0.25rem;padding:0.2rem 0.55rem;border-radius:6px;font-family:var(--font-mono);font-size:0.65rem;font-weight:600}
+        .nex-badge.blue{background:rgba(96,165,250,0.12);color:var(--neon-blue);border:1px solid rgba(96,165,250,0.25)}
+        .nex-badge.green{background:rgba(52,211,153,0.12);color:var(--neon-green);border:1px solid rgba(52,211,153,0.25)}
+        .nex-badge.active{background:rgba(52,211,153,0.12);color:var(--neon-green);border:1px solid rgba(52,211,153,0.25)}
+        .completion-cell{display:flex;flex-direction:column;gap:0.35rem}
+        .completion-text{font-weight:600;font-size:0.82rem}
+        .mini-bar{width:100%;height:4px;background:var(--dark-700);border-radius:100px;overflow:hidden}
+        .mini-fill{height:100%;border-radius:100px}
+        .act-btns{display:flex;gap:0.3rem}
+        .act-icon-btn{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:var(--dark-400);text-decoration:none;transition:all 0.2s;font-size:0.75rem}
+        .act-icon-btn:hover{background:linear-gradient(135deg,var(--neon-indigo),var(--neon-purple));color:#fff;border-color:transparent;transform:translateY(-1px);text-decoration:none}
+
+        /* QUICK ACTIONS */
+        .quick-actions{display:flex;gap:0.5rem;flex-wrap:wrap;animation:fadeInUp 0.5s ease 0.26s both}
+        .q-action{display:inline-flex;align-items:center;gap:0.4rem;padding:0.6rem 1.2rem;border-radius:12px;font-family:var(--font-mono);font-size:0.72rem;font-weight:600;text-decoration:none;border:1px solid;transition:all 0.2s}
+        .q-action.primary{color:#fff;background:linear-gradient(135deg,var(--neon-indigo),var(--neon-purple));border-color:transparent;box-shadow:0 4px 16px rgba(129,140,248,0.25)}
+        .q-action.primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(129,140,248,0.35);color:#fff;text-decoration:none}
+        .q-action.ghost{color:var(--dark-300);background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.1)}
+        .q-action.ghost:hover{background:rgba(255,255,255,0.08);color:#fff;text-decoration:none}
+
+        /* EMPTY */
+        .nex-empty{text-align:center;padding:3rem 1.5rem}
+        .nex-empty-icon{width:56px;height:56px;border-radius:16px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:var(--dark-600);display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin:0 auto 0.8rem}
+        .nex-empty h4{font-size:0.95rem;font-weight:700;color:var(--dark-300);margin-bottom:0.3rem}
+        .nex-empty p{font-size:0.8rem;color:var(--dark-500);margin-bottom:1rem}
+
+        @@media(max-width:1200px){.stats-grid{grid-template-columns:repeat(2,1fr)}.metrics-grid{grid-template-columns:repeat(2,1fr)}}
+        @@media(max-width:768px){
+            .dash-content{padding:1rem}
+            .stats-grid,.metrics-grid{grid-template-columns:1fr}
+            .charts-grid{grid-template-columns:1fr}
+            .dash-hero-inner{flex-direction:column;align-items:flex-start;padding:1.2rem}
+            .dash-hero-actions{width:100%}
+            .hero-action{flex:1;justify-content:center}
+            .nav-container{flex-wrap:wrap}
+            .nav-right{order:3;flex-basis:100%;justify-content:space-between}
+            .notif-item{flex-direction:column;align-items:flex-start;gap:0.6rem}
+            .notif-actions{width:100%}
+            .notif-btn{flex:1;justify-content:center;min-width:100px}
+            .nex-table{font-size:0.75rem;min-width:600px}
+            .nex-table th,.nex-table td{padding:0.5rem}
+            .quick-actions{justify-content:center}
+        }
+        @@media(max-width:480px){.notif-actions{flex-direction:column}.notif-btn{width:100%}}
+        @@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0.01ms !important;animation-iteration-count:1 !important;transition-duration:0.01ms !important}}
+        @@media print{.bg-pattern,.top-nav{display:none !important}.stat-card,.chart-card,.metric-card,.activity-section,.nex-table-card{background:white;color:black;border:1px solid #ccc;backdrop-filter:none}}
     </style>
 }
 
-<div class="dashboard-container">
-    <!-- Header Section -->
-    <div class="dashboard-header">
-        <div class="welcome-section">
-            <div class="welcome-text">
-                <h1>Survey Analytics Dashboard</h1>
-                <p>Real-time insights into your questionnaire performance</p>
+<div class="nex-dash">
+    <div class="bg-pattern"><div class="grid-overlay"></div><div class="gradient-mesh"></div></div>
+
+    <nav class="top-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <div class="brand-icon"><i class="fas fa-chart-line"></i></div>
+                <div class="brand-text"><span class="brand-name">DASHBOARD</span><span class="brand-version">v1.0</span></div>
             </div>
-            <div class="user-avatar">
-                <div class="avatar-circle">
-                    @if (!string.IsNullOrEmpty(Model.FirstName) && !string.IsNullOrEmpty(Model.LastName))
-                    {
-                        @Model.FirstName.Substring(0, 1).ToUpper()
-                        @Model.LastName.Substring(0, 1).ToUpper()
-                    }
-                    else
-                    {
-                        <i class="fas fa-user-tie"></i>
-                    }
-                </div>
-                <div class="user-info">
-                    <h3>@Model.FirstName @Model.LastName</h3>
-                    <p>System Administrator</p>
+            <div class="nav-right">
+                <div class="nav-live"><span class="dot"></span> LIVE</div>
+                <div class="nav-user">
+                    <div class="nav-avatar">
+                        @if (!string.IsNullOrEmpty(Model.FirstName) && !string.IsNullOrEmpty(Model.LastName))
+                        { @Model.FirstName.Substring(0,1).ToUpper()@Model.LastName.Substring(0,1).ToUpper() }
+                        else { <i class="fas fa-user-tie"></i> }
+                    </div>
+                    <div>
+                        <div class="nav-user-name">@Model.FirstName @Model.LastName</div>
+                        <div class="nav-user-role">ADMINISTRATOR</div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    </nav>
 
-    <!-- Key Metrics Grid -->
-    <div class="stats-grid">
-        <div class="stat-card primary">
-            <div class="stat-header">
-                <div class="stat-icon primary">
-                    <i class="fas fa-clipboard-list"></i>
+    <div class="dash-content">
+
+        <!-- Hero -->
+        <div class="dash-hero">
+            <div class="dash-hero-inner">
+                <div class="dash-hero-left">
+                    <div class="dash-hero-icon"><i class="fas fa-chart-pie"></i></div>
+                    <div>
+                        <h1>Survey Analytics Dashboard</h1>
+                        <p>Real-time insights into your questionnaire performance</p>
+                    </div>
+                </div>
+                <div class="dash-hero-actions">
+                    <a href="@Url.Action("Create", "Questionnaire")" class="hero-action primary"><i class="fas fa-plus"></i> New Survey</a>
+                    <a href="@Url.Action("Index", "Questionnaire")" class="hero-action ghost"><i class="fas fa-list"></i> All Surveys</a>
                 </div>
             </div>
-            <div class="stat-value" id="total-questionnaires">@Model.SurveyAnalytics.TotalQuestionnaires</div>
-            <div class="stat-label">Total Questionnaires</div>
-            <div class="stat-trend">
-                <i class="fas fa-arrow-@(Model.SurveyAnalytics.TrendData.QuestionnairesTrendPositive ? "up" : "down") trend-@(Model.SurveyAnalytics.TrendData.QuestionnairesTrendPositive ? "positive" : "negative")"></i>
-                <span class="trend-@(Model.SurveyAnalytics.TrendData.QuestionnairesTrendPositive ? "positive" : "negative")">@Model.SurveyAnalytics.TrendData.QuestionnairesTrendText</span>
-            </div>
         </div>
 
-        <div class="stat-card success">
-            <div class="stat-header">
-                <div class="stat-icon success">
-                    <i class="fas fa-users"></i>
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-top"><div class="stat-icon-box"><i class="fas fa-clipboard-list"></i></div></div>
+                <div class="stat-val" id="total-questionnaires">@Model.SurveyAnalytics.TotalQuestionnaires</div>
+                <div class="stat-lbl">Total Questionnaires</div>
+                <div class="stat-trend @(Model.SurveyAnalytics.TrendData.QuestionnairesTrendPositive ? "up" : "down")">
+                    <i class="fas fa-arrow-@(Model.SurveyAnalytics.TrendData.QuestionnairesTrendPositive ? "up" : "down")"></i>
+                    @Model.SurveyAnalytics.TrendData.QuestionnairesTrendText
                 </div>
             </div>
-            <div class="stat-value" id="total-responses">@Model.SurveyAnalytics.TotalResponses</div>
-            <div class="stat-label">Total Responses</div>
-            <div class="stat-trend">
-                <i class="fas fa-arrow-@(Model.SurveyAnalytics.TrendData.ResponsesTrendPositive ? "up" : "down") trend-@(Model.SurveyAnalytics.TrendData.ResponsesTrendPositive ? "positive" : "negative")"></i>
-                <span class="trend-@(Model.SurveyAnalytics.TrendData.ResponsesTrendPositive ? "positive" : "negative")">@Model.SurveyAnalytics.TrendData.ResponsesTrendText</span>
-            </div>
-        </div>
-
-        <div class="stat-card warning">
-            <div class="stat-header">
-                <div class="stat-icon warning">
-                    <i class="fas fa-percentage"></i>
+            <div class="stat-card">
+                <div class="stat-top"><div class="stat-icon-box"><i class="fas fa-users"></i></div></div>
+                <div class="stat-val" id="total-responses">@Model.SurveyAnalytics.TotalResponses</div>
+                <div class="stat-lbl">Total Responses</div>
+                <div class="stat-trend @(Model.SurveyAnalytics.TrendData.ResponsesTrendPositive ? "up" : "down")">
+                    <i class="fas fa-arrow-@(Model.SurveyAnalytics.TrendData.ResponsesTrendPositive ? "up" : "down")"></i>
+                    @Model.SurveyAnalytics.TrendData.ResponsesTrendText
                 </div>
             </div>
-            <div class="stat-value" id="completion-rate">@Model.SurveyAnalytics.CompletionRate%</div>
-            <div class="stat-label">Avg. Completion Rate</div>
-            <div class="stat-trend">
-                <i class="fas fa-arrow-@(Model.SurveyAnalytics.TrendData.CompletionTrendPositive ? "up" : "down") trend-@(Model.SurveyAnalytics.TrendData.CompletionTrendPositive ? "positive" : "negative")"></i>
-                <span class="trend-@(Model.SurveyAnalytics.TrendData.CompletionTrendPositive ? "positive" : "negative")">@Model.SurveyAnalytics.TrendData.CompletionTrendText</span>
-            </div>
-        </div>
-
-        <div class="stat-card danger">
-            <div class="stat-header">
-                <div class="stat-icon danger">
-                    <i class="fas fa-clock"></i>
+            <div class="stat-card">
+                <div class="stat-top"><div class="stat-icon-box"><i class="fas fa-percentage"></i></div></div>
+                <div class="stat-val" id="completion-rate">@Model.SurveyAnalytics.CompletionRate%</div>
+                <div class="stat-lbl">Avg. Completion Rate</div>
+                <div class="stat-trend @(Model.SurveyAnalytics.TrendData.CompletionTrendPositive ? "up" : "down")">
+                    <i class="fas fa-arrow-@(Model.SurveyAnalytics.TrendData.CompletionTrendPositive ? "up" : "down")"></i>
+                    @Model.SurveyAnalytics.TrendData.CompletionTrendText
                 </div>
             </div>
-            <div class="stat-value" id="avg-response-time">@Model.SurveyAnalytics.AvgResponseTime</div>
-            <div class="stat-label">Avg. Minutes per Survey</div>
-            <div class="stat-trend">
-                <i class="fas fa-arrow-@(Model.SurveyAnalytics.TrendData.ResponseTimeTrendPositive ? "down" : "up") trend-@(Model.SurveyAnalytics.TrendData.ResponseTimeTrendPositive ? "positive" : "negative")"></i>
-                <span class="trend-@(Model.SurveyAnalytics.TrendData.ResponseTimeTrendPositive ? "positive" : "negative")">@Model.SurveyAnalytics.TrendData.ResponseTimeTrendText</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- Performance Metrics -->
-    <div class="performance-metrics">
-        <div class="metric-card">
-            <div class="metric-header">
-                <h3>Response Rate Trends</h3>
-                <div class="real-time-indicator">
-                    <div class="pulse"></div>
-                    Live Data
+            <div class="stat-card">
+                <div class="stat-top"><div class="stat-icon-box"><i class="fas fa-clock"></i></div></div>
+                <div class="stat-val" id="avg-response-time">@Model.SurveyAnalytics.AvgResponseTime</div>
+                <div class="stat-lbl">Avg. Minutes per Survey</div>
+                <div class="stat-trend @(Model.SurveyAnalytics.TrendData.ResponseTimeTrendPositive ? "up" : "down")">
+                    <i class="fas fa-arrow-@(Model.SurveyAnalytics.TrendData.ResponseTimeTrendPositive ? "down" : "up")"></i>
+                    @Model.SurveyAnalytics.TrendData.ResponseTimeTrendText
                 </div>
             </div>
-            <div class="stat-value">@Model.SurveyAnalytics.ResponseRateTrend%</div>
-            <div class="stat-label">Current Month Response Rate</div>
-            <div class="progress-bar">
-                <div class="progress-fill" style="width: @Model.SurveyAnalytics.ResponseRateTrend%; background: var(--success-gradient);"></div>
+        </div>
+
+        <!-- Metrics -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-head"><h3>Response Rate Trends</h3><div class="nav-live"><span class="dot"></span> Live</div></div>
+                <div class="metric-val">@Model.SurveyAnalytics.ResponseRateTrend%</div>
+                <div class="metric-lbl">Current Month Response Rate</div>
+                <div class="nex-progress"><div class="nex-progress-fill prog-green" style="width:@Model.SurveyAnalytics.ResponseRateTrend%"></div></div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-head"><h3>User Engagement</h3><span>Last 30 days</span></div>
+                <div class="metric-val">@Model.SurveyAnalytics.MonthlyActiveUsers</div>
+                <div class="metric-lbl">Active Participants</div>
+                <div class="nex-progress"><div class="nex-progress-fill prog-indigo" style="width:@(Math.Min(100, Math.Max(5, Model.SurveyAnalytics.MonthlyActiveUsers * 2)))%"></div></div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-head"><h3>Survey Quality</h3><span>Response quality</span></div>
+                <div class="metric-val">@Model.SurveyAnalytics.QualityScore/10</div>
+                <div class="metric-lbl">Quality Score</div>
+                <div class="nex-progress"><div class="nex-progress-fill prog-yellow" style="width:@(Model.SurveyAnalytics.QualityScore * 10)%"></div></div>
             </div>
         </div>
 
-        <div class="metric-card">
-            <div class="metric-header">
-                <h3>User Engagement</h3>
-                <span style="color: var(--text-secondary); font-size: 0.9rem;">Last 30 days</span>
+        <!-- Charts 2x2 -->
+        <div class="charts-grid">
+            <!-- 1: Responses Over Time (Clean Line) -->
+            <div class="chart-card">
+                <div class="chart-head">
+                    <h3><i class="fas fa-chart-line" style="color:var(--neon-indigo)"></i> Responses Over Time</h3>
+                    <span class="chart-tag indigo">30 Days</span>
+                </div>
+                <div class="chart-container">
+                    <canvas id="chart1"></canvas>
+                    <div class="chart-empty-overlay" id="empty1" style="display:none"><i class="fas fa-chart-line"></i><span>No response data yet</span></div>
+                </div>
             </div>
-            <div class="stat-value">@Model.SurveyAnalytics.MonthlyActiveUsers</div>
-            <div class="stat-label">Active Participants</div>
-            <div class="progress-bar">
-                <div class="progress-fill" style="width: @(Math.Min(100, Math.Max(5, Model.SurveyAnalytics.MonthlyActiveUsers * 2)))%; background: var(--primary-gradient);"></div>
+
+            <!-- 2: Responses per Survey (Simple Bar) -->
+            <div class="chart-card">
+                <div class="chart-head">
+                    <h3><i class="fas fa-chart-bar" style="color:var(--neon-blue)"></i> Questions vs Responses</h3>
+                    <span class="chart-tag blue">Per Survey</span>
+                </div>
+                <div class="chart-container">
+                    <canvas id="chart2"></canvas>
+                    <div class="chart-empty-overlay" id="empty2" style="display:none"><i class="fas fa-chart-bar"></i><span>No survey data yet</span></div>
+                </div>
+            </div>
+
+            <!-- 3: Completion Rate (Horizontal Bar) -->
+            <div class="chart-card">
+                <div class="chart-head">
+                    <h3><i class="fas fa-tasks" style="color:var(--neon-green)"></i> Completion Rate</h3>
+                    <span class="chart-tag green">Per Survey</span>
+                </div>
+                <div class="chart-container">
+                    <canvas id="chart3"></canvas>
+                    <div class="chart-empty-overlay" id="empty3" style="display:none"><i class="fas fa-tasks"></i><span>No completion data yet</span></div>
+                </div>
+            </div>
+
+            <!-- 4: Weekly Activity (Simple Bar) -->
+            <div class="chart-card">
+                <div class="chart-head">
+                    <h3><i class="fas fa-calendar-week" style="color:var(--neon-yellow)"></i> Weekly Activity</h3>
+                    <span class="chart-tag yellow">This Week</span>
+                </div>
+                <div class="chart-container">
+                    <canvas id="chart4"></canvas>
+                    <div class="chart-empty-overlay" id="empty4" style="display:none"><i class="fas fa-calendar-week"></i><span>No activity this week</span></div>
+                </div>
             </div>
         </div>
 
-        <div class="metric-card">
-            <div class="metric-header">
-                <h3>Survey Quality</h3>
-                <span style="color: var(--text-secondary); font-size: 0.9rem;">Response quality</span>
+        <!-- Recent Activity -->
+        <div class="activity-section">
+            <div class="activity-head">
+                <h3><i class="fas fa-bell"></i> Recent Activity</h3>
+                <span>Last 24 hours</span>
             </div>
-            <div class="stat-value">@Model.SurveyAnalytics.QualityScore/10</div>
-            <div class="stat-label">Quality Score</div>
-            <div class="progress-bar">
-                <div class="progress-fill" style="width: @(Model.SurveyAnalytics.QualityScore * 10)%; background: var(--warning-gradient);"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Charts Section -->
-    <div class="charts-grid">
-        <div class="chart-card">
-            <div class="chart-header">
-                <h3 class="chart-title">Survey Responses Over Time</h3>
-                <select class="chart-filter" id="response-time-filter">
-                    <option value="7">Last 7 days</option>
-                    <option value="30" selected>Last 30 days</option>
-                    <option value="90">Last 90 days</option>
-                </select>
-            </div>
-            <div class="chart-container">
-                <canvas id="responseChart"></canvas>
-            </div>
-        </div>
-
-        <div class="chart-card">
-            <div class="chart-header">
-                <h3 class="chart-title">Question Types Distribution</h3>
-                <span style="color: var(--text-secondary); font-size: 0.9rem;">All Surveys</span>
-            </div>
-            <div class="chart-container">
-                <canvas id="questionTypeChart"></canvas>
-            </div>
-        </div>
-
-        <div class="chart-card">
-            <div class="chart-header">
-                <h3 class="chart-title">Survey Performance</h3>
-                <span style="color: var(--text-secondary); font-size: 0.9rem;">Top performing</span>
-            </div>
-            <div class="chart-container">
-                <canvas id="performanceChart"></canvas>
-            </div>
-        </div>
-
-        <div class="chart-card">
-            <div class="chart-header">
-                <h3 class="chart-title">Response Rate Trends</h3>
-                <select class="chart-filter">
-                    <option>This week</option>
-                    <option selected>This month</option>
-                    <option>This quarter</option>
-                </select>
-            </div>
-            <div class="chart-container">
-                <canvas id="activityChart"></canvas>
-            </div>
-        </div>
-    </div>
-
-    <!-- Recent Activity -->
-    <!-- 🔥 UPDATED RECENT ACTIVITY SECTION with User-Specific Analytics Links -->
-    <!-- 🔥 UPDATED RECENT ACTIVITY SECTION with Distinct Activity Types -->
-    <div class="recent-activity">
-        <div class="activity-header">
-            <h3>Recent Activity</h3>
-            <span style="color: var(--text-secondary); font-size: 0.9rem;">Last 24 hours</span>
-        </div>
-        <div class="notification-list">
-            @if (Model.SurveyAnalytics.RecentActivity.Any())
-            {
-                @foreach (var activity in Model.SurveyAnalytics.RecentActivity.Take(5))
+            <div class="notif-list">
+                @if (Model.SurveyAnalytics.RecentActivity.Any())
                 {
-                    <div class="notification-item @(activity.Type == "creation" ? "creation-activity" : "response-activity")">
-                        <div class="notification-icon @(activity.Type == "creation" ? "creation-icon" : "response-icon")">
-                            <i class="@activity.Icon"></i>
-                        </div>
-                        <div class="notification-content">
-                            <div class="notification-title">@activity.Description</div>
-                            <div class="notification-meta">
-                                @activity.Timestamp.ToString("MMM dd, yyyy HH:mm")
-                                @(!string.IsNullOrEmpty(activity.UserName) ? $"by {activity.UserName}" : "")
-                                @if (!string.IsNullOrEmpty(activity.UserEmail))
+                    @foreach (var activity in Model.SurveyAnalytics.RecentActivity.Take(5))
+                    {
+                        <div class="notif-item @(activity.Type == "creation" ? "creation-activity" : "response-activity")">
+                            <div class="notif-icon @(activity.Type == "creation" ? "creation-icon" : activity.Type == "response" ? "response-icon" : "default-icon")">
+                                <i class="@activity.Icon"></i>
+                            </div>
+                            <div class="notif-body">
+                                <div class="notif-title">@activity.Description</div>
+                                <div class="notif-meta">
+                                    @activity.Timestamp.ToString("MMM dd, yyyy HH:mm")
+                                    @(!string.IsNullOrEmpty(activity.UserName) ? $"by {activity.UserName}" : "")
+                                    @if (!string.IsNullOrEmpty(activity.UserEmail))
+                                    { <span style="opacity:0.6">(@activity.UserEmail)</span> }
+                                </div>
+                            </div>
+                            <div class="notif-actions">
+                                @if (activity.Type == "response")
                                 {
-                                    <span class="text-muted">(@activity.UserEmail)</span>
+                                    @if (activity.ResponseId > 0)
+                                    { <a href="@Url.Action("ViewResponse", "UserResponse", new { area = "Admin", id = activity.ResponseId })" class="notif-btn btn-p"><i class="fas fa-eye"></i> View</a> }
+                                    @if (!string.IsNullOrEmpty(activity.UserEmail))
+                                    { <a href="@Url.Action("UserResponsesStatus", "UserResponseStatus", new { area = "Admin", userEmail = activity.UserEmail })" class="notif-btn btn-s"><i class="fas fa-user-chart"></i> Analytics</a> }
                                 }
+                                else if (activity.Type == "creation")
+                                {
+                                    @if (activity.QuestionnaireId > 0)
+                                    {
+                                        <a href="@Url.Action("Details", "Questionnaire", new { area = "Admin", id = activity.QuestionnaireId })" class="notif-btn btn-g"><i class="fas fa-info-circle"></i> View</a>
+                                        <a href="@Url.Action("Edit", "Questionnaire", new { area = "Admin", id = activity.QuestionnaireId })" class="notif-btn btn-w"><i class="fas fa-edit"></i> Edit</a>
+                                    }
+                                }
+                                else
+                                { <a href="@Url.Action("Index", "UserResponse", new { area = "Admin" })" class="notif-btn btn-p"><i class="fas fa-list"></i> View All</a> }
                             </div>
                         </div>
-                        <div class="notification-actions">
-                            @if (activity.Type == "response")
-                            {
-                                <!-- 📋 RESPONSE ACTIVITY ACTIONS -->
-                                @if (activity.ResponseId > 0)
-                                {
-                                    <a href="@Url.Action("ViewResponse", "UserResponse", new { area = "Admin", id = activity.ResponseId })"
-                                       class="notification-btn btn-primary"
-                                       title="View Response #@activity.ResponseId">
-                                        <i class="fas fa-eye"></i> View Response
-                                    </a>
-                                }
-
-                                @if (!string.IsNullOrEmpty(activity.UserEmail))
-                                {
-                                    <a href="@Url.Action("UserResponsesStatus", "UserResponseStatus", new { area = "Admin", userEmail = activity.UserEmail })"
-                                       class="notification-btn btn-secondary"
-                                       title="View all responses from @activity.UserEmail">
-                                        <i class="fas fa-user-chart"></i> User Analytics
-                                    </a>
-                                }
-                            }
-                            else if (activity.Type == "creation")
-                            {
-                                <!-- 🆕 SURVEY CREATION ACTIVITY ACTIONS -->
-                                @if (activity.QuestionnaireId > 0)
-                                {
-                                    <a href="@Url.Action("Details", "Questionnaire", new { area = "Admin", id = activity.QuestionnaireId })"
-                                       class="notification-btn btn-success"
-                                       title="View Survey Details">
-                                        <i class="fas fa-info-circle"></i> View Survey
-                                    </a>
-                                    <a href="@Url.Action("Edit", "Questionnaire", new { area = "Admin", id = activity.QuestionnaireId })"
-                                       class="notification-btn btn-warning"
-                                       title="Edit Survey">
-                                        <i class="fas fa-edit"></i> Edit
-                                    </a>
-                                }
-                            }
-                            else
-                            {
-                                <!-- 🔄 FALLBACK ACTIONS -->
-                                <a href="@Url.Action("Index", "UserResponse", new { area = "Admin" })"
-                                   class="notification-btn btn-primary">
-                                    <i class="fas fa-list"></i> View All
-                                </a>
-                            }
+                    }
+                }
+                else
+                {
+                    <div class="notif-item">
+                        <div class="notif-icon default-icon"><i class="fas fa-info-circle"></i></div>
+                        <div class="notif-body">
+                            <div class="notif-title">Welcome to your survey dashboard!</div>
+                            <div class="notif-meta">Start by creating your first questionnaire to see activity here</div>
+                        </div>
+                        <div class="notif-actions">
+                            <a href="@Url.Action("Create", "Questionnaire", new { area = "Admin" })" class="notif-btn btn-p"><i class="fas fa-plus"></i> Create Survey</a>
                         </div>
                     </div>
                 }
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="nex-table-card">
+            <div class="nex-table-head"><h3><i class="fas fa-table"></i> Active Questionnaires</h3></div>
+            @if (Model.SurveyAnalytics.TopSurveys.Any())
+            {
+                <div class="table-responsive">
+                    <table class="nex-table">
+                        <thead><tr><th style="width:40%">Survey</th><th style="width:10%">Questions</th><th style="width:10%">Responses</th><th style="width:18%">Completion</th><th style="width:10%">Status</th><th style="width:12%">Actions</th></tr></thead>
+                        <tbody>
+                            @foreach (var survey in Model.SurveyAnalytics.TopSurveys)
+                            {
+                                string initial = !string.IsNullOrEmpty(survey.Title) ? survey.Title.Substring(0, 1).ToUpper() : "S";
+                                <tr>
+                                    <td>
+                                        <div class="survey-cell">
+                                            <div class="survey-icon">@initial</div>
+                                            <div class="survey-info">
+                                                <div class="survey-title">@survey.Title</div>
+                                                <div class="survey-meta">
+                                                    <span class="survey-id-badge"><i class="fas fa-hashtag"></i> @survey.Id</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span class="nex-badge blue">@survey.QuestionCount</span></td>
+                                    <td><span class="nex-badge green">@survey.ResponseCount</span></td>
+                                    <td>
+                                        <div class="completion-cell">
+                                            <span class="completion-text" style="color:@(survey.CompletionRate >= 80 ? "var(--neon-green)" : survey.CompletionRate >= 50 ? "var(--neon-yellow)" : "var(--neon-red)")">@survey.CompletionRate%</span>
+                                            <div class="mini-bar"><div class="mini-fill" style="width:@(Math.Max(2, survey.CompletionRate))%;background:@(survey.CompletionRate >= 80 ? "var(--neon-green)" : survey.CompletionRate >= 50 ? "var(--neon-yellow)" : survey.CompletionRate > 0 ? "var(--neon-red)" : "var(--dark-600)")"></div></div>
+                                        </div>
+                                    </td>
+                                    <td><span class="nex-badge active"><i class="fas fa-circle" style="font-size:0.4rem"></i> Active</span></td>
+                                    <td>
+                                        <div class="act-btns">
+                                            <a href="@Url.Action("Details", "Questionnaire", new { id = survey.Id })" class="act-icon-btn" title="View"><i class="fas fa-eye"></i></a>
+                                            <a href="@Url.Action("Edit", "Questionnaire", new { id = survey.Id })" class="act-icon-btn" title="Edit"><i class="fas fa-edit"></i></a>
+                                            <a href="@Url.Action("Index", "UserResponse")" class="act-icon-btn" title="Responses"><i class="fas fa-download"></i></a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
             }
             else
             {
-                <div class="notification-item">
-                    <div class="notification-icon" style="background: var(--primary-gradient);">
-                        <i class="fas fa-info-circle"></i>
-                    </div>
-                    <div class="notification-content">
-                        <div class="notification-title">Welcome to your survey dashboard!</div>
-                        <div class="notification-meta">Start by creating your first questionnaire to see activity here</div>
-                    </div>
-                    <div class="notification-actions">
-                        <a href="@Url.Action("Create", "Questionnaire", new { area = "Admin" })"
-                           class="notification-btn btn-primary">
-                            <i class="fas fa-plus"></i> Create Survey
-                        </a>
-                    </div>
+                <div class="nex-empty">
+                    <div class="nex-empty-icon"><i class="fas fa-clipboard-list"></i></div>
+                    <h4>No surveys yet</h4>
+                    <p>Create your first survey to start collecting responses</p>
+                    <a href="@Url.Action("Create", "Questionnaire")" class="q-action primary"><i class="fas fa-plus"></i> Create Survey</a>
                 </div>
             }
         </div>
-    </div>
 
-    <style>
-        /* 🎨 DISTINCT STYLING FOR DIFFERENT ACTIVITY TYPES */
-
-        /* 📋 Response Activity Styling */
-        .response-activity {
-            border-left: 4px solid var(--success-gradient) !important;
-            background: linear-gradient(90deg, rgba(16, 185, 129, 0.05) 0%, rgba(255, 255, 255, 1) 10%);
-        }
-
-        .response-icon {
-            background: var(--success-gradient) !important;
-            animation: pulse-green 2s infinite;
-        }
-
-        /* 🆕 Survey Creation Activity Styling */
-        .creation-activity {
-            border-left: 4px solid var(--primary-gradient) !important;
-            background: linear-gradient(90deg, rgba(102, 126, 234, 0.05) 0%, rgba(255, 255, 255, 1) 10%);
-        }
-
-        .creation-icon {
-            background: var(--primary-gradient) !important;
-            animation: pulse-blue 2s infinite;
-        }
-
-        /* ✨ Animation Effects */
-        @@keyframes pulse-green {
-            0%, 100%
-
-        {
-            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
-        }
-
-        50% {
-            box-shadow: 0 0 0 5px rgba(16, 185, 129, 0);
-        }
-
-        }
-
-        @@keyframes pulse-blue {
-            0%, 100%
-
-        {
-            box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.4);
-        }
-
-        50% {
-            box-shadow: 0 0 0 5px rgba(102, 126, 234, 0);
-        }
-
-        }
-
-        /* 🔘 Additional Button Styles */
-        .btn-success {
-            background: var(--success-gradient);
-            color: white;
-            border: none;
-        }
-
-            .btn-success:hover {
-                color: white;
-                transform: translateY(-1px);
-                box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-            }
-
-        .btn-warning {
-            background: var(--warning-gradient);
-            color: white;
-            border: none;
-        }
-
-            .btn-warning:hover {
-                color: white;
-                transform: translateY(-1px);
-                box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
-            }
-
-        /* 📱 Mobile Responsive Adjustments */
-        @@media (max-width: 768px) {
-            .creation-activity, .response-activity
-
-        {
-            background: var(--surface);
-        }
-
-        .notification-actions {
-            flex-wrap: wrap;
-            gap: 0.5rem;
-        }
-
-        .notification-btn {
-            flex: 1;
-            min-width: 120px;
-            font-size: 0.8rem;
-            padding: 0.4rem 0.8rem;
-        }
-
-        }
-    </style>
-
-    <!-- Data Table - Full Width -->
-    <div class="data-table full-width-table">
-        <div class="table-header">
-            <h3>Active Questionnaires</h3>
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <a href="@Url.Action("Create", "Questionnaire")" class="q-action primary"><i class="fas fa-plus"></i> Create New Survey</a>
+            <a href="@Url.Action("Index", "UserResponse")" class="q-action ghost"><i class="fas fa-download"></i> Export Data</a>
+            <a href="@Url.Action("Index", "UserResponseStatus")" class="q-action ghost"><i class="fas fa-users"></i> Manage Response</a>
+            <a href="@Url.Action("Index", "Questionnaire")" class="q-action ghost"><i class="fas fa-list"></i> All Surveys</a>
         </div>
-        @if (Model.SurveyAnalytics.TopSurveys.Any())
-        {
-            <div class="table-responsive">
-                <table class="table w-100">
-                    <thead>
-                        <tr>
-                            <th style="width: 45%;">Title</th>
-                            <th style="width: 10%;">Questions</th>
-                            <th style="width: 10%;">Responses</th>
-                            <th style="width: 15%;">Completion Rate</th>
-                            <th style="width: 10%;">Status</th>
-                            <th style="width: 20%;">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var survey in Model.SurveyAnalytics.TopSurveys)
-                        {
-                            <tr>
-                                <td>
-                                    <div class="survey-title-cell">
-                                        <strong>@survey.Title</strong>
-                                        <small class="text-muted d-block">Survey ID: @survey.Id</small>
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="badge badge-info">@survey.QuestionCount</span>
-                                </td>
-                                <td>
-                                    <span class="badge badge-success">@survey.ResponseCount</span>
-                                </td>
-                                <td>
-                                    <div class="completion-cell">
-                                        <span class="completion-text">@survey.CompletionRate%</span>
-                                        <div class="mini-progress-bar">
-                                            <div class="mini-progress-fill" style="width: @survey.CompletionRate%; background: @(survey.CompletionRate >= 80 ? "#10b981" : survey.CompletionRate >= 50 ? "#f59e0b" : "#ef4444");"></div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="status-badge status-active">Active</span>
-                                </td>
-                                <td>
-                                    <div class="action-buttons">
-                                        <a href="@Url.Action("Details", "Questionnaire", new { id = survey.Id })" class="action-icon-btn" title="View Details">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                        <a href="@Url.Action("Edit", "Questionnaire", new { id = survey.Id })" class="action-icon-btn" title="Edit Survey">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <a href="@Url.Action("Index", "UserResponse")" class="action-icon-btn" title="View Responses">
-                                            <i class="fas fa-download"></i>
-                                        </a>
-                                       
-                                    </div>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        }
-        else
-        {
-            <div class="empty-state">
-                <i class="fas fa-clipboard-list"></i>
-                <h4>No surveys yet</h4>
-                <p>Create your first survey to start collecting responses and see analytics here.</p>
-                <a href="@Url.Action("Create", "Questionnaire")" class="action-btn btn-primary">
-                    <i class="fas fa-plus"></i>
-                    Create Your First Survey
-                </a>
-            </div>
-        }
-    </div>
-
-    <!-- Quick Actions -->
-    <div class="quick-actions">
-        <a href="@Url.Action("Create", "Questionnaire")" class="action-btn btn-primary">
-            <i class="fas fa-plus"></i>
-            Create New Survey
-        </a>
-        <a href="@Url.Action("Index", "UserResponse")" class="action-btn btn-secondary">
-            <i class="fas fa-download"></i>
-            Export Data
-        </a>
-        <a href="@Url.Action("Index", "UserResponseStatus")" class="action-btn btn-secondary">
-            <i class="fas fa-users"></i>
-            Manage Response
-        </a>
-        <a href="@Url.Action("Index", "Questionnaire")" class="action-btn btn-secondary">
-            <i class="fas fa-list"></i>
-            All Surveys
-        </a>
     </div>
 </div>
 
+
+
+
 @section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
     <script>
-        // Chart configurations and data
-        const chartOptions = {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: true,
-                    position: 'bottom'
-                }
-            }
-        };
+        Chart.defaults.color = '#94a3b8';
+        Chart.defaults.borderColor = 'rgba(255,255,255,0.05)';
+        Chart.defaults.font.family = "'JetBrains Mono', monospace";
+        Chart.defaults.font.size = 11;
 
-        // Global variables for charts
-        let responseChart, questionTypeChart, performanceChart, activityChart;
+        // Common options
+        var gc = 'rgba(255,255,255,0.05)';
+        var tc = '#64748b';
+        var intTicks = { color: tc, callback: function(v) { return Number.isInteger(v) ? v : ''; } };
+        var tip = { backgroundColor: 'rgba(15,23,42,0.9)', titleColor: '#e2e8f0', bodyColor: '#cbd5e1', borderColor: 'rgba(255,255,255,0.08)', borderWidth: 1, cornerRadius: 8, padding: 10 };
 
-        // Load real data and initialize charts
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeCharts();
+        function empty(id) { var e = document.getElementById(id); if (e) e.style.display = 'flex'; }
 
-            // Auto-refresh data every 30 seconds
-            setInterval(refreshRealtimeData, 30000);
+        document.addEventListener('DOMContentLoaded', function () {
+            loadChart1(); loadChart2(); loadChart3(); loadChart4();
 
-            // Animate progress bars on load
-            animateProgressBars();
+            document.querySelectorAll('.nex-progress-fill').forEach(function(b) {
+                var w = b.style.width; b.style.width = '0%';
+                setTimeout(function() { b.style.width = w; }, 400);
+            });
 
-            // Add hover effects to stat cards
-            addHoverEffects();
+            setInterval(function () {
+                fetch(document.getElementById('url-realtime').value)
+                    .then(function(r){return r.json();})
+                    .then(function(d) {
+                        var a = document.getElementById('total-questionnaires');
+                        var b = document.getElementById('total-responses');
+                        if (a) a.textContent = d.totalQuestionnaires;
+                        if (b) b.textContent = d.totalResponses;
+                    }).catch(function(){});
+            }, 30000);
         });
 
-        function initializeCharts() {
-            loadResponseTrends();
-            loadQuestionTypeDistribution();
-            loadSurveyPerformance();
-            loadActivityChart();
-        }
+        // ===== CHART 1: Responses Over Time — Clean Line with soft gradient =====
+        function loadChart1() {
+            fetch(document.getElementById('url-trends').value)
+                .then(function(r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+                .then(function(data) {
+                    if (!data || data.length === 0) { empty('empty1'); return; }
 
-        function loadResponseTrends() {
-            fetch('@Url.Action("GetResponseTrendsData", "Admin")')
-                .then(response => response.json())
-                .then(data => {
-                    const ctx = document.getElementById('responseChart').getContext('2d');
+                    var ctx = document.getElementById('chart1').getContext('2d');
+                    var grad = ctx.createLinearGradient(0, 0, 0, 260);
+                    grad.addColorStop(0, 'rgba(129,140,248,0.2)');
+                    grad.addColorStop(1, 'rgba(129,140,248,0)');
 
-                    if (responseChart) {
-                        responseChart.destroy();
-                    }
-
-                    responseChart = new Chart(ctx, {
+                    new Chart(ctx, {
                         type: 'line',
                         data: {
-                            labels: data.length > 0 ? data.map(d => new Date(d.date).toLocaleDateString()) : ['No data'],
-                            datasets: [{
-                                label: 'Survey Responses',
-                                data: data.length > 0 ? data.map(d => d.responses) : [0],
-                                borderColor: '#667eea',
-                                backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                                tension: 0.4,
-                                fill: true
-                            }]
-                        },
-                        options: {
-                            ...chartOptions,
-                            scales: {
-                                y: {
-                                    beginAtZero: true,
-                                    grid: { color: '#e2e8f0' }
-                                },
-                                x: {
-                                    grid: { color: '#e2e8f0' }
-                                }
-                            }
-                        }
-                    });
-                })
-                .catch(error => {
-                    console.error('Error loading response trends:', error);
-                    createFallbackResponseChart();
-                });
-        }
-
-        function loadQuestionTypeDistribution() {
-            fetch('@Url.Action("GetQuestionTypeDistribution", "Admin")')
-                .then(response => response.json())
-                .then(data => {
-                    const ctx = document.getElementById('questionTypeChart').getContext('2d');
-
-                    if (questionTypeChart) {
-                        questionTypeChart.destroy();
-                    }
-
-                    const hasData = data && data.length > 0;
-
-                    questionTypeChart = new Chart(ctx, {
-                        type: 'doughnut',
-                        data: {
-                            labels: hasData ? data.map(d => d.type) : ['No Data'],
-                            datasets: [{
-                                data: hasData ? data.map(d => d.count) : [1],
-                                backgroundColor: hasData ? [
-                                    '#667eea', '#764ba2', '#f093fb', '#f5576c',
-                                    '#4facfe', '#00f2fe', '#43e97b', '#38f9d7'
-                                ] : ['#e2e8f0'],
-                                borderWidth: 2,
-                                borderColor: '#ffffff'
-                            }]
-                        },
-                        options: {
-                            ...chartOptions,
-                            cutout: '60%'
-                        }
-                    });
-                })
-                .catch(error => {
-                    console.error('Error loading question type distribution:', error);
-                    createFallbackQuestionTypeChart();
-                });
-        }
-
-        function loadSurveyPerformance() {
-            fetch('@Url.Action("GetSurveyPerformanceData", "Admin")')
-                .then(response => response.json())
-                .then(data => {
-                    const ctx = document.getElementById('performanceChart').getContext('2d');
-
-                    if (performanceChart) {
-                        performanceChart.destroy();
-                    }
-
-                    const hasData = data && data.length > 0;
-
-                    performanceChart = new Chart(ctx, {
-                        type: 'bar',
-                        data: {
-                            labels: hasData ? data.map(d => d.name.length > 15 ? d.name.substring(0, 15) + '...' : d.name) : ['No Surveys'],
+                            labels: data.map(function(d) {
+                                return new Date(d.date || d.Date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                            }),
                             datasets: [{
                                 label: 'Responses',
-                                data: hasData ? data.map(d => d.responses) : [0],
-                                backgroundColor: 'rgba(102, 126, 234, 0.8)',
-                                borderColor: '#667eea',
+                                data: data.map(function(d) { return d.responses || d.Responses || d.count || d.Count || 0; }),
+                                borderColor: 'rgba(129,140,248,0.7)',
+                                backgroundColor: grad,
                                 borderWidth: 2,
-                                borderRadius: 4
+                                tension: 0.35,
+                                fill: true,
+                                pointBackgroundColor: 'rgba(129,140,248,0.8)',
+                                pointBorderColor: 'rgba(15,23,42,0.8)',
+                                pointBorderWidth: 2,
+                                pointRadius: 3,
+                                pointHoverRadius: 6,
+                                pointHoverBackgroundColor: '#818cf8'
                             }]
                         },
                         options: {
-                            ...chartOptions,
+                            responsive: true, maintainAspectRatio: false,
+                            plugins: { legend: { display: false }, tooltip: tip },
                             scales: {
-                                y: {
-                                    beginAtZero: true,
-                                    grid: { color: '#e2e8f0' }
-                                },
-                                x: {
-                                    grid: { color: '#e2e8f0' }
-                                }
+                                y: { beginAtZero: true, grid: { color: gc }, ticks: intTicks },
+                                x: { grid: { color: 'transparent' }, ticks: { color: tc, maxRotation: 45 } }
                             }
                         }
                     });
-                })
-                .catch(error => {
-                    console.error('Error loading survey performance:', error);
-                    createFallbackPerformanceChart();
-                });
+                }).catch(function(e) { console.error('Chart1:', e); empty('empty1'); });
         }
 
-        function loadActivityChart() {
-            fetch('@Url.Action("GetRealWeeklyActivity", "Admin")')
-                .then(response => response.json())
-                .then(data => {
-                    const ctx = document.getElementById('activityChart').getContext('2d');
+        // ===== CHART 2: Questions vs Responses per Survey — Grouped Bar =====
+        function loadChart2() {
+            fetch(document.getElementById('url-perf').value)
+                .then(function(r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+                .then(function(data) {
+                    if (!data || data.length === 0) { empty('empty2'); return; }
 
-                    if (activityChart) {
-                        activityChart.destroy();
-                    }
+                    var labels = data.map(function(d) {
+                        var n = d.name || d.Name || '';
+                        return n.length > 12 ? n.substring(0, 12) + '..' : n;
+                    });
 
-                    const hasData = data && data.length > 0;
-
-                    activityChart = new Chart(ctx, {
+                    new Chart(document.getElementById('chart2'), {
                         type: 'bar',
                         data: {
-                            labels: hasData ? data.map(d => d.day) : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-                            datasets: [{
-                                label: 'Response Rate %',
-                                data: hasData ? data.map(d => d.responseRate) : [0, 0, 0, 0, 0, 0, 0],
-                                backgroundColor: 'rgba(16, 185, 129, 0.8)',
-                                borderColor: '#10b981',
-                                borderWidth: 2,
-                                borderRadius: 4
-                            }]
+                            labels: labels,
+                            datasets: [
+                                {
+                                    label: 'Questions',
+                                    data: data.map(function(d) { return d.questions || d.Questions || 0; }),
+                                    backgroundColor: 'rgba(129,140,248,0.35)',
+                                    borderColor: 'rgba(129,140,248,0.6)',
+                                    borderWidth: 1,
+                                    borderRadius: 4,
+                                    barPercentage: 0.7,
+                                    categoryPercentage: 0.65
+                                },
+                                {
+                                    label: 'Responses',
+                                    data: data.map(function(d) { return d.responses || d.Responses || 0; }),
+                                    backgroundColor: 'rgba(52,211,153,0.35)',
+                                    borderColor: 'rgba(52,211,153,0.6)',
+                                    borderWidth: 1,
+                                    borderRadius: 4,
+                                    barPercentage: 0.7,
+                                    categoryPercentage: 0.65
+                                }
+                            ]
                         },
                         options: {
-                            ...chartOptions,
-                            scales: {
-                                y: {
-                                    beginAtZero: true,
-                                    max: 100,
-                                    grid: { color: '#e2e8f0' }
-                                },
-                                x: {
-                                    grid: { color: '#e2e8f0' }
-                                }
-                            },
+                            responsive: true, maintainAspectRatio: false,
                             plugins: {
-                                ...chartOptions.plugins,
-                                tooltip: {
-                                    callbacks: {
-                                        afterLabel: function(context) {
-                                            if (hasData) {
-                                                const dataPoint = data[context.dataIndex];
-                                                return [
-                                                    `Active Users: ${dataPoint.activeUsers}`,
-                                                    `Responses: ${dataPoint.responses}`
-                                                ];
-                                            }
-                                            return [];
-                                        }
-                                    }
-                                }
+                                legend: { display: true, position: 'bottom', labels: { color: '#94a3b8', usePointStyle: true, pointStyle: 'circle', padding: 12, font: { size: 10 } } },
+                                tooltip: tip
+                            },
+                            scales: {
+                                y: { beginAtZero: true, grid: { color: gc }, ticks: intTicks },
+                                x: { grid: { color: 'transparent' }, ticks: { color: tc, maxRotation: 45, font: { size: 9 } } }
                             }
                         }
                     });
-                })
-                .catch(error => {
-                    console.error('Error loading weekly activity:', error);
-                    createFallbackActivityChart();
-                });
+                }).catch(function(e) { console.error('Chart2:', e); empty('empty2'); });
         }
 
-        function refreshRealtimeData() {
-            fetch('@Url.Action("GetRealTimeAnalytics", "Admin")')
-                .then(response => response.json())
-                .then(data => {
-                    // Update real-time metrics
-                    const totalQuestionnaires = document.getElementById('total-questionnaires');
-                    const totalResponses = document.getElementById('total-responses');
+        // ===== CHART 3: Completion Rate — Horizontal Bar with % =====
+        function loadChart3() {
+            fetch(document.getElementById('url-perf').value)
+                .then(function(r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+                .then(function(data) {
+                    if (!data || data.length === 0) { empty('empty3'); return; }
 
-                    if (totalQuestionnaires) totalQuestionnaires.textContent = data.totalQuestionnaires;
-                    if (totalResponses) totalResponses.textContent = data.totalResponses;
+                    var labels = data.map(function(d) {
+                        var n = d.name || d.Name || '';
+                        return n.length > 15 ? n.substring(0, 15) + '..' : n;
+                    });
+                    var rates = data.map(function(d) { return d.completionRate || d.CompletionRate || 0; });
+                    var barColors = rates.map(function(r) {
+                        return r >= 80 ? 'rgba(52,211,153,0.35)' : r >= 50 ? 'rgba(251,191,36,0.35)' : 'rgba(248,113,113,0.35)';
+                    });
+                    var borderColors = rates.map(function(r) {
+                        return r >= 80 ? 'rgba(52,211,153,0.6)' : r >= 50 ? 'rgba(251,191,36,0.6)' : 'rgba(248,113,113,0.6)';
+                    });
 
-                    console.log('Dashboard data refreshed at ' + new Date().toLocaleTimeString());
-                })
-                .catch(error => console.error('Error refreshing data:', error));
+                    new Chart(document.getElementById('chart3'), {
+                        type: 'bar',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Completion %',
+                                data: rates,
+                                backgroundColor: barColors,
+                                borderColor: borderColors,
+                                borderWidth: 1,
+                                borderRadius: 4,
+                                barPercentage: 0.6
+                            }]
+                        },
+                        options: {
+                            indexAxis: 'y',
+                            responsive: true, maintainAspectRatio: false,
+                            plugins: { legend: { display: false }, tooltip: tip },
+                            scales: {
+                                x: { beginAtZero: true, max: 100, grid: { color: gc }, ticks: { color: tc, callback: function(v) { return v + '%'; } } },
+                                y: { grid: { color: 'transparent' }, ticks: { color: tc, font: { size: 9 } } }
+                            }
+                        }
+                    });
+                }).catch(function(e) { console.error('Chart3:', e); empty('empty3'); });
         }
 
-        function animateProgressBars() {
-            const progressBars = document.querySelectorAll('.progress-fill');
-            progressBars.forEach(bar => {
-                const width = bar.style.width;
-                bar.style.width = '0%';
-                setTimeout(() => {
-                    bar.style.width = width;
-                }, 500);
-            });
-        }
+        // ===== CHART 4: Weekly Activity — Simple Bars =====
+        function loadChart4() {
+            fetch(document.getElementById('url-weekly').value)
+                .then(function(r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+                .then(function(data) {
+                    var ok = data && data.length > 0;
+                    var active = ok && data.some(function(d) { return (d.responses || d.Responses || 0) > 0 || (d.activeUsers || d.ActiveUsers || 0) > 0; });
+                    if (!active) empty('empty4');
 
-        function addHoverEffects() {
-            const statCards = document.querySelectorAll('.stat-card');
-            statCards.forEach(card => {
-                card.addEventListener('mouseenter', function() {
-                    this.style.transform = 'translateY(-5px) scale(1.02)';
-                });
-                card.addEventListener('mouseleave', function() {
-                    this.style.transform = 'translateY(0) scale(1)';
-                });
-            });
+                    new Chart(document.getElementById('chart4'), {
+                        type: 'bar',
+                        data: {
+                            labels: ok ? data.map(function(d) { return d.day || d.Day; }) : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                            datasets: [
+                                {
+                                    label: 'Responses',
+                                    data: ok ? data.map(function(d) { return d.responses || d.Responses || 0; }) : [0,0,0,0,0,0,0],
+                                    backgroundColor: 'rgba(129,140,248,0.35)',
+                                    borderColor: 'rgba(129,140,248,0.6)',
+                                    borderWidth: 1,
+                                    borderRadius: 4,
+                                    barPercentage: 0.55,
+                                    categoryPercentage: 0.7
+                                },
+                                {
+                                    label: 'Active Users',
+                                    data: ok ? data.map(function(d) { return d.activeUsers || d.ActiveUsers || 0; }) : [0,0,0,0,0,0,0],
+                                    backgroundColor: 'rgba(52,211,153,0.35)',
+                                    borderColor: 'rgba(52,211,153,0.6)',
+                                    borderWidth: 1,
+                                    borderRadius: 4,
+                                    barPercentage: 0.55,
+                                    categoryPercentage: 0.7
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true, maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: true, position: 'bottom', labels: { color: '#94a3b8', usePointStyle: true, pointStyle: 'circle', padding: 12, font: { size: 10 } } },
+                                tooltip: tip
+                            },
+                            scales: {
+                                y: { beginAtZero: true, grid: { color: gc }, ticks: intTicks },
+                                x: { grid: { color: 'transparent' }, ticks: { color: tc } }
+                            }
+                        }
+                    });
+                }).catch(function(e) { console.error('Chart4:', e); empty('empty4'); });
         }
-
-        // Fallback chart functions
-        function createFallbackResponseChart() {
-            const ctx = document.getElementById('responseChart').getContext('2d');
-            responseChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-                    datasets: [{
-                        label: 'Survey Responses',
-                        data: [5, 12, 8, 15, 20, 8, 6],
-                        borderColor: '#667eea',
-                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                        tension: 0.4,
-                        fill: true
-                    }]
-                },
-                options: {
-                    ...chartOptions,
-                    scales: {
-                        y: { beginAtZero: true, grid: { color: '#e2e8f0' } },
-                        x: { grid: { color: '#e2e8f0' } }
-                    }
-                }
-            });
-        }
-
-        function createFallbackQuestionTypeChart() {
-            const ctx = document.getElementById('questionTypeChart').getContext('2d');
-            questionTypeChart = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Multiple Choice', 'Open Ended', 'Likert Scale', 'Text Input', 'Rating'],
-                    datasets: [{
-                        data: [35, 25, 20, 12, 8],
-                        backgroundColor: ['#667eea', '#764ba2', '#f093fb', '#f5576c', '#4facfe'],
-                        borderWidth: 2,
-                        borderColor: '#ffffff'
-                    }]
-                },
-                options: { ...chartOptions, cutout: '60%' }
-            });
-        }
-
-        function createFallbackPerformanceChart() {
-            const ctx = document.getElementById('performanceChart').getContext('2d');
-            performanceChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['Survey 1', 'Survey 2', 'Survey 3'],
-                    datasets: [{
-                        label: 'Responses',
-                        data: [25, 45, 30],
-                        backgroundColor: 'rgba(102, 126, 234, 0.8)',
-                        borderColor: '#667eea',
-                        borderWidth: 2,
-                        borderRadius: 4
-                    }]
-                },
-                options: {
-                    ...chartOptions,
-                    scales: {
-                        y: { beginAtZero: true, grid: { color: '#e2e8f0' } },
-                        x: { grid: { color: '#e2e8f0' } }
-                    }
-                }
-            });
-        }
-
-        function createFallbackActivityChart() {
-            const ctx = document.getElementById('activityChart').getContext('2d');
-            activityChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-                    datasets: [{
-                        label: 'Response Rate %',
-                        data: [45, 52, 48, 65, 72, 35, 28],
-                        backgroundColor: 'rgba(16, 185, 129, 0.8)',
-                        borderColor: '#10b981',
-                        borderWidth: 2,
-                        borderRadius: 4
-                    }]
-                },
-                options: {
-                    ...chartOptions,
-                    scales: {
-                        y: { beginAtZero: true, max: 100, grid: { color: '#e2e8f0' } },
-                        x: { grid: { color: '#e2e8f0' } }
-                    }
-                }
-            });
-        }
-
-        // Chart filter functionality
-        document.getElementById('response-time-filter')?.addEventListener('change', function() {
-            console.log('Filter changed to:', this.value, 'days');
-            loadResponseTrends();
-        });
     </script>
+
+    <input type="hidden" id="url-trends" value="@Url.Action("GetResponseTrendsData", "Admin", new { area = "Admin" })" />
+    <input type="hidden" id="url-perf" value="@Url.Action("GetSurveyPerformanceData", "Admin", new { area = "Admin" })" />
+    <input type="hidden" id="url-weekly" value="@Url.Action("GetRealWeeklyActivity", "Admin", new { area = "Admin" })" />
+    <input type="hidden" id="url-realtime" value="@Url.Action("GetRealTimeAnalytics", "Admin", new { area = "Admin" })" />
 }

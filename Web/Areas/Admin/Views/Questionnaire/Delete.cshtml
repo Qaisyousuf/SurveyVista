@@ -2,747 +2,307 @@
 
 @{
     ViewData["Title"] = "Delete Questionnaire";
+    var totalAnswers = Model.Questions?.Sum(q => q.Answers?.Count ?? 0) ?? 0;
+    var otherCount = Model.Questions?.Count(q => q.Answers != null && q.Answers.Any(a => a.IsOtherOption)) ?? 0;
+    var qCount = Model.Questions?.Count ?? 0;
 }
 
 <style>
-    /* Modern Design System */
     @@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-
     :root {
-        --danger-color: #ef4444;
-        --danger-light: #fca5a5;
-        --danger-dark: #dc2626;
-        --warning-color: #f59e0b;
-        --info-color: #06b6d4;
-        --success-color: #10b981;
-        --gray-50: #f8fafc;
-        --gray-100: #f1f5f9;
-        --gray-200: #e2e8f0;
-        --gray-300: #cbd5e1;
-        --gray-400: #94a3b8;
-        --gray-500: #64748b;
-        --gray-600: #475569;
-        --gray-700: #334155;
-        --gray-800: #1e293b;
-        --gray-900: #0f172a;
-        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-        --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-        --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
-        --border-radius-sm: 8px;
-        --border-radius-md: 12px;
-        --border-radius-lg: 16px;
-        --border-radius-xl: 24px;
+        --bg:#0f1923;--bg-card:#1a2332;--bg-elevated:#1f2b3d;--bg-input:#16202e;
+        --text-primary:#e8edf2;--text-secondary:#9ba8b9;--text-muted:#5e6e82;--text-faint:#3d4e63;
+        --teal:#33b3ae;--teal-soft:rgba(51,179,174,0.1);
+        --red:#ef4444;--red-soft:rgba(239,68,68,0.08);--red-medium:rgba(239,68,68,0.15);--red-border:rgba(239,68,68,0.3);--red-dark:#dc2626;
+        --amber:#f59e0b;--amber-soft:rgba(245,158,11,0.08);--amber-border:rgba(245,158,11,0.3);
+        --info:#06b6d4;--info-soft:rgba(6,182,212,0.1);--info-border:rgba(6,182,212,0.3);
+        --green:#10b981;--green-soft:rgba(16,185,129,0.1);--green-border:rgba(16,185,129,0.3);
+        --border:rgba(255,255,255,0.06);--border-light:rgba(255,255,255,0.04);
+        --shadow-sm:0 2px 8px rgba(0,0,0,0.25);--shadow-md:0 4px 16px rgba(0,0,0,0.3);--shadow-lg:0 8px 32px rgba(0,0,0,0.35);
+        --radius-sm:8px;--radius-md:12px;--radius-lg:16px;
+        --transition:all 0.2s cubic-bezier(0.4,0,0.2,1);
     }
-
-    * {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    }
-
-  
-
-    .container {
-        max-width: 1000px;
-    }
-
-    /* Main Delete Card */
-    .delete-card {
-        background: white;
-        border-radius: var(--border-radius-xl);
-        box-shadow: var(--shadow-2xl);
-        border: 1px solid var(--gray-200);
-        overflow: hidden;
-        position: relative;
-    }
-
-        .delete-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 6px;
-            background: linear-gradient(90deg, var(--danger-color), var(--danger-light), var(--danger-dark));
-        }
-
-    /* Header Section */
-    .delete-header {
-        background: linear-gradient(135deg, var(--danger-color) 0%, var(--danger-dark) 100%);
-        color: white;
-        padding: 3rem 2rem;
-        text-align: center;
-        position: relative;
-        overflow: hidden;
-    }
-
-        .delete-header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20"><defs><radialGradient id="a" cx="50%" cy="0%" r="100%"><stop offset="0%" stop-color="white" stop-opacity="0.1"/><stop offset="100%" stop-color="white" stop-opacity="0"/></radialGradient></defs><rect width="100" height="20" fill="url(%23a)"/></svg>');
-            opacity: 0.3;
-        }
-
-    .delete-icon {
-        background: rgba(255, 255, 255, 0.2);
-        width: 80px;
-        height: 80px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 1.5rem;
-        position: relative;
-        z-index: 1;
-    }
-
-        .delete-icon i {
-            font-size: 2.5rem;
-            color: white;
-        }
-
-    .delete-title {
-        font-size: 2.5rem;
-        font-weight: 800;
-        margin: 0 0 0.5rem;
-        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        position: relative;
-        z-index: 1;
-    }
-
-    .delete-subtitle {
-        font-size: 1.1rem;
-        opacity: 0.9;
-        font-weight: 500;
-        position: relative;
-        z-index: 1;
-    }
-
-    /* Content Section */
-    .delete-content {
-        padding: 3rem 2rem;
-    }
-
-    /* Warning Alert */
-    .warning-alert {
-        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-        border: 2px solid var(--warning-color);
-        border-radius: var(--border-radius-lg);
-        padding: 2rem;
-        margin-bottom: 2.5rem;
-        position: relative;
-    }
-
-        .warning-alert::before {
-            content: "⚠️";
-            position: absolute;
-            top: -15px;
-            left: 20px;
-            background: var(--warning-color);
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: var(--border-radius-md);
-            font-size: 1.2rem;
-            font-weight: 700;
-        }
-
-    .warning-content {
-        margin-top: 0.5rem;
-    }
-
-    .warning-title {
-        font-size: 1.25rem;
-        font-weight: 700;
-        color: var(--gray-800);
-        margin-bottom: 1rem;
-    }
-
-    .warning-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-    }
-
-        .warning-list li {
-            display: flex;
-            align-items: center;
-            margin-bottom: 0.75rem;
-            font-weight: 500;
-            color: var(--gray-700);
-        }
-
-            .warning-list li i {
-                color: var(--danger-color);
-                margin-right: 0.75rem;
-                font-size: 1.1rem;
-            }
-
-    /* Questionnaire Info */
-    .questionnaire-info {
-        background: linear-gradient(135deg, var(--gray-50) 0%, var(--gray-100) 100%);
-        border-radius: var(--border-radius-lg);
-        padding: 2rem;
-        margin-bottom: 2.5rem;
-        border: 1px solid var(--gray-200);
-    }
-
-    .info-header {
-        display: flex;
-        align-items: center;
-        margin-bottom: 1.5rem;
-    }
-
-    .info-icon {
-        background: var(--info-color);
-        color: white;
-        width: 48px;
-        height: 48px;
-        border-radius: var(--border-radius-md);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-right: 1rem;
-        font-size: 1.5rem;
-    }
-
-    .info-title {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: var(--gray-800);
-        margin: 0;
-    }
-
-    .info-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1.5rem;
-        margin-bottom: 1.5rem;
-    }
-
-    .info-item {
-        background: white;
-        padding: 1.25rem;
-        border-radius: var(--border-radius-md);
-        border: 1px solid var(--gray-200);
-        box-shadow: var(--shadow-sm);
-    }
-
-    .info-label {
-        font-size: 0.875rem;
-        font-weight: 600;
-        color: var(--gray-500);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-bottom: 0.5rem;
-    }
-
-    .info-value {
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: var(--gray-800);
-        word-break: break-word;
-    }
-
-    .info-description {
-        background: white;
-        padding: 1.25rem;
-        border-radius: var(--border-radius-md);
-        border: 1px solid var(--gray-200);
-        box-shadow: var(--shadow-sm);
-        max-height: 120px;
-        overflow-y: auto;
-    }
-
-    .info-description-content {
-        color: var(--gray-700);
-        line-height: 1.6;
-        font-size: 0.95rem;
-    }
-
-    /* Stats Section */
-    .stats-section {
-        background: white;
-        border-radius: var(--border-radius-lg);
-        padding: 2rem;
-        margin-bottom: 2.5rem;
-        border: 1px solid var(--gray-200);
-        box-shadow: var(--shadow-md);
-    }
-
-    .stats-title {
-        font-size: 1.25rem;
-        font-weight: 700;
-        color: var(--gray-800);
-        margin-bottom: 1.5rem;
-        display: flex;
-        align-items: center;
-    }
-
-        .stats-title i {
-            margin-right: 0.75rem;
-            color: var(--info-color);
-        }
-
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: 1rem;
-    }
-
-    .stat-card {
-        background: linear-gradient(135deg, var(--gray-50) 0%, var(--gray-100) 100%);
-        padding: 1.5rem;
-        border-radius: var(--border-radius-md);
-        text-align: center;
-        border: 1px solid var(--gray-200);
-        transition: all 0.3s ease;
-    }
-
-        .stat-card:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
-        }
-
-    .stat-number {
-        font-size: 2rem;
-        font-weight: 800;
-        color: var(--danger-color);
-        display: block;
-        margin-bottom: 0.5rem;
-    }
-
-    .stat-label {
-        font-size: 0.875rem;
-        font-weight: 600;
-        color: var(--gray-600);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    /* Action Buttons */
-    .action-section {
-        background: var(--gray-50);
-        padding: 2.5rem 2rem;
-        border-top: 1px solid var(--gray-200);
-    }
-
-    .action-buttons {
-        display: flex;
-        gap: 1rem;
-        justify-content: center;
-        flex-wrap: wrap;
-    }
-
-    .btn {
-        border-radius: var(--border-radius-md);
-        font-weight: 600;
-        padding: 1rem 2rem;
-        font-size: 1rem;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        border: none;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.75rem;
-        box-shadow: var(--shadow-md);
-        position: relative;
-        overflow: hidden;
-        min-width: 140px;
-        justify-content: center;
-    }
-
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.5s;
-        }
-
-        .btn:hover::before {
-            left: 100%;
-        }
-
-    .btn-danger-custom {
-        background: linear-gradient(135deg, var(--danger-color) 0%, var(--danger-dark) 100%);
-        color: white;
-    }
-
-        .btn-danger-custom:hover {
-            background: linear-gradient(135deg, var(--danger-dark) 0%, #b91c1c 100%);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-xl);
-            color: white;
-        }
-
-    .btn-secondary-custom {
-        background: linear-gradient(135deg, var(--gray-500) 0%, var(--gray-600) 100%);
-        color: white;
-    }
-
-        .btn-secondary-custom:hover {
-            background: linear-gradient(135deg, var(--gray-600) 0%, var(--gray-700) 100%);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-xl);
-            color: white;
-        }
-
-    /* Enhanced Modal */
-    .modal-content {
-        border-radius: var(--border-radius-xl);
-        border: none;
-        box-shadow: var(--shadow-2xl);
-        overflow: hidden;
-    }
-
-    .modal-header-danger {
-        background: linear-gradient(135deg, var(--danger-color) 0%, var(--danger-dark) 100%);
-        color: white;
-        padding: 2rem 2.5rem;
-        border: none;
-        text-align: center;
-    }
-
-    .modal-title-custom {
-        font-size: 1.5rem;
-        font-weight: 700;
-        margin: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.75rem;
-    }
-
-    .modal-body-custom {
-        padding: 2.5rem;
-        text-align: center;
-    }
-
-    .modal-message {
-        font-size: 1.25rem;
-        color: var(--gray-700);
-        margin-bottom: 1.5rem;
-        line-height: 1.6;
-    }
-
-    .modal-warning {
-        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-        border: 1px solid var(--warning-color);
-        border-radius: var(--border-radius-md);
-        padding: 1.5rem;
-        margin-bottom: 1.5rem;
-    }
-
-    .modal-footer-custom {
-        padding: 2rem 2.5rem;
-        border: none;
-        background: var(--gray-50);
-        display: flex;
-        gap: 1rem;
-        justify-content: center;
-    }
-
-    /* Success State */
-    .success-message {
-        color: var(--success-color);
-        font-size: 1.5rem;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.75rem;
-    }
-
-    /* Loading State */
-    .btn.loading {
-        opacity: 0.7;
-        pointer-events: none;
-    }
-
-        .btn.loading::after {
-            content: "";
-            width: 18px;
-            height: 18px;
-            margin-left: 0.75rem;
-            border: 2px solid transparent;
-            border-top-color: currentColor;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-    @@keyframes spin {
-        0%
-
-    {
-        transform: rotate(0deg);
-    }
-
-    100% {
-        transform: rotate(360deg);
-    }
-
-    }
-
-    /* Responsive Design */
-    @@media (max-width: 768px) {
-        .container
-
-    {
-        padding: 0 1rem;
-    }
-
-    .delete-content {
-        padding: 2rem 1.5rem;
-    }
-
-    .info-grid {
-        grid-template-columns: 1fr;
-        gap: 1rem;
-    }
-
-    .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    .action-buttons {
-        flex-direction: column;
-    }
-
-    .btn {
-        width: 100%;
-    }
-
-    }
-
-    /* Animations */
-    .fade-in {
-        animation: fadeIn 0.6s ease-out;
-    }
-
-    @@keyframes fadeIn {
-        from
-
-    {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-
+    @@keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    @@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.6}}
+    @@keyframes shake{0%,100%{transform:translateX(0)}10%,30%,50%,70%,90%{transform:translateX(-4px)}20%,40%,60%,80%{transform:translateX(4px)}}
+    *{box-sizing:border-box}
+
+    .delete-page{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);min-height:100vh;padding:32px 40px 80px;-webkit-font-smoothing:antialiased;color:var(--text-primary)}
+
+    /* ===== PAGE HEADER ===== */
+    .page-top{max-width:900px;margin:0 auto 28px;animation:slideUp .5s ease both}
+    .page-breadcrumb{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-muted);margin-bottom:16px}
+    .page-breadcrumb a{color:var(--text-muted);text-decoration:none;transition:var(--transition)}
+    .page-breadcrumb a:hover{color:var(--teal)}
+    .page-breadcrumb .sep{color:var(--text-faint)}
+    .page-title-row{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+    .page-title{font-size:28px;font-weight:700;color:var(--text-primary);letter-spacing:-0.5px;margin:0;display:flex;align-items:center;gap:14px}
+    .page-title-icon{width:44px;height:44px;border-radius:var(--radius-md);background:linear-gradient(135deg,var(--red),var(--red-dark));display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff;box-shadow:0 4px 20px rgba(239,68,68,0.3)}
+    .btn-back{display:inline-flex;align-items:center;gap:8px;padding:10px 22px;background:var(--bg-card);color:var(--text-secondary);border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-weight:500;font-family:inherit;cursor:pointer;transition:var(--transition);text-decoration:none}
+    .btn-back:hover{background:var(--bg-elevated);border-color:rgba(255,255,255,0.1);color:var(--text-primary);text-decoration:none}
+
+    /* ===== DANGER BANNER ===== */
+    .danger-banner{max-width:900px;margin:0 auto 24px;background:linear-gradient(135deg,rgba(239,68,68,0.08),rgba(220,38,38,0.04));border:1.5px solid var(--red-border);border-radius:var(--radius-lg);padding:24px 28px;animation:slideUp .5s ease .06s both;position:relative;overflow:hidden}
+    .danger-banner::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--red),var(--red-dark),var(--red))}
+    .danger-banner-inner{display:flex;align-items:flex-start;gap:16px}
+    .danger-banner-icon{width:44px;height:44px;border-radius:var(--radius-md);background:var(--red-medium);display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--red);flex-shrink:0}
+    .danger-banner-content h3{font-size:16px;font-weight:700;color:var(--red);margin:0 0 10px}
+    .danger-list{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .danger-list li{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-secondary);font-weight:500}
+    .danger-list li i{color:var(--red);font-size:12px;flex-shrink:0}
+
+    /* ===== INFO CARD ===== */
+    .info-card{max-width:900px;margin:0 auto 24px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow-sm);animation:slideUp .5s ease .12s both;transition:var(--transition)}
+    .info-card:hover{box-shadow:var(--shadow-md);border-color:rgba(255,255,255,0.08)}
+    .info-card-header{display:flex;align-items:center;gap:12px;padding:22px 28px;border-bottom:1px solid var(--border-light)}
+    .info-card-icon{width:36px;height:36px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff}
+    .info-card-icon.info-blue{background:var(--info)}
+    .info-card-title{font-size:16px;font-weight:700;color:var(--text-primary);margin:0}
+    .info-card-body{padding:24px 28px}
+
+    .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+    .detail-item{padding:16px 20px;background:var(--bg-elevated);border:1px solid var(--border-light);border-radius:var(--radius-sm);transition:var(--transition)}
+    .detail-item:hover{border-color:rgba(255,255,255,0.08)}
+    .detail-item.full{grid-column:1/-1}
+    .detail-label{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+    .detail-label i{font-size:12px;color:var(--teal)}
+    .detail-value{font-size:15px;font-weight:600;color:var(--text-primary);line-height:1.4;word-break:break-word}
+    .detail-value.id-val{color:var(--teal);font-family:'JetBrains Mono',monospace}
+    .detail-value.desc-val{font-size:14px;font-weight:400;color:var(--text-secondary);line-height:1.7}
+    .empty-desc{color:var(--text-faint);font-style:italic}
+
+    /* ===== STATS BAR ===== */
+    .stats-bar{max-width:900px;margin:0 auto 24px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px;animation:slideUp .5s ease .18s both}
+    .stat-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:20px 24px;text-align:center;transition:var(--transition);position:relative;overflow:hidden}
+    .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:3px 3px 0 0}
+    .stat-card:nth-child(1)::before{background:var(--red)}
+    .stat-card:nth-child(2)::before{background:var(--amber)}
+    .stat-card:nth-child(3)::before{background:var(--info)}
+    .stat-card:hover{box-shadow:var(--shadow-sm);border-color:rgba(255,255,255,0.1);transform:translateY(-2px)}
+    .stat-number{font-size:32px;font-weight:800;line-height:1;margin-bottom:6px}
+    .stat-card:nth-child(1) .stat-number{color:var(--red)}
+    .stat-card:nth-child(2) .stat-number{color:var(--amber)}
+    .stat-card:nth-child(3) .stat-number{color:var(--info)}
+    .stat-label{font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.6px}
+
+    /* ===== ACTION ROW ===== */
+    .action-row{max-width:900px;margin:0 auto;animation:slideUp .5s ease .24s both}
+    .action-card{background:var(--bg-card);border:1.5px solid var(--red-border);border-radius:var(--radius-lg);padding:28px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+    .action-info{display:flex;align-items:center;gap:14px}
+    .action-icon{width:48px;height:48px;border-radius:var(--radius-md);background:var(--red-medium);display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--red);flex-shrink:0;animation:pulse 2s ease infinite}
+    .action-text h3{font-size:16px;font-weight:700;color:var(--text-primary);margin:0 0 4px}
+    .action-text p{font-size:13px;color:var(--text-muted);margin:0}
+    .action-btns{display:flex;gap:12px}
+
+    .btn-delete{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;background:linear-gradient(135deg,var(--red),var(--red-dark));color:#fff;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;transition:var(--transition);box-shadow:0 4px 20px rgba(239,68,68,0.25);text-decoration:none}
+    .btn-delete:hover{background:linear-gradient(135deg,var(--red-dark),#b91c1c);transform:translateY(-2px);box-shadow:0 8px 28px rgba(239,68,68,0.35);color:#fff;text-decoration:none}
+    .btn-delete.loading{opacity:0.7;pointer-events:none}
+    .btn-delete.loading::after{content:'';width:16px;height:16px;margin-left:8px;border:2px solid transparent;border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite}
+    @@keyframes spin{to{transform:rotate(360deg)}}
+
+    .btn-cancel{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;background:var(--bg-elevated);color:var(--text-secondary);border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;transition:var(--transition);text-decoration:none}
+    .btn-cancel:hover{background:var(--bg-hover);border-color:rgba(255,255,255,0.1);color:var(--text-primary);text-decoration:none}
+
+    /* ===== MODAL ===== */
+    .modal-content{background:var(--bg-card) !important;border:1px solid var(--border) !important;border-radius:var(--radius-lg) !important;box-shadow:0 25px 60px rgba(0,0,0,0.5) !important;overflow:hidden}
+    .modal-backdrop.show{backdrop-filter:blur(4px)}
+
+    .m-header{background:linear-gradient(135deg,var(--red),var(--red-dark));padding:24px 28px;border:none;display:flex;align-items:center;gap:12px}
+    .m-header-icon{width:40px;height:40px;border-radius:10px;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff}
+    .m-header h5{font-size:18px;font-weight:700;color:#fff;margin:0}
+
+    .m-body{padding:28px;text-align:center}
+    .m-body p.m-msg{font-size:16px;color:var(--text-primary);margin-bottom:20px;line-height:1.6;font-weight:500}
+    .m-warning{background:var(--amber-soft);border:1px solid var(--amber-border);border-radius:var(--radius-sm);padding:16px;margin-bottom:0;display:flex;align-items:center;gap:10px;font-size:13px;color:var(--amber);font-weight:600}
+    .m-warning i{font-size:18px;flex-shrink:0}
+
+    .m-footer{padding:20px 28px;border-top:1px solid var(--border);display:flex;gap:12px;justify-content:flex-end}
+
+    .m-success{display:flex;align-items:center;justify-content:center;gap:10px;font-size:18px;font-weight:700;color:var(--green)}
+
+    /* ===== RESPONSIVE ===== */
+    @@media(max-width:768px){
+        .delete-page{padding:16px}
+        .detail-grid{grid-template-columns:1fr}
+        .stats-bar{grid-template-columns:1fr}
+        .danger-list{grid-template-columns:1fr}
+        .action-card{flex-direction:column;text-align:center}
+        .action-info{flex-direction:column}
+        .action-btns{flex-direction:column;width:100%}
+        .action-btns .btn-delete,.action-btns .btn-cancel{width:100%;justify-content:center}
+        .page-title-row{flex-direction:column;align-items:flex-start}
     }
 </style>
 
-<div class="container">
-    <div class="delete-card fade-in">
-        <!-- Header Section -->
-        <div class="delete-header">
-            <div class="delete-icon">
-                <i class="bi bi-trash3-fill"></i>
-            </div>
-            <h1 class="delete-title">Delete Questionnaire</h1>
-            <p class="delete-subtitle">This action will permanently remove this questionnaire and all associated data</p>
+<div class="delete-page">
+
+    <!-- Page Header -->
+    <div class="page-top">
+        <div class="page-breadcrumb">
+            <a href="@Url.Action("Index", "Questionnaire")">Questionnaires</a>
+            <span class="sep">/</span>
+            <span>Delete</span>
         </div>
-
-        <!-- Content Section -->
-        <div class="delete-content">
-            <!-- Warning Alert -->
-            <div class="warning-alert">
-                <div class="warning-content">
-                    <h3 class="warning-title">⚠️ Critical Warning</h3>
-                    <ul class="warning-list">
-                        <li><i class="bi bi-x-circle-fill"></i>This action cannot be undone</li>
-                        <li><i class="bi bi-x-circle-fill"></i>All questions and answers will be permanently deleted</li>
-                        <li><i class="bi bi-x-circle-fill"></i>Any survey responses will be lost forever</li>
-                        <li><i class="bi bi-x-circle-fill"></i>Associated data and analytics will be removed</li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- Questionnaire Information -->
-            <div class="questionnaire-info">
-                <div class="info-header">
-                    <div class="info-icon">
-                        <i class="bi bi-file-text"></i>
-                    </div>
-                    <h2 class="info-title">Questionnaire Details</h2>
-                </div>
-
-                <div class="info-grid">
-                    <div class="info-item">
-                        <div class="info-label">Title</div>
-                        <div class="info-value">@Model.Title</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label">Questionnaire ID</div>
-                        <div class="info-value">#@Model.Id</div>
-                    </div>
-                </div>
-
-                <div class="info-description">
-                    <div class="info-label">Description</div>
-                    <div class="info-description-content">
-                        @if (!string.IsNullOrEmpty(Model.Description))
-                        {
-                            @Html.Raw(Model.Description)
-                        }
-                        else
-                        {
-                            <em class="text-muted">No description provided</em>
-                        }
-                    </div>
-                </div>
-            </div>
-
-            <!-- Statistics -->
-            <div class="stats-section">
-                <h3 class="stats-title">
-                    <i class="bi bi-graph-up"></i>
-                    Content Statistics
-                </h3>
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <span class="stat-number">@Model.Questions.Count</span>
-                        <span class="stat-label">Questions</span>
-                    </div>
-                    <div class="stat-card">
-                        <span class="stat-number">@Model.Questions.Sum(q => q.Answers.Count)</span>
-                        <span class="stat-label">Total Answers</span>
-                    </div>
-                    <div class="stat-card">
-                        <span class="stat-number">@Model.Questions.Count(q => q.Answers.Any(a => a.IsOtherOption))</span>
-                        <span class="stat-label">Other Options</span>
-                    </div>
-                </div>
-            </div>
+        <div class="page-title-row">
+            <h1 class="page-title">
+                <span class="page-title-icon"><i class="bi bi-trash3-fill"></i></span>
+                Delete Questionnaire
+            </h1>
+            <a href="@Url.Action("Index", "Questionnaire")" class="btn-back"><i class="bi bi-arrow-left"></i> Back to List</a>
         </div>
+    </div>
 
-        <!-- Action Section -->
-        <div class="action-section">
-            <div class="action-buttons">
-                <button type="button" class="btn btn-danger-custom" data-bs-toggle="modal" data-bs-target="#deleteModal">
-                    <i class="bi bi-trash3-fill"></i>
-                    Delete Questionnaire
-                </button>
-                <a asp-action="Index" class="btn btn-secondary-custom">
-                    <i class="bi bi-arrow-left"></i>
-                    Back to List
-                </a>
+    <!-- Danger Banner -->
+    <div class="danger-banner">
+        <div class="danger-banner-inner">
+            <div class="danger-banner-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
+            <div class="danger-banner-content">
+                <h3>This action is permanent and cannot be undone</h3>
+                <ul class="danger-list">
+                    <li><i class="bi bi-x-circle-fill"></i> All questions will be permanently deleted</li>
+                    <li><i class="bi bi-x-circle-fill"></i> All answers will be removed</li>
+                    <li><i class="bi bi-x-circle-fill"></i> Survey responses will be lost forever</li>
+                    <li><i class="bi bi-x-circle-fill"></i> Associated analytics will be erased</li>
+                </ul>
             </div>
         </div>
     </div>
+
+    <!-- Questionnaire Info -->
+    <div class="info-card">
+        <div class="info-card-header">
+            <div class="info-card-icon info-blue"><i class="bi bi-file-text-fill"></i></div>
+            <h2 class="info-card-title">Questionnaire Details</h2>
+        </div>
+        <div class="info-card-body">
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <div class="detail-label"><i class="bi bi-hash"></i> ID</div>
+                    <div class="detail-value id-val">#@Model.Id</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label"><i class="bi bi-card-heading"></i> Title</div>
+                    <div class="detail-value">@Model.Title</div>
+                </div>
+                <div class="detail-item full">
+                    <div class="detail-label"><i class="bi bi-card-text"></i> Description</div>
+                    @if (!string.IsNullOrEmpty(Model.Description))
+                    {
+                        <div class="detail-value desc-val">@Html.Raw(Model.Description)</div>
+                    }
+                    else
+                    {
+                        <div class="detail-value empty-desc">No description provided</div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-bar">
+        <div class="stat-card">
+            <div class="stat-number">@qCount</div>
+            <div class="stat-label">Questions</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">@totalAnswers</div>
+            <div class="stat-label">Total Answers</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">@otherCount</div>
+            <div class="stat-label">Other Options</div>
+        </div>
+    </div>
+
+    <!-- Action Row -->
+    <div class="action-row">
+        <div class="action-card">
+            <div class="action-info">
+                <div class="action-icon"><i class="bi bi-trash3"></i></div>
+                <div class="action-text">
+                    <h3>Ready to delete this questionnaire?</h3>
+                    <p>This will permanently remove all @qCount questions and @totalAnswers answers</p>
+                </div>
+            </div>
+            <div class="action-btns">
+                <a href="@Url.Action("Index", "Questionnaire")" class="btn-cancel"><i class="bi bi-arrow-left"></i> Cancel</a>
+                <button type="button" class="btn-delete" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                    <i class="bi bi-trash3-fill"></i> Delete Questionnaire
+                </button>
+            </div>
+        </div>
+    </div>
+
 </div>
 
-<!-- Enhanced Delete Confirmation Modal -->
+<!-- Delete Confirmation Modal -->
 <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header-danger">
-                <h5 class="modal-title-custom" id="deleteModalLabel">
-                    <i class="bi bi-exclamation-triangle-fill"></i>
-                    Confirm Deletion
-                </h5>
+            <div class="m-header">
+                <div class="m-header-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
+                <h5 id="deleteModalLabel">Confirm Deletion</h5>
             </div>
-            <div class="modal-body-custom">
-                <p class="modal-message" id="deleteMessage">
-                    Are you absolutely sure you want to delete this questionnaire?
-                </p>
-                <div class="modal-warning">
+            <div class="m-body">
+                <p class="m-msg" id="deleteMessage">Are you absolutely sure you want to delete this questionnaire?</p>
+                <div class="m-warning" id="modalWarning">
                     <i class="bi bi-shield-exclamation"></i>
-                    <strong>This action is irreversible!</strong> Once deleted, this questionnaire and all its data cannot be recovered.
+                    <span>This action is irreversible. All data will be permanently lost.</span>
                 </div>
             </div>
-            <div class="modal-footer-custom">
-                <button type="button" class="btn btn-secondary-custom" data-bs-dismiss="modal">
-                    <i class="bi bi-x"></i>
-                    Cancel
-                </button>
-                <button type="button" class="btn btn-danger-custom" id="deleteButton">
-                    <i class="bi bi-trash3-fill"></i>
-                    Yes, Delete Forever
-                </button>
+            <div class="m-footer" id="modalFooter">
+                <button type="button" class="btn-cancel" data-bs-dismiss="modal"><i class="bi bi-x"></i> Cancel</button>
+                <button type="button" class="btn-delete" id="deleteButton"><i class="bi bi-trash3-fill"></i> Yes, Delete Forever</button>
             </div>
         </div>
     </div>
 </div>
 
 @section Scripts {
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ckeditor/4.11.4/ckeditor.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
-
     <script>
         $(document).ready(function () {
             var itemId = @Model.Id;
 
-            // Enhanced delete button click event
             $('#deleteButton').on('click', function () {
                 var $btn = $(this);
-                var $modal = $('#deleteModal');
-
-                // Add loading state
                 $btn.addClass('loading').prop('disabled', true);
 
-                // Make AJAX request to delete the item
                 $.ajax({
                     url: '/admin/Questionnaire/Delete/' + itemId,
                     type: 'POST',
                     success: function (result) {
-                        // Update modal content to show success
-                        $('.modal-header-danger').removeClass('modal-header-danger').css({
-                            'background': 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
-                        });
+                        // Success state
+                        $('.m-header').css('background', 'linear-gradient(135deg, #10b981, #059669)');
+                        $('.m-header h5').text('Deleted Successfully');
+                        $('.m-header-icon i').removeClass('bi-exclamation-triangle-fill').addClass('bi-check-circle-fill');
+                        $('#deleteMessage').html('<div class="m-success"><i class="bi bi-check-circle-fill"></i> Questionnaire deleted successfully!</div>');
+                        $('#modalWarning').hide();
+                        $('#modalFooter').hide();
 
-                        $('.modal-title-custom').html('<i class="bi bi-check-circle-fill"></i> Success');
-
-                        $('#deleteMessage').html('<div class="success-message"><i class="bi bi-check-circle-fill"></i>Questionnaire deleted successfully!</div>');
-
-                        $('.modal-warning').hide();
-                        $('.modal-footer-custom').hide();
-
-                        // Automatically redirect after showing success
                         setTimeout(function () {
-                            $modal.modal('hide');
+                            $('#deleteModal').modal('hide');
                             window.location.href = '/admin/Questionnaire/Index';
                         }, 2000);
                     },
-                    error: function (xhr, status, error) {
-                        // Remove loading state
+                    error: function () {
                         $btn.removeClass('loading').prop('disabled', false);
-
-                        // Show error message
-                        $('#deleteMessage').html('<div class="text-danger"><i class="bi bi-exclamation-triangle-fill"></i> Failed to delete questionnaire. Please try again.</div>');
-
-                        // Auto-hide error message after 3 seconds
+                        $('#deleteMessage').html('<span style="color:var(--red)"><i class="bi bi-exclamation-triangle-fill"></i> Failed to delete. Please try again.</span>');
                         setTimeout(function () {
-                            $modal.modal('hide');
+                            $('#deleteModal').modal('hide');
                         }, 3000);
                     }
                 });
             });
 
-            // Reset modal when hidden
             $('#deleteModal').on('hidden.bs.modal', function () {
-                // Reset button state
                 $('#deleteButton').removeClass('loading').prop('disabled', false);
-
-                // Reset modal content if needed
-                $('.modal-header-danger').css({
-                    'background': 'linear-gradient(135deg, var(--danger-color) 0%, var(--danger-dark) 100%)'
-                });
-
-                $('.modal-title-custom').html('<i class="bi bi-exclamation-triangle-fill"></i> Confirm Deletion');
+                $('.m-header').css('background', 'linear-gradient(135deg, #ef4444, #dc2626)');
+                $('.m-header h5').text('Confirm Deletion');
+                $('.m-header-icon i').removeClass('bi-check-circle-fill').addClass('bi-exclamation-triangle-fill');
                 $('#deleteMessage').text('Are you absolutely sure you want to delete this questionnaire?');
-                $('.modal-warning').show();
-                $('.modal-footer-custom').show();
+                $('#modalWarning').show();
+                $('#modalFooter').show();
             });
         });
     </script>

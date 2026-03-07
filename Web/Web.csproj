@@ -36,6 +36,7 @@
 
   <ItemGroup>
     <Folder Include="NewFolder\" />
+    <Folder Include="wwwroot\uploads\questionimages\" />
   </ItemGroup>
 
 </Project>

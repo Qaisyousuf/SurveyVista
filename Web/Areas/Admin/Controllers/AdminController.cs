@@ -1,16 +1,18 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Model;
-using Data;
 using Services.Interaces;
 using System.Security.Claims;
+using Web.Authorization;
 using Web.ViewModel.DashboardVM;
 
 namespace Web.Areas.Admin.Controllers
 {
-    [Authorize(Roles = "Admin,Demo")]
+    [Area("Admin")]
+    [HasPermission(Permissions.Dashboard.View)]
     public class AdminController : Controller
     {
         private readonly SignInManager<ApplicationUser> _signInManager;
@@ -533,16 +535,20 @@ namespace Web.Areas.Admin.Controllers
         {
             var thirtyDaysAgo = DateTime.Now.AddDays(-30);
 
-            var trendData = await _context.Responses
+            var responses = await _context.Responses
                 .Where(r => r.SubmissionDate >= thirtyDaysAgo)
-                .GroupBy(r => r.SubmissionDate.Date)
+                .Select(r => new { r.SubmissionDate })
+                .ToListAsync(); // Pull into memory first
+
+            var trendData = responses
+                .GroupBy(r => r.SubmissionDate.Date) // Now safe — in-memory grouping
                 .Select(g => new
                 {
                     Date = g.Key.ToString("yyyy-MM-dd"),
                     Responses = g.Count()
                 })
                 .OrderBy(d => d.Date)
-                .ToListAsync();
+                .ToList();
 
             return Json(trendData);
         }

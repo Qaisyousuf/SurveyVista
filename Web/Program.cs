@@ -1,5 +1,8 @@
 using Data;
+using Microsoft.AspNetCore.Authorization;
 using Services.Implemnetation;
+using Services.Interaces;
+using Web.Authorization;
 using Web.Extesions;
 using Web.ViewComponents;
 
@@ -39,8 +42,10 @@ builder.Services.UserResponseConfiguration();
 builder.Services.ConfigureOpenAI(config);
 builder.Services.AddSignalR();
 builder.Services.ConfigureAIAnalysis();
-
-
+// Add permission-based authorization
+builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
+builder.Services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
+builder.Services.AddScoped<IUserTrajectoryService, UserTrajectoryService>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSeoSoft", policy =>
@@ -51,6 +56,33 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.AccessDeniedPath = "/Admin/AccessDenied/Index";
+    options.Events.OnRedirectToAccessDenied = context =>
+    {
+        // For AJAX requests, return 403
+        if (context.Request.Headers["X-Requested-With"] == "XMLHttpRequest" ||
+            context.Request.Headers["Accept"].ToString().Contains("application/json"))
+        {
+            context.Response.StatusCode = 403;
+            return Task.CompletedTask;
+        }
+
+        // For normal requests, redirect back with ?accessDenied=true
+        var returnUrl = context.Request.Path + context.Request.QueryString;
+        var referer = context.Request.Headers["Referer"].ToString();
+        var redirectUrl = !string.IsNullOrEmpty(referer) ? referer : "/admin";
+
+        if (!redirectUrl.Contains("accessDenied=true"))
+        {
+            redirectUrl += (redirectUrl.Contains("?") ? "&" : "?") + "accessDenied=true";
+        }
+
+        context.Response.Redirect(redirectUrl);
+        return Task.CompletedTask;
+    };
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

@@ -1,12 +1,15 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using Web.Authorization;
 using Web.ViewModel.AccountVM;
 
 namespace Web.Areas.Admin.Controllers
 {
 
-   
+    [HasPermission(Permissions.Roles.View)]
+    [Area("Admin")]
     public class RolesController : Controller
     {
         private readonly RoleManager<IdentityRole> _roleManager;
@@ -15,99 +18,146 @@ namespace Web.Areas.Admin.Controllers
         {
             _roleManager = roleManager;
         }
-        public IActionResult Index()
+
+        public async Task<IActionResult> Index()
         {
-            var roles = _roleManager.Roles.Select(r => new RoleViewModel
+            var roles = _roleManager.Roles.ToList();
+            var models = new List<RoleViewModel>();
+
+            foreach (var role in roles)
             {
-                Id = r.Id,
-                Name = r.Name,
-               
-            }).ToList();
+                var claims = await _roleManager.GetClaimsAsync(role);
+                var permissions = claims
+                    .Where(c => c.Type == Permissions.ClaimType)
+                    .Select(c => c.Value)
+                    .ToList();
 
-            return View(roles);
+                models.Add(new RoleViewModel
+                {
+                    Id = role.Id,
+                    Name = role.Name,
+                    SelectedPermissions = permissions
+                });
+            }
+
+            // Pass grouped permissions for the UI
+            ViewBag.PermissionGroups = Permissions.GetAllGrouped();
+
+            return View(models);
         }
 
 
-        public IActionResult Create()
-        {
-            return View(new RoleViewModel());
-        }
-
+        [HasPermission(Permissions.Roles.Create)]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(RoleViewModel model)
+        public async Task<IActionResult> CreateAjax(RoleViewModel model)
         {
-            if (ModelState.IsValid)
+            if (string.IsNullOrWhiteSpace(model.Name))
             {
-                var role = new IdentityRole
-                {
-                    Name = model.Name
-                };
-                // Optionally handle the description if your IdentityRole class supports it
-                var result = await _roleManager.CreateAsync(role);
-                if (result.Succeeded)
-                {
-                    TempData["Success"] = "role created successfully";
-                    return RedirectToAction("Index");
-
-                }
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError("", error.Description);
-                }
+                return Json(new { success = false, errors = new List<string> { "Role name is required." } });
             }
-            return View(model);
+
+            // Check if role already exists
+            var existingRole = await _roleManager.FindByNameAsync(model.Name);
+            if (existingRole != null)
+            {
+                return Json(new { success = false, errors = new List<string> { $"Role '{model.Name}' already exists." } });
+            }
+
+            var role = new IdentityRole { Name = model.Name };
+            var result = await _roleManager.CreateAsync(role);
+
+            if (result.Succeeded)
+            {
+                // Save permissions as claims
+                if (model.SelectedPermissions != null && model.SelectedPermissions.Any())
+                {
+                    foreach (var permission in model.SelectedPermissions)
+                    {
+                        await _roleManager.AddClaimAsync(role, new Claim(Permissions.ClaimType, permission));
+                    }
+                }
+
+                return Json(new { success = true, message = $"Role '{model.Name}' created successfully." });
+            }
+
+            var errors = result.Errors.Select(e => e.Description).ToList();
+            return Json(new { success = false, errors });
         }
 
-        public async Task<IActionResult> Edit(string id)
+        [HttpGet]
+
+        [HasPermission(Permissions.Roles.View)]
+        public async Task<IActionResult> GetRolePermissions(string id)
         {
             var role = await _roleManager.FindByIdAsync(id);
             if (role == null)
             {
-                return NotFound();
+                return Json(new { success = false, errors = new List<string> { "Role not found." } });
             }
 
-            var model = new RoleViewModel
-            {
-                Id = role.Id,
-                Name = role.Name,
-              
-            };
+            var claims = await _roleManager.GetClaimsAsync(role);
+            var permissions = claims
+                .Where(c => c.Type == Permissions.ClaimType)
+                .Select(c => c.Value)
+                .ToList();
 
-            return View(model);
+            return Json(new
+            {
+                success = true,
+                id = role.Id,
+                name = role.Name,
+                permissions
+            });
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(RoleViewModel model)
+        [HasPermission(Permissions.Roles.Edit)]
+        public async Task<IActionResult> EditAjax(RoleViewModel model)
         {
-            if (ModelState.IsValid)
+            if (string.IsNullOrWhiteSpace(model.Name))
             {
-                var role = await _roleManager.FindByIdAsync(model.Id);
-                if (role == null)
-                {
-                    return NotFound();
-                }
+                return Json(new { success = false, errors = new List<string> { "Role name is required." } });
+            }
 
-                role.Name = model.Name;
-            
+            var role = await _roleManager.FindByIdAsync(model.Id);
+            if (role == null)
+            {
+                return Json(new { success = false, errors = new List<string> { "Role not found." } });
+            }
 
-                var result = await _roleManager.UpdateAsync(role);
-                if (result.Succeeded)
+            // Update name
+            role.Name = model.Name;
+            var result = await _roleManager.UpdateAsync(role);
+
+            if (!result.Succeeded)
+            {
+                var errors = result.Errors.Select(e => e.Description).ToList();
+                return Json(new { success = false, errors });
+            }
+
+            // Remove old permission claims
+            var existingClaims = await _roleManager.GetClaimsAsync(role);
+            foreach (var claim in existingClaims.Where(c => c.Type == Permissions.ClaimType))
+            {
+                await _roleManager.RemoveClaimAsync(role, claim);
+            }
+
+            // Add new permission claims
+            if (model.SelectedPermissions != null && model.SelectedPermissions.Any())
+            {
+                foreach (var permission in model.SelectedPermissions)
                 {
-                    TempData["Success"] = "Role updated successfully";
-                    return RedirectToAction(nameof(Index));
-                }
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError("", error.Description);
+                    await _roleManager.AddClaimAsync(role, new Claim(Permissions.ClaimType, permission));
                 }
             }
 
-            return View(model);
+            return Json(new { success = true, message = $"Role '{model.Name}' updated successfully." });
         }
 
 
+        [HasPermission(Permissions.Roles.Delete)]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteMultiple(List<string> selectedRoles)
@@ -123,6 +173,13 @@ namespace Web.Areas.Admin.Controllers
                 var role = await _roleManager.FindByIdAsync(roleId);
                 if (role != null)
                 {
+                    // Remove all claims first
+                    var claims = await _roleManager.GetClaimsAsync(role);
+                    foreach (var claim in claims)
+                    {
+                        await _roleManager.RemoveClaimAsync(role, claim);
+                    }
+
                     await _roleManager.DeleteAsync(role);
                 }
             }
@@ -130,6 +187,5 @@ namespace Web.Areas.Admin.Controllers
             TempData["Success"] = "Selected roles deleted successfully.";
             return RedirectToAction(nameof(Index));
         }
-
     }
 }

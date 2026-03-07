@@ -1,1214 +1,222 @@
-﻿@model IEnumerable<Model.Response>
+﻿@model List<Response>
 
 @{
     ViewData["Title"] = "Response Management";
+    var totalResponses = Model?.Count ?? 0;
+    var uniqueUsers = Model?.Select(r => r.UserEmail).Distinct().Count() ?? 0;
+    var uniqueSurveys = Model?.Select(r => r.QuestionnaireId).Distinct().Count() ?? 0;
+    var todayCount = Model?.Count(r => r.SubmissionDate.Date == DateTime.Today) ?? 0;
 }
 
 <style>
-    /* Modern Design System */
     @@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-
-    :root {
-        --primary-color: #6366f1;
-        --primary-light: #8b5cf6;
-        --primary-dark: #4338ca;
-        --success-color: #10b981;
-        --success-light: #34d399;
-        --success-dark: #059669;
-        --info-color: #06b6d4;
-        --info-light: #22d3ee;
-        --info-dark: #0891b2;
-        --warning-color: #f59e0b;
-        --warning-light: #fbbf24;
-        --warning-dark: #d97706;
-        --danger-color: #ef4444;
-        --danger-light: #fca5a5;
-        --danger-dark: #dc2626;
-        --gray-50: #f8fafc;
-        --gray-100: #f1f5f9;
-        --gray-200: #e2e8f0;
-        --gray-300: #cbd5e1;
-        --gray-400: #94a3b8;
-        --gray-500: #64748b;
-        --gray-600: #475569;
-        --gray-700: #334155;
-        --gray-800: #1e293b;
-        --gray-900: #0f172a;
-        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-        --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-        --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
-        --border-radius-sm: 8px;
-        --border-radius-md: 12px;
-        --border-radius-lg: 16px;
-        --border-radius-xl: 24px;
-    }
-
-    * {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    }
-
-    body {
-        background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
-        min-height: 100vh;
-    }
-
-    .container {
-        max-width: 1400px;
-        margin: 0 auto;
-        padding: 2rem 1rem;
-    }
-
-    /* Header Section */
-    .page-header {
-        background: white;
-        border-radius: var(--border-radius-xl);
-        box-shadow: var(--shadow-xl);
-        padding: 2.5rem;
-        margin-bottom: 2rem;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .page-header::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(90deg, var(--primary-color), var(--info-color), var(--success-color));
-    }
-
-    .header-content {
-        display: flex;
-        align-items: center;
-        gap: 1.5rem;
-    }
-
-    .header-icon {
-        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
-        color: white;
-        width: 64px;
-        height: 64px;
-        border-radius: var(--border-radius-lg);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.75rem;
-        box-shadow: var(--shadow-lg);
-    }
-
-    .header-text h1 {
-        font-size: 2.25rem;
-        font-weight: 800;
-        color: var(--gray-800);
-        margin: 0 0 0.5rem;
-    }
-
-    .header-subtitle {
-        color: var(--gray-600);
-        font-size: 1.1rem;
-        font-weight: 500;
-    }
-
-    /* Statistics Section */
-    .stats-section {
-        background: linear-gradient(135deg, var(--info-color) 0%, var(--info-dark) 100%);
-        color: white;
-        padding: 2rem;
-        margin-bottom: 2rem;
-        border-radius: var(--border-radius-lg);
-        box-shadow: var(--shadow-lg);
-    }
-
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: 1.5rem;
-        text-align: center;
-    }
-
-    .stat-item {
-        padding: 1rem;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: var(--border-radius-md);
-        backdrop-filter: blur(10px);
-        transition: all 0.3s ease;
-    }
-
-    .stat-item:hover {
-        background: rgba(255, 255, 255, 0.2);
-        transform: translateY(-2px);
-    }
-
-    .stat-number {
-        font-size: 2.5rem;
-        font-weight: 800;
-        display: block;
-        margin-bottom: 0.25rem;
-    }
-
-    .stat-label {
-        font-size: 0.875rem;
-        font-weight: 500;
-        opacity: 0.9;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    /* Selection Controls */
-    .selection-controls {
-        background: white;
-        border-radius: var(--border-radius-lg);
-        padding: 2rem;
-        margin-bottom: 2rem;
-        box-shadow: var(--shadow-lg);
-        border: 1px solid var(--gray-200);
-        display: none;
-        transition: all 0.3s ease;
-    }
-
-    .selection-controls.show {
-        display: block;
-        animation: slideDown 0.3s ease;
-    }
-
-    @@keyframes slideDown {
-        from {
-            opacity: 0;
-            transform: translateY(-20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .selection-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        flex-wrap: wrap;
-        gap: 1rem;
-        margin-bottom: 1.5rem;
-    }
-
-    .selection-info {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-    }
-
-    .selection-icon {
-        background: var(--primary-color);
-        color: white;
-        width: 48px;
-        height: 48px;
-        border-radius: var(--border-radius-md);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.5rem;
-    }
-
-    .selection-text h3 {
-        font-size: 1.25rem;
-        font-weight: 700;
-        color: var(--gray-800);
-        margin: 0 0 0.25rem;
-    }
-
-    .selection-count {
-        color: var(--gray-600);
-        font-weight: 500;
-    }
-
-    .selection-actions {
-        display: flex;
-        gap: 1rem;
-        flex-wrap: wrap;
-    }
-
-    .master-checkbox-container {
-        background: white;
-        border-radius: var(--border-radius-md);
-        padding: 1.5rem;
-        margin-bottom: 2rem;
-        box-shadow: var(--shadow-md);
-        border: 1px solid var(--gray-200);
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-    }
-
-    .master-checkbox {
-        width: 28px;
-        height: 28px;
-        border: 2px solid var(--gray-300);
-        border-radius: 8px;
-        background: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        box-shadow: var(--shadow-sm);
-    }
-
-    .master-checkbox:hover {
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-    }
-
-    .master-checkbox.checked {
-        background: var(--primary-color);
-        border-color: var(--primary-color);
-        color: white;
-    }
-
-    .master-checkbox input {
-        display: none;
-    }
-
-    /* Response Cards Grid */
-    .responses-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-        gap: 2rem;
-        margin-bottom: 2rem;
-    }
-
-    /* Response Card */
-    .response-card {
-        background: white;
-        border-radius: var(--border-radius-xl);
-        box-shadow: var(--shadow-lg);
-        overflow: hidden;
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        position: relative;
-        border: 1px solid var(--gray-200);
-    }
-
-    .response-card:hover {
-        transform: translateY(-8px);
-        box-shadow: var(--shadow-2xl);
-        border-color: var(--primary-color);
-    }
-
-    .response-card.selected {
-        border-color: var(--primary-color);
-        background: linear-gradient(135deg, #fef2f2 0%, #fecaca 10%, white 100%);
-        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1), var(--shadow-lg);
-    }
-
-    .response-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(90deg, var(--primary-color), var(--info-color), var(--success-color));
-        transform: scaleX(0);
-        transition: transform 0.3s ease;
-        transform-origin: left;
-    }
-
-    .response-card:hover::before {
-        transform: scaleX(1);
-    }
-
-    .response-card.selected::before {
-        transform: scaleX(1);
-        background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
-    }
-
-    /* Card Header */
-    .card-header-custom {
-        background: linear-gradient(135deg, var(--gray-50) 0%, var(--gray-100) 100%);
-        padding: 1.5rem;
-        border-bottom: 1px solid var(--gray-200);
-        position: relative;
-    }
-
-    /* Response Checkbox - Simplified and Reliable */
-    .response-checkbox {
-        position: absolute;
-        top: 1rem;
-        right: 1rem;
-        z-index: 20;
-    }
-
-    .checkbox-label {
-        cursor: pointer;
-        margin: 0;
-        padding: 0;
-        display: block;
-    }
-
-    .response-checkbox-input {
-        position: absolute;
-        opacity: 0;
-        width: 0;
-        height: 0;
-        margin: 0;
-        padding: 0;
-    }
-
-    .checkbox-custom {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 32px;
-        height: 32px;
-        border: 3px solid var(--gray-300);
-        border-radius: 8px;
-        background: white;
-        transition: all 0.2s ease;
-        box-shadow: var(--shadow-md);
-        cursor: pointer;
-    }
-
-    .checkbox-custom:hover {
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
-        transform: scale(1.05);
-    }
-
-    .checkbox-custom i {
-        font-size: 18px;
-        font-weight: bold;
-        color: white;
-        opacity: 0;
-        transition: opacity 0.2s ease;
-    }
-
-    .response-checkbox-input:checked + .checkbox-custom {
-        background: var(--primary-color);
-        border-color: var(--primary-color);
-    }
-
-    .response-checkbox-input:checked + .checkbox-custom i {
-        opacity: 1;
-    }
-
-    /* Master Checkbox - Updated to match */
-    .master-checkbox {
-        width: 32px;
-        height: 32px;
-        border: 3px solid var(--gray-300);
-        border-radius: 8px;
-        background: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        box-shadow: var(--shadow-md);
-    }
-
-    .master-checkbox:hover {
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
-        transform: scale(1.05);
-    }
-
-    .master-checkbox.checked {
-        background: var(--primary-color);
-        border-color: var(--primary-color);
-        color: white;
-    }
-
-    .master-checkbox input {
-        display: none;
-    }
-
-    .master-checkbox i {
-        font-size: 18px;
-        font-weight: bold;
-    }
-
-    .response-info {
-        padding-right: 3rem;
-    }
-
-    .response-id {
-        background: linear-gradient(135deg, var(--warning-color) 0%, var(--warning-dark) 100%);
-        color: white;
-        padding: 0.375rem 0.75rem;
-        border-radius: var(--border-radius-sm);
-        font-weight: 600;
-        font-size: 0.875rem;
-        display: inline-block;
-        margin-bottom: 1rem;
-        box-shadow: var(--shadow-sm);
-    }
-
-    .questionnaire-title {
-        font-size: 1.25rem;
-        font-weight: 700;
-        color: var(--gray-800);
-        margin: 0 0 1rem;
-        line-height: 1.4;
-    }
-
-    .user-info {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-    }
-
-    .user-avatar {
-        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
-        color: white;
-        width: 48px;
-        height: 48px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.25rem;
-        font-weight: 700;
-        box-shadow: var(--shadow-md);
-    }
-
-    .user-details h4 {
-        font-size: 1rem;
-        font-weight: 600;
-        color: var(--gray-800);
-        margin: 0 0 0.25rem;
-    }
-
-    .user-email {
-        color: var(--gray-600);
-        font-size: 0.875rem;
-        font-weight: 500;
-    }
-
-    /* Card Content */
-    .card-content {
-        padding: 1.5rem;
-    }
-
-    .submission-info {
-        background: var(--gray-50);
-        border-radius: var(--border-radius-md);
-        padding: 1.25rem;
-        margin-bottom: 1.5rem;
-        border: 1px solid var(--gray-200);
-    }
-
-    .submission-header {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        margin-bottom: 0.75rem;
-    }
-
-    .submission-icon {
-        background: var(--success-color);
-        color: white;
-        width: 32px;
-        height: 32px;
-        border-radius: var(--border-radius-sm);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1rem;
-    }
-
-    .submission-title {
-        font-size: 1rem;
-        font-weight: 600;
-        color: var(--gray-800);
-        margin: 0;
+    :root{
+        --bg:#0f1923;--bg-card:#1a2332;--bg-elevated:#1f2b3d;--bg-input:#16202e;
+        --text-primary:#e8edf2;--text-secondary:#9ba8b9;--text-muted:#5e6e82;--text-faint:#3d4e63;
+        --teal:#33b3ae;--teal-soft:rgba(51,179,174,0.1);--teal-border:rgba(51,179,174,0.3);--teal-dark:#2a9490;
+        --blue:#3b82f6;--blue-soft:rgba(59,130,246,0.1);--blue-border:rgba(59,130,246,0.3);
+        --purple:#7c3aed;--purple-soft:rgba(124,58,237,0.1);--purple-border:rgba(124,58,237,0.3);
+        --amber:#f59e0b;--amber-soft:rgba(245,158,11,0.1);--amber-border:rgba(245,158,11,0.3);
+        --red:#ef4444;--red-soft:rgba(239,68,68,0.08);--red-border:rgba(239,68,68,0.3);
+        --green:#10b981;--green-soft:rgba(16,185,129,0.1);--green-border:rgba(16,185,129,0.3);
+        --info:#06b6d4;--info-soft:rgba(6,182,212,0.1);--info-border:rgba(6,182,212,0.3);
+        --border:rgba(255,255,255,0.06);--border-light:rgba(255,255,255,0.04);
+        --shadow-sm:0 2px 8px rgba(0,0,0,0.25);--shadow-md:0 4px 16px rgba(0,0,0,0.3);
+        --radius-sm:8px;--radius-md:12px;--radius-lg:16px;
+        --transition:all 0.2s cubic-bezier(0.4,0,0.2,1);
+    }
+    @@keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    @@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    @@keyframes gridMove{0%{transform:translate(0,0)}100%{transform:translate(60px,60px)}}
+    @@keyframes meshShift{0%,100%{filter:hue-rotate(0deg);transform:scale(1)}50%{filter:hue-rotate(30deg);transform:scale(1.05)}}
+    *{box-sizing:border-box}
+
+    .resp-page{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);min-height:100vh;padding:32px 40px 80px;-webkit-font-smoothing:antialiased;color:var(--text-primary);position:relative}
+
+    /* ===== DYNAMIC BACKGROUND ===== */
+    .bg-pattern{position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:0;overflow:hidden;pointer-events:none}
+    .grid-overlay{position:absolute;inset:0;background-image:linear-gradient(rgba(51,179,174,0.07) 1px,transparent 1px),linear-gradient(90deg,rgba(59,130,246,0.07) 1px,transparent 1px);background-size:60px 60px;animation:gridMove 20s linear infinite}
+    .gradient-mesh{position:absolute;inset:0;background:radial-gradient(circle at 20% 20%,rgba(51,179,174,0.12) 0%,transparent 50%),radial-gradient(circle at 80% 60%,rgba(124,58,237,0.12) 0%,transparent 50%),radial-gradient(circle at 40% 80%,rgba(59,130,246,0.1) 0%,transparent 50%);animation:meshShift 15s ease-in-out infinite}
+
+    .resp-page>*:not(.bg-pattern){position:relative;z-index:1}
+
+    /* ===== HEADER ===== */
+    .page-header{max-width:1200px;margin:0 auto 28px;animation:slideUp .5s ease both}
+    .page-header-inner{background:rgba(255,255,255,0.04);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.08);border-radius:var(--radius-lg);padding:28px 32px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;position:relative;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.12)}
+    .page-header-inner::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--teal),var(--blue),var(--purple))}
+    .header-left{display:flex;align-items:center;gap:16px}
+    .header-icon{width:48px;height:48px;border-radius:var(--radius-md);background:linear-gradient(135deg,var(--teal),var(--teal-dark));display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;box-shadow:0 4px 16px rgba(51,179,174,0.25)}
+    .header-title{font-size:24px;font-weight:700;color:var(--text-primary);margin:0}
+    .header-subtitle{font-size:13px;color:var(--text-muted);margin:4px 0 0;font-weight:500}
+    .header-actions{display:flex;gap:10px}
+    .btn-action{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;transition:var(--transition);text-decoration:none;border:none}
+    .btn-delete-sel{background:var(--red-soft);color:var(--red);border:1.5px solid var(--red-border)}
+    .btn-delete-sel:hover{background:rgba(239,68,68,0.15);color:#fff;text-decoration:none}
+    .btn-delete-sel:disabled,.btn-delete-sel.disabled{opacity:0.4;pointer-events:none}
+
+    /* ===== STATS ===== */
+    .stats-bar{max-width:1200px;margin:0 auto 24px;display:grid;grid-template-columns:repeat(4,1fr);gap:16px;animation:slideUp .5s ease .06s both}
+    .stat-card{background:rgba(255,255,255,0.04);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.08);border-radius:var(--radius-md);padding:20px 24px;text-align:center;transition:var(--transition);position:relative;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.12)}
+    .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:3px 3px 0 0}
+    .stat-card:nth-child(1)::before{background:var(--teal)}
+    .stat-card:nth-child(2)::before{background:var(--blue)}
+    .stat-card:nth-child(3)::before{background:var(--purple)}
+    .stat-card:nth-child(4)::before{background:var(--amber)}
+    .stat-card:hover{box-shadow:var(--shadow-sm);border-color:rgba(255,255,255,0.1);transform:translateY(-2px)}
+    .stat-num{font-size:32px;font-weight:800;line-height:1;margin-bottom:6px}
+    .stat-card:nth-child(1) .stat-num{background:linear-gradient(135deg,var(--teal),#5eead4);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .stat-card:nth-child(2) .stat-num{background:linear-gradient(135deg,var(--blue),#93c5fd);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .stat-card:nth-child(3) .stat-num{background:linear-gradient(135deg,var(--purple),#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .stat-card:nth-child(4) .stat-num{background:linear-gradient(135deg,var(--amber),#fcd34d);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .stat-lbl{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.6px}
+
+    /* ===== TOOLBAR ===== */
+    .toolbar{max-width:1200px;margin:0 auto 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;animation:slideUp .5s ease .1s both}
+    .select-all-wrap{display:flex;align-items:center;gap:10px}
+    .cb-custom{width:18px;height:18px;border-radius:5px;border:2px solid var(--text-faint);background:var(--bg-input);cursor:pointer;appearance:none;-webkit-appearance:none;transition:var(--transition);position:relative}
+    .cb-custom:checked{background:var(--teal);border-color:var(--teal)}
+    .cb-custom:checked::after{content:'\2713';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;font-size:11px;font-weight:700}
+    .select-label{font-size:13px;font-weight:600;color:var(--text-secondary);cursor:pointer}
+    .sel-count{font-size:13px;font-weight:600;color:var(--teal)}
+
+    /* ===== GRID ===== */
+    .resp-grid{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px;animation:slideUp .5s ease .14s both}
+
+    /* ===== RESPONSE CARD ===== */
+    .resp-card{background:rgba(255,255,255,0.04);backdrop-filter:blur(20px);border:1.5px solid rgba(255,255,255,0.08);border-radius:var(--radius-md);overflow:hidden;transition:var(--transition);position:relative;box-shadow:0 8px 32px rgba(0,0,0,0.12)}
+    .resp-card:hover{box-shadow:var(--shadow-md);border-color:rgba(255,255,255,0.1);transform:translateY(-3px)}
+    .resp-card.selected{border-color:var(--teal);box-shadow:0 0 0 1px var(--teal),var(--shadow-sm)}
+
+    .card-top{padding:18px 20px 14px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+    .card-id{font-size:10px;font-weight:700;color:var(--teal);background:var(--teal-soft);border:1px solid var(--teal-border);padding:3px 10px;border-radius:100px;letter-spacing:0.3px;font-family:'JetBrains Mono',monospace}
+    .card-cb{width:18px;height:18px;border-radius:5px;border:2px solid var(--text-faint);background:var(--bg-input);cursor:pointer;appearance:none;-webkit-appearance:none;transition:var(--transition);flex-shrink:0}
+    .card-cb:checked{background:var(--teal);border-color:var(--teal)}
+    .card-cb:checked::after{content:'\2713';position:absolute;color:#fff;font-size:11px;font-weight:700}
+
+    .card-body{padding:0 20px 16px}
+    .card-title{font-size:16px;font-weight:700;color:var(--text-primary);margin:0 0 14px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+    .card-user{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+    .user-avatar{width:34px;height:34px;border-radius:var(--radius-sm);background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0}
+    .user-info{min-width:0}
+    .user-name{font-size:13px;font-weight:600;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .user-email{font-size:11px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+    .card-date{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-muted);font-weight:500}
+    .card-date i{color:var(--amber);font-size:13px}
+
+    .card-footer{border-top:1px solid var(--border-light);padding:0}
+    .card-footer a{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;font-size:13px;font-weight:600;color:var(--teal);text-decoration:none;transition:var(--transition)}
+    .card-footer a:hover{background:var(--teal-soft);color:#fff}
+
+    /* ===== EMPTY STATE ===== */
+    .empty-state{max-width:1200px;margin:0 auto;text-align:center;padding:80px 24px;animation:slideUp .5s ease .14s both}
+    .empty-icon{width:80px;height:80px;border-radius:var(--radius-lg);background:rgba(255,255,255,0.04);backdrop-filter:blur(20px);display:flex;align-items:center;justify-content:center;font-size:36px;color:var(--text-faint);margin:0 auto 20px;border:1px solid rgba(255,255,255,0.08);box-shadow:0 8px 32px rgba(0,0,0,0.12)}
+    .empty-state h3{font-size:20px;font-weight:700;color:var(--text-secondary);margin:0 0 8px}
+    .empty-state p{font-size:14px;color:var(--text-muted);margin:0}
+
+    /* ===== RESPONSIVE ===== */
+    @@media(max-width:768px){
+        .resp-page{padding:16px}
+        .stats-bar{grid-template-columns:repeat(2,1fr)}
+        .resp-grid{grid-template-columns:1fr}
+        .page-header-inner{flex-direction:column;align-items:flex-start}
+        .toolbar{flex-direction:column;align-items:flex-start}
+    }
+    @@media(prefers-reduced-motion:reduce){
+        *,*::before,*::after{animation-duration:0.01ms !important;animation-iteration-count:1 !important;transition-duration:0.01ms !important}
+    }
+    @@media print{
+        .bg-pattern{display:none !important}
+        .resp-card,.stat-card,.page-header-inner{background:white;color:black;border:1px solid #333;backdrop-filter:none}
     }
-
-    .submission-date {
-        font-size: 1rem;
-        font-weight: 600;
-        color: var(--success-color);
-    }
-
-    /* Action Button */
-    .action-section {
-        background: var(--gray-50);
-        padding: 1.5rem;
-        border-top: 1px solid var(--gray-200);
-    }
-
-    .action-btn {
-        background: linear-gradient(135deg, var(--info-color) 0%, var(--info-dark) 100%);
-        color: white;
-        border: none;
-        padding: 0.75rem 1.5rem;
-        border-radius: var(--border-radius-md);
-        font-weight: 600;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        transition: all 0.3s ease;
-        box-shadow: var(--shadow-md);
-        width: 100%;
-        justify-content: center;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .action-btn::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-        transition: left 0.5s;
-    }
-
-    .action-btn:hover::before {
-        left: 100%;
-    }
-
-    .action-btn:hover {
-        background: linear-gradient(135deg, var(--info-dark) 0%, #0e7490 100%);
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-lg);
-        color: white;
-        text-decoration: none;
-    }
-
-    /* Buttons */
-    .btn {
-        border-radius: var(--border-radius-md);
-        font-weight: 600;
-        padding: 0.75rem 1.5rem;
-        font-size: 0.875rem;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        border: none;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        box-shadow: var(--shadow-sm);
-        position: relative;
-        overflow: hidden;
-        cursor: pointer;
-    }
-
-    .btn::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-        transition: left 0.5s;
-    }
-
-    .btn:hover::before {
-        left: 100%;
-    }
-
-    .btn-danger {
-        background: linear-gradient(135deg, var(--danger-color) 0%, var(--danger-dark) 100%);
-        color: white;
-    }
-
-    .btn-danger:hover {
-        background: linear-gradient(135deg, var(--danger-dark) 0%, #b91c1c 100%);
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-lg);
-        color: white;
-    }
-
-    .btn-secondary {
-        background: linear-gradient(135deg, var(--gray-500) 0%, var(--gray-600) 100%);
-        color: white;
-    }
-
-    .btn-secondary:hover {
-        background: linear-gradient(135deg, var(--gray-600) 0%, var(--gray-700) 100%);
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-lg);
-        color: white;
-    }
-
-    .btn-warning {
-        background: linear-gradient(135deg, var(--warning-color) 0%, var(--warning-dark) 100%);
-        color: white;
-    }
-
-    .btn-warning:hover {
-        background: linear-gradient(135deg, var(--warning-dark) 0%, #b45309 100%);
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-lg);
-        color: white;
-    }
-
-    /* Empty State */
-    .empty-state {
-        text-align: center;
-        padding: 4rem 2rem;
-        background: white;
-        border-radius: var(--border-radius-xl);
-        box-shadow: var(--shadow-lg);
-        border: 2px dashed var(--gray-300);
-    }
-
-    .empty-state-icon {
-        background: var(--gray-100);
-        color: var(--gray-400);
-        width: 80px;
-        height: 80px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 2rem;
-        margin: 0 auto 1.5rem;
-    }
-
-    .empty-state h3 {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: var(--gray-700);
-        margin-bottom: 1rem;
-    }
-
-    .empty-state p {
-        color: var(--gray-500);
-        font-size: 1rem;
-    }
-
-    /* Loading States */
-    .btn.loading {
-        opacity: 0.7;
-        pointer-events: none;
-    }
-
-    .btn.loading::after {
-        content: "";
-        width: 18px;
-        height: 18px;
-        margin-left: 0.75rem;
-        border: 2px solid transparent;
-        border-top-color: currentColor;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-    }
-
-    @@keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
-
-    /* Responsive Design */
-    @@media (max-width: 1024px) {
-        .responses-grid {
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-        }
-    }
-
-    @@media (max-width: 768px) {
-        .container {
-            padding: 1rem;
-        }
-
-        .responses-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .stats-grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
-
-        .selection-header {
-            flex-direction: column;
-            align-items: flex-start;
-        }
-
-        .selection-actions {
-            width: 100%;
-        }
-
-        .selection-actions .btn {
-            flex: 1;
-        }
-
-        .user-info {
-            flex-direction: column;
-            text-align: center;
-            gap: 0.75rem;
-        }
-    }
-
-    /* Confirmation Modal Styles */
-    .confirmation-modal {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.75);
-        backdrop-filter: blur(8px);
-        z-index: 1000;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        opacity: 0;
-        visibility: hidden;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-        .confirmation-modal.show {
-            opacity: 1;
-            visibility: visible;
-        }
-
-    .modal-content {
-        background: white;
-        border-radius: var(--border-radius-xl);
-        box-shadow: var(--shadow-2xl);
-        max-width: 500px;
-        width: 90%;
-        max-height: 90vh;
-        overflow: hidden;
-        transform: translateY(20px) scale(0.95);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        position: relative;
-    }
-
-        .confirmation-modal.show .modal-content {
-            transform: translateY(0) scale(1);
-        }
-
-    .modal-header {
-        padding: 3rem 2rem 2rem 2rem;
-        text-align: center;
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-
-    /* Icon Row */
-    .modal-icon-row {
-        width: 100%;
-        display: flex;
-        justify-content: center;
-        margin-bottom: 3rem;
-    }
-
-    .modal-icon {
-        width: 100px;
-        height: 100px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 2.5rem;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .modal-icon::before {
-        content: '';
-        position: absolute;
-        top: -2px;
-        left: -2px;
-        right: -2px;
-        bottom: -2px;
-        border-radius: 50%;
-        z-index: -1;
-        opacity: 0.3;
-    }
-
-    .modal-icon.delete-selected {
-        background: linear-gradient(135deg, var(--danger-color) 0%, var(--danger-light) 50%, var(--danger-dark) 100%);
-        color: white;
-        box-shadow: 0 20px 40px rgba(239, 68, 68, 0.4), 0 8px 16px rgba(239, 68, 68, 0.2);
-    }
-
-    .modal-icon.delete-selected::before {
-        background: linear-gradient(135deg, var(--danger-light) 0%, var(--danger-color) 100%);
-    }
-
-    .modal-icon.delete-all {
-        background: linear-gradient(135deg, var(--danger-dark) 0%, var(--danger-color) 50%, #b91c1c 100%);
-        color: white;
-        box-shadow: 0 20px 40px rgba(220, 38, 38, 0.5), 0 8px 16px rgba(220, 38, 38, 0.3);
-    }
-
-    .modal-icon.delete-all::before {
-        background: linear-gradient(135deg, var(--danger-color) 0%, var(--danger-dark) 100%);
-    }
-
-    /* Icon symbol styling */
-    .modal-icon i {
-        position: relative;
-        z-index: 1;
-        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
-    }
-
-    /* Title Row */
-    .modal-title-row {
-        width: 100%;
-        display: flex;
-        justify-content: center;
-        margin-bottom: 2rem;
-    }
-
-    .modal-title {
-        font-size: 1.875rem;
-        font-weight: 800;
-        color: var(--gray-800);
-        margin: 0;
-        line-height: 1.2;
-        text-align: center;
-    }
-
-    /* Subtitle Row */
-    .modal-subtitle-row {
-        width: 100%;
-        display: flex;
-        justify-content: center;
-        margin-bottom: 0;
-    }
-
-    .modal-subtitle {
-        color: var(--gray-600);
-        font-size: 1.1rem;
-        font-weight: 500;
-        margin: 0;
-        line-height: 1.4;
-        text-align: center;
-        max-width: 400px;
-    }
-
-    .modal-body {
-        padding: 1.5rem 2rem;
-    }
-
-    .modal-description {
-        background: var(--gray-50);
-        border-radius: var(--border-radius-md);
-        padding: 1.5rem;
-        margin-bottom: 1.5rem;
-        border: 1px solid var(--gray-200);
-    }
-
-    .modal-description h4 {
-        font-size: 1rem;
-        font-weight: 700;
-        color: var(--gray-800);
-        margin: 0 0 0.75rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .modal-description ul {
-        margin: 0;
-        padding-left: 1.25rem;
-        color: var(--gray-600);
-    }
-
-    .modal-description li {
-        margin-bottom: 0.5rem;
-        font-size: 0.875rem;
-        line-height: 1.5;
-    }
-
-    .selection-info {
-        background: linear-gradient(135deg, var(--danger-color) 0%, var(--danger-light) 100%);
-        color: white;
-        padding: 1rem;
-        border-radius: var(--border-radius-md);
-        margin-bottom: 1.5rem;
-        text-align: center;
-    }
-
-    .selection-count {
-        font-size: 1.125rem;
-        font-weight: 700;
-        margin: 0 0 0.5rem;
-    }
-
-    .selection-meta {
-        font-size: 0.875rem;
-        opacity: 0.9;
-        margin: 0;
-    }
-
-    .modal-actions {
-        display: flex;
-        gap: 1rem;
-        padding: 2rem;
-        background: var(--gray-50);
-        border-top: 1px solid var(--gray-200);
-    }
-
-    .modal-btn {
-        flex: 1;
-        padding: 1rem 1.5rem;
-        border-radius: var(--border-radius-md);
-        font-weight: 700;
-        font-size: 1rem;
-        border: none;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        box-shadow: var(--shadow-md);
-    }
-
-        .modal-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
-        }
-
-    .modal-btn-cancel {
-        background: white;
-        color: var(--gray-700);
-        border: 2px solid var(--gray-300);
-    }
-
-        .modal-btn-cancel:hover {
-            background: var(--gray-50);
-            border-color: var(--gray-400);
-        }
-
-    .modal-btn-confirm {
-        color: white;
-    }
-
-    .modal-btn-confirm.delete-selected {
-        background: linear-gradient(135deg, var(--danger-color) 0%, var(--danger-dark) 100%);
-    }
-
-        .modal-btn-confirm.delete-selected:hover {
-            background: linear-gradient(135deg, var(--danger-dark) 0%, #b91c1c 100%);
-        }
-
-    .modal-btn-confirm.delete-all {
-        background: linear-gradient(135deg, var(--danger-dark) 0%, #b91c1c 100%);
-    }
-
-        .modal-btn-confirm.delete-all:hover {
-            background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
-        }
-
-    /* Animations */
-    .fade-in {
-        animation: fadeIn 0.6s ease-out;
-    }
-
-    @@keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .stagger-animation {
-        animation: fadeIn 0.6s ease-out;
-        animation-fill-mode: both;
-    }
-
-    .stagger-animation:nth-child(1) { animation-delay: 0.1s; }
-    .stagger-animation:nth-child(2) { animation-delay: 0.2s; }
-    .stagger-animation:nth-child(3) { animation-delay: 0.3s; }
-    .stagger-animation:nth-child(4) { animation-delay: 0.4s; }
-    .stagger-animation:nth-child(5) { animation-delay: 0.5s; }
-    .stagger-animation:nth-child(6) { animation-delay: 0.6s; }
 </style>
 
-<div class="container-fluid">
-    <!-- Notifications -->
-    <partial name="_Notification" />
+<form id="deleteForm" method="post" asp-action="DeleteMultiple" asp-controller="UserResponse">
+<div class="resp-page">
 
-    <!-- Success/Error Messages -->
-    @if (TempData["Success"] != null)
-    {
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="bi bi-check-circle"></i> @TempData["Success"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    }
+    <!-- Dynamic Background -->
+    <div class="bg-pattern">
+        <div class="grid-overlay"></div>
+        <div class="gradient-mesh"></div>
+    </div>
 
-    @if (TempData["Error"] != null)
-    {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="bi bi-exclamation-triangle"></i> @TempData["Error"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    }
-
-    @if (TempData["Warning"] != null)
-    {
-        <div class="alert alert-warning alert-dismissible fade show" role="alert">
-            <i class="bi bi-exclamation-circle"></i> @TempData["Warning"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    }
-
-    <!-- Page Header -->
-    <div class="page-header fade-in">
-        <div class="header-content">
-            <div class="header-icon">
-                <i class="bi bi-clipboard-data-fill"></i>
+    <!-- Header -->
+    <div class="page-header">
+        <div class="page-header-inner">
+            <div class="header-left">
+                <div class="header-icon"><i class="bi bi-clipboard-data"></i></div>
+                <div>
+                    <h1 class="header-title">Response Management</h1>
+                    <p class="header-subtitle">Monitor and manage all survey responses</p>
+                </div>
             </div>
-            <div class="header-text">
-                <h1>Response Management</h1>
-                <p class="header-subtitle">Monitor and manage all survey responses from users</p>
+            <div class="header-actions">
+                <button type="submit" class="btn-action btn-delete-sel disabled" id="btnDeleteSelected" disabled>
+                    <i class="bi bi-trash3"></i> Delete Selected (<span id="selCountTop">0</span>)
+                </button>
             </div>
         </div>
     </div>
 
-    @if (Model.Any())
+    <!-- Stats -->
+    <div class="stats-bar">
+        <div class="stat-card">
+            <div class="stat-num">@totalResponses</div>
+            <div class="stat-lbl">Total</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-num">@uniqueUsers</div>
+            <div class="stat-lbl">Users</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-num">@uniqueSurveys</div>
+            <div class="stat-lbl">Surveys</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-num">@todayCount</div>
+            <div class="stat-lbl">Today</div>
+        </div>
+    </div>
+
+    @if (Model != null && Model.Any())
     {
-        <!-- Statistics Section -->
-        <div class="stats-section fade-in">
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <span class="stat-number">@Model.Count()</span>
-                    <span class="stat-label">Total Responses</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number">@Model.Select(r => r.UserEmail).Distinct().Count()</span>
-                    <span class="stat-label">Unique Users</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number">@Model.Select(r => r.Questionnaire?.Title).Distinct().Count()</span>
-                    <span class="stat-label">Questionnaires</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number">@Model.Where(r => r.SubmissionDate.Date == DateTime.Today).Count()</span>
-                    <span class="stat-label">Today's Responses</span>
-                </div>
+        <!-- Toolbar -->
+        <div class="toolbar">
+            <div class="select-all-wrap">
+                <input type="checkbox" class="cb-custom" id="selectAll" />
+                <label for="selectAll" class="select-label">Select All</label>
             </div>
+            <span class="sel-count"><span id="selCount">0</span> selected</span>
         </div>
 
-        <!-- Master Checkbox -->
-        <div class="master-checkbox-container fade-in">
-            <div class="master-checkbox" id="selectAllCheckbox">
-                <input type="checkbox" id="selectAllInput">
-                <i class="bi bi-check" style="display: none;"></i>
-            </div>
-            <label for="selectAllInput" class="mb-0 font-weight-bold">
-                <i class="bi bi-check-square me-2"></i>Select All Responses
-            </label>
-            <div class="ms-auto">
-                <span id="selectedCount" class="badge bg-primary">0 selected</span>
-            </div>
-        </div>
-
-        <!-- Selection Controls -->
-        <div class="selection-controls" id="selectionControls">
-            <div class="selection-header">
-                <div class="selection-info">
-                    <div class="selection-icon">
-                        <i class="bi bi-check-circle-fill"></i>
-                    </div>
-                    <div class="selection-text">
-                        <h3>Selection Active</h3>
-                        <p class="selection-count" id="selectionText">0 responses selected</p>
-                    </div>
-                </div>
-                <div class="selection-actions">
-                    <button type="button" class="btn btn-danger" id="deleteSelectedBtn">
-                        <i class="bi bi-trash-fill"></i>
-                        Delete Selected
-                    </button>
-                    <button type="button" class="btn btn-secondary" id="deselectAllBtn">
-                        <i class="bi bi-x-circle"></i>
-                        Deselect All
-                    </button>
-                    <button type="button" class="btn btn-warning" id="deleteAllBtn">
-                        <i class="bi bi-trash3-fill"></i>
-                        Delete All
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Hidden Forms for Actions -->
-        <form asp-action="DeleteMultiple" method="post" id="deleteMultipleForm" style="display: none;">
-            @Html.AntiForgeryToken()
-            <div id="selectedResponsesContainer"></div>
-        </form>
-
-        <form asp-action="DeleteAll" method="post" id="deleteAllForm" style="display: none;">
-            @Html.AntiForgeryToken()
-        </form>
-
-        <!-- Responses Grid -->
-        <div class="responses-grid">
-            @foreach (var item in Model.Select((response, index) => new { Response = response, Index = index }))
+        <!-- Response Grid -->
+        <div class="resp-grid">
+            @foreach (var response in Model.OrderByDescending(r => r.SubmissionDate))
             {
-                <div class="response-card stagger-animation" data-id="@item.Response.Id">
-                    <!-- Response Checkbox - Simplified -->
-                    <div class="response-checkbox">
-                        <label class="checkbox-label" for="checkbox_@item.Response.Id">
-                            <input type="checkbox" 
-                                   id="checkbox_@item.Response.Id" 
-                                   class="response-checkbox-input" 
-                                   value="@item.Response.Id"
-                                   data-response-id="@item.Response.Id">
-                            <span class="checkbox-custom">
-                                <i class="bi bi-check"></i>
-                            </span>
-                        </label>
+                var initials = !string.IsNullOrEmpty(response.UserName) ? response.UserName.Substring(0, 1).ToUpper() : "?";
+                <div class="resp-card" data-id="@response.Id">
+                    <div class="card-top">
+                        <span class="card-id">ID: @response.Id</span>
+                        <input type="checkbox" name="ids" value="@response.Id" class="card-cb item-cb" />
                     </div>
-
-                    <!-- Card Header -->
-                    <div class="card-header-custom">
-                        <div class="response-info">
-                            <span class="response-id">ID: @item.Response.Id</span>
-                            <h3 class="questionnaire-title">@(item.Response.Questionnaire?.Title ?? "Unknown Questionnaire")</h3>
+                    <div class="card-body">
+                        <h3 class="card-title">@(response.Questionnaire?.Title ?? "Untitled Survey")</h3>
+                        <div class="card-user">
+                            <div class="user-avatar">@initials</div>
                             <div class="user-info">
-                                <div class="user-avatar">
-                                    @(item.Response.UserName?.Substring(0, 1).ToUpper() ?? "U")
-                                </div>
-                                <div class="user-details">
-                                    <h4>@(item.Response.UserName ?? "Unknown User")</h4>
-                                    <p class="user-email">@(item.Response.UserEmail ?? "No email")</p>
-                                </div>
+                                <div class="user-name">@(response.UserName ?? "Anonymous")</div>
+                                <div class="user-email">@(response.UserEmail ?? "No email")</div>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- Card Content -->
-                    <div class="card-content">
-                        <div class="submission-info">
-                            <div class="submission-header">
-                                <div class="submission-icon">
-                                    <i class="bi bi-calendar-check"></i>
-                                </div>
-                                <h4 class="submission-title">Submission Details</h4>
-                            </div>
-                            <div class="submission-date">
-                                @item.Response.SubmissionDate.ToString("MMMM dd, yyyy 'at' HH:mm")
-                            </div>
+                        <div class="card-date">
+                            <i class="bi bi-calendar3"></i>
+                            @response.SubmissionDate.ToString("MMM dd, yyyy HH:mm")
                         </div>
                     </div>
-
-                    <!-- Action Section -->
-                    <div class="action-section">
-                        <a asp-action="ViewResponse" asp-route-id="@item.Response.Id" class="action-btn">
-                            <i class="bi bi-graph-up-arrow"></i>
-                            View Response Details
+                    <div class="card-footer">
+                        <a asp-action="ViewResponse" asp-route-id="@response.Id">
+                            <i class="bi bi-eye"></i> View Details
                         </a>
                     </div>
                 </div>
@@ -1217,400 +225,58 @@
     }
     else
     {
-        <!-- Empty State -->
-        <div class="empty-state fade-in">
-            <div class="empty-state-icon">
-                <i class="bi bi-clipboard-x"></i>
-            </div>
+        <div class="empty-state">
+            <div class="empty-icon"><i class="bi bi-inbox"></i></div>
             <h3>No Responses Yet</h3>
-            <p>When users start submitting survey responses, they will appear here for you to manage and review.</p>
+            <p>Survey responses will appear here once users submit them.</p>
         </div>
     }
-</div>
 
-<!-- Confirmation Modal -->
-<div id="confirmationModal" class="confirmation-modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <!-- Icon Row -->
-            <div class="modal-icon-row">
-                <div id="modalIcon" class="modal-icon">
-                    <i id="modalIconSymbol" class="bi"></i>
-                </div>
-            </div>
-            
-            <!-- Title Row -->
-            <div class="modal-title-row">
-                <h2 id="modalTitle" class="modal-title"></h2>
-            </div>
-            
-            <!-- Subtitle Row -->
-            <div class="modal-subtitle-row">
-                <p id="modalSubtitle" class="modal-subtitle"></p>
-            </div>
-        </div>
-        
-        <div class="modal-body">
-            <div id="selectionInfo" class="selection-info">
-                <div id="selectionCount" class="selection-count"></div>
-                <div id="selectionMeta" class="selection-meta"></div>
-            </div>
-            
-            <div id="modalDescription" class="modal-description">
-                <h4 id="descriptionTitle"></h4>
-                <ul id="descriptionList"></ul>
-            </div>
-        </div>
-        
-        <div class="modal-actions">
-            <button type="button" id="cancelBtn" class="modal-btn modal-btn-cancel">
-                <i class="bi bi-x-circle"></i>
-                Cancel
-            </button>
-            <button type="button" id="confirmBtn" class="modal-btn modal-btn-confirm">
-                <i id="confirmIcon" class="bi"></i>
-                <span id="confirmText"></span>
-            </button>
-        </div>
-    </div>
 </div>
+</form>
 
 @section Scripts {
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            let selectedResponses = [];
+        $(document).ready(function () {
+            var $selectAll = $('#selectAll');
+            var $items = $('.item-cb');
+            var $btnDel = $('#btnDeleteSelected');
+            var $selCount = $('#selCount');
+            var $selCountTop = $('#selCountTop');
 
-            console.log('Response Management JS Loaded');
-
-            // Modal elements
-            const modal = document.getElementById('confirmationModal');
-            const modalIcon = document.getElementById('modalIcon');
-            const modalIconSymbol = document.getElementById('modalIconSymbol');
-            const modalTitle = document.getElementById('modalTitle');
-            const modalSubtitle = document.getElementById('modalSubtitle');
-            const selectionInfo = document.getElementById('selectionInfo');
-            const selectionCount = document.getElementById('selectionCount');
-            const selectionMeta = document.getElementById('selectionMeta');
-            const modalDescription = document.getElementById('modalDescription');
-            const descriptionTitle = document.getElementById('descriptionTitle');
-            const descriptionList = document.getElementById('descriptionList');
-            const cancelBtn = document.getElementById('cancelBtn');
-            const confirmBtn = document.getElementById('confirmBtn');
-            const confirmIcon = document.getElementById('confirmIcon');
-            const confirmText = document.getElementById('confirmText');
-
-            let currentAction = '';
-
-            // Modal configurations
-            const modalConfigs = {
-                deleteSelected: {
-                    icon: 'bi-trash-fill',
-                    iconClass: 'delete-selected',
-                    title: 'Delete Selected Responses',
-                    subtitle: 'Permanently remove the selected survey responses',
-                    confirmText: 'Delete Selected',
-                    confirmIcon: 'bi-trash-fill',
-                    confirmClass: 'delete-selected',
-                    descriptionTitle: '<i class="bi bi-exclamation-triangle"></i> What will be deleted:',
-                    descriptionItems: [
-                        'All selected response records will be permanently removed',
-                        'Associated response details and answers will be deleted',
-                        'This action cannot be undone or recovered',
-                        'Response statistics will be updated automatically'
-                    ]
-                },
-                deleteAll: {
-                    icon: 'bi-trash3-fill',
-                    iconClass: 'delete-all',
-                    title: 'Delete All Responses',
-                    subtitle: 'Permanently remove every survey response in the system',
-                    confirmText: 'Delete Everything',
-                    confirmIcon: 'bi-trash3-fill',
-                    confirmClass: 'delete-all',
-                    descriptionTitle: '<i class="bi bi-exclamation-triangle-fill"></i> This will delete:',
-                    descriptionItems: [
-                        'ALL response records in the entire system',
-                        'ALL associated response details and answers',
-                        'ALL response statistics and data',
-                        'This action cannot be undone - everything will be lost permanently'
-                    ]
+            function updateCount() {
+                var count = $items.filter(':checked').length;
+                $selCount.text(count);
+                $selCountTop.text(count);
+                if (count > 0) {
+                    $btnDel.removeClass('disabled').prop('disabled', false);
+                } else {
+                    $btnDel.addClass('disabled').prop('disabled', true);
                 }
-            };
-
-            function showConfirmationModal(action, count = 0) {
-                currentAction = action;
-                const config = modalConfigs[action];
-                
-                // Set modal icon and styling
-                modalIcon.className = `modal-icon ${config.iconClass}`;
-                modalIconSymbol.className = `bi ${config.icon}`;
-                
-                // Set modal content
-                modalTitle.textContent = config.title;
-                modalSubtitle.textContent = config.subtitle;
-                
-                // Set selection info
-                if (action === 'deleteSelected') {
-                    selectionCount.textContent = `${count} Response${count !== 1 ? 's' : ''} Selected`;
-                    selectionMeta.textContent = 'These responses will be permanently deleted';
-                } else if (action === 'deleteAll') {
-                    selectionCount.textContent = `${count} Total Responses`;
-                    selectionMeta.textContent = 'Every response in the system will be deleted';
-                }
-                
-                // Set description
-                descriptionTitle.innerHTML = config.descriptionTitle;
-                descriptionList.innerHTML = config.descriptionItems.map(item => `<li>${item}</li>`).join('');
-                
-                // Set confirm button
-                confirmBtn.className = `modal-btn modal-btn-confirm ${config.confirmClass}`;
-                confirmIcon.className = `bi ${config.confirmIcon}`;
-                confirmText.textContent = config.confirmText;
-                
-                // Show modal with animation
-                modal.classList.add('show');
-                document.body.style.overflow = 'hidden';
+                // Visual selected state on cards
+                $items.each(function () {
+                    $(this).closest('.resp-card').toggleClass('selected', $(this).is(':checked'));
+                });
             }
 
-            function hideConfirmationModal() {
-                modal.classList.remove('show');
-                document.body.style.overflow = '';
-                
-                // Reset after animation
-                setTimeout(() => {
-                    currentAction = '';
-                }, 300);
-            }
-
-            // Modal event listeners
-            cancelBtn.addEventListener('click', hideConfirmationModal);
-
-            confirmBtn.addEventListener('click', function() {
-                if (currentAction === 'deleteSelected') {
-                    // Add loading state
-                    this.classList.add('loading');
-                    this.disabled = true;
-
-                    // Create form with selected IDs
-                    const form = document.getElementById('deleteMultipleForm');
-                    const container = document.getElementById('selectedResponsesContainer');
-                    container.innerHTML = '';
-
-                    selectedResponses.forEach(function(id) {
-                        const input = document.createElement('input');
-                        input.type = 'hidden';
-                        input.name = 'ids';
-                        input.value = id;
-                        container.appendChild(input);
-                    });
-
-                    console.log('Submitting delete selected form with IDs:', selectedResponses);
-                    form.submit();
-                } else if (currentAction === 'deleteAll') {
-                    // Add loading state
-                    this.classList.add('loading');
-                    this.disabled = true;
-
-                    const form = document.getElementById('deleteAllForm');
-                    console.log('Submitting delete all form');
-                    form.submit();
-                }
-                
-                hideConfirmationModal();
+            $selectAll.on('change', function () {
+                $items.prop('checked', this.checked);
+                updateCount();
             });
 
-            // Close modal when clicking outside
-            modal.addEventListener('click', function(e) {
-                if (e.target === modal) {
-                    hideConfirmationModal();
-                }
+            $items.on('change', function () {
+                $selectAll.prop('checked', $items.length === $items.filter(':checked').length);
+                updateCount();
             });
 
-            // Close modal with Escape key
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape' && modal.classList.contains('show')) {
-                    hideConfirmationModal();
-                }
-            });
-
-            // Prevent modal content clicks from closing modal
-            modal.querySelector('.modal-content').addEventListener('click', function(e) {
-                e.stopPropagation();
-            });
-
-            // Update selection UI
-            function updateSelectionUI() {
-                const selectedCount = selectedResponses.length;
-                const selectedCountElement = document.getElementById('selectedCount');
-                const selectionTextElement = document.getElementById('selectionText');
-                const selectionControlsElement = document.getElementById('selectionControls');
-
-                console.log('Updating UI, selected count:', selectedCount);
-
-                if (selectedCountElement) {
-                    selectedCountElement.textContent = selectedCount + ' selected';
-                }
-
-                if (selectionTextElement) {
-                    selectionTextElement.textContent = selectedCount + ' response' + (selectedCount !== 1 ? 's' : '') + ' selected';
-                }
-
-                if (selectionControlsElement) {
-                    if (selectedCount > 0) {
-                        selectionControlsElement.classList.add('show');
-                    } else {
-                        selectionControlsElement.classList.remove('show');
-                    }
-                }
-
-                // Update master checkbox state
-                const totalResponses = document.querySelectorAll('.response-checkbox-input').length;
-                const masterCheckbox = document.getElementById('selectAllCheckbox');
-                const masterInput = document.getElementById('selectAllInput');
-                const masterIcon = masterCheckbox ? masterCheckbox.querySelector('i') : null;
-
-                if (masterCheckbox && masterInput && masterIcon) {
-                    if (selectedCount === 0) {
-                        masterCheckbox.classList.remove('checked');
-                        masterInput.checked = false;
-                        masterIcon.style.display = 'none';
-                    } else if (selectedCount === totalResponses) {
-                        masterCheckbox.classList.add('checked');
-                        masterInput.checked = true;
-                        masterIcon.style.display = 'block';
-                    } else {
-                        masterCheckbox.classList.remove('checked');
-                        masterInput.checked = false;
-                        masterIcon.style.display = 'none';
-                    }
-                }
-            }
-
-            // Handle individual checkbox changes
-            document.addEventListener('change', function(e) {
-                if (e.target.classList.contains('response-checkbox-input')) {
-                    const responseId = parseInt(e.target.value);
-                    const responseCard = e.target.closest('.response-card');
-                    
-                    console.log('Checkbox changed:', responseId, 'checked:', e.target.checked);
-
-                    if (e.target.checked) {
-                        if (!selectedResponses.includes(responseId)) {
-                            selectedResponses.push(responseId);
-                            if (responseCard) {
-                                responseCard.classList.add('selected');
-                            }
-                        }
-                    } else {
-                        selectedResponses = selectedResponses.filter(id => id !== responseId);
-                        if (responseCard) {
-                            responseCard.classList.remove('selected');
-                        }
-                    }
-
-                    updateSelectionUI();
-                    console.log('Selected responses:', selectedResponses);
-                }
-            });
-
-            // Handle master checkbox
-            const selectAllCheckbox = document.getElementById('selectAllCheckbox');
-            if (selectAllCheckbox) {
-                selectAllCheckbox.addEventListener('click', function(e) {
+            // Confirm before delete
+            $('#deleteForm').on('submit', function (e) {
+                var count = $items.filter(':checked').length;
+                if (count === 0) { e.preventDefault(); return false; }
+                if (!confirm('Are you sure you want to delete ' + count + ' response(s)? This cannot be undone.')) {
                     e.preventDefault();
-                    e.stopPropagation();
-                    
-                    const allInputs = document.querySelectorAll('.response-checkbox-input');
-                    const shouldSelectAll = selectedResponses.length !== allInputs.length;
-                    
-                    console.log('Master checkbox clicked, shouldSelectAll:', shouldSelectAll);
-
-                    if (shouldSelectAll) {
-                        selectedResponses = [];
-                        allInputs.forEach(function(input) {
-                            const responseId = parseInt(input.value);
-                            const responseCard = input.closest('.response-card');
-                            
-                            input.checked = true;
-                            selectedResponses.push(responseId);
-                            if (responseCard) {
-                                responseCard.classList.add('selected');
-                            }
-                        });
-                    } else {
-                        selectedResponses = [];
-                        allInputs.forEach(function(input) {
-                            const responseCard = input.closest('.response-card');
-                            
-                            input.checked = false;
-                            if (responseCard) {
-                                responseCard.classList.remove('selected');
-                            }
-                        });
-                    }
-
-                    updateSelectionUI();
-                    console.log('Updated selected responses:', selectedResponses);
-                });
-            }
-
-            // Deselect all button
-            const deselectAllBtn = document.getElementById('deselectAllBtn');
-            if (deselectAllBtn) {
-                deselectAllBtn.addEventListener('click', function() {
-                    console.log('Deselect all clicked');
-                    selectedResponses = [];
-                    
-                    document.querySelectorAll('.response-checkbox-input').forEach(function(input) {
-                        const responseCard = input.closest('.response-card');
-                        input.checked = false;
-                        if (responseCard) {
-                            responseCard.classList.remove('selected');
-                        }
-                    });
-                    
-                    updateSelectionUI();
-                });
-            }
-
-            // Delete selected button with beautiful modal
-            const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
-            if (deleteSelectedBtn) {
-                deleteSelectedBtn.addEventListener('click', function() {
-                    console.log('Delete selected clicked. Selected responses:', selectedResponses);
-                    
-                    if (selectedResponses.length === 0) {
-                        alert('Please select at least one response to delete.');
-                        return;
-                    }
-
-                    showConfirmationModal('deleteSelected', selectedResponses.length);
-                });
-            }
-
-            // Delete all button with beautiful modal
-            const deleteAllBtn = document.getElementById('deleteAllBtn');
-            if (deleteAllBtn) {
-                deleteAllBtn.addEventListener('click', function() {
-                    const totalResponses = document.querySelectorAll('.response-checkbox-input').length;
-                    showConfirmationModal('deleteAll', totalResponses);
-                });
-            }
-
-            // Initialize UI
-            updateSelectionUI();
-            
-            // Debug info
-            const checkboxes = document.querySelectorAll('.response-checkbox-input');
-            console.log('Total checkboxes found:', checkboxes.length);
-            
-            // Test each checkbox
-            checkboxes.forEach((checkbox, index) => {
-                console.log(`Checkbox ${index}:`, {
-                    id: checkbox.id,
-                    value: checkbox.value,
-                    visible: checkbox.offsetParent !== null
-                });
+                    return false;
+                }
             });
         });
     </script>

@@ -1,1708 +1,553 @@
-﻿@model EditQuestionnaireViewModel
-
+﻿@model Web.ViewModel.QuestionnaireVM.EditQuestionnaireViewModel
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Edit Questionnaire";
 }
-
 <style>
-    /* Modern Design Enhancements */
-    @@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
+    @@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
     :root {
-        --primary-color: #6366f1;
-        --primary-light: #8b5cf6;
-        --primary-dark: #4338ca;
-        --success-color: #10b981;
-        --danger-color: #ef4444;
-        --warning-color: #f59e0b;
-        --info-color: #06b6d4;
-        --gray-50: #f8fafc;
-        --gray-100: #f1f5f9;
-        --gray-200: #e2e8f0;
-        --gray-300: #cbd5e1;
-        --gray-400: #94a3b8;
-        --gray-500: #64748b;
-        --gray-600: #475569;
-        --gray-700: #334155;
-        --gray-800: #1e293b;
-        --gray-900: #0f172a;
-        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-        --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-        --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
-        --border-radius-sm: 8px;
-        --border-radius-md: 12px;
-        --border-radius-lg: 16px;
-        --border-radius-xl: 20px;
-    }
-
-    * {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    }
-
-    body {
-        background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
-        min-height: 100vh;
-    }
-
-    .container {
-        max-width: 1200px;
-    }
-
-    /* Enhanced Card Design */
-    .main-card {
-        background: white;
-        border-radius: var(--border-radius-xl);
-        box-shadow: var(--shadow-2xl);
-        border: 1px solid var(--gray-200);
-        overflow: hidden;
-        backdrop-filter: blur(10px);
-    }
-
-    .card-header-custom {
-        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
-        color: white;
-        padding: 2.5rem;
-        text-align: center;
-        border: none;
-        position: relative;
-        overflow: hidden;
-    }
-
-        .card-header-custom::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20"><defs><radialGradient id="a" cx="50%" cy="0%" r="100%"><stop offset="0%" stop-color="white" stop-opacity="0.1"/><stop offset="100%" stop-color="white" stop-opacity="0"/></radialGradient></defs><rect width="100" height="20" fill="url(%23a)"/></svg>');
-            opacity: 0.3;
-        }
-
-        .card-header-custom h5 {
-            font-size: 2rem;
-            font-weight: 700;
-            margin: 0;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            position: relative;
-            z-index: 1;
-        }
-
-    .card-body-custom {
-        padding: 3rem;
-        background: var(--gray-50);
-    }
-
-    /* Form Enhancements */
-    .form-group {
-        margin-bottom: 2rem;
-    }
-
-    .form-control {
-        border: 2px solid var(--gray-200);
-        border-radius: var(--border-radius-md);
-        padding: 1rem 1.25rem;
-        font-size: 0.95rem;
-        font-weight: 500;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        background: white;
-        box-shadow: var(--shadow-sm);
-        width: 100%;
-        min-height: 50px;
-    }
-
-        .form-control:focus {
-            border-color: var(--primary-color);
-            background: white;
-            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1), var(--shadow-md);
-            outline: none;
-            transform: translateY(-1px);
-        }
-
-    /* Enhanced Select Styling */
-    select.form-control {
-        appearance: none;
-        -webkit-appearance: none;
-        -moz-appearance: none;
-        background-color: white;
-        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
-        background-position: right 0.75rem center;
-        background-repeat: no-repeat;
-        background-size: 1.25em 1.25em;
-        padding-right: 2.5rem;
-        cursor: pointer;
-    }
-
-        select.form-control:focus {
-            background-color: white;
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236366f1' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
-            background-position: right 0.75rem center;
-            background-repeat: no-repeat;
-            background-size: 1.25em 1.25em;
-        }
-
-        select.form-control option {
-            padding: 0.75rem;
-            font-weight: 500;
-            color: var(--gray-900);
-            background: white;
-        }
-
-    .control-label {
-        font-weight: 600;
-        color: var(--gray-700);
-        margin-bottom: 0.75rem;
-        font-size: 0.95rem;
-        display: flex;
-        align-items: center;
-    }
-
-    /* Button Enhancements */
-    .btn {
-        border-radius: var(--border-radius-md);
-        font-weight: 600;
-        padding: 0.75rem 1.5rem;
-        font-size: 0.875rem;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        border: none;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        box-shadow: var(--shadow-sm);
-        position: relative;
-        overflow: hidden;
-    }
-
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.5s;
-        }
-
-        .btn:hover::before {
-            left: 100%;
-        }
-
-    .btn-primary {
-        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
-        color: white;
-    }
-
-        .btn-primary:hover {
-            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
-            color: white;
-        }
-
-    .btn-success {
-        background: linear-gradient(135deg, var(--success-color) 0%, #059669 100%);
-        color: white;
-    }
-
-        .btn-success:hover {
-            background: linear-gradient(135deg, #059669 0%, #047857 100%);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
-            color: white;
-        }
-
-    .btn-danger {
-        background: linear-gradient(135deg, var(--danger-color) 0%, #dc2626 100%);
-        color: white;
-    }
-
-        .btn-danger:hover {
-            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
-            color: white;
-        }
-
-    .btn-info {
-        background: linear-gradient(135deg, var(--info-color) 0%, #0891b2 100%);
-        color: white;
-    }
-
-        .btn-info:hover {
-            background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
-            color: white;
-        }
-
-    .btn-warning {
-        background: linear-gradient(135deg, var(--warning-color) 0%, #d97706 100%);
-        color: white;
-    }
-
-        .btn-warning:hover {
-            background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
-            color: white;
-        }
-
-    .btn-secondary {
-        background: linear-gradient(135deg, var(--gray-500) 0%, var(--gray-600) 100%);
-        color: white;
-    }
-
-        .btn-secondary:hover {
-            background: linear-gradient(135deg, var(--gray-600) 0%, var(--gray-700) 100%);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
-            color: white;
-        }
-
-    /* Bulk Selection Controls */
-    .bulk-selection-controls {
-        background: white;
-        border-radius: var(--border-radius-lg);
-        padding: 2rem;
-        margin: 2rem 0;
-        box-shadow: var(--shadow-lg);
-        border: 1px solid var(--gray-200);
-        display: none;
-        transition: all 0.3s ease;
-    }
-
-        .bulk-selection-controls.show {
-            display: block;
-            animation: slideDown 0.3s ease;
-        }
-
-    @@keyframes slideDown {
-        from
-
-    {
-        opacity: 0;
-        transform: translateY(-20px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-
-    }
-
-    .selection-summary {
-        background: linear-gradient(135deg, var(--info-color) 0%, #0891b2 100%);
-        color: white;
-        padding: 1rem 1.5rem;
-        border-radius: var(--border-radius-md);
-        margin-bottom: 1.5rem;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-    }
-
-    /* Question Container Enhancements */
-    #customCard {
-        background: white;
-        border: none;
-        border-radius: var(--border-radius-lg);
-        padding: 3rem;
-        margin: 3rem 0;
-        box-shadow: var(--shadow-xl);
-        position: relative;
-        overflow: hidden;
-    }
-
-        #customCard::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, var(--primary-color), var(--primary-light), var(--info-color));
-        }
-
-        #customCard h4 {
-            font-size: 1.75rem;
-            font-weight: 700;
-            color: var(--gray-800);
-            margin-bottom: 3rem;
-            text-align: center;
-        }
-
-    .question {
-        background: white;
-        border-radius: var(--border-radius-lg);
-        padding: 2.5rem;
-        margin-bottom: 2.5rem;
-        box-shadow: var(--shadow-lg);
-        border: 1px solid var(--gray-200);
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        position: relative;
-        overflow: hidden;
-    }
-
-        .question::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 4px;
-            height: 100%;
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-            transform: scaleY(0);
-            transition: transform 0.3s ease;
-            transform-origin: bottom;
-        }
-
-        .question:hover {
-            box-shadow: var(--shadow-2xl);
-            transform: translateY(-4px);
-            border-color: var(--primary-color);
-        }
-
-            .question:hover::before {
-                transform: scaleY(1);
-            }
-
-        .question.selected {
-            border-color: var(--danger-color);
-            background: linear-gradient(135deg, #fef2f2 0%, #fecaca 10%, white 100%);
-            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1), var(--shadow-lg);
-        }
-
-            .question.selected::before {
-                background: linear-gradient(135deg, var(--danger-color), #dc2626);
-                transform: scaleY(1);
-            }
-
-    /* Question Checkbox Styling */
-    .question-checkbox {
-        position: absolute;
-        top: 1.5rem;
-        right: 1.5rem;
-        z-index: 10;
-    }
-
-    .custom-checkbox {
-        width: 24px;
-        height: 24px;
-        border: 2px solid var(--gray-300);
-        border-radius: 6px;
-        background: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        box-shadow: var(--shadow-sm);
-    }
-
-        .custom-checkbox:hover {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-        }
-
-        .custom-checkbox.checked {
-            background: var(--danger-color);
-            border-color: var(--danger-color);
-            color: white;
-        }
-
-        .custom-checkbox input {
-            display: none;
-        }
-
-    /* Master checkbox styling */
-    .master-checkbox-container {
-        background: white;
-        border-radius: var(--border-radius-md);
-        padding: 1.5rem;
-        margin: 2rem 0;
-        box-shadow: var(--shadow-md);
-        border: 1px solid var(--gray-200);
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-    }
-
-    .master-checkbox {
-        width: 28px;
-        height: 28px;
-        border: 2px solid var(--gray-300);
-        border-radius: 8px;
-        background: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        box-shadow: var(--shadow-sm);
-    }
-
-        .master-checkbox:hover {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-        }
-
-        .master-checkbox.checked {
-            background: var(--primary-color);
-            border-color: var(--primary-color);
-            color: white;
-        }
-
-        .master-checkbox input {
-            display: none;
-        }
-
-    /* Question Separator */
-    .question-separator {
-        display: flex;
-        align-items: center;
-        margin-bottom: 2rem;
-    }
-
-    .line-container {
-        flex: 1;
-    }
-
-    .line-start, .line-end {
-        border: none;
-        height: 3px;
-        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
-        margin: 0;
-        border-radius: 2px;
-    }
-
-    .next-question-container {
-        padding: 0 1.5rem;
-    }
-
-    .badge {
-        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
-        color: white;
-        padding: 0.75rem 1.25rem;
-        border-radius: var(--border-radius-md);
-        font-weight: 600;
-        font-size: 0.8rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        box-shadow: var(--shadow-md);
-    }
-
-    /* Question Title Styling */
-    .question-title {
-        background: linear-gradient(135deg, var(--gray-50) 0%, var(--gray-100) 100%);
-        padding: 2rem 2rem 2rem 3rem;
-        border-radius: var(--border-radius-md);
-        border: 1px solid var(--gray-200);
-        margin-bottom: 1.5rem;
-        transition: all 0.3s ease;
-        position: relative;
-    }
-
-        .question-title:hover {
-            background: linear-gradient(135deg, var(--gray-100) 0%, var(--gray-200) 100%);
-            transform: translateY(-1px);
-        }
-
-    .item-question {
-        font-size: 1.15rem;
-        font-weight: 600;
-        color: var(--gray-900);
-        line-height: 1.6;
-        display: block;
-        word-wrap: break-word;
-        margin-bottom: 0;
-    }
-
-    /* Answer Section Enhancements */
-    .answers {
-        background: linear-gradient(135deg, var(--gray-50) 0%, var(--gray-100) 100%);
-        border-radius: var(--border-radius-md);
-        padding: 2rem;
-        margin: 1.5rem 0;
-        border: 1px solid var(--gray-200);
-    }
-
-        .answers h6 {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--gray-800);
-            margin-bottom: 1.5rem;
-        }
-
-    .answer, .answer-group {
-        background: white;
-        border-radius: var(--border-radius-md);
-        padding: 1.5rem;
-        margin-bottom: 1.25rem;
-        border: 2px solid var(--gray-200);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: var(--shadow-sm);
-    }
-
-        .answer:hover, .answer-group:hover {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1), var(--shadow-md);
-            transform: translateY(-1px);
-        }
-
-    /* Other Option Styling */
-    .other-option-group {
-        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-        border: 2px solid var(--warning-color);
-        position: relative;
-    }
-
-        .other-option-group::before {
-            content: "OTHER OPTION";
-            position: absolute;
-            top: -12px;
-            left: 20px;
-            background: var(--warning-color);
-            color: white;
-            padding: 0.375rem 1rem;
-            border-radius: var(--border-radius-sm);
-            font-size: 0.7rem;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            box-shadow: var(--shadow-sm);
-        }
-
-    .other-option-badge {
-        background: var(--warning-color);
-        color: white;
-        padding: 0.375rem 1rem;
-        border-radius: var(--border-radius-sm);
-        font-size: 0.75rem;
-        font-weight: 600;
-        margin-left: 0.75rem;
-        box-shadow: var(--shadow-sm);
-    }
-
-    .other-option-info {
-        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-        border: 1px solid var(--info-color);
-        border-radius: var(--border-radius-sm);
-        padding: 1rem 1.25rem;
-        margin-top: 1rem;
-        font-size: 0.875rem;
-        color: var(--gray-700);
-        font-weight: 500;
-    }
-
-        .other-option-info i {
-            color: var(--info-color);
-            margin-right: 0.75rem;
-        }
-
-    /* Question Type Info */
-    .question-type-info {
-        background: var(--gray-100);
-        border-radius: var(--border-radius-sm);
-        padding: 0.75rem 1rem;
-        margin-top: 0.5rem;
-        border-left: 4px solid var(--info-color);
-        font-size: 0.875rem;
-        color: var(--gray-700);
-    }
-
-        .question-type-info.supports-other {
-            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-            border-left-color: var(--info-color);
-        }
-
-        .question-type-info.no-other {
-            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
-            border-left-color: var(--gray-400);
-        }
-
-    /* Enhanced Other Option Button - Conditional Styling */
-    .addOtherOption {
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-        .addOtherOption.hidden {
-            display: none !important;
-        }
-
-        .addOtherOption.visible {
-            display: inline-flex !important;
-        }
-
-    /* Action Buttons */
-    .action-buttons {
-        display: flex;
-        gap: 1rem;
-        margin-top: 2rem;
-        flex-wrap: wrap;
-    }
-
-        .action-buttons .btn {
-            flex: 0 0 auto;
-        }
-
-    /* Add Question Button */
-    #addNewQuestion {
-        background: linear-gradient(135deg, var(--success-color) 0%, #059669 100%);
-        color: white;
-        padding: 1.25rem 2.5rem;
-        font-size: 1.1rem;
-        font-weight: 700;
-        border-radius: var(--border-radius-lg);
-        margin: 3rem 0;
-        box-shadow: var(--shadow-lg);
-        border: none;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        position: relative;
-        overflow: hidden;
-    }
-
-        #addNewQuestion:hover {
-            transform: translateY(-3px);
-            box-shadow: var(--shadow-2xl);
-            background: linear-gradient(135deg, #059669 0%, #047857 100%);
-        }
-
-    /* Alert Enhancements */
-    .alert {
-        border-radius: var(--border-radius-md);
-        padding: 1.25rem 1.5rem;
-        margin: 1.5rem 0;
-        border: none;
-        font-weight: 500;
-        box-shadow: var(--shadow-sm);
-    }
-
-    .alert-success {
-        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-        color: #065f46;
-        border-left: 4px solid var(--success-color);
-    }
-
-    .alert-info {
-        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-        color: #0c4a6e;
-        border-left: 4px solid var(--info-color);
-    }
-
-    .alert-warning {
-        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-        color: #92400e;
-        border-left: 4px solid var(--warning-color);
-    }
-
-    /* Form Actions */
-    .form-actions {
-        background: white;
-        padding: 2.5rem;
-        border-radius: var(--border-radius-lg);
-        margin-top: 3rem;
-        display: flex;
-        gap: 1.5rem;
-        flex-wrap: wrap;
-        align-items: center;
-        box-shadow: var(--shadow-lg);
-        border: 1px solid var(--gray-200);
-    }
-
-    /* Responsive Design */
-    @@media (max-width: 768px) {
-        .card-body-custom
-
-    {
-        padding: 2rem;
-    }
-
-    .question {
-        padding: 2rem;
-    }
-
-    #customCard {
-        padding: 2rem;
-    }
-
-    .action-buttons {
-        flex-direction: column;
-    }
-
-    .form-actions {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .card-header-custom h5 {
-        font-size: 1.5rem;
-    }
-
-    }
-
-    /* Modal Enhancements */
-    .modal-content {
-        border-radius: var(--border-radius-lg);
-        border: none;
-        box-shadow: var(--shadow-2xl);
-        overflow: hidden;
-    }
-
-    .modal-header {
-        background: linear-gradient(135deg, var(--danger-color) 0%, #dc2626 100%);
-        color: white;
-        border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
-        border: none;
-        padding: 2rem 2.5rem;
-    }
-
-    .modal-body {
-        padding: 2.5rem;
-        font-size: 1.1rem;
-        color: var(--gray-700);
-    }
-
-    .modal-footer {
-        padding: 2rem 2.5rem;
-        border: none;
-        background: var(--gray-50);
-    }
-
-    /* Loading States */
-    .btn.loading {
-        opacity: 0.7;
-        pointer-events: none;
-    }
-
-        .btn.loading::after {
-            content: "";
-            width: 18px;
-            height: 18px;
-            margin-left: 0.75rem;
-            border: 2px solid transparent;
-            border-top-color: currentColor;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-    @@keyframes spin {
-        0%
-
-    {
-        transform: rotate(0deg);
-    }
-
-    100% {
-        transform: rotate(360deg);
-    }
-
-    }
-
-    /* Animations */
-    .fade-in {
-        animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    @@keyframes fadeIn {
-        from
-
-    {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-
-    }
-
-    /* Enhanced Focus States */
-    .btn:focus,
-    .form-control:focus {
-        outline: 2px solid var(--primary-color);
-        outline-offset: 2px;
-    }
-
-    /* Smooth scrolling */
-    html {
-        scroll-behavior: smooth;
-    }
-
-    /* Enhanced Typography */
-    h1, h2, h3, h4, h5, h6 {
-        font-weight: 700;
-        letter-spacing: -0.025em;
-    }
-
-    /* Icon styling */
-    .bi {
-        font-size: 1.1em;
-    }
+        --bg:#0f1923;--bg-card:#1a2332;--bg-elevated:#1f2b3d;--bg-input:#16202e;--bg-hover:#243044;
+        --text-primary:#e8edf2;--text-secondary:#9ba8b9;--text-muted:#5e6e82;--text-faint:#3d4e63;
+        --teal:#33b3ae;--teal-soft:rgba(51,179,174,0.1);--teal-medium:rgba(51,179,174,0.2);--teal-glow:rgba(51,179,174,0.12);--teal-dark:#2a9490;
+        --amber:#f59e0b;--amber-soft:rgba(245,158,11,0.1);--amber-border:rgba(245,158,11,0.35);
+        --purple:#7c3aed;--purple-soft:rgba(124,58,237,0.1);--purple-border:rgba(124,58,237,0.35);
+        --red:#ef4444;--red-soft:rgba(239,68,68,0.1);
+        --green:#10b981;--green-soft:rgba(16,185,129,0.1);--green-border:rgba(16,185,129,0.35);
+        --border:rgba(255,255,255,0.06);--border-light:rgba(255,255,255,0.04);--border-focus:rgba(51,179,174,0.4);
+        --shadow-xs:0 1px 3px rgba(0,0,0,0.2);--shadow-sm:0 2px 8px rgba(0,0,0,0.25);--shadow-md:0 4px 16px rgba(0,0,0,0.3);--shadow-lg:0 8px 32px rgba(0,0,0,0.35);--shadow-teal:0 4px 20px rgba(51,179,174,0.2);
+        --radius-sm:8px;--radius-md:12px;--radius-lg:16px;
+        --transition:all 0.2s cubic-bezier(0.4,0,0.2,1);--transition-spring:all 0.35s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    @@keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    @@keyframes scaleIn{from{opacity:0;transform:scale(0.96)}to{opacity:1;transform:scale(1)}}
+    @@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    @@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+    *{box-sizing:border-box}
+    .edit-page{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);min-height:100vh;padding:32px 40px 80px;-webkit-font-smoothing:antialiased;color:var(--text-primary)}
+    .page-top{max-width:1280px;margin:0 auto 28px;animation:slideUp .5s ease both}
+    .page-breadcrumb{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-muted);margin-bottom:16px}
+    .page-breadcrumb a{color:var(--text-muted);text-decoration:none;transition:var(--transition)}
+    .page-breadcrumb a:hover{color:var(--teal)}
+    .page-breadcrumb .sep{color:var(--text-faint)}
+    .page-title-row{display:flex;align-items:center;justify-content:space-between;gap:20px}
+    .page-title{font-size:28px;font-weight:700;color:var(--text-primary);letter-spacing:-0.5px;margin:0}
+    .page-title-accent{display:inline-block;width:8px;height:8px;background:var(--teal);border-radius:50%;margin-left:4px;vertical-align:super;animation:pulse 2s ease infinite}
+    .question-counter-pill{display:flex;align-items:center;gap:8px;background:var(--bg-card);border:1px solid var(--border);border-radius:100px;padding:8px 20px;font-size:13px;font-weight:500;color:var(--text-secondary);box-shadow:var(--shadow-xs)}
+    .counter-number{font-weight:700;font-size:18px;color:var(--teal);line-height:1}
+    .meta-card{max-width:1280px;margin:0 auto 24px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px 32px;box-shadow:var(--shadow-xs);animation:slideUp .5s ease .1s both;transition:var(--transition)}
+    .meta-card:hover{box-shadow:var(--shadow-sm);border-color:rgba(255,255,255,0.08)}
+    .meta-row{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+    .field-group label{display:block;font-size:13px;font-weight:600;color:var(--text-secondary);margin-bottom:8px;letter-spacing:-0.01em}
+    .field-input{width:100%;background:var(--bg-input);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:12px 16px;font-size:14px;font-family:inherit;color:var(--text-primary);transition:var(--transition);outline:none}
+    .field-input::placeholder{color:var(--text-muted)}
+    .field-input:focus{background:var(--bg-elevated);border-color:var(--border-focus);box-shadow:0 0 0 3px var(--teal-glow)}
+    .builder-layout{max-width:1280px;margin:0 auto;display:flex;gap:24px;align-items:flex-start;animation:slideUp .5s ease .15s both}
+    .palette{width:240px;min-width:240px;position:sticky;top:24px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;box-shadow:var(--shadow-xs);transition:var(--transition);max-height:calc(100vh - 48px);overflow-y:auto}
+    .palette:hover{box-shadow:var(--shadow-sm)}
+    .palette-title{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px}
+    .palette-item{display:flex;align-items:center;gap:10px;padding:10px 12px;margin-bottom:4px;border-radius:var(--radius-sm);color:var(--text-secondary);font-size:13px;font-weight:500;cursor:grab;transition:var(--transition);user-select:none;border:1.5px solid transparent}
+    .palette-item:hover{background:var(--teal-soft);color:var(--teal);border-color:var(--teal-medium);transform:translateX(4px)}
+    .palette-item:active{cursor:grabbing;transform:scale(0.97)}
+    .palette-item .p-icon{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:6px;background:var(--bg-elevated);color:var(--teal);font-size:14px;flex-shrink:0;transition:var(--transition)}
+    .palette-item:hover .p-icon{background:var(--teal);color:#fff}
+    .palette::-webkit-scrollbar{width:4px}
+    .palette::-webkit-scrollbar-track{background:transparent}
+    .palette::-webkit-scrollbar-thumb{background:var(--text-faint);border-radius:4px}
+    .canvas-area{flex:1;min-width:0}
+    .canvas-drop{min-height:280px;border:2px dashed var(--border);border-radius:var(--radius-lg);padding:16px;transition:var(--transition);background:transparent}
+    .canvas-drop.drag-over{border-color:var(--teal);background:var(--teal-soft)}
+    .canvas-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:64px 24px;color:var(--text-muted)}
+    .canvas-empty-icon{width:56px;height:56px;border-radius:16px;background:var(--bg-elevated);display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--text-faint);margin-bottom:16px}
+    .canvas-empty p{font-size:14px;text-align:center;margin:0;line-height:1.6}
+    .q-card{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-md);margin-bottom:12px;overflow:hidden;transition:var(--transition);box-shadow:var(--shadow-xs);animation:scaleIn .3s ease both}
+    .q-card:hover{box-shadow:var(--shadow-sm);border-color:rgba(255,255,255,0.1)}
+    .q-card.saved{border-color:var(--green-border)}
+    .q-card.saved .q-header{background:var(--green-soft)}
+    .q-card.sortable-chosen{box-shadow:var(--shadow-lg);transform:rotate(0.5deg)}
+    .q-card.sortable-ghost{opacity:0.3}
+    .q-header{display:flex;align-items:center;gap:12px;padding:14px 18px;cursor:pointer;transition:var(--transition)}
+    .q-header:hover{background:var(--bg-elevated)}
+    .q-drag{color:var(--text-faint);cursor:grab;font-size:16px;transition:var(--transition)}
+    .q-drag:hover{color:var(--text-muted)}.q-drag:active{cursor:grabbing}
+    .q-num{width:28px;height:28px;border-radius:8px;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;transition:var(--transition-spring)}
+    .q-card:hover .q-num{transform:scale(1.08)}
+    .q-title{flex:1;font-size:14px;font-weight:500;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .q-type-tag{font-size:11px;font-weight:600;color:var(--teal);background:var(--teal-soft);padding:3px 10px;border-radius:100px;white-space:nowrap}
+    .q-saved-tag{font-size:11px;font-weight:600;color:var(--green);background:var(--green-soft);padding:3px 10px;border-radius:100px;display:none}
+    .q-card.saved .q-saved-tag{display:inline-block}
+    .q-chevron{color:var(--text-faint);font-size:14px;transition:transform .25s ease;padding:4px;background:none;border:none;cursor:pointer}
+    .q-chevron.open{transform:rotate(180deg)}
+    .q-remove{background:none;border:none;color:var(--text-faint);font-size:14px;padding:4px 6px;cursor:pointer;transition:var(--transition);border-radius:6px}
+    .q-remove:hover{color:var(--red);background:var(--red-soft)}
+    .q-body{display:none;padding:20px 20px 18px;border-top:1px solid var(--border-light);animation:fadeIn .2s ease}
+    .q-body.show{display:block}
+    .q-body .field-group{margin-bottom:16px}
+    .q-body label{display:block;font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.4px}
+    .q-body .field-input{background:var(--bg-input);border:1.5px solid var(--border);font-size:14px;padding:10px 14px}
+    .q-body .field-input:focus{background:var(--bg-elevated);border-color:var(--border-focus);box-shadow:0 0 0 3px var(--teal-glow)}
+    .q-body .field-input:disabled{background:var(--bg);color:var(--text-muted);cursor:not-allowed}
+    .ans-section{margin-top:14px}
+    .ans-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+    .ans-header label{margin:0}
+    .ans-hint{font-size:11px;font-style:italic;color:var(--text-muted);font-weight:400;text-transform:none;letter-spacing:0}
+    .ans-item{display:flex;align-items:center;gap:8px;margin-bottom:6px;padding:8px 10px;background:var(--bg-elevated);border:1.5px solid var(--border);border-radius:var(--radius-sm);transition:var(--transition);flex-wrap:wrap}
+    .ans-item:hover{border-color:rgba(255,255,255,0.1)}
+    .ans-item.is-other{border-color:var(--amber-border);background:var(--amber-soft)}
+    .ans-item.has-logic{border-left:3px solid var(--purple);background:var(--purple-soft)}
+    .ans-item.is-other.has-logic{border-color:var(--amber-border);border-left:3px solid var(--purple)}
+    .ans-drag{color:var(--text-faint);cursor:grab;font-size:14px}.ans-drag:active{cursor:grabbing}
+    .ans-input{flex:1;background:var(--bg-input);border:1.5px solid var(--border);border-radius:6px;padding:8px 12px;font-size:13px;font-family:inherit;color:var(--text-primary);outline:none;transition:var(--transition);min-width:100px}
+    .ans-input::placeholder{color:var(--text-faint)}
+    .ans-input:focus{border-color:var(--border-focus);box-shadow:0 0 0 2px var(--teal-glow)}
+    .ans-input:disabled{background:var(--bg);color:var(--text-muted)}
+    .ans-pill{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:100px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;cursor:pointer;transition:var(--transition);border:1.5px solid var(--border);background:var(--bg-input);color:var(--text-muted);white-space:nowrap;flex-shrink:0}
+    .ans-pill:hover{border-color:var(--text-muted)}
+    .ans-pill input{display:none}
+    .ans-pill.other-pill.active{background:var(--amber-soft);border-color:var(--amber-border);color:var(--amber)}
+    .ans-pill.logic-pill.active{background:var(--purple-soft);border-color:var(--purple-border);color:var(--purple)}
+    .ans-rm{background:none;border:none;color:var(--text-faint);cursor:pointer;padding:4px;border-radius:4px;font-size:13px;transition:var(--transition)}
+    .ans-rm:hover{color:var(--red);background:var(--red-soft)}
+    .logic-panel{display:none;width:100%;margin-top:8px;padding:12px 14px;background:var(--bg-card);border:1.5px solid var(--purple-border);border-radius:var(--radius-sm);animation:slideUp .2s ease both}
+    .logic-panel.show{display:block}
+    .logic-panel label{font-size:11px;font-weight:600;color:var(--purple);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:5px;display:block}
+    .logic-select,.logic-input{width:100%;background:var(--bg-input);border:1.5px solid var(--border);border-radius:6px;padding:7px 10px;font-size:12px;font-family:inherit;color:var(--text-primary);outline:none;transition:var(--transition)}
+    .logic-select:focus,.logic-input:focus{border-color:var(--purple-border);box-shadow:0 0 0 2px rgba(124,58,237,0.1)}
+    .logic-select option{background:var(--bg-card);color:var(--text-primary)}
+    .logic-sub{margin-top:8px;display:none}.logic-sub.show{display:block}
+    .logic-summary{margin-top:8px;font-size:11px;color:var(--text-muted);font-style:italic}
+    .logic-summary i{color:var(--purple)}
+    .add-ans-btn{width:100%;padding:10px;border:1.5px dashed var(--border);background:transparent;border-radius:var(--radius-sm);font-size:13px;font-weight:500;font-family:inherit;color:var(--text-muted);cursor:pointer;transition:var(--transition);margin-top:4px}
+    .add-ans-btn:hover{border-color:var(--teal);color:var(--teal);background:var(--teal-soft)}
+    .img-ans-item{display:flex;align-items:center;gap:10px;margin-bottom:8px;padding:10px 12px;background:var(--bg-elevated);border:1.5px solid var(--border);border-radius:var(--radius-sm)}
+    .img-ans-item .ans-drag{color:var(--text-faint);cursor:grab;font-size:14px}
+    .img-upload-wrap{flex:1;display:flex;align-items:center;gap:10px}
+    .img-upload-inner{flex:1}
+    .img-upload-label{font-size:11px;color:var(--text-muted);margin-bottom:4px}
+    .img-file-input{background:var(--bg-input);border:1.5px solid var(--border);color:var(--text-secondary);border-radius:6px;padding:6px 10px;font-size:12px;width:100%}
+    .img-file-input::-webkit-file-upload-button{background:var(--teal-soft);color:var(--teal);border:1px solid var(--teal-medium);border-radius:4px;padding:4px 12px;margin-right:10px;cursor:pointer;font-size:11px}
+    .img-preview{width:48px;height:48px;border-radius:6px;object-fit:cover;border:1px solid var(--border);display:none}
+    .img-preview.has-image{display:block}
+    .q-actions{display:flex;gap:8px;margin-top:16px;padding-top:14px;border-top:1px solid var(--border-light)}
+    .btn-q-save{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;transition:var(--transition-spring);border:1.5px solid var(--green-border);background:var(--green-soft);color:var(--green)}
+    .btn-q-save:hover{background:var(--green);color:#fff;transform:translateY(-1px);box-shadow:0 4px 12px rgba(16,185,129,0.25)}
+    .btn-q-edit{display:none;align-items:center;gap:6px;padding:8px 18px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;transition:var(--transition-spring);border:1.5px solid rgba(51,179,174,0.3);background:var(--teal-soft);color:var(--teal)}
+    .btn-q-edit:hover{background:var(--teal);color:#fff;transform:translateY(-1px);box-shadow:var(--shadow-teal)}
+    .submit-row{max-width:1280px;margin:24px auto 0;display:flex;justify-content:space-between;align-items:center;animation:slideUp .5s ease .25s both}
+    .btn-back{display:inline-flex;align-items:center;gap:8px;padding:14px 28px;background:var(--bg-card);color:var(--text-secondary);border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:14px;font-weight:500;font-family:inherit;cursor:pointer;transition:var(--transition);text-decoration:none}
+    .btn-back:hover{background:var(--bg-elevated);border-color:rgba(255,255,255,0.1);color:var(--text-primary)}
+    .btn-submit{display:inline-flex;align-items:center;gap:8px;padding:14px 32px;background:var(--teal);color:#fff;border:none;border-radius:var(--radius-sm);font-size:15px;font-weight:600;font-family:inherit;cursor:pointer;transition:var(--transition-spring);box-shadow:var(--shadow-teal);letter-spacing:-0.01em}
+    .btn-submit:hover{background:var(--teal-dark);transform:translateY(-2px);box-shadow:0 8px 28px rgba(51,179,174,0.25)}
+    .btn-submit:active{transform:translateY(-1px)}
+    @@media(max-width:768px){
+        .edit-page{padding:16px}
+        .builder-layout{flex-direction:column}
+        .palette{width:100%;min-width:unset;position:static;display:flex;flex-wrap:wrap;gap:4px;padding:12px;max-height:none}
+        .palette-title{width:100%}
+        .palette-item{flex:0 0 auto;margin-bottom:0;padding:8px 10px;font-size:12px}
+        .meta-row{grid-template-columns:1fr}
+        .submit-row{flex-direction:column-reverse;gap:12px}
+        .submit-row .btn-back,.submit-row .btn-submit{width:100%;justify-content:center}
+    }
+    .text-danger{color:var(--red)!important;font-size:12px}
 </style>
 
-<div class="container mt-4">
-    <div class="card main-card">
-        <div class="card-header-custom">
-            <h5><i class="bi bi-pencil-square me-2"></i>Edit Survey</h5>
+<div class="edit-page">
+    <form asp-action="Edit" asp-controller="Questionnaire" method="post" id="questionnaireForm" enctype="multipart/form-data">
+        <input type="hidden" asp-for="Id" />
+        <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+        <div class="page-top">
+            <div class="page-breadcrumb">
+                <a href="@Url.Action("Index", "Questionnaire")">Questionnaires</a>
+                <span class="sep">/</span>
+                <span>Edit</span>
+            </div>
+            <div class="page-title-row">
+                <h1 class="page-title">Edit Questionnaire<span class="page-title-accent"></span></h1>
+                <div class="question-counter-pill">
+                    <span class="counter-number" id="questionCounter">@(Model.Questions?.Count ?? 0)</span>
+                    <span>questions</span>
+                </div>
+            </div>
         </div>
-        <div class="card-body-custom">
-            <form asp-action="Edit">
-                <input type="hidden" asp-for="Id" />
 
-                <!-- Basic Information -->
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="form-group">
-                            <label asp-for="Title" class="control-label">
-                                <i class="bi bi-card-heading me-2"></i>Survey Title
-                            </label>
-                            <input asp-for="Title" class="form-control" placeholder="Enter survey title" />
-                            <span asp-validation-for="Title" class="text-danger"></span>
-                        </div>
-                    </div>
-                    <div class="col-md-12">
-                        <div class="form-group">
-                            <label asp-for="Description" class="control-label">
-                                <i class="bi bi-card-text me-2"></i>Description
-                            </label>
-                            <textarea asp-for="Description" class="form-control" rows="4" placeholder="Enter survey description"></textarea>
-                            <span asp-validation-for="Description" class="text-danger"></span>
-                        </div>
-                    </div>
+        <div class="meta-card">
+            <div class="meta-row">
+                <div class="field-group">
+                    <label asp-for="Title">Title</label>
+                    <input asp-for="Title" class="field-input" placeholder="Enter questionnaire title" />
+                    <span asp-validation-for="Title" class="text-danger"></span>
                 </div>
-
-                <!-- Questions Section -->
-                <div class="card" id="customCard">
-                    <div class="text-center">
-                        <h4><i class="bi bi-question-circle me-2"></i>Edit Questions or Add New Questions</h4>
-                    </div>
-
-                    <!-- Master Checkbox for Select All -->
-                    <div class="master-checkbox-container">
-                        <div class="master-checkbox" id="selectAllCheckbox">
-                            <input type="checkbox" id="selectAllInput">
-                            <i class="bi bi-check" style="display: none;"></i>
-                        </div>
-                        <label for="selectAllInput" class="mb-0 font-weight-bold">
-                            <i class="bi bi-check-square me-2"></i>Select All Questions
-                        </label>
-                        <div class="ms-auto">
-                            <span id="selectedCount" class="badge bg-primary">0 selected</span>
-                        </div>
-                    </div>
-
-                    <!-- Bulk Selection Controls -->
-                    <div class="bulk-selection-controls" id="bulkControls">
-                        <div class="selection-summary">
-                            <i class="bi bi-info-circle"></i>
-                            <span id="bulkSelectionText">0 questions selected</span>
-                        </div>
-                        <div class="d-flex gap-3 flex-wrap">
-                            <button type="button" class="btn btn-danger" id="deleteSelectedQuestions">
-                                <i class="bi bi-trash-fill"></i> Delete Selected Questions
-                            </button>
-                            <button type="button" class="btn btn-secondary" id="deselectAll">
-                                <i class="bi bi-x-circle"></i> Deselect All
-                            </button>
-                        </div>
-                    </div>
-
-                    <div id="questionsContainer">
-                        @for (int i = 0; i < Model.Questions.Count; i++)
-                        {
-                            <div class="question fade-in" data-question-index="@i">
-                                <!-- Question Checkbox -->
-                                <div class="question-checkbox">
-                                    <div class="custom-checkbox question-select-checkbox">
-                                        <input type="checkbox" class="question-checkbox-input">
-                                        <i class="bi bi-check" style="display: none;"></i>
-                                    </div>
-                                </div>
-
-                                <div class="question-separator">
-                                    <div class="line-container">
-                                        <hr class="line-start">
-                                    </div>
-                                    <div class="next-question-container">
-                                        <span class="badge">Question @(i + 1)</span>
-                                    </div>
-                                    <div class="line-container">
-                                        <hr class="line-end">
-                                    </div>
-                                </div>
-
-                                <input type="hidden" asp-for="Questions[i].Id" />
-
-                                <div class="question-title">
-                                    <div class="d-flex justify-content-between align-items-start">
-                                        <div class="flex-grow-1">
-                                            <span class="item-question">@Html.Raw(Model.Questions[i].Text)</span>
-                                        </div>
-                                        <div class="action-buttons">
-                                            <button type="button" class="btn btn-primary btn-sm editQuestion">
-                                                <i class="bi bi-pencil-square"></i> Edit
-                                            </button>
-                                            <button type="button" class="btn btn-danger btn-sm removeQuestion">
-                                                <i class="bi bi-trash"></i> Remove
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="question-details" style="display: none;">
-                                    <div class="form-group">
-                                        <label asp-for="Questions[i].Text" class="control-label">Question Text</label>
-                                        <input asp-for="Questions[i].Text" class="form-control" placeholder="Enter question text" />
-                                        <span asp-validation-for="Questions[i].Text" class="text-danger"></span>
-                                    </div>
-                                    <div class="form-group">
-                                        <label asp-for="Questions[i].Type" class="control-label">Question Type</label>
-                                        <select asp-for="Questions[i].Type" asp-items="@ViewBag.QuestionTypes" class="form-control question-type"></select>
-                                        <span asp-validation-for="Questions[i].Type" class="text-danger"></span>
-
-                                        <!-- Question Type Information -->
-                                        <div class="question-type-info">
-                                            <i class="bi bi-info-circle"></i>
-                                            <span class="type-info-text">Select a question type to see available options</span>
-                                        </div>
-                                    </div>
-
-                                    <div class="answers">
-                                        <h6 class="mb-3"><i class="bi bi-list-ul me-2"></i>Answer Options</h6>
-                                        @for (int j = 0; j < Model.Questions[i].Answers.Count; j++)
-                                        {
-                                            <div class="answer-group @(Model.Questions[i].Answers[j].IsOtherOption ? "other-option-group" : "")">
-                                                <input type="hidden" asp-for="Questions[i].Answers[j].Id" />
-                                                <input type="hidden" asp-for="Questions[i].Answers[j].IsOtherOption" />
-                                                <div class="form-group mb-0">
-                                                    <label asp-for="Questions[i].Answers[j].Text" class="control-label">
-                                                        Answer @(j + 1)
-                                                        @if (Model.Questions[i].Answers[j].IsOtherOption)
-                                                        {
-                                                            <span class="other-option-badge">Other Option</span>
-                                                        }
-                                                    </label>
-                                                    <div class="d-flex gap-2">
-                                                        <input asp-for="Questions[i].Answers[j].Text" class="form-control" placeholder="Enter answer text" />
-                                                        <button type="button" class="btn btn-danger btn-sm removeAnswer">
-                                                            <i class="bi bi-trash3"></i>
-                                                        </button>
-                                                    </div>
-                                                    <span asp-validation-for="Questions[i].Answers[j].Text" class="text-danger"></span>
-                                                    @if (Model.Questions[i].Answers[j].IsOtherOption)
-                                                    {
-                                                        <div class="other-option-info">
-                                                            <i class="bi bi-info-circle"></i>
-                                                            This option allows users to write their own custom response
-                                                        </div>
-                                                    }
-                                                </div>
-                                            </div>
-                                        }
-
-                                        <div class="d-flex gap-2 mt-3">
-                                            <button type="button" class="btn btn-success btn-sm addAnswer">
-                                                <i class="bi bi-plus-square"></i> Add Answer
-                                            </button>
-                                            <button type="button" class="btn btn-warning btn-sm addOtherOption">
-                                                <i class="bi bi-pencil-square"></i> Add "Other" Option
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <div class="action-buttons">
-                                        <button type="button" class="btn btn-primary saveQuestion">
-                                            <i class="bi bi-check-circle"></i> Save Changes
-                                        </button>
-                                        <button type="button" class="btn btn-secondary cancelEdit">
-                                            <i class="bi bi-x-circle"></i> Cancel
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        }
-                    </div>
+                <div class="field-group">
+                    <label asp-for="Description">Description</label>
+                    <textarea asp-for="Description" class="field-input" rows="1" placeholder="Brief description"></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
                 </div>
-
-                <div class="text-center">
-                    <button type="button" id="addNewQuestion">
-                        <i class="bi bi-plus-circle-fill"></i> Add New Question
-                    </button>
-                </div>
-
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary btn-lg">
-                        <i class="bi bi-save"></i> Update Survey
-                    </button>
-                    <a asp-action="Index" class="btn btn-info btn-lg">
-                        <i class="bi bi-arrow-left"></i> Back to List
-                    </a>
-                </div>
-            </form>
+            </div>
         </div>
-    </div>
+
+        <div class="builder-layout">
+            <div class="palette">
+                <div class="palette-title">Question Types</div>
+                <div id="questionTypePalette">
+                    <div class="palette-item" data-type="Text" draggable="true"><span class="p-icon"><i class="bi bi-fonts"></i></span>Text</div>
+                    <div class="palette-item" data-type="CheckBox" draggable="true"><span class="p-icon"><i class="bi bi-check2-square"></i></span>Checkbox</div>
+                    <div class="palette-item" data-type="TrueFalse" draggable="true"><span class="p-icon"><i class="bi bi-toggle-on"></i></span>True / False</div>
+                    <div class="palette-item" data-type="Multiple_choice" draggable="true"><span class="p-icon"><i class="bi bi-ui-radios"></i></span>Multiple Choice</div>
+                    <div class="palette-item" data-type="Rating" draggable="true"><span class="p-icon"><i class="bi bi-star"></i></span>Rating</div>
+                    <div class="palette-item" data-type="Likert" draggable="true"><span class="p-icon"><i class="bi bi-distribute-horizontal"></i></span>Likert Scale</div>
+                    <div class="palette-item" data-type="Matrix" draggable="true"><span class="p-icon"><i class="bi bi-grid-3x3"></i></span>Matrix</div>
+                    <div class="palette-item" data-type="Open_ended" draggable="true"><span class="p-icon"><i class="bi bi-chat-left-text"></i></span>Open Ended</div>
+                    <div class="palette-item" data-type="Demographic" draggable="true"><span class="p-icon"><i class="bi bi-people"></i></span>Demographic</div>
+                    <div class="palette-item" data-type="Ranking" draggable="true"><span class="p-icon"><i class="bi bi-sort-numeric-down"></i></span>Ranking</div>
+                    <div class="palette-item" data-type="Image" draggable="true"><span class="p-icon"><i class="bi bi-image"></i></span>Image</div>
+                    <div class="palette-item" data-type="Slider" draggable="true"><span class="p-icon"><i class="bi bi-sliders"></i></span>Slider</div>
+                </div>
+            </div>
+
+            <div class="canvas-area">
+                <div class="canvas-drop" id="questionsCanvas">
+                    <div class="canvas-empty" id="canvasPlaceholder" style="@(Model.Questions != null && Model.Questions.Count > 0 ? "display:none" : "")">
+                        <div class="canvas-empty-icon"><i class="bi bi-plus-lg"></i></div>
+                        <p>Drag a question type from the left<br>or click one to add it here</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="submit-row">
+            <a href="@Url.Action("Index", "Questionnaire")" class="btn-back"><i class="bi bi-arrow-left"></i> Back to List</a>
+            <button type="submit" class="btn-submit"><i class="bi bi-check-lg"></i> Update Questionnaire</button>
+        </div>
+
+        <div id="hiddenFormData"></div>
+    </form>
 </div>
-
-<!-- Enhanced Confirmation Modal for Single Question -->
-<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="confirmDeleteModalLabel">
-                    <i class="bi bi-exclamation-triangle me-2"></i>Confirm Deletion
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p class="mb-3">Are you sure you want to delete this question?</p>
-                <div class="alert alert-warning">
-                    <i class="bi bi-warning me-2"></i>
-                    <strong>Warning:</strong> This action cannot be undone. All associated answers and responses will be permanently removed.
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="bi bi-x"></i> Cancel
-                </button>
-                <button type="button" class="btn btn-danger confirm-delete">
-                    <i class="bi bi-trash"></i> Delete Question
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Enhanced Bulk Delete Confirmation Modal -->
-<div class="modal fade" id="confirmBulkDeleteModal" tabindex="-1" aria-labelledby="confirmBulkDeleteModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="confirmBulkDeleteModalLabel">
-                    <i class="bi bi-exclamation-triangle me-2"></i>Confirm Multiple Deletion
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="alert alert-danger">
-                    <i class="bi bi-exclamation-triangle me-2"></i>
-                    <strong>Critical Warning:</strong> You are about to delete <span id="deletionCount" class="fw-bold">0</span> question(s).
-                </div>
-                <p class="mb-3">This action will permanently remove:</p>
-                <ul class="list-unstyled">
-                    <li class="mb-2"><i class="bi bi-check text-danger me-2"></i><span id="questionCount">0</span> questions</li>
-                    <li class="mb-2"><i class="bi bi-check text-danger me-2"></i>All associated answers</li>
-                    <li class="mb-2"><i class="bi bi-check text-danger me-2"></i>All related user responses</li>
-                </ul>
-                <div class="alert alert-warning">
-                    <i class="bi bi-info-circle me-2"></i>
-                    <strong>Note:</strong> This action cannot be undone. Please ensure you want to proceed with this bulk deletion.
-                </div>
-                <div class="preview-container" id="deletionPreview">
-                    <h6 class="fw-bold mb-3">Questions to be deleted:</h6>
-                    <div class="preview-list" style="max-height: 200px; overflow-y: auto; background: #f8f9fa; padding: 1rem; border-radius: 8px;">
-                        <!-- Preview questions will be populated here -->
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="bi bi-x"></i> Cancel
-                </button>
-                <button type="button" class="btn btn-danger" id="confirmBulkDelete">
-                    <i class="bi bi-trash"></i> Delete All Selected Questions
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
 @section Scripts {
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ckeditor/4.11.4/ckeditor.js"></script>
-    <script>
-        CKEDITOR.replace("Description");
-    </script>
-    @{
-        <partial name="_ValidationScriptsPartial" />
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script>
+$(document).ready(function () {
+
+    const typesRequiredAnswers = ['CheckBox','TrueFalse','Multiple_choice','Rating','Likert','Ranking','Demographic'];
+    const typesOptionalAnswers = ['Text','Open_ended','Matrix','Slider'];
+    const typeIsImage = 'Image';
+    const typesWithOther = ['Multiple_choice','CheckBox','TrueFalse','Demographic','Likert','Matrix'];
+    const typesWithConditions = ['Multiple_choice','CheckBox','TrueFalse','Demographic','Likert','Matrix','Rating','Ranking','Image'];
+    const defaultAnswers = { 'TrueFalse':['True','False'], 'Likert':['Strongly Disagree','Disagree','Neutral','Agree','Strongly Agree'], 'Rating':['1','2','3','4','5'] };
+    let questionIndex = 0;
+
+    const canvas = document.getElementById('questionsCanvas');
+    Sortable.create(canvas, { animation: 200, handle: '.q-drag', ghostClass: 'sortable-ghost', chosenClass: 'sortable-chosen', filter: '.canvas-empty', onSort: () => { updateNums(); rebuild(); refreshAllJumps(); } });
+
+    // Palette drag & click
+    document.querySelectorAll('.palette-item').forEach(b => {
+        b.addEventListener('dragstart', e => { e.dataTransfer.setData('qType', b.dataset.type); e.dataTransfer.effectAllowed = 'copy'; });
+        b.addEventListener('click', () => addQ(b.dataset.type));
+    });
+    canvas.addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; canvas.classList.add('drag-over'); });
+    canvas.addEventListener('dragleave', () => canvas.classList.remove('drag-over'));
+    canvas.addEventListener('drop', e => { e.preventDefault(); canvas.classList.remove('drag-over'); const t = e.dataTransfer.getData('qType'); if (t) addQ(t); });
+
+    // ===== ADD NEW QUESTION =====
+    function addQ(type, existingText, existingAnswers, existingQId) {
+        $('#canvasPlaceholder').hide();
+        const qi = questionIndex;
+        const isImg = type === typeIsImage;
+        const isOpt = typesOptionalAnswers.includes(type);
+        const hasOther = typesWithOther.includes(type);
+        const hasCond = typesWithConditions.includes(type);
+        const qText = existingText || '';
+        const titleDisplay = qText || 'Untitled Question';
+
+        let ansHtml = '';
+        if (isImg) {
+            ansHtml = `<div class="ans-section"><div class="ans-header"><label>Image Answers</label></div><div class="img-ans-list" data-qi="${qi}">${imgAns(qi,0)}</div><button type="button" class="add-ans-btn add-img-btn" data-qi="${qi}"><i class="bi bi-plus"></i> Add Image</button></div>`;
+        } else {
+            let items = '';
+            if (existingAnswers && existingAnswers.length > 0) {
+                existingAnswers.forEach((a, i) => {
+                    const isOth = a.isOther || false;
+                    items += ansItem(qi, i, a.text, isOth, hasOther, hasCond, a.id, a.conditionJson);
+                });
+            } else {
+                const defs = defaultAnswers[type] || [];
+                if (defs.length) defs.forEach((v,i) => items += ansItem(qi,i,v,false,hasOther,hasCond,0,null));
+                else { items += ansItem(qi,0,'',false,hasOther,hasCond,0,null); items += ansItem(qi,1,'',false,hasOther,hasCond,0,null); }
+            }
+            const hint = isOpt ? `<span class="ans-hint">(optional)</span>` : '';
+            ansHtml = `<div class="ans-section"><div class="ans-header"><label>Answers ${hint}</label></div><div class="ans-list" data-qi="${qi}" data-other="${hasOther}" data-cond="${hasCond}">${items}</div><button type="button" class="add-ans-btn add-txt-btn" data-qi="${qi}" data-other="${hasOther}" data-cond="${hasCond}"><i class="bi bi-plus"></i> Add Answer</button></div>`;
+        }
+
+        const label = type.replace('_',' ');
+        const qIdAttr = existingQId ? ` data-qid="${existingQId}"` : '';
+
+        $(canvas).append(`
+            <div class="q-card" data-qi="${qi}" data-type="${type}"${qIdAttr}>
+                <div class="q-header">
+                    <span class="q-drag"><i class="bi bi-grip-vertical"></i></span>
+                    <span class="q-num">${qi+1}</span>
+                    <span class="q-title" id="qTitle_${qi}">${esc(titleDisplay)}</span>
+                    <span class="q-type-tag">${label}</span>
+                    <span class="q-saved-tag"><i class="bi bi-check"></i> Saved</span>
+                    <button type="button" class="q-chevron" data-ti="${qi}"><i class="bi bi-chevron-down"></i></button>
+                    <button type="button" class="q-remove" data-ri="${qi}"><i class="bi bi-x-lg"></i></button>
+                </div>
+                <div class="q-body" id="qBody_${qi}">
+                    <div class="field-group"><label>Question Text</label><textarea class="field-input q-text" data-qi="${qi}" placeholder="Type your question here..." rows="2">${esc(qText)}</textarea></div>
+                    ${ansHtml}
+                    <div class="q-actions">
+                        <button type="button" class="btn-q-save" data-qi="${qi}"><i class="bi bi-check-lg"></i> Save</button>
+                        <button type="button" class="btn-q-edit" data-qi="${qi}"><i class="bi bi-pencil"></i> Edit</button>
+                    </div>
+                </div>
+            </div>`);
+
+        // Init sortable on answer list
+        const al = document.querySelector(`.ans-list[data-qi="${qi}"]`);
+        if (al) Sortable.create(al, { animation: 150, handle: '.ans-drag', ghostClass: 'sortable-ghost', onSort: () => rebuild() });
+        const il = document.querySelector(`.img-ans-list[data-qi="${qi}"]`);
+        if (il) Sortable.create(il, { animation: 150, handle: '.ans-drag', ghostClass: 'sortable-ghost', onSort: () => rebuild() });
+
+        questionIndex++;
+        updateNums(); rebuild(); refreshAllJumps();
+
+        // If loading existing, auto-save the card
+        if (existingText) {
+            autoSaveCard(qi);
+        }
     }
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script>
-        $(document).ready(function () {
-            let questionToDelete = null;
-            let selectedQuestions = [];
+    function autoSaveCard(qi) {
+        const card = $(`.q-card[data-qi="${qi}"]`);
+        card.find('.q-text,.ans-input,.img-file-input,.oth-chk,.cond-action,.cond-jump,.cond-skip,.cond-end').prop('disabled', true);
+        card.find('.txt-rm,.img-rm,.logic-pill,.other-pill').css('pointer-events','none').css('opacity','0.4');
+        card.find('.add-txt-btn,.add-img-btn').hide();
+        card.find('.ans-drag').css('visibility','hidden');
+        card.find('.btn-q-save').hide();
+        card.find('.btn-q-edit').css('display','inline-flex');
+        card.addClass('saved');
+        $(`#qBody_${qi}`).removeClass('show');
+        card.find('.q-chevron').removeClass('open');
+    }
 
-            // ===== QUESTION TYPES THAT SUPPORT OTHER OPTIONS =====
-            const questionTypesWithOtherOption = [
-                'CheckBox',
-                'Multiple_choice',
-                'Demographic'
-            ];
+    // ===== ANSWER ITEM =====
+    function ansItem(qi, ai, val, isOth, supOther, supCond, ansId, condJson) {
+        const othCls = isOth ? 'is-other' : '';
+        const othPill = supOther ? `<label class="ans-pill other-pill ${isOth?'active':''}" title="Other option"><input type="checkbox" class="oth-chk" ${isOth?'checked':''}><i class="bi bi-chat-dots"></i> Other</label>` : '';
+        const condPill = supCond ? `<label class="ans-pill logic-pill" title="Condition logic"><i class="bi bi-lightning"></i> Logic</label>` : '';
+        const condPanel = supCond ? `
+            <div class="logic-panel">
+                <label><i class="bi bi-lightning-fill"></i> When selected:</label>
+                <select class="logic-select cond-action"><option value="0">\u27a1\ufe0f Continue normally</option><option value="1">\ud83c\udfaf Jump to question</option><option value="2">\u23ed\ufe0f Skip questions</option><option value="3">\ud83c\udfc1 End survey</option></select>
+                <div class="logic-sub sub-jump"><label>Jump to:</label><select class="logic-select cond-jump"><option value="">-- select --</option></select></div>
+                <div class="logic-sub sub-skip"><label>Skip how many:</label><input type="number" class="logic-input cond-skip" min="1" value="1" /></div>
+                <div class="logic-sub sub-end"><label>End message:</label><input type="text" class="logic-input cond-end" placeholder="Thank you!" /></div>
+                <div class="logic-summary"><i class="bi bi-info-circle"></i> <span class="cond-sum">Continue normally</span></div>
+            </div>` : '';
+        const aidAttr = ansId ? ` data-aid="${ansId}"` : '';
+        const condAttr = condJson ? ` data-cond='${esc(condJson)}'` : '';
+        return `<div class="ans-item ${othCls}" data-ai="${ai}"${aidAttr}${condAttr}><span class="ans-drag"><i class="bi bi-grip-vertical"></i></span><input type="text" class="ans-input" placeholder="Answer option..." value="${esc(val)}" />${othPill}${condPill}<button type="button" class="ans-rm txt-rm" title="Remove"><i class="bi bi-trash3"></i></button>${condPanel}</div>`;
+    }
 
-            // ===== FUNCTION TO CHECK IF QUESTION TYPE SUPPORTS OTHER OPTIONS =====
-            function supportsOtherOption(questionType) {
-                return questionTypesWithOtherOption.includes(questionType);
-            }
+    function imgAns(qi, ai) {
+        return `<div class="img-ans-item" data-ai="${ai}"><span class="ans-drag"><i class="bi bi-grip-vertical"></i></span><div class="img-upload-wrap"><div class="img-upload-inner"><div class="img-upload-label">Image ${ai+1}</div><input type="file" class="img-file-input" accept="image/*" data-qi="${qi}" data-ai="${ai}" /></div><img class="img-preview" id="imgP_${qi}_${ai}" src="" alt="" /></div><button type="button" class="ans-rm img-rm" title="Remove"><i class="bi bi-trash3"></i></button></div>`;
+    }
 
-            // ===== FUNCTION TO UPDATE OTHER OPTION VISIBILITY =====
-            function updateOtherOptionVisibility(questionContainer) {
-                const questionTypeSelect = questionContainer.find('.question-type');
-                const selectedType = questionTypeSelect.val();
-                const addOtherBtn = questionContainer.find('.addOtherOption');
-                const typeInfo = questionContainer.find('.question-type-info');
-                const typeInfoText = typeInfo.find('.type-info-text');
-
-                // Get the text of the selected option
-                const selectedOptionText = questionTypeSelect.find('option:selected').text();
-
-                if (supportsOtherOption(selectedType)) {
-                    // Show "Add Other Option" button
-                    addOtherBtn.removeClass('hidden').addClass('visible').show();
-                    typeInfo.removeClass('no-other').addClass('supports-other');
-                    typeInfoText.html(`<strong>${selectedOptionText}</strong> supports "Other" options - users can provide custom answers`);
-                } else {
-                    // Hide "Add Other Option" button
-                    addOtherBtn.removeClass('visible').addClass('hidden').hide();
-                    typeInfo.removeClass('supports-other').addClass('no-other');
-                    typeInfoText.html(`<strong>${selectedOptionText}</strong> does not support "Other" options`);
-
-                    // Remove any existing other options for this question
-                    questionContainer.find('.other-option-group').remove();
-                }
-            }
-
-            // ===== UPDATE EXISTING QUESTIONS ON PAGE LOAD =====
-            $('.question').each(function() {
-                updateOtherOptionVisibility($(this));
-            });
-
-            // ===== HANDLE QUESTION TYPE CHANGES FOR EXISTING QUESTIONS =====
-            $(document).on("change", ".question-type", function () {
-                const questionContainer = $(this).closest('.question');
-                updateOtherOptionVisibility(questionContainer);
-            });
-
-            // Update selection UI
-            function updateSelectionUI() {
-                const selectedCount = selectedQuestions.length;
-                $('#selectedCount').text(selectedCount + ' selected');
-                $('#bulkSelectionText').text(selectedCount + ' question' + (selectedCount !== 1 ? 's' : '') + ' selected');
-
-                if (selectedCount > 0) {
-                    $('#bulkControls').addClass('show');
-                } else {
-                    $('#bulkControls').removeClass('show');
-                }
-
-                // Update master checkbox state
-                const totalQuestions = $('.question-checkbox-input').length;
-                const masterCheckbox = $('#selectAllCheckbox');
-                const masterInput = $('#selectAllInput');
-
-                if (selectedCount === 0) {
-                    masterCheckbox.removeClass('checked');
-                    masterInput.prop('checked', false);
-                    masterCheckbox.find('i').hide();
-                } else if (selectedCount === totalQuestions) {
-                    masterCheckbox.addClass('checked');
-                    masterInput.prop('checked', true);
-                    masterCheckbox.find('i').show();
-                } else {
-                    masterCheckbox.removeClass('checked');
-                    masterInput.prop('checked', false);
-                    masterCheckbox.find('i').hide();
-                }
-            }
-
-            // Handle individual question checkbox clicks
-            $(document).on('change', '.question-checkbox-input', function() {
-                const questionContainer = $(this).closest('.question');
-                const questionIndex = questionContainer.data('question-index');
-                const checkbox = $(this).closest('.custom-checkbox');
-
-                if ($(this).is(':checked')) {
-                    if (!selectedQuestions.includes(questionIndex)) {
-                        selectedQuestions.push(questionIndex);
-                        questionContainer.addClass('selected');
-                        checkbox.addClass('checked');
-                        checkbox.find('i').show();
-                    }
-                } else {
-                    selectedQuestions = selectedQuestions.filter(q => q !== questionIndex);
-                    questionContainer.removeClass('selected');
-                    checkbox.removeClass('checked');
-                    checkbox.find('i').hide();
-                }
-
-                updateSelectionUI();
-            });
-
-            // Handle checkbox visual clicks
-            $(document).on('click', '.question-select-checkbox', function() {
-                const input = $(this).find('input');
-                input.prop('checked', !input.is(':checked')).trigger('change');
-            });
-
-            // Handle master checkbox
-            $('#selectAllCheckbox').click(function() {
-                const shouldSelectAll = selectedQuestions.length !== $('.question-checkbox-input').length;
-
-                $('.question-checkbox-input').each(function() {
-                    const questionContainer = $(this).closest('.question');
-                    const questionIndex = questionContainer.data('question-index');
-                    const checkbox = $(this).closest('.custom-checkbox');
-
-                    $(this).prop('checked', shouldSelectAll);
-
-                    if (shouldSelectAll) {
-                        if (!selectedQuestions.includes(questionIndex)) {
-                            selectedQuestions.push(questionIndex);
-                        }
-                        questionContainer.addClass('selected');
-                        checkbox.addClass('checked');
-                        checkbox.find('i').show();
-                    } else {
-                        selectedQuestions = [];
-                        questionContainer.removeClass('selected');
-                        checkbox.removeClass('checked');
-                        checkbox.find('i').hide();
-                    }
-                });
-
-                updateSelectionUI();
-            });
-
-            // Deselect all button
-            $('#deselectAll').click(function() {
-                selectedQuestions = [];
-                $('.question-checkbox-input').prop('checked', false);
-                $('.question').removeClass('selected');
-                $('.custom-checkbox').removeClass('checked');
-                $('.custom-checkbox i').hide();
-                updateSelectionUI();
-            });
-
-            // Handle bulk delete button
-            $('#deleteSelectedQuestions').click(function() {
-                if (selectedQuestions.length === 0) {
-                    alert('Please select at least one question to delete.');
-                    return;
-                }
-
-                // Update modal content
-                $('#deletionCount, #questionCount').text(selectedQuestions.length);
-
-                // Populate preview
-                const previewContainer = $('#deletionPreview .preview-list');
-                previewContainer.empty();
-
-                selectedQuestions.forEach(function(questionIndex) {
-                    const questionContainer = $(`.question[data-question-index="${questionIndex}"]`);
-                    const questionText = questionContainer.find('.item-question').text().trim();
-                    const truncatedText = questionText.length > 80 ? questionText.substring(0, 80) + '...' : questionText;
-
-                    previewContainer.append(`
-                        <div class="mb-2 p-2 bg-white rounded border">
-                            <strong>Question ${questionIndex + 1}:</strong> ${truncatedText}
-                        </div>
-                    `);
-                });
-
-                $('#confirmBulkDeleteModal').modal('show');
-            });
-
-            // Confirm bulk deletion
-            $('#confirmBulkDelete').click(function() {
-                const $btn = $(this);
-                $btn.addClass('loading').prop('disabled', true);
-
-                // Sort in descending order to avoid index issues when removing
-                selectedQuestions.sort((a, b) => b - a);
-
-                // Remove selected questions with animation
-                let delay = 0;
-                selectedQuestions.forEach(function(questionIndex) {
-                    setTimeout(function() {
-                        const questionContainer = $(`.question[data-question-index="${questionIndex}"]`);
-                        questionContainer.fadeOut(300, function() {
-                            $(this).remove();
-                        });
-                    }, delay);
-                    delay += 100;
-                });
-
-                // Reset selection state and re-index form after all deletions
-                setTimeout(function() {
-                    selectedQuestions = [];
-                    updateSelectionUI();
-
-                    // Re-index all remaining questions and their form fields
-                    reindexAllQuestions();
-
-                    $('#confirmBulkDeleteModal').modal('hide');
-                    $btn.removeClass('loading').prop('disabled', false);
-
-                    // Show success message
-                    const successMessage = $('<div class="alert alert-success fade-in" role="alert"><i class="bi bi-check-circle me-2"></i>Selected questions deleted successfully!</div>');
-                    $('#customCard').prepend(successMessage);
-
-                    setTimeout(function() {
-                        successMessage.fadeOut(300, function() {
-                            $(this).remove();
-                        });
-                    }, 3000);
-                }, delay + 500);
-            });
-
-            // Function to update question numbers after deletion
-            function updateQuestionNumbers() {
-                $('.question').each(function(index) {
-                    $(this).find('.badge').text('Question ' + (index + 1));
-                    $(this).attr('data-question-index', index);
-                });
-            }
-
-            // Function to properly re-index all form fields after question deletion
-            function reindexAllQuestions() {
-                $('.question').each(function(questionIndex) {
-                    const questionContainer = $(this);
-
-                    // Update data attribute and badge
-                    questionContainer.attr('data-question-index', questionIndex);
-                    questionContainer.find('.badge').text('Question ' + (questionIndex + 1));
-
-                    // Update question form fields
-                    questionContainer.find('input[name*="Questions["]').each(function() {
-                        const name = $(this).attr('name');
-                        if (name) {
-                            const newName = name.replace(/Questions\[\d+\]/, `Questions[${questionIndex}]`);
-                            $(this).attr('name', newName);
-                        }
-                    });
-
-                    questionContainer.find('select[name*="Questions["]').each(function() {
-                        const name = $(this).attr('name');
-                        if (name) {
-                            const newName = name.replace(/Questions\[\d+\]/, `Questions[${questionIndex}]`);
-                            $(this).attr('name', newName);
-                        }
-                    });
-
-                    questionContainer.find('textarea[name*="Questions["]').each(function() {
-                        const name = $(this).attr('name');
-                        if (name) {
-                            const newName = name.replace(/Questions\[\d+\]/, `Questions[${questionIndex}]`);
-                            $(this).attr('name', newName);
-                        }
-                    });
-
-                    // Update answer form fields
-                    questionContainer.find('.answer-group').each(function(answerIndex) {
-                        $(this).find('input[name*="Answers["]').each(function() {
-                            const name = $(this).attr('name');
-                            if (name) {
-                                const newName = name.replace(/Questions\[\d+\]\.Answers\[\d+\]/, `Questions[${questionIndex}].Answers[${answerIndex}]`);
-                                $(this).attr('name', newName);
-                            }
-                        });
-
-                        // Update answer labels
-                        const label = $(this).find('label.control-label').first();
-                        if (label.length) {
-                            const labelText = label.text();
-                            if (labelText.includes('Answer ')) {
-                                const otherContent = label.find('.other-option-badge').length > 0 ?
-                                    ' <span class="other-option-badge">Other Option</span>' : '';
-                                label.html(`Answer ${answerIndex + 1}${otherContent}`);
+    // ===== LOAD EXISTING QUESTIONS FROM MODEL =====
+    @if(Model.Questions != null && Model.Questions.Count > 0)
+    {
+        <text>
+        const existingQuestions = [
+            @for(int i = 0; i < Model.Questions.Count; i++)
+            {
+                var q = Model.Questions[i];
+                var typeStr = q.Type.ToString();
+                var qTextJs = q.Text?.Replace("\\", "\\\\").Replace("'", "\\'").Replace("\n", "\\n").Replace("\r", "") ?? "";
+                <text>{
+                    id: @q.Id,
+                    text: '@Html.Raw(qTextJs)',
+                    type: '@typeStr',
+                    answers: [
+                        @if(q.Answers != null)
+                        {
+                            for(int j = 0; j < q.Answers.Count; j++)
+                            {
+                                var a = q.Answers[j];
+                                var aTextJs = a.Text?.Replace("\\", "\\\\").Replace("'", "\\'").Replace("\n", "\\n").Replace("\r", "") ?? "";
+                                <text>{ id: @a.Id, text: '@Html.Raw(aTextJs)', isOther: false, conditionJson: null }@(j < q.Answers.Count - 1 ? "," : "")</text>
                             }
                         }
-                    });
-                });
+                    ]
+                }@(i < Model.Questions.Count - 1 ? "," : "")</text>
             }
+        ];
 
-            // Function to add a new regular answer
-            $(document).on('click', '.addAnswer', function () {
-                var questionContainer = $(this).closest('.question');
-                var questionIndex = questionContainer.attr('data-question-index');
-                var newAnswerIndex = questionContainer.find('.answers .answer-group').length;
-
-                var answerHtml = `
-                    <div class="answer-group fade-in">
-                        <div class="form-group mb-0">
-                            <label class="control-label">Answer ${newAnswerIndex + 1}</label>
-                            <div class="d-flex gap-2">
-                                <input type="text" name="Questions[${questionIndex}].Answers[${newAnswerIndex}].Text" class="form-control" placeholder="Enter answer text" />
-                                <input type="hidden" name="Questions[${questionIndex}].Answers[${newAnswerIndex}].IsOtherOption" value="false" />
-                                <button type="button" class="btn btn-danger btn-sm removeAnswer">
-                                    <i class="bi bi-trash3"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>`;
-
-                $(this).closest('.d-flex').before(answerHtml);
-            });
-
-            // Function to add "Other" option - Enhanced with validation
-            $(document).on('click', '.addOtherOption', function () {
-                var questionContainer = $(this).closest('.question');
-                var questionIndex = questionContainer.attr('data-question-index');
-                var newAnswerIndex = questionContainer.find('.answers .answer-group').length;
-                var questionTypeSelect = questionContainer.find('.question-type');
-                var selectedType = questionTypeSelect.val();
-
-                // Double-check if the question type supports other options
-                if (!supportsOtherOption(selectedType)) {
-                    const selectedOptionText = questionTypeSelect.find('option:selected').text();
-                    alert(`"Other" options are not supported for ${selectedOptionText} question type.`);
-                    return;
-                }
-
-                // Check if "Other" option already exists
-                var existingOther = questionContainer.find('.other-option-group');
-                if (existingOther.length > 0) {
-                    alert('An "Other" option already exists for this question.');
-                    return;
-                }
-
-                var otherOptionHtml = `
-                    <div class="answer-group other-option-group fade-in">
-                        <div class="form-group mb-0">
-                            <label class="control-label">
-                                Answer ${newAnswerIndex + 1}
-                                <span class="other-option-badge">Other Option</span>
-                            </label>
-                            <div class="d-flex gap-2">
-                                <input type="text" name="Questions[${questionIndex}].Answers[${newAnswerIndex}].Text" class="form-control" placeholder="Other (please specify)" value="Other (please specify)" />
-                                <input type="hidden" name="Questions[${questionIndex}].Answers[${newAnswerIndex}].IsOtherOption" value="true" />
-                                <button type="button" class="btn btn-warning btn-sm removeAnswer">
-                                    <i class="bi bi-trash3"></i> Remove Other
-                                </button>
-                            </div>
-                            <div class="other-option-info">
-                                <i class="bi bi-info-circle"></i>
-                                This option allows users to write their own custom response
-                            </div>
-                        </div>
-                    </div>`;
-
-                $(this).closest('.d-flex').before(otherOptionHtml);
-            });
-
-            // Function to remove an answer
-            $(document).on('click', '.removeAnswer', function () {
-                const questionContainer = $(this).closest('.question');
-                $(this).closest('.answer-group').fadeOut(300, function() {
-                    $(this).remove();
-                    // Re-index answers in this question
-                    const questionIndex = questionContainer.attr('data-question-index');
-                    questionContainer.find('.answer-group').each(function(answerIndex) {
-                        $(this).find('input[name*="Answers["]').each(function() {
-                            const name = $(this).attr('name');
-                            if (name) {
-                                const newName = name.replace(/Questions\[\d+\]\.Answers\[\d+\]/, `Questions[${questionIndex}].Answers[${answerIndex}]`);
-                                $(this).attr('name', newName);
-                            }
-                        });
-
-                        // Update answer labels
-                        const label = $(this).find('label.control-label').first();
-                        if (label.length) {
-                            const otherContent = label.find('.other-option-badge').length > 0 ?
-                                ' <span class="other-option-badge">Other Option</span>' : '';
-                            label.html(`Answer ${answerIndex + 1}${otherContent}`);
-                        }
-                    });
-                });
-            });
-
-            // Function to toggle question edit mode
-            $(document).on('click', '.editQuestion', function () {
-                var questionContainer = $(this).closest('.question');
-                questionContainer.find('.question-title').hide();
-                questionContainer.find('.question-details').slideDown(300);
-
-                // Update other option visibility when editing starts
-                updateOtherOptionVisibility(questionContainer);
-            });
-
-            // Function to cancel edit
-            $(document).on('click', '.cancelEdit', function () {
-                var questionContainer = $(this).closest('.question');
-                questionContainer.find('.question-details').slideUp(300);
-                questionContainer.find('.question-title').show();
-            });
-
-            // Function to save question details
-            $(document).on('click', '.saveQuestion', function () {
-                var $btn = $(this);
-                var questionContainer = $btn.closest('.question');
-
-                // Add loading state
-                $btn.addClass('loading').prop('disabled', true);
-
-                setTimeout(function() {
-                    var questionText = questionContainer.find('.question-details input[name$=".Text"]:first').val();
-
-                    // Update the question title display with full text
-                    questionContainer.find('.item-question').text(questionText);
-
-                    questionContainer.find('.question-details').slideUp(300);
-                    questionContainer.find('.question-title').show();
-
-                    // Show success message
-                    var successMessage = $('<div class="alert alert-success fade-in" role="alert"><i class="bi bi-check-circle me-2"></i>Question updated successfully!</div>');
-                    questionContainer.prepend(successMessage);
-
-                    setTimeout(function() {
-                        successMessage.fadeOut(300, function() {
-                            $(this).remove();
-                        });
-                    }, 3000);
-
-                    // Remove loading state
-                    $btn.removeClass('loading').prop('disabled', false);
-                }, 500);
-            });
-
-            // Function to handle question deletion
-            $(document).on('click', '.removeQuestion', function () {
-                questionToDelete = $(this).closest('.question');
-                $('#confirmDeleteModal').modal('show');
-            });
-
-            // Confirm deletion
-            $('.confirm-delete').click(function () {
-                if (questionToDelete) {
-                    const questionIndex = questionToDelete.data('question-index');
-
-                    // Remove from selection if it was selected
-                    selectedQuestions = selectedQuestions.filter(q => q !== questionIndex);
-                    updateSelectionUI();
-
-                    questionToDelete.fadeOut(300, function() {
-                        $(this).remove();
-                        // Re-index all remaining questions and their form fields
-                        reindexAllQuestions();
-                    });
-                    $('#confirmDeleteModal').modal('hide');
-                    questionToDelete = null;
-                }
-            });
-
-            // Function to add a new question
-            $('#addNewQuestion').click(function () {
-                var $btn = $(this);
-                $btn.addClass('loading').prop('disabled', true);
-
-                setTimeout(function() {
-                    var newQuestionIndex = $('.question').length;
-
-                    var questionHtml = `
-                        <div class="question fade-in" data-question-index="${newQuestionIndex}">
-                            <!-- Question Checkbox -->
-                            <div class="question-checkbox">
-                                <div class="custom-checkbox question-select-checkbox">
-                                    <input type="checkbox" class="question-checkbox-input">
-                                    <i class="bi bi-check" style="display: none;"></i>
-                                </div>
-                            </div>
-
-                            <div class="question-separator">
-                                <div class="line-container">
-                                    <hr class="line-start">
-                                </div>
-                                <div class="next-question-container">
-                                    <span class="badge">Question ${newQuestionIndex + 1}</span>
-                                </div>
-                                <div class="line-container">
-                                    <hr class="line-end">
-                                </div>
-                            </div>
-
-                            <div class="question-details">
-                                <div class="form-group">
-                                    <label class="control-label">Question Text</label>
-                                    <input type="text" class="form-control" name="Questions[${newQuestionIndex}].Text" placeholder="Enter question text"/>
-                                </div>
-                                <div class="form-group">
-                                    <label class="control-label">Question Type</label>
-                                    <select class="form-control question-type" name="Questions[${newQuestionIndex}].Type">`;
-
-                    // Add question type options dynamically
-                    var questionTypes = @Html.Raw(Json.Serialize(Enum.GetNames(typeof(QuestionType))));
-                    for (var i = 0; i < questionTypes.length; i++) {
-                        questionHtml += `<option value="${questionTypes[i]}">${questionTypes[i]}</option>`;
-                    }
-
-                    questionHtml += `</select>
-
-                                    <!-- Question Type Information -->
-                                    <div class="question-type-info">
-                                        <i class="bi bi-info-circle"></i>
-                                        <span class="type-info-text">Select a question type to see available options</span>
-                                    </div>
-                                </div>
-
-                                <div class="answers">
-                                    <h6 class="mb-3"><i class="bi bi-list-ul me-2"></i>Answer Options</h6>
-                                    <div class="answer-group">
-                                        <div class="form-group mb-0">
-                                            <label class="control-label">Answer 1</label>
-                                            <div class="d-flex gap-2">
-                                                <input type="text" class="form-control" name="Questions[${newQuestionIndex}].Answers[0].Text" placeholder="Enter answer text"/>
-                                                <input type="hidden" name="Questions[${newQuestionIndex}].Answers[0].IsOtherOption" value="false"/>
-                                                <button type="button" class="btn btn-danger btn-sm removeAnswer">
-                                                    <i class="bi bi-trash3"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="d-flex gap-2 mt-3">
-                                        <button type="button" class="btn btn-success btn-sm addAnswer">
-                                            <i class="bi bi-plus-square"></i> Add Answer
-                                        </button>
-                                        <button type="button" class="btn btn-warning btn-sm addOtherOption hidden">
-                                            <i class="bi bi-pencil-square"></i> Add "Other" Option
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div class="action-buttons">
-                                    <button type="button" class="btn btn-primary saveQuestion">
-                                        <i class="bi bi-check-circle"></i> Save Question
-                                    </button>
-                                    <button type="button" class="btn btn-danger removeQuestion">
-                                        <i class="bi bi-trash"></i> Remove Question
-                                    </button>
-                                </div>
-                            </div>
-                        </div>`;
-
-                    const newQuestionElement = $(questionHtml);
-                    $('#questionsContainer').append(newQuestionElement);
-
-                    // Update other option visibility for the new question
-                    updateOtherOptionVisibility(newQuestionElement);
-
-                    // Scroll to new question
-                    $('html, body').animate({
-                        scrollTop: newQuestionElement.offset().top - 100
-                    }, 500);
-
-                    $btn.removeClass('loading').prop('disabled', false);
-                }, 300);
-            });
-
-            // Initialize UI
-            updateSelectionUI();
+        existingQuestions.forEach(eq => {
+            addQ(eq.type, eq.text, eq.answers, eq.id);
         });
-    </script>
+        </text>
+    }
+
+    // ===== CONDITION LOGIC =====
+    $(document).on('click', '.logic-pill', function () {
+        const panel = $(this).closest('.ans-item').find('.logic-panel');
+        panel.toggleClass('show'); $(this).toggleClass('active');
+        if (panel.hasClass('show')) refreshJump($(this).closest('.ans-item'));
+    });
+    $(document).on('change', '.cond-action', function () {
+        const p = $(this).closest('.logic-panel');
+        p.find('.logic-sub').removeClass('show');
+        const v = $(this).val();
+        if (v==='1') p.find('.sub-jump').addClass('show');
+        else if (v==='2') p.find('.sub-skip').addClass('show');
+        else if (v==='3') p.find('.sub-end').addClass('show');
+        updateSum(p); updateAnsState($(this).closest('.ans-item')); rebuild();
+    });
+    $(document).on('change', '.cond-jump', function () { updateSum($(this).closest('.logic-panel')); rebuild(); });
+    $(document).on('input', '.cond-skip', function () { updateSum($(this).closest('.logic-panel')); rebuild(); });
+    $(document).on('input', '.cond-end', function () { rebuild(); });
+
+    function updateSum(p) {
+        const a = p.find('.cond-action').val(), s = p.find('.cond-sum');
+        if (a==='0') s.text('Continue normally');
+        else if (a==='1') { const t = p.find('.cond-jump option:selected').text(); s.text(t && t!=='-- select --' ? 'Jump to '+t : 'Jump to question'); }
+        else if (a==='2') s.text('Skip '+(p.find('.cond-skip').val()||1)+' question(s)');
+        else if (a==='3') s.text('End the survey');
+    }
+    function updateAnsState(item) {
+        const a = item.find('.cond-action').val();
+        if (a && a !== '0') { item.addClass('has-logic'); item.find('.logic-pill').addClass('active'); }
+        else { item.removeClass('has-logic'); if (!item.find('.logic-panel').hasClass('show')) item.find('.logic-pill').removeClass('active'); }
+    }
+    function refreshJump(item) {
+        const sel = item.find('.cond-jump'); if (!sel.length) return;
+        const cv = sel.val(); sel.empty().append('<option value="">-- select --</option>');
+        const ci = item.closest('.q-card').index();
+        $('.q-card').each(function (i) {
+            if (i<=ci) return;
+            const n=i+1, t=$(this).find('.q-title').text()||'Untitled';
+            sel.append(`<option value="${n}">Q${n}: ${t.length>35?t.substring(0,35)+'...':t}</option>`);
+        });
+        if (cv) sel.val(cv);
+    }
+    function refreshAllJumps() { $('.ans-item').each(function () { refreshJump($(this)); }); }
+
+    // ===== OTHER =====
+    $(document).on('change', '.oth-chk', function () {
+        const item = $(this).closest('.ans-item'), pill = $(this).closest('.ans-pill');
+        if ($(this).is(':checked')) { item.addClass('is-other'); pill.addClass('active'); const inp = item.find('.ans-input'); if (!inp.val().trim()) inp.val('Other (please specify)'); }
+        else { item.removeClass('is-other'); pill.removeClass('active'); }
+        rebuild();
+    });
+
+    // ===== IMAGE =====
+    $(document).on('change', '.img-file-input', function () {
+        const qi=$(this).data('qi'), ai=$(this).data('ai'), p=$(`#imgP_${qi}_${ai}`);
+        if (this.files&&this.files[0]) { const r=new FileReader(); r.onload=e=>p.attr('src',e.target.result).addClass('has-image'); r.readAsDataURL(this.files[0]); }
+        else p.attr('src','').removeClass('has-image');
+        rebuild();
+    });
+
+    // ===== ADD/REMOVE =====
+    $(document).on('click', '.add-txt-btn', function () {
+        const qi=$(this).data('qi'), o=String($(this).data('other'))==='true', c=String($(this).data('cond'))==='true';
+        const list=$(this).siblings('.ans-list');
+        list.append(ansItem(qi,list.children().length,'',false,o,c,0,null));
+        list.find('.ans-item:last .ans-input').focus(); rebuild(); refreshAllJumps();
+    });
+    $(document).on('click', '.txt-rm', function () { const l=$(this).closest('.ans-list'); if(l.children().length>1) $(this).closest('.ans-item').fadeOut(150,function(){$(this).remove();rebuild();refreshAllJumps();}); });
+    $(document).on('click', '.add-img-btn', function () { const qi=$(this).data('qi'),l=$(this).siblings('.img-ans-list'); l.append(imgAns(qi,l.children().length)); rebuild(); });
+    $(document).on('click', '.img-rm', function () { const l=$(this).closest('.img-ans-list'); if(l.children().length>1) $(this).closest('.img-ans-item').fadeOut(150,function(){$(this).remove();rebuild();}); });
+
+    // ===== TOGGLE / REMOVE =====
+    $(document).on('click', '.q-header', function (e) { if($(e.target).closest('.q-remove').length)return; const i=$(this).find('.q-chevron').data('ti'); $(`#qBody_${i}`).toggleClass('show'); $(this).find('.q-chevron').toggleClass('open'); });
+    $(document).on('click', '.q-remove', function (e) { e.stopPropagation(); $(this).closest('.q-card').fadeOut(200,function(){$(this).remove();updateNums();rebuild();refreshAllJumps();if(!$('.q-card').length)$('#canvasPlaceholder').show();}); });
+
+    // ===== SAVE / EDIT =====
+    $(document).on('click', '.btn-q-save', function () {
+        const qi=$(this).data('qi'), card=$(this).closest('.q-card'), type=card.data('type');
+        if(!card.find('.q-text').val().trim()){card.find('.q-text').css('border-color','var(--red)').focus();return;}
+        if(typesRequiredAnswers.includes(type)){let bad=false;card.find('.ans-input').each(function(){if(!$(this).val().trim()){$(this).css('border-color','var(--red)');bad=true;}});if(bad)return;}
+        if(type===typeIsImage){let m=false;card.find('.img-file-input').each(function(){if(!this.files||!this.files[0]){const p=$(this).closest('.img-ans-item').find('.img-preview');if(!p.hasClass('has-image')){$(this).css('border-color','var(--red)');m=true;}}});if(m)return;}
+        card.find('.q-text,.ans-input,.img-file-input,.oth-chk,.cond-action,.cond-jump,.cond-skip,.cond-end').prop('disabled',true);
+        card.find('.txt-rm,.img-rm,.logic-pill,.other-pill').css('pointer-events','none').css('opacity','0.4');
+        card.find('.add-txt-btn,.add-img-btn').hide();
+        card.find('.ans-drag').css('visibility','hidden');
+        card.find('.btn-q-save').hide(); card.find('.btn-q-edit').css('display','inline-flex');
+        card.addClass('saved'); $(`#qBody_${qi}`).removeClass('show'); card.find('.q-chevron').removeClass('open');
+        rebuild();
+    });
+
+    $(document).on('click', '.btn-q-edit', function () {
+        const qi=$(this).data('qi'), card=$(this).closest('.q-card');
+        card.find('.q-text,.ans-input,.img-file-input,.oth-chk,.cond-action,.cond-jump,.cond-skip,.cond-end').prop('disabled',false);
+        card.find('.txt-rm,.img-rm,.logic-pill,.other-pill').css('pointer-events','').css('opacity','');
+        card.find('.add-txt-btn,.add-img-btn').show();
+        card.find('.ans-drag').css('visibility','visible');
+        card.find('.btn-q-edit').hide(); card.find('.btn-q-save').show();
+        card.removeClass('saved'); $(`#qBody_${qi}`).addClass('show'); card.find('.q-chevron').addClass('open');
+        card.find('.q-text').focus();
+    });
+
+    $(document).on('input', '.q-text', function () { const qi=$(this).data('qi'); $(`#qTitle_${qi}`).text($(this).val().trim()||'Untitled Question'); $(this).css('border-color',''); rebuild(); refreshAllJumps(); });
+    $(document).on('input', '.ans-input', function () { $(this).css('border-color',''); rebuild(); });
+
+    // ===== NUMBERING =====
+    function updateNums() {
+        let c = 0;
+        $('.q-card').each(function (i) { $(this).find('.q-num').text(i+1); c++; });
+        $('#questionCounter').text(c);
+    }
+
+    // ===== CONDITION JSON =====
+    function buildCond(item) {
+        const sel = item.find('.cond-action'); if (!sel.length) return null;
+        const a = sel.val(); if (!a || a==='0') return null;
+        let c = {ActionType:parseInt(a)};
+        if (a==='1'){const t=item.find('.cond-jump').val();if(t)c.TargetQuestionNumber=parseInt(t);}
+        else if(a==='2'){const s=item.find('.cond-skip').val();if(s)c.SkipCount=parseInt(s);}
+        else if(a==='3'){const m=item.find('.cond-end').val();if(m)c.EndMessage=m;}
+        return JSON.stringify(c);
+    }
+
+    // ===== REBUILD HIDDEN FORM =====
+    function rebuild() {
+        const ct = $('#hiddenFormData'); ct.empty();
+        $('.q-card').each(function (qi) {
+            const card=$(this), type=card.data('type'), text=card.find('.q-text').val()||'';
+            const qid = card.data('qid') || 0;
+            // Include Question Id for existing questions
+            if (qid) ct.append(`<input type="hidden" name="Questions[${qi}].Id" value="${qid}" />`);
+            ct.append(`<input type="hidden" name="Questions[${qi}].Text" value="${esc(text)}" />`);
+            ct.append(`<input type="hidden" name="Questions[${qi}].Type" value="${type}" />`);
+            let ai=0;
+            card.find('.ans-list .ans-item').each(function(){
+                const v=$(this).find('.ans-input').val()||'', isO=$(this).find('.oth-chk').is(':checked'), cj=buildCond($(this));
+                const aid = $(this).data('aid') || 0;
+                if(v.trim()||typesRequiredAnswers.includes(type)){
+                    // Include Answer Id for existing answers
+                    if (aid) ct.append(`<input type="hidden" name="Questions[${qi}].Answers[${ai}].Id" value="${aid}" />`);
+                    ct.append(`<input type="hidden" name="Questions[${qi}].Answers[${ai}].Text" value="${esc(v)}" />`);
+                    ct.append(`<input type="hidden" name="Questions[${qi}].Answers[${ai}].IsOtherOption" value="${isO}" />`);
+                    if(cj) ct.append(`<input type="hidden" name="Questions[${qi}].Answers[${ai}].ConditionJson" value="${esc(cj)}" />`);
+                    ai++;
+                }
+            });
+            if(type===typeIsImage) card.find('.img-file-input').each(function(ii){$(this).attr('name',`ImageFiles_${qi}_${ii}`);});
+        });
+    }
+
+    function esc(t){const d=document.createElement('div');d.appendChild(document.createTextNode(t));return d.innerHTML;}
+
+    // ===== FORM SUBMIT =====
+    $('#questionnaireForm').on('submit', function (e) {
+        // Re-enable all fields before submission
+        $('.q-card.saved').find('.img-file-input,.q-text,.ans-input,.oth-chk,.cond-action,.cond-jump,.cond-skip,.cond-end').prop('disabled',false);
+        rebuild();
+        if(!$('.q-card').length){e.preventDefault();alert('Please add at least one question.');return false;}
+        let ok=true;
+        $('.q-card').each(function(){if(!$(this).find('.q-text').val()?.trim()){$(this).find('.q-text').css('border-color','var(--red)');ok=false;}});
+        if(!ok){e.preventDefault();alert('Please fill in all question texts.');return false;}
+    });
+});
+</script>
 }

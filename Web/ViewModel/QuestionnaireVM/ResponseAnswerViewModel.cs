@@ -2,11 +2,12 @@
 {
     public class ResponseAnswerViewModel
     {
-        public int Id { get; set; }  // Answer ID
-        public string? Text { get; set; }  // Answer text
-
+        public int Id { get; set; }
+        public string? Text { get; set; }
         public int? Count { get; set; }
+
+        // NEW: Must be mapped from Answer entity
         public bool IsOtherOption { get; set; } = false;
-        public string? ConditionJson { get; set; }  // Add this line for conditional logic
+        public string? ConditionJson { get; set; }
     }
 }

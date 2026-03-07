@@ -1,16 +1,12 @@
 ﻿// Services/Implementation/AiAnalysisService.cs
-using Azure;
-using Azure.AI.OpenAI;
-using Azure.AI.TextAnalytics;
 using Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Model;
-using OpenAI.Chat;
 using Services.AIViewModel;
 using Services.Interaces;
-using System.ClientModel;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -20,14 +16,19 @@ namespace Services.Implemnetation
 {
     public class AiAnalysisService : IAiAnalysisService, IDisposable
     {
-        private readonly TextAnalyticsClient _textAnalyticsClient;
-        private readonly AzureOpenAIClient _azureOpenAIClient;
-        private readonly ChatClient _chatClient;
+        private readonly HttpClient _httpClient;
         private readonly IConfiguration _configuration;
         private readonly ILogger<AiAnalysisService> _logger;
         private readonly SurveyContext _context;
-        private readonly string _openAIDeploymentName;
-        private bool _disposed = false;
+        private readonly string _apiKey;
+        private readonly string _model;
+        private readonly SemaphoreSlim _rateLimiter;
+        private bool _disposed;
+
+        private const string ClaudeApiUrl = "https://api.anthropic.com/v1/messages";
+        private const string AnthropicVersion = "2023-06-01";
+        private const int MaxRetries = 3;
+        private const int BaseDelayMs = 1000;
 
         public AiAnalysisService(
             IConfiguration configuration,
@@ -38,52 +39,191 @@ namespace Services.Implemnetation
             _logger = logger;
             _context = context;
 
-            // Initialize Azure Language Service
-            var languageEndpoint = _configuration["AzureLanguageService:Endpoint"];
-            var languageKey = _configuration["AzureLanguageService:Key"];
-            _textAnalyticsClient = new TextAnalyticsClient(new Uri(languageEndpoint), new AzureKeyCredential(languageKey));
+            _apiKey = _configuration["Claude:ApiKey"]
+                ?? throw new InvalidOperationException("Claude:ApiKey is not configured in appsettings.json");
+            _model = _configuration["Claude:Model"] ?? "claude-sonnet-4-20250514";
 
-            // Initialize Azure OpenAI
-            var openAIEndpoint = _configuration["AzureOpenAI:Endpoint"];
-            var openAIKey = _configuration["AzureOpenAI:Key"];
-            _openAIDeploymentName = _configuration["AzureOpenAI:DeploymentName"];
+            // Configure HttpClient
+            _httpClient = new HttpClient
+            {
+                Timeout = TimeSpan.FromSeconds(120)
+            };
+            _httpClient.DefaultRequestHeaders.Add("x-api-key", _apiKey);
+            _httpClient.DefaultRequestHeaders.Add("anthropic-version", AnthropicVersion);
+            _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-            _azureOpenAIClient = new AzureOpenAIClient(new Uri(openAIEndpoint), new AzureKeyCredential(openAIKey));
-            _chatClient = _azureOpenAIClient.GetChatClient(_openAIDeploymentName);
+            // Rate limiter: max 5 concurrent requests to Claude
+            _rateLimiter = new SemaphoreSlim(5, 5);
 
-            _logger.LogInformation("AiAnalysisService initialized successfully");
+            _logger.LogInformation("AiAnalysisService initialized with Claude API (model: {Model})", _model);
         }
 
-        #region Azure Language Service Methods
+        #region Core Claude API Communication
+
+        /// <summary>
+        /// Sends a message to Claude API with retry logic and rate limiting.
+        /// </summary>
+        private async Task<string> SendClaudeRequestAsync(string systemPrompt, string userPrompt, float temperature = 0.3f, int maxTokens = 2048)
+        {
+            await _rateLimiter.WaitAsync();
+            try
+            {
+                for (int attempt = 1; attempt <= MaxRetries; attempt++)
+                {
+                    try
+                    {
+                        var requestBody = new
+                        {
+                            model = _model,
+                            max_tokens = maxTokens,
+                            temperature = temperature,
+                            system = systemPrompt,
+                            messages = new[]
+                            {
+                                new { role = "user", content = userPrompt }
+                            }
+                        };
+
+                        var json = JsonSerializer.Serialize(requestBody, new JsonSerializerOptions
+                        {
+                            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                        });
+
+                        var content = new StringContent(json, Encoding.UTF8, "application/json");
+                        var response = await _httpClient.PostAsync(ClaudeApiUrl, content);
+
+                        if (response.IsSuccessStatusCode)
+                        {
+                            var responseJson = await response.Content.ReadAsStringAsync();
+                            var doc = JsonDocument.Parse(responseJson);
+
+                            // Extract text from Claude's response content array
+                            if (doc.RootElement.TryGetProperty("content", out var contentArray) &&
+                                contentArray.ValueKind == JsonValueKind.Array)
+                            {
+                                foreach (var block in contentArray.EnumerateArray())
+                                {
+                                    if (block.TryGetProperty("type", out var type) &&
+                                        type.GetString() == "text" &&
+                                        block.TryGetProperty("text", out var text))
+                                    {
+                                        return text.GetString() ?? string.Empty;
+                                    }
+                                }
+                            }
+
+                            _logger.LogWarning("Claude response had no text content block. Raw: {Raw}",
+                                responseJson.Length > 500 ? responseJson[..500] : responseJson);
+                            return string.Empty;
+                        }
+
+                        // Handle rate limiting (429)
+                        if ((int)response.StatusCode == 429)
+                        {
+                            var delay = BaseDelayMs * (int)Math.Pow(2, attempt - 1);
+                            _logger.LogWarning("Claude API rate limited (attempt {Attempt}/{Max}). Retrying in {Delay}ms",
+                                attempt, MaxRetries, delay);
+                            await Task.Delay(delay);
+                            continue;
+                        }
+
+                        // Handle overloaded (529)
+                        if ((int)response.StatusCode == 529)
+                        {
+                            var delay = BaseDelayMs * (int)Math.Pow(2, attempt);
+                            _logger.LogWarning("Claude API overloaded (attempt {Attempt}/{Max}). Retrying in {Delay}ms",
+                                attempt, MaxRetries, delay);
+                            await Task.Delay(delay);
+                            continue;
+                        }
+
+                        // Other errors
+                        var errorBody = await response.Content.ReadAsStringAsync();
+                        _logger.LogError("Claude API error {StatusCode} (attempt {Attempt}): {Error}",
+                            (int)response.StatusCode, attempt, errorBody.Length > 500 ? errorBody[..500] : errorBody);
+
+                        if (attempt == MaxRetries)
+                            throw new HttpRequestException($"Claude API returned {(int)response.StatusCode} after {MaxRetries} attempts");
+
+                        await Task.Delay(BaseDelayMs * attempt);
+                    }
+                    catch (TaskCanceledException) when (attempt < MaxRetries)
+                    {
+                        _logger.LogWarning("Claude API timeout (attempt {Attempt}/{Max})", attempt, MaxRetries);
+                        await Task.Delay(BaseDelayMs * attempt);
+                    }
+                    catch (HttpRequestException) when (attempt < MaxRetries)
+                    {
+                        _logger.LogWarning("Claude API connection error (attempt {Attempt}/{Max})", attempt, MaxRetries);
+                        await Task.Delay(BaseDelayMs * attempt);
+                    }
+                }
+
+                throw new HttpRequestException("Claude API request failed after all retry attempts");
+            }
+            finally
+            {
+                _rateLimiter.Release();
+            }
+        }
+
+        #endregion
+
+        #region Core Analysis Methods
 
         public async Task<SentimentAnalysisResult> AnalyzeSentimentAsync(string text)
         {
             try
             {
                 if (string.IsNullOrWhiteSpace(text))
-                {
                     return new SentimentAnalysisResult { Sentiment = "Neutral", ConfidenceScore = 0.0 };
+
+                var systemPrompt = @"You are a sentiment analysis engine for workplace mental health surveys. 
+Respond ONLY with a valid JSON object. No markdown, no explanation, no code fences.";
+
+                var userPrompt = $@"Analyze the sentiment of this workplace survey response:
+
+""{text}""
+
+Return this exact JSON structure:
+{{
+  ""sentiment"": ""Positive"",
+  ""confidenceScore"": 0.85,
+  ""positiveScore"": 0.85,
+  ""negativeScore"": 0.10,
+  ""neutralScore"": 0.05
+}}
+
+Rules:
+- sentiment must be exactly ""Positive"", ""Negative"", or ""Neutral""
+- All scores must be between 0.0 and 1.0
+- Scores should approximately sum to 1.0
+- confidenceScore = the highest of the three scores";
+
+                var response = await SendClaudeRequestAsync(systemPrompt, userPrompt, 0.1f);
+                var doc = ParseLenientJson(response);
+
+                if (doc == null)
+                {
+                    _logger.LogWarning("Failed to parse sentiment response. Raw: {Raw}", Truncate(response));
+                    return new SentimentAnalysisResult { Sentiment = "Neutral", ConfidenceScore = 0.5 };
                 }
 
-                var response = await _textAnalyticsClient.AnalyzeSentimentAsync(text);
-                var sentiment = response.Value;
-
+                var root = doc.RootElement;
                 return new SentimentAnalysisResult
                 {
-                    Sentiment = sentiment.Sentiment.ToString(),
-                    ConfidenceScore = sentiment.ConfidenceScores.Positive > sentiment.ConfidenceScores.Negative
-                        ? sentiment.ConfidenceScores.Positive
-                        : sentiment.ConfidenceScores.Negative,
-                    PositiveScore = sentiment.ConfidenceScores.Positive,
-                    NegativeScore = sentiment.ConfidenceScores.Negative,
-                    NeutralScore = sentiment.ConfidenceScores.Neutral,
+                    Sentiment = GetStringProp(root, "sentiment", "Neutral"),
+                    ConfidenceScore = GetDoubleProp(root, "confidenceScore", 0.5),
+                    PositiveScore = GetDoubleProp(root, "positiveScore", 0.0),
+                    NegativeScore = GetDoubleProp(root, "negativeScore", 0.0),
+                    NeutralScore = GetDoubleProp(root, "neutralScore", 0.0),
                     AnalyzedAt = DateTime.UtcNow
                 };
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error analyzing sentiment for text: {Text}", text);
-                throw;
+                _logger.LogError(ex, "Error analyzing sentiment");
+                return new SentimentAnalysisResult { Sentiment = "Neutral", ConfidenceScore = 0.0 };
             }
         }
 
@@ -92,36 +232,49 @@ namespace Services.Implemnetation
             try
             {
                 if (string.IsNullOrWhiteSpace(text))
+                    return new KeyPhrasesResult();
+
+                var systemPrompt = @"You are a key phrase extraction engine for workplace mental health surveys.
+Respond ONLY with a valid JSON object. No markdown, no explanation, no code fences.";
+
+                var userPrompt = $@"Extract key phrases from this workplace survey response:
+
+""{text}""
+
+Return this exact JSON structure:
+{{
+  ""keyPhrases"": [""phrase1"", ""phrase2""],
+  ""workplaceFactors"": [""factor1"", ""factor2""],
+  ""emotionalIndicators"": [""indicator1"", ""indicator2""]
+}}
+
+Rules:
+- keyPhrases: all significant noun phrases and concepts (5-15 phrases)
+- workplaceFactors: only phrases related to work environment, management, teams, deadlines, meetings, projects, colleagues, workload
+- emotionalIndicators: only phrases indicating emotional state (stress, anxiety, satisfaction, motivation, frustration, burnout, happiness, exhaustion)";
+
+                var response = await SendClaudeRequestAsync(systemPrompt, userPrompt, 0.2f);
+                var doc = ParseLenientJson(response);
+
+                if (doc == null)
                 {
+                    _logger.LogWarning("Failed to parse key phrases response. Raw: {Raw}", Truncate(response));
                     return new KeyPhrasesResult();
                 }
 
-                var response = await _textAnalyticsClient.ExtractKeyPhrasesAsync(text);
-                var keyPhrases = response.Value.ToList();
-
-                // Mental health specific categorization
-                var workplaceFactors = keyPhrases.Where(phrase =>
-                    phrase.Contains("work") || phrase.Contains("manager") || phrase.Contains("team") ||
-                    phrase.Contains("deadline") || phrase.Contains("pressure") || phrase.Contains("colleague") ||
-                    phrase.Contains("office") || phrase.Contains("meeting") || phrase.Contains("project")).ToList();
-
-                var emotionalIndicators = keyPhrases.Where(phrase =>
-                    phrase.Contains("stress") || phrase.Contains("anxious") || phrase.Contains("tired") ||
-                    phrase.Contains("overwhelmed") || phrase.Contains("frustrated") || phrase.Contains("happy") ||
-                    phrase.Contains("satisfied") || phrase.Contains("motivated") || phrase.Contains("burned")).ToList();
-
+                var root = doc.RootElement;
                 return new KeyPhrasesResult
                 {
-                    KeyPhrases = keyPhrases,
-                    WorkplaceFactors = workplaceFactors,
-                    EmotionalIndicators = emotionalIndicators,
+                    KeyPhrases = GetStringArray(root, "keyPhrases"),
+                    WorkplaceFactors = GetStringArray(root, "workplaceFactors"),
+                    EmotionalIndicators = GetStringArray(root, "emotionalIndicators"),
                     ExtractedAt = DateTime.UtcNow
                 };
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error extracting key phrases for text: {Text}", text);
-                throw;
+                _logger.LogError(ex, "Error extracting key phrases");
+                return new KeyPhrasesResult();
             }
         }
 
@@ -130,35 +283,32 @@ namespace Services.Implemnetation
             try
             {
                 if (string.IsNullOrWhiteSpace(text))
-                {
                     return string.Empty;
-                }
 
-                var response = await _textAnalyticsClient.RecognizePiiEntitiesAsync(text);
-                var piiEntities = response.Value;
+                var systemPrompt = @"You are a PII anonymization engine. Your job is to replace personally identifiable information in text with placeholder tags. Return ONLY the anonymized text — nothing else.";
 
-                string anonymizedText = text;
-                foreach (var entity in piiEntities.OrderByDescending(e => e.Offset))
-                {
-                    var replacement = entity.Category.ToString() switch
-                    {
-                        "Person" => "[NAME]",
-                        "Email" => "[EMAIL]",
-                        "PhoneNumber" => "[PHONE]",
-                        "Address" => "[ADDRESS]",
-                        _ => "[REDACTED]"
-                    };
+                var userPrompt = $@"Anonymize this text by replacing PII with these tags:
+- Person names → [NAME]
+- Email addresses → [EMAIL]
+- Phone numbers → [PHONE]
+- Physical addresses → [ADDRESS]
+- Company names (if identifying specific small company) → [ORG]
+- Any other identifying info → [REDACTED]
 
-                    anonymizedText = anonymizedText.Remove(entity.Offset, entity.Length)
-                        .Insert(entity.Offset, replacement);
-                }
+Keep all non-PII text exactly as-is. Do NOT add explanations or formatting.
 
-                return anonymizedText;
+Text: ""{text}""";
+
+                var response = await SendClaudeRequestAsync(systemPrompt, userPrompt, 0.0f);
+
+                // Clean up: remove any quotes Claude might wrap the response in
+                var cleaned = response.Trim().Trim('"');
+                return string.IsNullOrWhiteSpace(cleaned) ? text : cleaned;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error anonymizing text: {Text}", text);
-                return text; // Return original text if anonymization fails
+                _logger.LogError(ex, "Error anonymizing text");
+                return text; // Return original if anonymization fails
             }
         }
 
@@ -167,125 +317,99 @@ namespace Services.Implemnetation
             try
             {
                 if (string.IsNullOrWhiteSpace(text))
-                {
                     return new List<string>();
-                }
 
-                var response = await _textAnalyticsClient.RecognizeEntitiesAsync(text);
-                var entities = response.Value;
+                var systemPrompt = @"You are a named entity recognition engine.
+Respond ONLY with a valid JSON array. No markdown, no explanation.";
 
-                return entities.Select(entity => $"{entity.Category}: {entity.Text}").ToList();
+                var userPrompt = $@"Detect named entities in this text and categorize them:
+
+""{text}""
+
+Return a JSON array of strings in ""Category: Entity"" format:
+[""Person: John Smith"", ""Organization: Acme Corp"", ""Location: New York"", ""Role: Manager""]
+
+Categories: Person, Organization, Location, Role, Department, Date, Event";
+
+                var response = await SendClaudeRequestAsync(systemPrompt, userPrompt, 0.1f);
+                return DeserializeLenient<List<string>>(response) ?? new List<string>();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error detecting entities for text: {Text}", text);
-                throw;
+                _logger.LogError(ex, "Error detecting entities");
+                return new List<string>();
             }
         }
 
         #endregion
 
-        #region Azure OpenAI Methods
+        #region Risk Assessment Methods
 
         public async Task<MentalHealthRiskAssessment> AssessMentalHealthRiskAsync(string anonymizedText, string questionContext)
         {
             try
             {
-                var prompt = $@"
-As a mental health professional, analyze this workplace survey response and assess the mental health risk level.
+                var systemPrompt = @"You are a clinical workplace psychologist specializing in occupational mental health risk assessment. You analyze employee survey responses to identify mental health risk factors.
 
-Question Context: {questionContext}
-Response: {anonymizedText}
+CRITICAL: Respond ONLY with a single valid JSON object. No markdown, no code fences, no explanation text.";
 
-Please provide:
-1. Risk Level (Low, Moderate, High, Critical)
-2. Risk Score (0.0 to 1.0)
-3. Risk Indicators (specific concerns found)
-4. Protective Factors (positive elements found)
-5. Requires Immediate Attention (true/false)
-6. Recommended Action
+                var userPrompt = $@"Assess the mental health risk level of this anonymized workplace survey response.
 
-Respond in this JSON format:
+Survey Question: {questionContext}
+Employee Response: {anonymizedText}
+
+Evaluate for:
+- Signs of burnout, exhaustion, or chronic stress
+- Anxiety or depression indicators
+- Work-life balance deterioration
+- Social withdrawal or conflict
+- Self-harm or crisis indicators (escalate to Critical)
+- Protective factors (coping mechanisms, social support, positive outlook)
+
+Return this exact JSON structure:
 {{
-    ""riskLevel"": ""Low"",
-    ""riskScore"": 0.0,
-    ""riskIndicators"": [""indicator1"", ""indicator2""],
-    ""protectiveFactors"": [""factor1"", ""factor2""],
-    ""requiresImmediateAttention"": false,
-    ""recommendedAction"": ""specific action recommendation""
-}}";
+  ""riskLevel"": ""Low"",
+  ""riskScore"": 0.25,
+  ""riskIndicators"": [""specific concern 1"", ""specific concern 2""],
+  ""protectiveFactors"": [""positive factor 1"", ""positive factor 2""],
+  ""requiresImmediateAttention"": false,
+  ""recommendedAction"": ""specific actionable recommendation""
+}}
 
-                var messages = new List<ChatMessage>
+Rules:
+- riskLevel: exactly ""Low"", ""Moderate"", ""High"", or ""Critical""
+- riskScore: 0.0 (no risk) to 1.0 (maximum risk)
+  - Low: 0.0–0.25, Moderate: 0.26–0.50, High: 0.51–0.75, Critical: 0.76–1.0
+- requiresImmediateAttention: true ONLY for Critical or if self-harm/crisis indicators present
+- recommendedAction: professional, specific, actionable (not generic)";
+
+                var response = await SendClaudeRequestAsync(systemPrompt, userPrompt, 0.2f);
+                var doc = ParseLenientJson(response);
+
+                if (doc == null)
                 {
-                    new SystemChatMessage("You are a mental health professional specialized in workplace wellness. Always respond with a single valid JSON object only. No markdown, no explanations."),
-                    new UserChatMessage(prompt)
-                };
-
-                var chatOptions = new ChatCompletionOptions()
-                {
-                    Temperature = 0.3f
-                };
-
-                var response = await _chatClient.CompleteChatAsync(messages, chatOptions);
-                var content = response.Value.Content[0].Text;
-
-                _logger.LogInformation("OpenAI Response: {Content}", content);
-
-                // Parse more defensively
-                var jsonDoc = ParseLenient(content, out var parseErr);
-                if (jsonDoc == null)
-                {
-                    _logger.LogWarning("Failed to parse JSON response from OpenAI: {Err}. Raw (first 800): {Raw}",
-                        parseErr, content?.Length > 800 ? content[..800] : content);
-
-                    return new MentalHealthRiskAssessment
-                    {
-                        RiskLevel = RiskLevel.Moderate,
-                        RiskScore = 0.5,
-                        RiskIndicators = new List<string> { "Unable to parse AI response" },
-                        ProtectiveFactors = new List<string>(),
-                        RequiresImmediateAttention = false,
-                        RecommendedAction = "Manual review recommended due to analysis error",
-                        AssessedAt = DateTime.UtcNow
-                    };
+                    _logger.LogWarning("Failed to parse risk assessment. Raw: {Raw}", Truncate(response));
+                    return DefaultRiskAssessment("Unable to parse AI response");
                 }
 
-                var root = jsonDoc.RootElement;
+                var root = doc.RootElement;
+                var riskLevelStr = GetStringProp(root, "riskLevel", "Moderate");
 
                 return new MentalHealthRiskAssessment
                 {
-                    RiskLevel = Enum.TryParse<RiskLevel>(root.TryGetProperty("riskLevel", out var rl) ? (rl.GetString() ?? "Low") : "Low", out var riskLevel)
-                        ? riskLevel : RiskLevel.Low,
-                    RiskScore = root.TryGetProperty("riskScore", out var scoreProperty)
-                        ? TryGetDoubleFlexible(scoreProperty, out var d) ? d : 0.0
-                        : 0.0,
-                    RiskIndicators = root.TryGetProperty("riskIndicators", out var indicatorsProperty)
-                        ? indicatorsProperty.EnumerateArray().Select(x => x.GetString() ?? "").Where(s => !string.IsNullOrEmpty(s)).ToList()
-                        : new List<string>(),
-                    ProtectiveFactors = root.TryGetProperty("protectiveFactors", out var factorsProperty)
-                        ? factorsProperty.EnumerateArray().Select(x => x.GetString() ?? "").Where(s => !string.IsNullOrEmpty(s)).ToList()
-                        : new List<string>(),
-                    RequiresImmediateAttention = root.TryGetProperty("requiresImmediateAttention", out var attentionProperty) &&
-                                                TryGetBoolFlexible(attentionProperty, out var b) && b,
-                    RecommendedAction = root.TryGetProperty("recommendedAction", out var actionProperty) ? (actionProperty.GetString() ?? "") : "",
+                    RiskLevel = Enum.TryParse<RiskLevel>(riskLevelStr, true, out var rl) ? rl : RiskLevel.Moderate,
+                    RiskScore = Math.Clamp(GetDoubleProp(root, "riskScore", 0.5), 0.0, 1.0),
+                    RiskIndicators = GetStringArray(root, "riskIndicators"),
+                    ProtectiveFactors = GetStringArray(root, "protectiveFactors"),
+                    RequiresImmediateAttention = GetBoolProp(root, "requiresImmediateAttention", false),
+                    RecommendedAction = GetStringProp(root, "recommendedAction", "Manual review recommended"),
                     AssessedAt = DateTime.UtcNow
                 };
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error assessing mental health risk for text: {Text}", anonymizedText);
-
-                // Return a safe default assessment instead of throwing
-                return new MentalHealthRiskAssessment
-                {
-                    RiskLevel = RiskLevel.Moderate,
-                    RiskScore = 0.5,
-                    RiskIndicators = new List<string> { $"Analysis error: {ex.Message}" },
-                    ProtectiveFactors = new List<string>(),
-                    RequiresImmediateAttention = false,
-                    RecommendedAction = "Manual review recommended due to system error",
-                    AssessedAt = DateTime.UtcNow
-                };
+                _logger.LogError(ex, "Error assessing mental health risk");
+                return DefaultRiskAssessment($"Analysis error: {ex.Message}");
             }
         }
 
@@ -293,102 +417,72 @@ Respond in this JSON format:
         {
             try
             {
-                var prompt = $@"
-Analyze this workplace survey response and identify specific workplace insights and intervention recommendations.
+                var systemPrompt = @"You are a workplace mental health consultant specializing in organizational wellness intervention design.
 
-Question Context: {questionContext}
-Response: {anonymizedText}
+CRITICAL: Respond ONLY with a single valid JSON object. No markdown, no code fences, no explanation.";
 
-Identify workplace issues and provide specific, actionable intervention recommendations. Focus on:
-- Work-life balance issues
-- Management/leadership concerns
-- Team dynamics problems
-- Workload and stress factors
-- Communication issues
-- Organizational culture problems
+                var userPrompt = $@"Analyze this workplace survey response and identify actionable workplace insights.
 
-Respond in this JSON format:
+Survey Question: {questionContext}
+Employee Response: {anonymizedText}
+
+Identify issues across these domains:
+- Work-Life Balance, Workload Management, Team Dynamics
+- Leadership/Management, Communication, Job Satisfaction
+- Stress Management, Career Development, Work Environment
+- Organizational Culture, Mental Health Support, Burnout Prevention
+
+Return this exact JSON:
 {{
   ""insights"": [
     {{
-      ""category"": ""category name"",
-      ""issue"": ""specific issue identified"",
-      ""recommendedIntervention"": ""specific action to take"",
-      ""priority"": 1,
-      ""affectedAreas"": [""area1"", ""area2""]
+      ""category"": ""Work-Life Balance"",
+      ""issue"": ""specific issue identified from response"",
+      ""recommendedIntervention"": ""specific, actionable organizational intervention"",
+      ""priority"": 3,
+      ""affectedAreas"": [""Employee Wellbeing"", ""Productivity""]
     }}
   ]
-}}";
+}}
 
-                var messages = new List<ChatMessage>
+Rules:
+- 1–5 insights maximum (only genuinely identified issues)
+- priority: 1 (critical) to 5 (minor)
+- recommendedIntervention: professional, specific, implementable by HR/management
+- Do NOT invent issues not supported by the response text";
+
+                var response = await SendClaudeRequestAsync(systemPrompt, userPrompt, 0.3f);
+                var doc = ParseLenientJson(response);
+
+                if (doc == null)
                 {
-                    new SystemChatMessage("You are a workplace mental health consultant. Always respond with a SINGLE valid JSON object ONLY. No markdown, no code fences, no explanations."),
-                    new UserChatMessage(prompt)
-                };
-
-                var chatOptions = new ChatCompletionOptions()
-                {
-                    Temperature = 0.4f
-                };
-
-                var response = await _chatClient.CompleteChatAsync(messages, chatOptions);
-                var content = response.Value.Content[0].Text;
-
-                var jsonDoc = ParseLenient(content, out var parseErr);
-                if (jsonDoc == null)
-                {
-                    _logger.LogWarning("Insights JSON parse failed: {Err}. Raw (first 800): {Raw}",
-                        parseErr, content?.Length > 800 ? content[..800] : content);
-
-                    // Fail soft (avoid crashing controller)
+                    _logger.LogWarning("Failed to parse insights. Raw: {Raw}", Truncate(response));
                     return new List<WorkplaceInsight>();
                 }
 
-                var root = jsonDoc.RootElement;
-
-                if (!root.TryGetProperty("insights", out var insightsElement) || insightsElement.ValueKind != JsonValueKind.Array)
-                {
-                    // No insights array — return empty rather than throw
+                var root = doc.RootElement;
+                if (!root.TryGetProperty("insights", out var insightsEl) || insightsEl.ValueKind != JsonValueKind.Array)
                     return new List<WorkplaceInsight>();
-                }
 
-                var workplaceInsights = new List<WorkplaceInsight>();
-
-                foreach (var insight in insightsElement.EnumerateArray())
+                var insights = new List<WorkplaceInsight>();
+                foreach (var item in insightsEl.EnumerateArray())
                 {
-                    // Be defensive with each field
-                    string category = insight.TryGetProperty("category", out var cat) ? (cat.GetString() ?? "") : "";
-                    string issue = insight.TryGetProperty("issue", out var iss) ? (iss.GetString() ?? "") : "";
-                    string recommended = insight.TryGetProperty("recommendedIntervention", out var rec) ? (rec.GetString() ?? "") : "";
-                    int priority = 3;
-                    if (insight.TryGetProperty("priority", out var pr))
+                    insights.Add(new WorkplaceInsight
                     {
-                        if (pr.ValueKind == JsonValueKind.Number && pr.TryGetInt32(out var pInt)) priority = pInt;
-                        else if (pr.ValueKind == JsonValueKind.String && int.TryParse(pr.GetString(), out var pStr)) priority = pStr;
-                    }
-                    var affectedAreas = new List<string>();
-                    if (insight.TryGetProperty("affectedAreas", out var aa) && aa.ValueKind == JsonValueKind.Array)
-                    {
-                        affectedAreas = aa.EnumerateArray().Select(x => x.GetString() ?? "").Where(s => !string.IsNullOrWhiteSpace(s)).ToList();
-                    }
-
-                    workplaceInsights.Add(new WorkplaceInsight
-                    {
-                        Category = category,
-                        Issue = issue,
-                        RecommendedIntervention = recommended,
-                        Priority = priority,
-                        AffectedAreas = affectedAreas,
+                        Category = GetStringProp(item, "category", "General"),
+                        Issue = GetStringProp(item, "issue", ""),
+                        RecommendedIntervention = GetStringProp(item, "recommendedIntervention", ""),
+                        Priority = Math.Clamp(GetIntProp(item, "priority", 3), 1, 5),
+                        AffectedAreas = GetStringArray(item, "affectedAreas"),
                         IdentifiedAt = DateTime.UtcNow
                     });
                 }
 
-                return workplaceInsights;
+                return insights;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error generating workplace insights for text: {Text}", anonymizedText);
-                // Fail soft to prevent controller crash
+                _logger.LogError(ex, "Error generating workplace insights");
                 return new List<WorkplaceInsight>();
             }
         }
@@ -399,9 +493,11 @@ Respond in this JSON format:
             {
                 var totalResponses = analysisResults.Count;
                 var highRiskCount = analysisResults.Count(r => r.RiskAssessment?.RiskLevel >= RiskLevel.High);
-                var positiveResponses = analysisResults.Count(r => r.SentimentAnalysis?.Sentiment == "Positive");
+                var criticalCount = analysisResults.Count(r => r.RiskAssessment?.RiskLevel == RiskLevel.Critical);
+                var positiveCount = analysisResults.Count(r => r.SentimentAnalysis?.Sentiment == "Positive");
+                var negativeCount = analysisResults.Count(r => r.SentimentAnalysis?.Sentiment == "Negative");
 
-                var commonIssues = analysisResults
+                var topCategories = analysisResults
                     .SelectMany(r => r.Insights)
                     .GroupBy(i => i.Category)
                     .OrderByDescending(g => g.Count())
@@ -409,43 +505,44 @@ Respond in this JSON format:
                     .Select(g => $"{g.Key}: {g.Count()} instances")
                     .ToList();
 
-                var prompt = $@"
-Create an executive summary for a workplace mental health survey analysis.
+                var topKeyPhrases = analysisResults
+                    .Where(r => r.KeyPhrases != null)
+                    .SelectMany(r => r.KeyPhrases!.KeyPhrases)
+                    .GroupBy(k => k.ToLower())
+                    .OrderByDescending(g => g.Count())
+                    .Take(8)
+                    .Select(g => g.Key)
+                    .ToList();
 
-Survey Statistics:
-- Total Responses: {totalResponses}
-- High Risk Responses: {highRiskCount}
-- Positive Responses: {positiveResponses}
-- Most Common Issues: {string.Join(", ", commonIssues)}
+                var systemPrompt = @"You are a senior organizational psychologist writing executive briefings for C-level leadership. Your writing is precise, data-driven, professional, and actionable. No fluff.";
 
-Create a comprehensive executive summary that includes:
-1. Overall mental health status
-2. Key findings and trends
-3. Areas of concern
-4. Positive indicators
-5. Immediate action items
-6. Long-term recommendations
+                var userPrompt = $@"Create a professional executive summary for this workplace mental health survey analysis.
 
-Keep it professional, actionable, and suitable for senior management.";
+DATA:
+- Total analyzed responses: {totalResponses}
+- Positive sentiment: {positiveCount} ({(totalResponses > 0 ? (positiveCount * 100.0 / totalResponses).ToString("F1") : "0")}%)
+- Negative sentiment: {negativeCount} ({(totalResponses > 0 ? (negativeCount * 100.0 / totalResponses).ToString("F1") : "0")}%)
+- High risk responses: {highRiskCount}
+- Critical risk responses: {criticalCount}
+- Top workplace issues: {string.Join(", ", topCategories)}
+- Recurring themes: {string.Join(", ", topKeyPhrases)}
 
-                var messages = new List<ChatMessage>
-                {
-                    new SystemChatMessage("You are an executive consultant specializing in workplace mental health reporting."),
-                    new UserChatMessage(prompt)
-                };
+Write the summary with these sections:
+1. OVERALL ASSESSMENT (2-3 sentences, overall mental health posture)
+2. KEY FINDINGS (3-5 bullet points, data-backed)
+3. AREAS OF CONCERN (prioritized list with risk implications)
+4. POSITIVE INDICATORS (strengths to preserve)
+5. IMMEDIATE ACTIONS (3-5 specific, implementable recommendations)
+6. STRATEGIC RECOMMENDATIONS (long-term organizational improvements)
 
-                var chatOptions = new ChatCompletionOptions()
-                {
-                    Temperature = 0.3f
-                };
+Keep it under 600 words. Professional tone suitable for board presentation.";
 
-                var response = await _chatClient.CompleteChatAsync(messages, chatOptions);
-                return response.Value.Content[0].Text;
+                return await SendClaudeRequestAsync(systemPrompt, userPrompt, 0.3f, 3000);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error generating executive summary");
-                throw;
+                return "Executive summary generation failed. Please retry the analysis.";
             }
         }
 
@@ -453,12 +550,14 @@ Keep it professional, actionable, and suitable for senior management.";
         {
             try
             {
-                var prompt = $@"
-Categorize this workplace mental health survey response into relevant themes.
+                var systemPrompt = @"You are a response categorization engine for workplace surveys.
+Respond ONLY with a JSON array of strings. No markdown, no explanation.";
 
-Response: {anonymizedText}
+                var userPrompt = $@"Categorize this workplace mental health response into applicable themes:
 
-Choose from these categories (select all that apply):
+""{anonymizedText}""
+
+Choose ALL that apply from:
 - Work-Life Balance
 - Workload Management
 - Team Dynamics
@@ -472,47 +571,37 @@ Choose from these categories (select all that apply):
 - Mental Health Support
 - Burnout Prevention
 
-Respond with a JSON array of applicable categories: [""category1"", ""category2""]";
+Return as JSON array: [""Category1"", ""Category2""]";
 
-                var messages = new List<ChatMessage>
-                {
-                    new SystemChatMessage("You are a mental health professional categorizing workplace responses. Always respond with a JSON array only."),
-                    new UserChatMessage(prompt)
-                };
-
-                var chatOptions = new ChatCompletionOptions()
-                {
-                    Temperature = 0.2f
-                };
-
-                var response = await _chatClient.CompleteChatAsync(messages, chatOptions);
-                var content = response.Value.Content[0].Text;
-
-                // lenient array parse
-                var categories = DeserializeLenient<List<string>>(content, out var err) ?? new List<string>();
-                if (!string.IsNullOrEmpty(err))
-                {
-                    _logger.LogWarning("Category JSON parse failed: {Err}. Raw (first 800): {Raw}",
-                        err, content?.Length > 800 ? content[..800] : content);
-                }
-
-                return categories;
+                var response = await SendClaudeRequestAsync(systemPrompt, userPrompt, 0.1f);
+                return DeserializeLenient<List<string>>(response) ?? new List<string>();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error categorizing response: {Text}", anonymizedText);
-                throw;
+                _logger.LogError(ex, "Error categorizing response");
+                return new List<string>();
             }
         }
 
         #endregion
 
-        #region Combined Analysis Methods
+        #region Composite Analysis Methods
 
         public async Task<ResponseAnalysisResult> AnalyzeCompleteResponseAsync(AnalysisRequest request)
         {
             try
             {
+                // Step 1: Check if already analyzed in DB
+                var cached = await LoadResponseAnalysisFromDbAsync(request.ResponseId, request.QuestionId);
+                if (cached != null)
+                {
+                    _logger.LogInformation("Loaded cached analysis for ResponseId: {ResponseId}, QuestionId: {QuestionId}", request.ResponseId, request.QuestionId);
+                    return cached;
+                }
+
+                // Step 2: Not in DB — run full Claude analysis
+                _logger.LogInformation("No cached analysis found. Calling Claude API for ResponseId: {ResponseId}, QuestionId: {QuestionId}", request.ResponseId, request.QuestionId);
+
                 var result = new ResponseAnalysisResult
                 {
                     ResponseId = request.ResponseId,
@@ -522,10 +611,10 @@ Respond with a JSON array of applicable categories: [""category1"", ""category2"
                     AnalyzedAt = DateTime.UtcNow
                 };
 
-                // Step 1: Anonymize the text
+                // Anonymize the text
                 result.AnonymizedResponseText = await AnonymizeTextAsync(request.ResponseText);
 
-                // Step 2: Azure Language Service Analysis
+                // Claude API calls
                 if (request.IncludeSentimentAnalysis)
                 {
                     result.SentimentAnalysis = await AnalyzeSentimentAsync(result.AnonymizedResponseText);
@@ -536,7 +625,6 @@ Respond with a JSON array of applicable categories: [""category1"", ""category2"
                     result.KeyPhrases = await ExtractKeyPhrasesAsync(result.AnonymizedResponseText);
                 }
 
-                // Step 3: Azure OpenAI Analysis
                 if (request.IncludeRiskAssessment)
                 {
                     result.RiskAssessment = await AssessMentalHealthRiskAsync(result.AnonymizedResponseText, request.QuestionText);
@@ -548,6 +636,10 @@ Respond with a JSON array of applicable categories: [""category1"", ""category2"
                 }
 
                 result.IsAnalysisComplete = true;
+
+                // Step 3: Save to DB for future use
+                await SaveResponseAnalysisToDbAsync(result);
+
                 return result;
             }
             catch (Exception ex)
@@ -560,33 +652,61 @@ Respond with a JSON array of applicable categories: [""category1"", ""category2"
         public async Task<List<ResponseAnalysisResult>> AnalyzeQuestionResponsesAsync(int questionId, List<AnalysisRequest> requests)
         {
             var results = new List<ResponseAnalysisResult>();
-
             foreach (var request in requests)
             {
                 try
                 {
-                    var result = await AnalyzeCompleteResponseAsync(request);
-                    results.Add(result);
+                    results.Add(await AnalyzeCompleteResponseAsync(request));
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error analyzing response {ResponseId} for question {QuestionId}", request.ResponseId, questionId);
-                    // Continue with other responses even if one fails
+                    _logger.LogError(ex, "Error analyzing response {ResponseId} for question {QuestionId}",
+                        request.ResponseId, questionId);
+                }
+            }
+            return results;
+        }
+        /// <summary>
+        /// Builds a combined analysis text from a ResponseDetail, including both text responses
+        /// and selected answer texts for checkbox/radio/multiple choice questions.
+        /// </summary>
+        private string BuildAnalysisText(ResponseDetail detail)
+        {
+            var parts = new List<string>();
+
+            // Include text response if present
+            if (!string.IsNullOrWhiteSpace(detail.TextResponse))
+            {
+                parts.Add(detail.TextResponse);
+            }
+
+            // Include selected answer texts for non-text questions
+            if (detail.ResponseAnswers != null && detail.ResponseAnswers.Any())
+            {
+                foreach (var ra in detail.ResponseAnswers)
+                {
+                    // Navigate through the Answer entity to get the text
+                    if (ra.Answer != null && !string.IsNullOrWhiteSpace(ra.Answer.Text))
+                    {
+                        parts.Add(ra.Answer.Text);
+                    }
                 }
             }
 
-            return results;
+            return string.Join(". ", parts);
         }
-
         public async Task<QuestionnaireAnalysisOverview> GenerateQuestionnaireOverviewAsync(int questionnaireId)
         {
             try
             {
-                // Get all responses for this questionnaire
+                // Get all responses — NOW including ResponseAnswers -> Answer for selected answer text
                 var responses = await _context.Responses
                     .Include(r => r.Questionnaire)
                     .Include(r => r.ResponseDetails)
-                    .ThenInclude(rd => rd.Question)
+                        .ThenInclude(rd => rd.Question)
+                    .Include(r => r.ResponseDetails)
+                        .ThenInclude(rd => rd.ResponseAnswers)
+                            .ThenInclude(ra => ra.Answer)  // <-- KEY FIX: load Answer.Text
                     .Where(r => r.QuestionnaireId == questionnaireId)
                     .ToListAsync();
 
@@ -600,38 +720,21 @@ Respond with a JSON array of applicable categories: [""category1"", ""category2"
                     };
                 }
 
-                // Analyze text responses
+                // Analyze ALL response types (text + checkbox + radio + etc.)
                 var analysisResults = new List<ResponseAnalysisResult>();
                 foreach (var response in responses)
                 {
                     foreach (var detail in response.ResponseDetails)
                     {
-                        string responseText = "";
+                        var analysisText = BuildAnalysisText(detail);
 
-                        // Handle text-based questions (existing)
-                        if (!string.IsNullOrWhiteSpace(detail.TextResponse))
-                        {
-                            responseText = detail.TextResponse;
-                        }
-                        // Handle CheckBox questions (NEW)
-                        else if (detail.QuestionType == QuestionType.CheckBox && detail.ResponseAnswers.Any())
-                        {
-                            var selectedAnswers = detail.ResponseAnswers
-                                .Select(ra => detail.Question.Answers.FirstOrDefault(a => a.Id == ra.AnswerId)?.Text)
-                                .Where(text => !string.IsNullOrEmpty(text))
-                                .ToList();
-
-                            responseText = $"Multiple Selection Question: {detail.Question.Text}\nSelected Options: {string.Join(", ", selectedAnswers)}\nAnalyze these selected workplace factors for mental health implications and patterns.";
-                        }
-
-                        // Create analysis request for ALL supported responses
-                        if (!string.IsNullOrEmpty(responseText))
+                        if (!string.IsNullOrWhiteSpace(analysisText))
                         {
                             var request = new AnalysisRequest
                             {
                                 ResponseId = response.Id,
                                 QuestionId = detail.QuestionId,
-                                ResponseText = responseText,
+                                ResponseText = analysisText,
                                 QuestionText = detail.Question?.Text ?? ""
                             };
 
@@ -704,28 +807,24 @@ Respond with a JSON array of applicable categories: [""category1"", ""category2"
             }
         }
 
+
         public async Task<List<ResponseAnalysisResult>> BatchAnalyzeResponsesAsync(List<AnalysisRequest> requests)
         {
             var results = new List<ResponseAnalysisResult>();
-            var tasks = new List<Task<ResponseAnalysisResult>>();
 
-            // Process in batches to avoid overwhelming the API
-            const int batchSize = 5;
-            for (int i = 0; i < requests.Count; i += batchSize)
+            foreach (var request in requests)
             {
-                var batch = requests.Skip(i).Take(batchSize);
-                foreach (var request in batch)
+                try
                 {
-                    tasks.Add(AnalyzeCompleteResponseAsync(request));
+                    // AnalyzeCompleteResponseAsync already checks DB first
+                    // So cached ones return instantly, only new ones hit Claude
+                    var result = await AnalyzeCompleteResponseAsync(request);
+                    results.Add(result);
                 }
-
-                // Wait for current batch to complete before starting next
-                var batchResults = await Task.WhenAll(tasks);
-                results.AddRange(batchResults);
-                tasks.Clear();
-
-                // Small delay between batches to respect API limits
-                await Task.Delay(1000);
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error analyzing response {ResponseId} for question {QuestionId}", request.ResponseId, request.QuestionId);
+                }
             }
 
             return results;
@@ -733,20 +832,34 @@ Respond with a JSON array of applicable categories: [""category1"", ""category2"
 
         #endregion
 
-        #region Mental Health Specific Methods
+        #region Mental Health Intelligence
 
         public async Task<List<ResponseAnalysisResult>> IdentifyHighRiskResponsesAsync(int questionnaireId)
         {
             try
             {
-                var overview = await GenerateQuestionnaireOverviewAsync(questionnaireId);
-                var allResults = await ExportAnonymizedAnalysisAsync(questionnaireId);
+                // Read from DB — no API calls
+                var highRiskEntities = await _context.ResponseAnalyses
+                    .Where(ra => _context.Responses
+                        .Where(r => r.QuestionnaireId == questionnaireId)
+                        .Select(r => r.Id)
+                        .Contains(ra.ResponseId))
+                    .Where(ra => ra.RiskLevel == "High" || ra.RiskLevel == "Critical" || ra.RequiresImmediateAttention)
+                    .OrderByDescending(ra => ra.RiskScore)
+                    .ToListAsync();
 
-                return allResults
-                    .Where(r => r.RiskAssessment != null &&
-                           (r.RiskAssessment.RiskLevel >= RiskLevel.High || r.RiskAssessment.RequiresImmediateAttention))
-                    .OrderByDescending(r => r.RiskAssessment!.RiskScore)
-                    .ToList();
+                // Convert entities to view models
+                var results = new List<ResponseAnalysisResult>();
+                foreach (var entity in highRiskEntities)
+                {
+                    var loaded = await LoadResponseAnalysisFromDbAsync(entity.ResponseId, entity.QuestionId);
+                    if (loaded != null)
+                    {
+                        results.Add(loaded);
+                    }
+                }
+
+                return results;
             }
             catch (Exception ex)
             {
@@ -761,16 +874,14 @@ Respond with a JSON array of applicable categories: [""category1"", ""category2"
             {
                 var responses = await _context.Responses
                     .Include(r => r.ResponseDetails)
-                    .ThenInclude(rd => rd.Question)
+                        .ThenInclude(rd => rd.Question)
                     .Where(r => r.QuestionnaireId == questionnaireId &&
                                r.SubmissionDate >= fromDate &&
                                r.SubmissionDate <= toDate)
                     .OrderBy(r => r.SubmissionDate)
                     .ToListAsync();
 
-                // This would typically involve more complex trend analysis
-                // For now, return general insights
-                var insights = new List<WorkplaceInsight>
+                return new List<WorkplaceInsight>
                 {
                     new WorkplaceInsight
                     {
@@ -781,27 +892,20 @@ Respond with a JSON array of applicable categories: [""category1"", ""category2"
                         IdentifiedAt = DateTime.UtcNow
                     }
                 };
-
-                return insights;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error analyzing mental health trends for QuestionnaireId: {QuestionnaireId}", questionnaireId);
+                _logger.LogError(ex, "Error analyzing trends for {QuestionnaireId}", questionnaireId);
                 throw;
             }
         }
 
-        public async Task<Dictionary<string, QuestionnaireAnalysisOverview>> CompareTeamMentalHealthAsync(int questionnaireId, List<string> teamIdentifiers)
+        public async Task<Dictionary<string, QuestionnaireAnalysisOverview>> CompareTeamMentalHealthAsync(
+            int questionnaireId, List<string> teamIdentifiers)
         {
-            // This would require team identification in responses
-            // For now, return a basic implementation
             var result = new Dictionary<string, QuestionnaireAnalysisOverview>();
-
             foreach (var team in teamIdentifiers)
-            {
                 result[team] = await GenerateQuestionnaireOverviewAsync(questionnaireId);
-            }
-
             return result;
         }
 
@@ -821,12 +925,13 @@ Respond with a JSON array of applicable categories: [""category1"", ""category2"
 
         #endregion
 
-        #region Reporting Methods
+        #region Reporting
 
         public async Task<string> GenerateDetailedAnalysisReportAsync(int questionnaireId)
         {
             try
             {
+                // Both of these now read from DB
                 var overview = await GenerateQuestionnaireOverviewAsync(questionnaireId);
                 var highRiskResponses = await IdentifyHighRiskResponsesAsync(questionnaireId);
 
@@ -878,7 +983,10 @@ Respond with a JSON array of applicable categories: [""category1"", ""category2"
             {
                 var responses = await _context.Responses
                     .Include(r => r.ResponseDetails)
-                    .ThenInclude(rd => rd.Question)
+                        .ThenInclude(rd => rd.Question)
+                    .Include(r => r.ResponseDetails)
+                        .ThenInclude(rd => rd.ResponseAnswers)
+                            .ThenInclude(ra => ra.Answer)
                     .Where(r => r.QuestionnaireId == questionnaireId)
                     .ToListAsync();
 
@@ -888,32 +996,15 @@ Respond with a JSON array of applicable categories: [""category1"", ""category2"
                 {
                     foreach (var detail in response.ResponseDetails)
                     {
-                        string responseText = "";
+                        var analysisText = BuildAnalysisText(detail);
 
-                        // Handle text-based questions
-                        if (!string.IsNullOrWhiteSpace(detail.TextResponse))
-                        {
-                            responseText = detail.TextResponse;
-                        }
-                        // Handle CheckBox questions
-                        else if (detail.QuestionType == QuestionType.CheckBox && detail.ResponseAnswers.Any())
-                        {
-                            var selectedAnswers = detail.ResponseAnswers
-                                .Select(ra => detail.Question.Answers.FirstOrDefault(a => a.Id == ra.AnswerId)?.Text)
-                                .Where(text => !string.IsNullOrEmpty(text))
-                                .ToList();
-
-                            responseText = $"Multiple Selection Question: {detail.Question.Text}\nSelected Options: {string.Join(", ", selectedAnswers)}\nAnalyze these selected workplace factors for mental health implications and patterns.";
-                        }
-
-                        // Create analysis request if we have text to analyze
-                        if (!string.IsNullOrEmpty(responseText))
+                        if (!string.IsNullOrWhiteSpace(analysisText))
                         {
                             var request = new AnalysisRequest
                             {
                                 ResponseId = response.Id,
                                 QuestionId = detail.QuestionId,
-                                ResponseText = responseText,
+                                ResponseText = analysisText,
                                 QuestionText = detail.Question?.Text ?? ""
                             };
 
@@ -932,6 +1023,7 @@ Respond with a JSON array of applicable categories: [""category1"", ""category2"
             }
         }
 
+
         public async Task<QuestionnaireAnalysisOverview> GenerateManagementDashboardAsync(int questionnaireId)
         {
             return await GenerateQuestionnaireOverviewAsync(questionnaireId);
@@ -939,58 +1031,217 @@ Respond with a JSON array of applicable categories: [""category1"", ""category2"
 
         #endregion
 
-        #region Utility Methods
+        #region Service Health
 
-        public async Task<bool> TestAzureLanguageServiceConnectionAsync()
+        public async Task<bool> TestClaudeConnectionAsync()
         {
             try
             {
-                await _textAnalyticsClient.AnalyzeSentimentAsync("Test connection");
-                return true;
+                var response = await SendClaudeRequestAsync(
+                    "You are a health check endpoint. Respond with exactly: OK",
+                    "Health check. Respond with exactly: OK",
+                    0.0f, 10);
+
+                return !string.IsNullOrWhiteSpace(response);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Azure Language Service connection test failed");
-                return false;
-            }
-        }
-
-        public async Task<bool> TestAzureOpenAIConnectionAsync()
-        {
-            try
-            {
-                var messages = new List<ChatMessage>
-                {
-                    new UserChatMessage("Test connection")
-                };
-
-                var chatOptions = new ChatCompletionOptions();
-
-                await _chatClient.CompleteChatAsync(messages, chatOptions);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Azure OpenAI connection test failed");
+                _logger.LogError(ex, "Claude connection test failed");
                 return false;
             }
         }
 
         public Task<bool> ValidateAnalysisRequestAsync(AnalysisRequest request)
         {
-            return Task.FromResult(!string.IsNullOrWhiteSpace(request.ResponseText) &&
-                   request.ResponseId > 0 &&
-                   request.QuestionId > 0);
+            return Task.FromResult(
+                !string.IsNullOrWhiteSpace(request.ResponseText) &&
+                request.ResponseId >= 0 &&
+                request.QuestionId >= 0);
         }
 
         public async Task<Dictionary<string, bool>> GetServiceHealthStatusAsync()
         {
-            var status = new Dictionary<string, bool>();
+            return new Dictionary<string, bool>
+            {
+                ["Claude"] = await TestClaudeConnectionAsync()
+            };
+        }
 
-            status["AzureLanguageService"] = await TestAzureLanguageServiceConnectionAsync();
-            status["AzureOpenAI"] = await TestAzureOpenAIConnectionAsync();
+        #endregion
 
-            return status;
+        #region Private Helpers
+
+        /// <summary>
+        /// Extracts analyzable text from a ResponseDetail (text responses + checkbox selections).
+        /// </summary>
+        private static string ExtractAnalyzableText(ResponseDetail detail)
+        {
+            if (!string.IsNullOrWhiteSpace(detail.TextResponse))
+                return detail.TextResponse;
+
+            if (detail.QuestionType == QuestionType.CheckBox && detail.ResponseAnswers.Any())
+            {
+                var selectedAnswers = detail.ResponseAnswers
+                    .Select(ra => detail.Question?.Answers?.FirstOrDefault(a => a.Id == ra.AnswerId)?.Text)
+                    .Where(text => !string.IsNullOrEmpty(text))
+                    .ToList();
+
+                if (selectedAnswers.Any())
+                {
+                    return $"Multiple Selection Question: {detail.Question?.Text}\n" +
+                           $"Selected Options: {string.Join(", ", selectedAnswers)}\n" +
+                           "Analyze these selected workplace factors for mental health implications and patterns.";
+                }
+            }
+
+            return string.Empty;
+        }
+
+        private static MentalHealthRiskAssessment DefaultRiskAssessment(string reason)
+        {
+            return new MentalHealthRiskAssessment
+            {
+                RiskLevel = RiskLevel.Moderate,
+                RiskScore = 0.5,
+                RiskIndicators = new List<string> { reason },
+                ProtectiveFactors = new List<string>(),
+                RequiresImmediateAttention = false,
+                RecommendedAction = "Manual review recommended due to analysis error",
+                AssessedAt = DateTime.UtcNow
+            };
+        }
+
+        private static string Truncate(string? s, int max = 800) =>
+            s == null ? "" : s.Length > max ? s[..max] : s;
+
+        #endregion
+
+        #region JSON Parsing Helpers
+
+        private static readonly Regex JsonObjectRegex = new(
+            @"(\{(?:[^{}]|(?<o>\{)|(?<-o>\}))*(?(o)(?!))\})",
+            RegexOptions.Singleline | RegexOptions.Compiled);
+
+        private static JsonDocument? ParseLenientJson(string? content)
+        {
+            if (string.IsNullOrWhiteSpace(content)) return null;
+
+            var json = content.Trim();
+
+            // Strip markdown code fences
+            if (json.StartsWith("```"))
+                json = Regex.Replace(json, @"^```(?:json)?\s*|\s*```$", "",
+                    RegexOptions.IgnoreCase | RegexOptions.Singleline).Trim();
+
+            // Try direct parse first
+            if (json.StartsWith("{"))
+            {
+                try
+                {
+                    return JsonDocument.Parse(json, new JsonDocumentOptions
+                    {
+                        AllowTrailingCommas = true,
+                        CommentHandling = JsonCommentHandling.Skip
+                    });
+                }
+                catch { }
+            }
+
+            // Try regex extraction
+            var match = JsonObjectRegex.Match(json);
+            if (!match.Success) return null;
+
+            try
+            {
+                return JsonDocument.Parse(match.Value, new JsonDocumentOptions
+                {
+                    AllowTrailingCommas = true,
+                    CommentHandling = JsonCommentHandling.Skip
+                });
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private static T? DeserializeLenient<T>(string? content)
+        {
+            if (string.IsNullOrWhiteSpace(content)) return default;
+
+            var json = content.Trim();
+            if (json.StartsWith("```"))
+                json = Regex.Replace(json, @"^```(?:json)?\s*|\s*```$", "",
+                    RegexOptions.IgnoreCase | RegexOptions.Singleline).Trim();
+
+            try
+            {
+                return JsonSerializer.Deserialize<T>(json, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true,
+                    AllowTrailingCommas = true,
+                    NumberHandling = JsonNumberHandling.AllowReadingFromString
+                });
+            }
+            catch
+            {
+                // Try extracting JSON object/array
+                if (typeof(T) == typeof(List<string>) && json.Contains("["))
+                {
+                    var start = json.IndexOf('[');
+                    var end = json.LastIndexOf(']');
+                    if (start >= 0 && end > start)
+                    {
+                        try
+                        {
+                            return JsonSerializer.Deserialize<T>(json[start..(end + 1)]);
+                        }
+                        catch { }
+                    }
+                }
+                return default;
+            }
+        }
+
+        private static string GetStringProp(JsonElement el, string name, string fallback) =>
+            el.TryGetProperty(name, out var prop) && prop.ValueKind == JsonValueKind.String
+                ? prop.GetString() ?? fallback : fallback;
+
+        private static double GetDoubleProp(JsonElement el, string name, double fallback)
+        {
+            if (!el.TryGetProperty(name, out var prop)) return fallback;
+            if (prop.ValueKind == JsonValueKind.Number && prop.TryGetDouble(out var d)) return d;
+            if (prop.ValueKind == JsonValueKind.String && double.TryParse(prop.GetString(), out var d2)) return d2;
+            return fallback;
+        }
+
+        private static int GetIntProp(JsonElement el, string name, int fallback)
+        {
+            if (!el.TryGetProperty(name, out var prop)) return fallback;
+            if (prop.ValueKind == JsonValueKind.Number && prop.TryGetInt32(out var i)) return i;
+            if (prop.ValueKind == JsonValueKind.String && int.TryParse(prop.GetString(), out var i2)) return i2;
+            return fallback;
+        }
+
+        private static bool GetBoolProp(JsonElement el, string name, bool fallback)
+        {
+            if (!el.TryGetProperty(name, out var prop)) return fallback;
+            if (prop.ValueKind == JsonValueKind.True) return true;
+            if (prop.ValueKind == JsonValueKind.False) return false;
+            if (prop.ValueKind == JsonValueKind.String && bool.TryParse(prop.GetString(), out var b)) return b;
+            return fallback;
+        }
+
+        private static List<string> GetStringArray(JsonElement el, string name)
+        {
+            if (!el.TryGetProperty(name, out var prop) || prop.ValueKind != JsonValueKind.Array)
+                return new List<string>();
+
+            return prop.EnumerateArray()
+                .Select(x => x.GetString())
+                .Where(s => !string.IsNullOrWhiteSpace(s))
+                .Select(s => s!)
+                .ToList();
         }
 
         #endregion
@@ -1009,125 +1260,608 @@ Respond with a JSON array of applicable categories: [""category1"", ""category2"
             {
                 if (disposing)
                 {
-                    // Dispose managed resources
+                    _httpClient?.Dispose();
+                    _rateLimiter?.Dispose();
                     _context?.Dispose();
                 }
                 _disposed = true;
             }
         }
-
-        #endregion
-
-        #region Private JSON Helpers (no new models)
-
-        private static readonly Regex JsonObjectRegex =
-            new(@"(\{(?:[^{}]|(?<o>\{)|(?<-o>\}))*(?(o)(?!))\})",
-                RegexOptions.Singleline | RegexOptions.Compiled);
-
-        private static bool TryExtractJsonObject(string text, out string json)
+        private async Task SaveResponseAnalysisToDbAsync(ResponseAnalysisResult result)
         {
-            json = text?.Trim() ?? "";
-
-            // strip markdown code fences if present
-            if (json.StartsWith("```"))
-            {
-                json = Regex.Replace(json, "^```(?:json)?\\s*|\\s*```$", "",
-                                     RegexOptions.IgnoreCase | RegexOptions.Singleline).Trim();
-            }
-
-            if (json.StartsWith("{") && json.EndsWith("}"))
-                return true;
-
-            var m = JsonObjectRegex.Match(json);
-            if (!m.Success) return false;
-
-            json = m.Value;
-            return true;
-        }
-
-        private static JsonDocument? ParseLenient(string content, out string? error)
-        {
-            error = null;
-
-            if (!TryExtractJsonObject(content, out var jsonOnly))
-            {
-                error = "No JSON object found in model response.";
-                return null;
-            }
-
-            var docOptions = new JsonDocumentOptions
-            {
-                AllowTrailingCommas = true,
-                CommentHandling = JsonCommentHandling.Skip
-            };
-
             try
             {
-                return JsonDocument.Parse(jsonOnly, docOptions);
-            }
-            catch (Exception ex)
-            {
-                error = ex.Message;
-                return null;
-            }
-        }
+                // Detach any tracked entities to avoid conflicts
+                var trackedEntities = _context.ChangeTracker.Entries<Model.ResponseAnalysis>()
+                    .Where(e => e.Entity.ResponseId == result.ResponseId && e.Entity.QuestionId == result.QuestionId)
+                    .ToList();
 
-        private static T? DeserializeLenient<T>(string content, out string? error)
-        {
-            error = null;
-
-            if (!TryExtractJsonObject(content, out var jsonOnly))
-            {
-                // also try plain array (for CategorizeResponseAsync)
-                var trimmed = (content ?? "").Trim();
-                if (typeof(T) == typeof(List<string>) && trimmed.StartsWith("[") && trimmed.EndsWith("]"))
+                foreach (var tracked in trackedEntities)
                 {
-                    jsonOnly = trimmed;
+                    tracked.State = EntityState.Detached;
+                }
+
+                // Check if already exists
+                var existing = await _context.ResponseAnalyses
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(ra => ra.ResponseId == result.ResponseId && ra.QuestionId == result.QuestionId);
+
+                if (existing != null)
+                {
+                    // Update existing
+                    existing.AnonymizedText = result.AnonymizedResponseText;
+                    existing.SentimentLabel = result.SentimentAnalysis?.Sentiment ?? "Neutral";
+                    existing.SentimentConfidence = result.SentimentAnalysis?.ConfidenceScore ?? 0;
+                    existing.PositiveScore = result.SentimentAnalysis?.PositiveScore ?? 0;
+                    existing.NegativeScore = result.SentimentAnalysis?.NegativeScore ?? 0;
+                    existing.NeutralScore = result.SentimentAnalysis?.NeutralScore ?? 0;
+                    existing.RiskLevel = result.RiskAssessment?.RiskLevel.ToString() ?? "Low";
+                    existing.RiskScore = result.RiskAssessment?.RiskScore ?? 0;
+                    existing.RequiresImmediateAttention = result.RiskAssessment?.RequiresImmediateAttention ?? false;
+                    existing.RecommendedAction = result.RiskAssessment?.RecommendedAction ?? "";
+                    existing.RiskIndicatorsJson = JsonSerializer.Serialize(result.RiskAssessment?.RiskIndicators ?? new List<string>());
+                    existing.ProtectiveFactorsJson = JsonSerializer.Serialize(result.RiskAssessment?.ProtectiveFactors ?? new List<string>());
+                    existing.KeyPhrasesJson = JsonSerializer.Serialize(result.KeyPhrases?.KeyPhrases ?? new List<string>());
+                    existing.WorkplaceFactorsJson = JsonSerializer.Serialize(result.KeyPhrases?.WorkplaceFactors ?? new List<string>());
+                    existing.EmotionalIndicatorsJson = JsonSerializer.Serialize(result.KeyPhrases?.EmotionalIndicators ?? new List<string>());
+                    existing.InsightsJson = JsonSerializer.Serialize(result.Insights);
+                    existing.AnalyzedAt = DateTime.UtcNow;
+
+                    _context.ResponseAnalyses.Attach(existing);
+                    _context.Entry(existing).State = EntityState.Modified;
                 }
                 else
                 {
-                    error = "No JSON object/array found in model response.";
-                    return default;
+                    // Create new
+                    var entity = new Model.ResponseAnalysis
+                    {
+                        ResponseId = result.ResponseId,
+                        QuestionId = result.QuestionId,
+                        QuestionText = result.QuestionText,
+                        AnonymizedText = result.AnonymizedResponseText,
+                        SentimentLabel = result.SentimentAnalysis?.Sentiment ?? "Neutral",
+                        SentimentConfidence = result.SentimentAnalysis?.ConfidenceScore ?? 0,
+                        PositiveScore = result.SentimentAnalysis?.PositiveScore ?? 0,
+                        NegativeScore = result.SentimentAnalysis?.NegativeScore ?? 0,
+                        NeutralScore = result.SentimentAnalysis?.NeutralScore ?? 0,
+                        RiskLevel = result.RiskAssessment?.RiskLevel.ToString() ?? "Low",
+                        RiskScore = result.RiskAssessment?.RiskScore ?? 0,
+                        RequiresImmediateAttention = result.RiskAssessment?.RequiresImmediateAttention ?? false,
+                        RecommendedAction = result.RiskAssessment?.RecommendedAction ?? "",
+                        RiskIndicatorsJson = JsonSerializer.Serialize(result.RiskAssessment?.RiskIndicators ?? new List<string>()),
+                        ProtectiveFactorsJson = JsonSerializer.Serialize(result.RiskAssessment?.ProtectiveFactors ?? new List<string>()),
+                        KeyPhrasesJson = JsonSerializer.Serialize(result.KeyPhrases?.KeyPhrases ?? new List<string>()),
+                        WorkplaceFactorsJson = JsonSerializer.Serialize(result.KeyPhrases?.WorkplaceFactors ?? new List<string>()),
+                        EmotionalIndicatorsJson = JsonSerializer.Serialize(result.KeyPhrases?.EmotionalIndicators ?? new List<string>()),
+                        InsightsJson = JsonSerializer.Serialize(result.Insights),
+                        AnalyzedAt = DateTime.UtcNow
+                    };
+
+                    _context.ResponseAnalyses.Add(entity);
                 }
-            }
 
-            var options = new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true,
-                AllowTrailingCommas = true,
-                NumberHandling = JsonNumberHandling.AllowReadingFromString
-            };
-
-            try
-            {
-                return JsonSerializer.Deserialize<T>(jsonOnly, options);
+                await _context.SaveChangesAsync();
             }
             catch (Exception ex)
             {
-                error = ex.Message;
-                return default;
+                _logger.LogError(ex, "Error saving analysis to DB for ResponseId: {ResponseId}, QuestionId: {QuestionId}", result.ResponseId, result.QuestionId);
             }
         }
 
-        private static bool TryGetDoubleFlexible(JsonElement el, out double value)
+        private async Task<ResponseAnalysisResult?> LoadResponseAnalysisFromDbAsync(int responseId, int questionId)
         {
-            value = 0;
-            if (el.ValueKind == JsonValueKind.Number) return el.TryGetDouble(out value);
-            if (el.ValueKind == JsonValueKind.String) return double.TryParse(el.GetString(), out value);
-            return false;
+            try
+            {
+                var entity = await _context.ResponseAnalyses
+     .AsNoTracking()
+     .FirstOrDefaultAsync(ra => ra.ResponseId == responseId && ra.QuestionId == questionId);
+
+                if (entity == null) return null;
+
+                return new ResponseAnalysisResult
+                {
+                    ResponseId = entity.ResponseId,
+                    QuestionId = entity.QuestionId,
+                    QuestionText = entity.QuestionText,
+                    AnonymizedResponseText = entity.AnonymizedText,
+                    SentimentAnalysis = new SentimentAnalysisResult
+                    {
+                        Sentiment = entity.SentimentLabel,
+                        ConfidenceScore = entity.SentimentConfidence,
+                        PositiveScore = entity.PositiveScore,
+                        NegativeScore = entity.NegativeScore,
+                        NeutralScore = entity.NeutralScore,
+                        AnalyzedAt = entity.AnalyzedAt
+                    },
+                    KeyPhrases = new KeyPhrasesResult
+                    {
+                        KeyPhrases = JsonSerializer.Deserialize<List<string>>(entity.KeyPhrasesJson) ?? new List<string>(),
+                        WorkplaceFactors = JsonSerializer.Deserialize<List<string>>(entity.WorkplaceFactorsJson) ?? new List<string>(),
+                        EmotionalIndicators = JsonSerializer.Deserialize<List<string>>(entity.EmotionalIndicatorsJson) ?? new List<string>(),
+                        ExtractedAt = entity.AnalyzedAt
+                    },
+                    RiskAssessment = new MentalHealthRiskAssessment
+                    {
+                        RiskLevel = Enum.TryParse<RiskLevel>(entity.RiskLevel, out var rl) ? rl : RiskLevel.Low,
+                        RiskScore = entity.RiskScore,
+                        RequiresImmediateAttention = entity.RequiresImmediateAttention,
+                        RecommendedAction = entity.RecommendedAction,
+                        RiskIndicators = JsonSerializer.Deserialize<List<string>>(entity.RiskIndicatorsJson) ?? new List<string>(),
+                        ProtectiveFactors = JsonSerializer.Deserialize<List<string>>(entity.ProtectiveFactorsJson) ?? new List<string>(),
+                        AssessedAt = entity.AnalyzedAt
+                    },
+                    Insights = JsonSerializer.Deserialize<List<WorkplaceInsight>>(entity.InsightsJson) ?? new List<WorkplaceInsight>(),
+                    AnalyzedAt = entity.AnalyzedAt,
+                    IsAnalysisComplete = true
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading analysis from DB for ResponseId: {ResponseId}, QuestionId: {QuestionId}", responseId, questionId);
+                return null;
+            }
+        }
+        private async Task SaveSnapshotToDbAsync(QuestionnaireAnalysisOverview overview)
+        {
+            try
+            {
+                var existing = await _context.QuestionnaireAnalysisSnapshots
+                    .FirstOrDefaultAsync(s => s.QuestionnaireId == overview.QuestionnaireId);
+
+                if (existing != null)
+                {
+                    existing.TotalResponses = overview.TotalResponses;
+                    existing.AnalyzedResponses = overview.AnalyzedResponses;
+                    existing.OverallPositiveSentiment = overview.OverallPositiveSentiment;
+                    existing.OverallNegativeSentiment = overview.OverallNegativeSentiment;
+                    existing.OverallNeutralSentiment = overview.OverallNeutralSentiment;
+                    existing.LowRiskCount = overview.LowRiskResponses;
+                    existing.ModerateRiskCount = overview.ModerateRiskResponses;
+                    existing.HighRiskCount = overview.HighRiskResponses;
+                    existing.CriticalRiskCount = overview.CriticalRiskResponses;
+                    existing.ExecutiveSummary = overview.ExecutiveSummary;
+                    existing.TopWorkplaceIssuesJson = JsonSerializer.Serialize(overview.TopWorkplaceIssues);
+                    existing.MostCommonKeyPhrasesJson = JsonSerializer.Serialize(overview.MostCommonKeyPhrases);
+                    existing.GeneratedAt = DateTime.UtcNow;
+
+                    _context.QuestionnaireAnalysisSnapshots.Update(existing);
+                }
+                else
+                {
+                    var entity = new Model.QuestionnaireAnalysisSnapshot
+                    {
+                        QuestionnaireId = overview.QuestionnaireId,
+                        TotalResponses = overview.TotalResponses,
+                        AnalyzedResponses = overview.AnalyzedResponses,
+                        OverallPositiveSentiment = overview.OverallPositiveSentiment,
+                        OverallNegativeSentiment = overview.OverallNegativeSentiment,
+                        OverallNeutralSentiment = overview.OverallNeutralSentiment,
+                        LowRiskCount = overview.LowRiskResponses,
+                        ModerateRiskCount = overview.ModerateRiskResponses,
+                        HighRiskCount = overview.HighRiskResponses,
+                        CriticalRiskCount = overview.CriticalRiskResponses,
+                        ExecutiveSummary = overview.ExecutiveSummary,
+                        TopWorkplaceIssuesJson = JsonSerializer.Serialize(overview.TopWorkplaceIssues),
+                        MostCommonKeyPhrasesJson = JsonSerializer.Serialize(overview.MostCommonKeyPhrases),
+                        GeneratedAt = DateTime.UtcNow
+                    };
+
+                    _context.QuestionnaireAnalysisSnapshots.Add(entity);
+                }
+
+                await _context.SaveChangesAsync();
+                _logger.LogInformation("Saved snapshot for QuestionnaireId: {QuestionnaireId}", overview.QuestionnaireId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error saving snapshot for QuestionnaireId: {QuestionnaireId}", overview.QuestionnaireId);
+            }
+        }
+        private async Task<string?> BuildAnalysisTextAsync(ResponseDetail detail)
+        {
+            try
+            {
+                var questionText = detail.Question?.Text ?? "Unknown question";
+                var questionType = detail.QuestionType;
+
+                // For text-based questions, use TextResponse directly
+                if (questionType == QuestionType.Text || questionType == QuestionType.Open_ended)
+                {
+                    return !string.IsNullOrWhiteSpace(detail.TextResponse) ? detail.TextResponse : null;
+                }
+
+                // For slider, use the numeric value with context
+                if (questionType == QuestionType.Slider)
+                {
+                    if (!string.IsNullOrWhiteSpace(detail.TextResponse))
+                    {
+                        return $"Question: {questionText}\nAnswer: {detail.TextResponse}";
+                    }
+                    return null;
+                }
+
+                // For Rating, use TextResponse if available
+                if (questionType == QuestionType.Rating)
+                {
+                    if (!string.IsNullOrWhiteSpace(detail.TextResponse))
+                    {
+                        return $"Rating Question: {questionText}\nRating given: {detail.TextResponse}";
+                    }
+                    return null;
+                }
+
+                // For TrueFalse, get the selected answer
+                if (questionType == QuestionType.TrueFalse)
+                {
+                    var selectedAnswers = await GetSelectedAnswerTextsAsync(detail);
+                    if (selectedAnswers.Any())
+                    {
+                        return $"True/False Question: {questionText}\nAnswer: {selectedAnswers.First()}";
+                    }
+                    return null;
+                }
+
+                // For Multiple Choice (single selection)
+                if (questionType == QuestionType.Multiple_choice)
+                {
+                    var selectedAnswers = await GetSelectedAnswerTextsAsync(detail);
+                    var otherText = !string.IsNullOrWhiteSpace(detail.TextResponse) ? $"\nAdditional comment: {detail.TextResponse}" : "";
+                    if (selectedAnswers.Any())
+                    {
+                        return $"Multiple Choice Question: {questionText}\nSelected: {string.Join(", ", selectedAnswers)}{otherText}";
+                    }
+                    return null;
+                }
+
+                // For CheckBox (multiple selection)
+                if (questionType == QuestionType.CheckBox)
+                {
+                    var selectedAnswers = await GetSelectedAnswerTextsAsync(detail);
+                    var otherText = !string.IsNullOrWhiteSpace(detail.TextResponse) ? $"\nAdditional comment: {detail.TextResponse}" : "";
+                    if (selectedAnswers.Any())
+                    {
+                        return $"Multiple Selection Question: {questionText}\nSelected Options: {string.Join(", ", selectedAnswers)}{otherText}\nAnalyze these selected workplace factors for mental health implications and patterns.";
+                    }
+                    return null;
+                }
+
+                // For Likert scale
+                if (questionType == QuestionType.Likert)
+                {
+                    var selectedAnswers = await GetSelectedAnswerTextsAsync(detail);
+                    if (selectedAnswers.Any())
+                    {
+                        return $"Likert Scale Question: {questionText}\nResponse: {string.Join(", ", selectedAnswers)}";
+                    }
+                    return null;
+                }
+
+                // For Matrix
+                if (questionType == QuestionType.Matrix)
+                {
+                    var selectedAnswers = await GetSelectedAnswerTextsAsync(detail);
+                    if (selectedAnswers.Any())
+                    {
+                        return $"Matrix Question: {questionText}\nResponses: {string.Join("; ", selectedAnswers)}";
+                    }
+                    return null;
+                }
+
+                // For Ranking
+                if (questionType == QuestionType.Ranking)
+                {
+                    var selectedAnswers = await GetSelectedAnswerTextsAsync(detail);
+                    if (selectedAnswers.Any())
+                    {
+                        return $"Ranking Question: {questionText}\nRanked order: {string.Join(" > ", selectedAnswers)}";
+                    }
+                    return null;
+                }
+
+                // For Demographic
+                if (questionType == QuestionType.Demographic)
+                {
+                    if (!string.IsNullOrWhiteSpace(detail.TextResponse))
+                    {
+                        return $"Demographic Question: {questionText}\nAnswer: {detail.TextResponse}";
+                    }
+                    var selectedAnswers = await GetSelectedAnswerTextsAsync(detail);
+                    if (selectedAnswers.Any())
+                    {
+                        return $"Demographic Question: {questionText}\nAnswer: {string.Join(", ", selectedAnswers)}";
+                    }
+                    return null;
+                }
+
+                // For Image-based questions
+                if (questionType == QuestionType.Image)
+                {
+                    var selectedAnswers = await GetSelectedAnswerTextsAsync(detail);
+                    if (selectedAnswers.Any())
+                    {
+                        return $"Image Selection Question: {questionText}\nSelected: {string.Join(", ", selectedAnswers)}";
+                    }
+                    return null;
+                }
+
+                // Fallback — use TextResponse if available
+                if (!string.IsNullOrWhiteSpace(detail.TextResponse))
+                {
+                    return detail.TextResponse;
+                }
+
+                return null;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error building analysis text for ResponseDetail {DetailId}", detail.Id);
+                return null;
+            }
         }
 
-        private static bool TryGetBoolFlexible(JsonElement el, out bool value)
+        private async Task<List<string>> GetSelectedAnswerTextsAsync(ResponseDetail detail)
         {
-            value = false;
-            if (el.ValueKind == JsonValueKind.True) { value = true; return true; }
-            if (el.ValueKind == JsonValueKind.False) { value = false; return true; }
-            if (el.ValueKind == JsonValueKind.String) return bool.TryParse(el.GetString(), out value);
-            return false;
+            try
+            {
+                if (detail.ResponseAnswers == null || !detail.ResponseAnswers.Any())
+                {
+                    // Load from DB if not included
+                    var answerIds = await _context.Set<ResponseAnswer>()
+                        .Where(ra => ra.ResponseDetailId == detail.Id)
+                        .Select(ra => ra.AnswerId)
+                        .ToListAsync();
+
+                    if (!answerIds.Any()) return new List<string>();
+
+                    var answerTexts = await _context.Set<Answer>()
+                        .Where(a => answerIds.Contains(a.Id))
+                        .Select(a => a.Text ?? "")
+                        .Where(t => !string.IsNullOrWhiteSpace(t))
+                        .ToListAsync();
+
+                    return answerTexts;
+                }
+
+                // Use already-loaded ResponseAnswers
+                var ids = detail.ResponseAnswers.Select(ra => ra.AnswerId).ToList();
+                var texts = await _context.Set<Answer>()
+                    .Where(a => ids.Contains(a.Id))
+                    .Select(a => a.Text ?? "")
+                    .Where(t => !string.IsNullOrWhiteSpace(t))
+                    .ToListAsync();
+
+                return texts;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting selected answers for ResponseDetail {DetailId}", detail.Id);
+                return new List<string>();
+            }
         }
 
+        private async Task<List<ResponseAnalysisResult>> AnalyzeAllResponsesInOneCallAsync(
+    List<(int ResponseId, int QuestionId, string QuestionText, string AnswerText)> qaItems)
+        {
+            var results = new List<ResponseAnalysisResult>();
+            if (!qaItems.Any()) return results;
 
+            try
+            {
+                var qaBlock = new StringBuilder();
+                for (int i = 0; i < qaItems.Count; i++)
+                {
+                    qaBlock.AppendLine($"[Response {i + 1}]");
+                    qaBlock.AppendLine($"Question: {qaItems[i].QuestionText}");
+                    qaBlock.AppendLine($"Answer: {qaItems[i].AnswerText}");
+                    qaBlock.AppendLine();
+                }
 
+                var systemPrompt = @"You are a workplace mental health professional. Always respond with a single valid JSON array only. No markdown, no code fences, no explanations.";
+
+                var userPrompt = $@"Analyze each of the following survey responses individually.
+
+For EACH response, provide:
+1. Sentiment (Positive, Negative, Neutral, Mixed)
+2. Sentiment confidence scores (positive, negative, neutral — each 0.0 to 1.0, must sum to ~1.0)
+3. Risk Level (Low, Moderate, High, Critical)
+4. Risk Score (0.0 to 1.0)
+5. Requires Immediate Attention (true/false)
+6. Recommended Action
+7. Risk Indicators (list of concerns)
+8. Protective Factors (list of positives)
+9. Key Phrases
+10. Workplace Factors
+11. Emotional Indicators
+12. Workplace Insights — each with category, issue, recommended intervention, priority (1-5), affected areas
+
+Survey Responses:
+{qaBlock}
+
+Return a JSON array with one object per response in the same order:
+[
+  {{
+    ""responseIndex"": 0,
+    ""sentiment"": ""Neutral"",
+    ""positiveScore"": 0.05,
+    ""negativeScore"": 0.05,
+    ""neutralScore"": 0.90,
+    ""riskLevel"": ""Low"",
+    ""riskScore"": 0.1,
+    ""requiresImmediateAttention"": false,
+    ""recommendedAction"": ""specific action"",
+    ""riskIndicators"": [""indicator1""],
+    ""protectiveFactors"": [""factor1""],
+    ""keyPhrases"": [""phrase1""],
+    ""workplaceFactors"": [""factor1""],
+    ""emotionalIndicators"": [""indicator1""],
+    ""insights"": [
+      {{
+        ""category"": ""Category Name"",
+        ""issue"": ""specific issue"",
+        ""recommendedIntervention"": ""specific intervention"",
+        ""priority"": 3,
+        ""affectedAreas"": [""area1""]
+      }}
+    ]
+  }}
+]
+
+Important:
+- Analyze EACH response individually based on its question context
+- Return exactly one object per response in the same order
+- Respond with ONLY the JSON array";
+
+                _logger.LogInformation("Sending combined analysis request for {Count} responses to Claude API", qaItems.Count);
+
+                var content = await SendClaudeRequestAsync(systemPrompt, userPrompt, 0.3f, 8000);
+
+                _logger.LogInformation("Received combined analysis response from Claude API");
+
+                var parsedResults = ParseCombinedAnalysisResponse(content, qaItems);
+                results.AddRange(parsedResults);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in combined analysis call. Falling back to individual analysis.");
+
+                foreach (var item in qaItems)
+                {
+                    try
+                    {
+                        var request = new AnalysisRequest
+                        {
+                            ResponseId = item.ResponseId,
+                            QuestionId = item.QuestionId,
+                            ResponseText = item.AnswerText,
+                            QuestionText = item.QuestionText
+                        };
+                        results.Add(await AnalyzeCompleteResponseAsync(request));
+                    }
+                    catch (Exception innerEx)
+                    {
+                        _logger.LogError(innerEx, "Fallback analysis failed for QuestionId: {QuestionId}", item.QuestionId);
+                    }
+                }
+            }
+
+            return results;
+        }
+
+        private List<ResponseAnalysisResult> ParseCombinedAnalysisResponse(
+            string content,
+            List<(int ResponseId, int QuestionId, string QuestionText, string AnswerText)> qaItems)
+        {
+            var results = new List<ResponseAnalysisResult>();
+
+            try
+            {
+                var json = content?.Trim() ?? "";
+                if (json.StartsWith("```"))
+                    json = Regex.Replace(json, @"^```(?:json)?\s*|\s*```$", "",
+                        RegexOptions.IgnoreCase | RegexOptions.Singleline).Trim();
+
+                using var doc = JsonDocument.Parse(json, new JsonDocumentOptions
+                {
+                    AllowTrailingCommas = true,
+                    CommentHandling = JsonCommentHandling.Skip
+                });
+
+                var array = doc.RootElement;
+                if (array.ValueKind != JsonValueKind.Array)
+                {
+                    _logger.LogWarning("Combined analysis response is not a JSON array");
+                    return results;
+                }
+
+                int index = 0;
+                foreach (var item in array.EnumerateArray())
+                {
+                    if (index >= qaItems.Count) break;
+                    var qa = qaItems[index];
+
+                    var result = new ResponseAnalysisResult
+                    {
+                        ResponseId = qa.ResponseId,
+                        QuestionId = qa.QuestionId,
+                        QuestionText = qa.QuestionText,
+                        ResponseText = qa.AnswerText,
+                        AnonymizedResponseText = qa.AnswerText,
+                        AnalyzedAt = DateTime.UtcNow,
+                        IsAnalysisComplete = true
+                    };
+
+                    // Sentiment
+                    result.SentimentAnalysis = new SentimentAnalysisResult
+                    {
+                        Sentiment = GetStringProp(item, "sentiment", "Neutral"),
+                        PositiveScore = GetDoubleProp(item, "positiveScore", 0),
+                        NegativeScore = GetDoubleProp(item, "negativeScore", 0),
+                        NeutralScore = GetDoubleProp(item, "neutralScore", 0),
+                        ConfidenceScore = Math.Max(GetDoubleProp(item, "positiveScore", 0),
+                            Math.Max(GetDoubleProp(item, "negativeScore", 0), GetDoubleProp(item, "neutralScore", 0))),
+                        AnalyzedAt = DateTime.UtcNow
+                    };
+
+                    // Risk
+                    var riskLevelStr = GetStringProp(item, "riskLevel", "Low");
+                    result.RiskAssessment = new MentalHealthRiskAssessment
+                    {
+                        RiskLevel = Enum.TryParse<RiskLevel>(riskLevelStr, true, out var rle) ? rle : RiskLevel.Low,
+                        RiskScore = Math.Clamp(GetDoubleProp(item, "riskScore", 0), 0.0, 1.0),
+                        RequiresImmediateAttention = GetBoolProp(item, "requiresImmediateAttention", false),
+                        RecommendedAction = GetStringProp(item, "recommendedAction", ""),
+                        RiskIndicators = GetStringArray(item, "riskIndicators"),
+                        ProtectiveFactors = GetStringArray(item, "protectiveFactors"),
+                        AssessedAt = DateTime.UtcNow
+                    };
+
+                    // Key Phrases
+                    result.KeyPhrases = new KeyPhrasesResult
+                    {
+                        KeyPhrases = GetStringArray(item, "keyPhrases"),
+                        WorkplaceFactors = GetStringArray(item, "workplaceFactors"),
+                        EmotionalIndicators = GetStringArray(item, "emotionalIndicators"),
+                        ExtractedAt = DateTime.UtcNow
+                    };
+
+                    // Insights
+                    var insights = new List<WorkplaceInsight>();
+                    if (item.TryGetProperty("insights", out var insArr) && insArr.ValueKind == JsonValueKind.Array)
+                    {
+                        foreach (var ins in insArr.EnumerateArray())
+                        {
+                            insights.Add(new WorkplaceInsight
+                            {
+                                Category = GetStringProp(ins, "category", "General"),
+                                Issue = GetStringProp(ins, "issue", ""),
+                                RecommendedIntervention = GetStringProp(ins, "recommendedIntervention", ""),
+                                Priority = Math.Clamp(GetIntProp(ins, "priority", 3), 1, 5),
+                                AffectedAreas = GetStringArray(ins, "affectedAreas"),
+                                IdentifiedAt = DateTime.UtcNow
+                            });
+                        }
+                    }
+                    result.Insights = insights;
+
+                    results.Add(result);
+                    index++;
+                }
+
+                _logger.LogInformation("Successfully parsed {Count} results from combined analysis", results.Count);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error parsing combined analysis response. Raw (first 1000): {Raw}",
+                    content?.Length > 1000 ? content[..1000] : content);
+            }
+
+            return results;
+        }
         #endregion
+
+
+
     }
+
+
 }

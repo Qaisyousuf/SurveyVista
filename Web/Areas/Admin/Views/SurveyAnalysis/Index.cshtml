@@ -2,2950 +2,524 @@
 @model IEnumerable<dynamic>
 
 @{
-    ViewData["Title"] = "Mental Health Survey Analysis - Dashboard";
+    ViewData["Title"] = "AI Survey Analysis — Intelligence Platform";
 }
 
-
 @section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <style>
         @@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
 
         :root {
-            --neon-blue: #60a5fa;
-            --neon-purple: #c084fc;
-            --neon-green: #34d399;
-            --neon-pink: #f472b6;
-            --neon-yellow: #fbbf24;
-            --neon-red: #f87171;
-            --neon-cyan: #22d3ee;
-            
-            --dark-900: #0f172a;
-            --dark-800: #1e293b;
-            --dark-700: #334155;
-            --dark-600: #475569;
-            --dark-500: #64748b;
-            --dark-400: #94a3b8;
-            --dark-300: #cbd5e1;
-            --dark-200: #e2e8f0;
-            --dark-100: #f1f5f9;
-            
-            --glass-bg: rgba(255, 255, 255, 0.05);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-            
-            --font-main: 'Space Grotesk', sans-serif;
-            --font-mono: 'JetBrains Mono', monospace;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: var(--font-main);
-            background: var(--dark-900);
-            color: #e2e8f0;
-            overflow-x: hidden;
-        }
-
-        .nexgen-dashboard {
-            min-height: 100vh;
-            position: relative;
-        }
-
-        /* Dynamic Background */
-        .bg-pattern {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: -1;
-            overflow: hidden;
-        }
-
-        .grid-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                linear-gradient(rgba(96, 165, 250, 0.1) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(96, 165, 250, 0.1) 1px, transparent 1px);
-            background-size: 60px 60px;
-            animation: gridMove 20s linear infinite;
-        }
-
-        .gradient-mesh {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                radial-gradient(circle at 20% 20%, rgba(96, 165, 250, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 80% 60%, rgba(192, 132, 252, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 40% 80%, rgba(52, 211, 153, 0.15) 0%, transparent 50%);
-            animation: meshShift 15s ease-in-out infinite;
-        }
-
-        /* Top Navigation */
-        .top-nav {
-            position: relative;
-            z-index: 100;
-            padding: 1rem 0;
-            background: rgba(15, 23, 42, 0.8);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(96, 165, 250, 0.2);
-        }
-
-        .nav-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 2rem;
-            display: flex;
-            align-items: center;
-            gap: 3rem;
-        }
-
-        .nav-brand {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .brand-icon {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.2rem;
-        }
-
-        .brand-name {
-            font-family: var(--font-mono);
-            font-weight: 700;
-            font-size: 1.1rem;
-            letter-spacing: 0.1em;
-            color: #e2e8f0;
-        }
-
-        .brand-version {
-            font-family: var(--font-mono);
-            font-size: 0.7rem;
-            color: var(--neon-green);
-            background: rgba(52, 211, 153, 0.1);
-            padding: 0.2rem 0.5rem;
-            border-radius: 4px;
-            border: 1px solid rgba(52, 211, 153, 0.3);
-        }
-
-        .nav-center {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-        }
-
-        .breadcrumb-modern {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            font-family: var(--font-mono);
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .crumb {
-            color: var(--dark-400);
-            transition: color 0.2s ease;
-        }
-
-        .crumb.active {
-            color: var(--neon-blue);
-        }
-
-        .breadcrumb-modern i {
-            color: var(--dark-500);
-            font-size: 0.6rem;
-        }
-
-        .nav-actions {
-            display: flex;
-            gap: 1rem;
-        }
-
-        .nav-btn {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.6rem 1.2rem;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 8px;
-            color: #e2e8f0;
-            font-size: 0.8rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            backdrop-filter: blur(10px);
-        }
-
-        .nav-btn:hover {
-            background: rgba(96, 165, 250, 0.1);
-            border-color: rgba(96, 165, 250, 0.3);
-            color: var(--neon-blue);
-        }
-
-        .org-badge {
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-            padding: 0.6rem 1rem;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            backdrop-filter: blur(10px);
-        }
-
-        .org-avatar {
-            width: 32px;
-            height: 32px;
-            background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple));
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 600;
-            font-size: 0.8rem;
-        }
-
-        .org-name {
-            font-weight: 600;
-            color: #e2e8f0;
-            font-size: 0.8rem;
-        }
-
-        .org-status {
-            font-size: 0.6rem;
-            color: var(--neon-green);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        /* Hero Section */
-        .hero-nexgen {
-            padding: 4rem 0 2rem;
-            text-align: center;
-            position: relative;
-            z-index: 10;
-        }
-
-        .hero-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.6rem;
-            padding: 0.5rem 1.2rem;
-            background: rgba(96, 165, 250, 0.1);
-            border: 1px solid rgba(96, 165, 250, 0.3);
-            border-radius: 50px;
-            margin-bottom: 2rem;
-            font-family: var(--font-mono);
-            font-size: 0.7rem;
-            font-weight: 600;
-            letter-spacing: 0.1em;
-            color: var(--neon-blue);
-        }
-
-        .badge-dot {
-            width: 6px;
-            height: 6px;
-            background: var(--neon-green);
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-
-        .hero-title {
-            font-size: 4rem;
-            font-weight: 700;
-            line-height: 1.1;
-            margin-bottom: 1.5rem;
-            color: #ffffff;
-        }
-
-        .title-gradient {
-            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple), var(--neon-pink));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .hero-description {
-            font-size: 1.1rem;
-            color: var(--dark-300);
-            max-width: 600px;
-            margin: 0 auto 2rem;
-            line-height: 1.6;
-        }
-
-        /* Main Content */
-        .main-content {
-            padding: 2rem 0 4rem;
-            position: relative;
-            z-index: 10;
-        }
-
-        /* Services Dashboard */
-        .services-dashboard {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            padding: 2rem;
-            margin-bottom: 3rem;
-            box-shadow: var(--glass-shadow);
-        }
-
-        .dashboard-header {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .header-icon {
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg, var(--neon-blue), var(--neon-cyan));
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.3rem;
-        }
-
-        .header-content h2 {
-            font-family: var(--font-mono);
-            font-size: 1.2rem;
-            font-weight: 700;
-            letter-spacing: 0.05em;
-            color: #ffffff;
-            margin-bottom: 0.3rem;
-        }
-
-        .header-content p {
-            color: var(--dark-300);
-            font-size: 0.9rem;
-        }
-
-        .services-strip {
-            display: flex;
-            gap: 1.5rem;
-            flex-wrap: wrap;
-        }
-
-        .service-chip {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 1rem 1.5rem;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            min-width: 200px;
-            transition: all 0.3s ease;
-        }
-
-        .service-chip.online {
-            border-color: rgba(52, 211, 153, 0.4);
-            background: rgba(52, 211, 153, 0.05);
-        }
-
-        .service-chip.offline {
-            border-color: rgba(248, 113, 113, 0.4);
-            background: rgba(248, 113, 113, 0.05);
-        }
-
-        .chip-status {
-            width: 15px;
-            height: 15px;
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-
-        .service-chip.online .chip-status {
-            background: var(--neon-green);
-            box-shadow: 0 0 20px rgba(52, 211, 153, 0.5);
-        }
-
-        .service-chip.offline .chip-status {
-            background: var(--neon-red);
-            box-shadow: 0 0 20px rgba(248, 113, 113, 0.5);
-        }
-
-        .chip-name {
-            font-weight: 600;
-            color: #ffffff;
-            flex: 1;
-        }
-
-        .chip-state {
-            font-family: var(--font-mono);
-            font-size: 0.7rem;
-            font-weight: 600;
-            letter-spacing: 0.1em;
-        }
-
-        .service-chip.online .chip-state {
-            color: var(--neon-green);
-        }
-
-        .service-chip.offline .chip-state {
-            color: var(--neon-red);
-        }
-
-        /* Alert System */
-        .alert-nexgen {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 1rem 1.5rem;
-            border-radius: 12px;
-            margin-bottom: 1.5rem;
-            position: relative;
-            overflow: hidden;
-            backdrop-filter: blur(10px);
-        }
-
-        .alert-stripe {
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 4px;
-        }
-
-        .alert-nexgen.error {
-            background: rgba(248, 113, 113, 0.1);
-            border: 1px solid rgba(248, 113, 113, 0.3);
-        }
-
-        .alert-nexgen.error .alert-stripe {
-            background: var(--neon-red);
-        }
-
-        .alert-nexgen.success {
-            background: rgba(52, 211, 153, 0.1);
-            border: 1px solid rgba(52, 211, 153, 0.3);
-        }
-
-        .alert-nexgen.success .alert-stripe {
-            background: var(--neon-green);
-        }
-
-        .alert-nexgen.warning {
-            background: rgba(251, 191, 36, 0.1);
-            border: 1px solid rgba(251, 191, 36, 0.3);
-        }
-
-        .alert-nexgen.warning .alert-stripe {
-            background: var(--neon-yellow);
-        }
-
-        .alert-icon {
-            font-size: 1.2rem;
-        }
-
-        .alert-nexgen.error .alert-icon {
-            color: var(--neon-red);
-        }
-
-        .alert-nexgen.success .alert-icon {
-            color: var(--neon-green);
-        }
-
-        .alert-nexgen.warning .alert-icon {
-            color: var(--neon-yellow);
-        }
-
-        .alert-label {
-            font-family: var(--font-mono);
-            font-size: 0.7rem;
-            font-weight: 700;
-            letter-spacing: 0.1em;
-            margin-bottom: 0.2rem;
-        }
-
-        .alert-text {
-            font-size: 0.9rem;
-            color: var(--dark-300);
-        }
-
-        .alert-dismiss {
-            background: none;
-            border: none;
-            color: currentColor;
-            cursor: pointer;
-            padding: 0.5rem;
-            border-radius: 6px;
-            transition: background 0.2s ease;
-        }
-
-        .alert-dismiss:hover {
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        /* Section Titles */
-        .surveys-grid-section {
-            margin-bottom: 3rem;
-        }
-
-        .section-title h2 {
-            font-family: var(--font-mono);
-            font-size: 1.5rem;
-            font-weight: 700;
-            letter-spacing: 0.1em;
-            text-align: center;
-            color: #ffffff;
-            margin-bottom: 1rem;
-        }
-
-        .title-underline {
-            width: 100px;
-            height: 3px;
-            background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple));
-            margin: 0 auto 3rem;
-            border-radius: 2px;
-        }
-
-        /* Survey Cards Grid */
-        .surveys-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
-            gap: 2rem;
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 2rem;
-        }
-
-        /* Next-Gen Survey Cards */
-        .survey-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            overflow: hidden;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            opacity: 0;
-            transform: translateY(30px);
-        }
-
-        .survey-card.animate-in {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .survey-card:hover {
-            transform: translateY(-5px);
-            border-color: rgba(96, 165, 250, 0.4);
-            box-shadow: 0 20px 40px rgba(96, 165, 250, 0.1);
-        }
-
-        .card-glow {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple), var(--neon-pink));
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .survey-card:hover .card-glow {
-            opacity: 1;
-        }
-
-        .card-border {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            border-radius: 20px;
-            background: linear-gradient(135deg, rgba(96, 165, 250, 0.1), rgba(192, 132, 252, 0.1));
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .survey-card:hover .card-border {
-            opacity: 1;
-        }
-
-        .card-header {
-            padding: 2rem 2rem 1rem;
-            position: relative;
-            z-index: 2;
-        }
-
-        .card-title-section {
-            margin-bottom: 1.5rem;
-        }
-
-        .card-title {
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: #ffffff;
-            margin-bottom: 1rem;
-            line-height: 1.3;
-        }
-
-        /* Enhanced Participants Section */
-        .participants-section {
-            margin-top: 1.5rem;
-        }
-
-        .participants-label {
-            font-family: var(--font-mono);
-            font-size: 0.6rem;
-            font-weight: 600;
-            letter-spacing: 0.1em;
-            color: var(--dark-400);
-            margin-bottom: 1rem;
-        }
-
-        .avatar-stack {
-            display: flex;
-            align-items: center;
-            gap: 0.3rem;
-            margin-bottom: 1rem;
-        }
-
-        .user-avatar-enhanced {
-            position: relative;
-            display: inline-block;
-        }
-
-        .avatar-circle {
-            width: 30px;
-            height: 30px;
-            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 600;
-            font-size: 0.7rem;
-            border: 2px solid var(--dark-800);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            animation: avatarFloat 2s ease-in-out infinite;
-            animation-delay: var(--delay);
-        }
-
-        .avatar-circle:hover {
-            transform: scale(1.1) translateY(-2px);
-            box-shadow: 0 8px 25px rgba(96, 165, 250, 0.4);
-        }
-
-        .avatar-tooltip {
-            position: absolute;
-            bottom: 35px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 1050;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
-            pointer-events: none;
-        }
-
-        .user-avatar-enhanced:hover .avatar-tooltip {
-            opacity: 1;
-            visibility: visible;
-            transform: translateX(-50%) translateY(-5px);
-        }
-
-        .tooltip-content {
-            background: rgba(15, 23, 42, 0.95);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(96, 165, 250, 0.3);
-            border-radius: 8px;
-            padding: 0.8rem 1rem;
-            min-width: 150px;
-            text-align: center;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-            position: relative;
-        }
-
-        .tooltip-content::before {
-            content: '';
-            position: absolute;
-            bottom: -6px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0;
-            height: 0;
-            border-left: 6px solid transparent;
-            border-right: 6px solid transparent;
-            border-top: 6px solid rgba(96, 165, 250, 0.3);
-        }
-
-        .user-name {
-            font-weight: 600;
-            color: #ffffff;
-            font-size: 0.8rem;
-            margin-bottom: 0.3rem;
-        }
-
-        .user-email {
-            font-size: 0.7rem;
-            color: var(--dark-300);
-            font-family: var(--font-mono);
-        }
-
-        .avatar-more {
-            font-family: var(--font-mono);
-            font-size: 0.7rem;
-            color: var(--dark-400);
-            margin-left: 0.5rem;
-        }
-
-        .participants-list {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 12px;
-            padding: 1rem;
-            max-height: 150px;
-            overflow-y: auto;
-        }
-
-        .participant-item {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 0.8rem;
-            border-radius: 8px;
-            transition: all 0.2s ease;
-        }
-
-        .participant-item:hover {
-            background: rgba(96, 165, 250, 0.05);
-        }
-
-        .participant-avatar {
-            width: 32px;
-            height: 32px;
-            background: linear-gradient(135deg, var(--neon-green), var(--neon-cyan));
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 600;
-            font-size: 0.8rem;
-            flex-shrink: 0;
-        }
-
-        .participant-details {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .participant-name {
-            font-weight: 600;
-            color: #ffffff;
-            font-size: 0.85rem;
-            margin-bottom: 0.2rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .participant-email {
-            font-size: 0.75rem;
-            color: var(--dark-400);
-            font-family: var(--font-mono);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .participants-overflow {
-            text-align: center;
-            padding: 0.8rem;
-            color: var(--dark-400);
-            font-size: 0.75rem;
-            font-style: italic;
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
-        }
-
-        /* FIXED DROPDOWN MENU STYLES */
-        .card-menu {
-            position: absolute;
-            top: 1.5rem;
-            right: 1.5rem;
-        }
-
-        .menu-dots {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            padding: 0.6rem;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-            transition: all 0.2s ease;
-        }
-
-        .menu-dots span {
-            width: 3px;
-            height: 3px;
-            background: var(--dark-300);
-            border-radius: 50%;
-            transition: background 0.2s ease;
-        }
-
-        .menu-dots:hover {
-            background: rgba(96, 165, 250, 0.1);
-            border-color: rgba(96, 165, 250, 0.3);
-        }
-
-        .menu-dots:hover span {
-            background: var(--neon-blue);
-        }
-
-        /* Bootstrap dropdown menu with custom styling */
-        .dropdown-menu.dropdown-nexgen {
-            background: rgba(15, 23, 42, 0.95) !important;
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(96, 165, 250, 0.2) !important;
-            border-radius: 12px !important;
-            padding: 0.5rem;
-            margin: 0;
-            min-width: 180px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3) !important;
-            /* High z-index to ensure visibility */
-            z-index: 1060 !important;
-        }
-
-        .dropdown-menu.dropdown-nexgen .dropdown-item {
-            display: flex !important;
-            align-items: center;
-            gap: 0.8rem;
-            padding: 0.8rem 1rem !important;
-            color: var(--dark-300) !important;
-            text-decoration: none;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            transition: all 0.2s ease;
-            background: transparent !important;
-        }
-
-        .dropdown-menu.dropdown-nexgen .dropdown-item:hover,
-        .dropdown-menu.dropdown-nexgen .dropdown-item:focus {
-            background: rgba(96, 165, 250, 0.1) !important;
-            color: var(--neon-blue) !important;
-        }
-
-        .dropdown-menu.dropdown-nexgen .dropdown-divider {
-            height: 1px;
-            background: rgba(255, 255, 255, 0.1);
-            margin: 0.5rem 0;
-            border: none;
-        }
-
-        /* Metrics Panel */
-        .metrics-panel {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1rem;
-            padding: 0 2rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .metric-chip {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 12px;
-            padding: 1.2rem;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            transition: all 0.2s ease;
-        }
-
-        .metric-chip:hover {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: rgba(255, 255, 255, 0.15);
-        }
-
-        .metric-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1rem;
-        }
-
-        .metric-chip.questions .metric-icon {
-            background: linear-gradient(135deg, var(--neon-blue), var(--neon-cyan));
-        }
-
-        .metric-chip.responses .metric-icon {
-            background: linear-gradient(135deg, var(--neon-green), var(--neon-cyan));
-        }
-
-        .metric-chip.textdata .metric-icon {
-            background: linear-gradient(135deg, var(--neon-purple), var(--neon-pink));
-        }
-
-        .metric-number {
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: #ffffff;
-            line-height: 1;
-        }
-
-        .metric-text {
-            font-family: var(--font-mono);
-            font-size: 0.6rem;
-            font-weight: 600;
-            letter-spacing: 0.1em;
-            color: var(--dark-400);
-        }
-
-        .activity-indicator {
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-            padding: 0.8rem 2rem;
-            font-family: var(--font-mono);
-            font-size: 0.7rem;
-            font-weight: 500;
-            letter-spacing: 0.05em;
-            color: var(--dark-400);
-        }
-
-        .activity-pulse {
-            width: 6px;
-            height: 6px;
-            background: var(--neon-green);
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-
-        /* Action Zone */
-        .action-zone {
-            padding: 2rem;
-            position: relative;
-            z-index: 2;
-        }
-
-        .primary-action {
-            width: 100%;
-            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
-            border: none;
-            border-radius: 16px;
-            padding: 0;
-            margin-bottom: 1.5rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .primary-action:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 20px 40px rgba(96, 165, 250, 0.2);
-        }
-
-        .action-bg {
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-            transition: left 0.6s ease;
-        }
-
-        .primary-action:hover .action-bg {
-            left: 100%;
-        }
-
-        .action-content {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-            padding: 1.5rem 2rem;
-            position: relative;
-            z-index: 2;
-        }
-
-        .action-icon {
-            width: 50px;
-            height: 50px;
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.3rem;
-        }
-
-        .action-text {
-            flex: 1;
-            text-align: left;
-            color: white;
-        }
-
-        .action-title {
-            font-family: var(--font-mono);
-            font-size: 0.9rem;
-            font-weight: 700;
-            letter-spacing: 0.05em;
-            margin-bottom: 0.3rem;
-        }
-
-        .action-subtitle {
-            font-size: 0.8rem;
-            opacity: 0.8;
-        }
-
-        .action-arrow {
-            color: white;
-            font-size: 1rem;
-            transition: transform 0.2s ease;
-        }
-
-        .primary-action:hover .action-arrow {
-            transform: translateX(5px);
-        }
-
-        /* Quick Actions */
-        .quick-actions {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1rem;
-        }
-
-        .quick-btn {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 1.2rem 0.8rem;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid;
-            border-radius: 12px;
-            text-decoration: none;
-            transition: all 0.2s ease;
-            min-height: 80px;
-            gap: 0.6rem;
-            cursor: pointer;
-        }
-
-        .quick-btn:hover {
-            transform: translateY(-2px);
-            text-decoration: none;
-        }
-
-        .risk-btn {
-            border-color: rgba(248, 113, 113, 0.3);
-            color: var(--neon-red);
-        }
-
-        .risk-btn:hover {
-            background: rgba(248, 113, 113, 0.1);
-            color: var(--neon-red);
-        }
-
-        .batch-btn {
-            border-color: rgba(34, 211, 238, 0.3);
-            color: var(--neon-cyan);
-        }
-
-        .batch-btn:hover {
-            background: rgba(34, 211, 238, 0.1);
-            color: var(--neon-cyan);
-        }
-
-        .trend-btn {
-            border-color: rgba(52, 211, 153, 0.3);
-            color: var(--neon-green);
-        }
-
-        .trend-btn:hover {
-            background: rgba(52, 211, 153, 0.1);
-            color: var(--neon-green);
-        }
-
-        .quick-btn i {
-            font-size: 1.1rem;
-        }
-
-        .quick-btn span {
-            font-family: var(--font-mono);
-            font-size: 0.6rem;
-            font-weight: 600;
-            letter-spacing: 0.1em;
-        }
-
-        /* Disabled State */
-        .disabled-state {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 1.5rem;
-            background: rgba(100, 116, 139, 0.05);
-            border: 1px solid rgba(100, 116, 139, 0.2);
-            border-radius: 12px;
-        }
-
-        .disabled-icon {
-            width: 40px;
-            height: 40px;
-            background: rgba(100, 116, 139, 0.2);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--dark-400);
-            font-size: 1.1rem;
-        }
-
-        .disabled-title {
-            font-family: var(--font-mono);
-            font-size: 0.8rem;
-            font-weight: 700;
-            letter-spacing: 0.05em;
-            color: var(--dark-400);
-            margin-bottom: 0.2rem;
-        }
-
-        .disabled-message {
-            font-size: 0.8rem;
-            color: var(--dark-500);
-        }
-
-        /* Empty State */
-        .empty-nexgen {
-            grid-column: 1 / -1;
-            text-align: center;
-            padding: 4rem 2rem;
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            position: relative;
-        }
-
-        .empty-visual {
-            position: relative;
-            margin-bottom: 2rem;
-            display: inline-block;
-        }
-
-        .empty-icon {
-            width: 100px;
-            height: 100px;
-            background: rgba(100, 116, 139, 0.1);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2.5rem;
-            color: var(--dark-400);
-            position: relative;
-            z-index: 2;
-        }
-
-        .empty-rings {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-
-        .ring {
-            position: absolute;
-            border: 1px solid;
-            border-radius: 50%;
-            opacity: 0.3;
-        }
-
-        .ring.r1 {
-            width: 120px;
-            height: 120px;
-            top: -60px;
-            left: -60px;
-            border-color: var(--neon-blue);
-            animation: ringPulse 3s infinite;
-        }
-
-        .ring.r2 {
-            width: 140px;
-            height: 140px;
-            top: -70px;
-            left: -70px;
-            border-color: var(--neon-purple);
-            animation: ringPulse 3s infinite 1s;
-        }
-
-        .ring.r3 {
-            width: 160px;
-            height: 160px;
-            top: -80px;
-            left: -80px;
-            border-color: var(--neon-pink);
-            animation: ringPulse 3s infinite 2s;
-        }
-
-        .empty-text h3 {
-            font-family: var(--font-mono);
-            font-size: 1.3rem;
-            font-weight: 700;
-            letter-spacing: 0.05em;
-            color: #ffffff;
-            margin-bottom: 0.8rem;
-        }
-
-        .empty-text p {
-            color: var(--dark-300);
-            margin-bottom: 2rem;
-            font-size: 0.95rem;
-        }
-
-        .create-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.8rem;
-            padding: 1rem 2rem;
-            background: linear-gradient(135deg, var(--neon-green), var(--neon-cyan));
-            color: white;
-            text-decoration: none;
-            border-radius: 12px;
-            font-family: var(--font-mono);
-            font-size: 0.8rem;
-            font-weight: 700;
-            letter-spacing: 0.05em;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .create-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 15px 30px rgba(52, 211, 153, 0.3);
-            color: white;
-        }
-
-        .btn-glow {
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.6s ease;
-        }
-
-        .create-btn:hover .btn-glow {
-            left: 100%;
-        }
-
-        /* Next-Gen Modals */
-        .modal-backdrop {
-            backdrop-filter: blur(12px);
-            background: rgba(15, 23, 42, 0.7);
-            z-index: 1040;
-        }
-
-        .modal-nexgen {
-            background: rgba(15, 23, 42, 0.95);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(96, 165, 250, 0.2);
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
-        }
-
-        .modal-header-nexgen {
-            position: relative;
-            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
-            padding: 0;
-            border: none;
-        }
-
-        .header-pattern {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
-        }
-
-        .header-content {
-            position: relative;
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-            padding: 2rem;
-            z-index: 2;
-        }
-
-        .modal-icon-nexgen {
-            width: 50px;
-            height: 50px;
-            background: rgba(255, 255, 255, 0.15);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.3rem;
-        }
-
-        .modal-title-group h4 {
-            font-family: var(--font-mono);
-            font-size: 1.1rem;
-            font-weight: 700;
-            letter-spacing: 0.05em;
-            color: white;
-            margin-bottom: 0.3rem;
-        }
-
-        .modal-title-group p {
-            font-size: 0.8rem;
-            color: rgba(255, 255, 255, 0.7);
-            margin: 0;
-        }
-
-        .close-nexgen {
-            position: absolute;
-            top: 1.5rem;
-            right: 1.5rem;
-            width: 36px;
-            height: 36px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            z-index: 3;
-        }
-
-        .close-nexgen:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .modal-body-nexgen {
-            padding: 2rem;
-            background: rgba(15, 23, 42, 0.8);
-        }
-
-        .test-form-nexgen {
-            margin-bottom: 2rem;
-        }
-
-        .input-nexgen {
-            margin-bottom: 1.5rem;
-        }
-
-        .input-label {
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-            font-family: var(--font-mono);
-            font-size: 0.7rem;
-            font-weight: 600;
-            letter-spacing: 0.1em;
-            color: var(--dark-300);
-            margin-bottom: 1rem;
-        }
-
-        .textarea-nexgen {
-            width: 100%;
-            padding: 1.2rem;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            color: #e2e8f0;
-            font-family: inherit;
-            font-size: 0.9rem;
-            resize: vertical;
-            transition: all 0.2s ease;
-        }
-
-        .textarea-nexgen:focus {
-            outline: none;
-            border-color: rgba(96, 165, 250, 0.5);
-            background: rgba(255, 255, 255, 0.05);
-            box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
-        }
-
-        .input-hint {
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-            margin-top: 0.8rem;
-            padding: 1rem;
-            background: rgba(96, 165, 250, 0.05);
-            border: 1px solid rgba(96, 165, 250, 0.2);
-            border-radius: 8px;
-            font-size: 0.8rem;
-            color: var(--dark-300);
-        }
-
-        .hint-icon {
-            font-size: 1rem;
-        }
-
-        .results-divider-nexgen {
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(96, 165, 250, 0.3), transparent);
-            margin: 2rem 0;
-        }
-
-        .results-header-nexgen {
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-            font-family: var(--font-mono);
-            font-size: 0.8rem;
-            font-weight: 700;
-            letter-spacing: 0.1em;
-            color: var(--neon-blue);
-            margin-bottom: 1.5rem;
-        }
-
-        .modal-footer-nexgen {
-            background: rgba(30, 41, 59, 0.8);
-            border: none;
-            padding: 1.5rem 2rem;
-            display: flex;
-            gap: 1rem;
-            justify-content: flex-end;
-        }
-
-        .btn-nexgen {
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
-            padding: 0.8rem 1.5rem;
-            border-radius: 8px;
-            font-family: var(--font-mono);
-            font-size: 0.7rem;
-            font-weight: 600;
-            letter-spacing: 0.05em;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            border: 1px solid;
-        }
-
-        .btn-nexgen.secondary {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: rgba(255, 255, 255, 0.2);
-            color: var(--dark-300);
-        }
-
-        .btn-nexgen.secondary:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: #e2e8f0;
-        }
-
-        .btn-nexgen.primary {
-            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
-            border-color: transparent;
-            color: white;
-        }
-
-        .btn-nexgen.primary:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 10px 20px rgba(96, 165, 250, 0.3);
-        }
-
-        /* Analysis Results */
-        .results-nexgen {
-            padding: 1rem 0;
-        }
-
-        .results-matrix {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .result-nexgen {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 1.2rem;
-        }
-
-        .result-header-nexgen {
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-            margin-bottom: 1rem;
-        }
-
-        .result-icon-nexgen {
-            width: 32px;
-            height: 32px;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.9rem;
-            color: white;
-        }
-
-        .result-nexgen.sentiment .result-icon-nexgen {
-            background: linear-gradient(135deg, var(--neon-pink), var(--neon-red));
-        }
-
-        .result-nexgen.risk .result-icon-nexgen {
-            background: linear-gradient(135deg, var(--neon-yellow), var(--neon-red));
-        }
-
-        .result-title {
-            font-family: var(--font-mono);
-            font-size: 0.7rem;
-            font-weight: 600;
-            letter-spacing: 0.1em;
-            color: var(--dark-300);
-        }
-
-        .result-value-nexgen {
-            text-align: center;
-        }
-
-        .value-chip {
-            padding: 0.4rem 1rem;
-            border-radius: 20px;
-            font-family: var(--font-mono);
-            font-size: 0.7rem;
-            font-weight: 700;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
-            border: 1px solid;
-        }
-
-        .value-chip.positive { background: rgba(52, 211, 153, 0.2); border-color: var(--neon-green); color: var(--neon-green); }
-        .value-chip.negative { background: rgba(248, 113, 113, 0.2); border-color: var(--neon-red); color: var(--neon-red); }
-        .value-chip.neutral { background: rgba(100, 116, 139, 0.2); border-color: var(--dark-500); color: var(--dark-300); }
-        .value-chip.unknown { background: rgba(100, 116, 139, 0.1); border-color: var(--dark-600); color: var(--dark-400); }
-
-        .value-chip.low { background: rgba(52, 211, 153, 0.2); border-color: var(--neon-green); color: var(--neon-green); }
-        .value-chip.moderate { background: rgba(251, 191, 36, 0.2); border-color: var(--neon-yellow); color: var(--neon-yellow); }
-        .value-chip.high { background: rgba(248, 113, 113, 0.2); border-color: var(--neon-red); color: var(--neon-red); }
-        .value-chip.critical { background: rgba(239, 68, 68, 0.3); border-color: #dc2626; color: #fca5a5; }
-
-        .insights-nexgen {
-            display: grid;
-            gap: 1.5rem;
-        }
-
-        .insight-panel {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 12px;
-            padding: 1.2rem;
-        }
-
-        .panel-header-nexgen {
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-            font-family: var(--font-mono);
-            font-size: 0.7rem;
-            font-weight: 600;
-            letter-spacing: 0.1em;
-            color: var(--dark-300);
-            margin-bottom: 1rem;
-        }
-
-        .tags-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.6rem;
-        }
-
-        .tag-nexgen {
-            padding: 0.4rem 0.8rem;
-            border-radius: 6px;
-            font-size: 0.7rem;
-            font-weight: 500;
-            border: 1px solid;
-        }
-
-        .tag-nexgen.phrase {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: rgba(255, 255, 255, 0.2);
-            color: var(--dark-200);
-        }
-
-        .tag-nexgen.category {
-            background: rgba(96, 165, 250, 0.2);
-            border-color: var(--neon-blue);
-            color: var(--neon-blue);
-        }
-
-        .no-data-nexgen {
-            color: var(--dark-500);
-            font-style: italic;
-            font-size: 0.8rem;
-            text-align: center;
-            width: 100%;
-            padding: 1rem;
-        }
-
-        /* Service Status in Modal */
-        .services-matrix {
-            display: grid;
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .service-nexgen {
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 12px;
-            padding: 1.2rem;
-            position: relative;
-            overflow: hidden;
-            transition: all 0.2s ease;
-        }
-
-        .service-border {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 2px;
-        }
-
-        .service-nexgen.online .service-border {
-            background: linear-gradient(90deg, var(--neon-green), var(--neon-cyan));
-        }
-
-        .service-nexgen.offline .service-border {
-            background: linear-gradient(90deg, var(--neon-red), var(--neon-yellow));
-        }
-
-        .service-content {
-            position: relative;
-            z-index: 2;
-        }
-
-        .service-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.8rem;
-        }
-
-        .service-icon-nexgen {
-            width: 36px;
-            height: 36px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #e2e8f0;
-            font-size: 1rem;
-        }
-
-        .service-status-nexgen {
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
-            font-family: var(--font-mono);
-            font-size: 0.6rem;
-            font-weight: 600;
-            letter-spacing: 0.1em;
-        }
-
-        .status-dot-nexgen {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-
-        .service-nexgen.online .status-dot-nexgen {
-            background: var(--neon-green);
-        }
-
-        .service-nexgen.offline .status-dot-nexgen {
-            background: var(--neon-red);
-        }
-
-        .service-nexgen.online .service-status-nexgen span {
-            color: var(--neon-green);
-        }
-
-        .service-nexgen.offline .service-status-nexgen span {
-            color: var(--neon-red);
-        }
-
-        .service-details h6 {
-            font-weight: 700;
-            color: #ffffff;
-            margin-bottom: 0.3rem;
-        }
-
-        .service-details p {
-            font-size: 0.8rem;
-            color: var(--dark-300);
-            margin: 0;
-        }
-
-        .system-status {
-            padding: 1.5rem;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            gap: 1.2rem;
-        }
-
-        .system-status.operational {
-            background: rgba(52, 211, 153, 0.1);
-            border: 1px solid rgba(52, 211, 153, 0.3);
-        }
-
-        .system-status.degraded {
-            background: rgba(251, 191, 36, 0.1);
-            border: 1px solid rgba(251, 191, 36, 0.3);
-        }
-
-        .status-indicator {
-            position: relative;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.1rem;
-        }
-
-        .system-status.operational .status-indicator {
-            background: var(--neon-green);
-            color: white;
-        }
-
-        .system-status.degraded .status-indicator {
-            background: var(--neon-yellow);
-            color: var(--dark-900);
-        }
-
-        .indicator-ring {
-            position: absolute;
-            top: -3px;
-            left: -3px;
-            right: -3px;
-            bottom: -3px;
-            border: 1px solid currentColor;
-            border-radius: 50%;
-            opacity: 0.3;
-            animation: pulse 2s infinite;
-        }
-
-        .status-title {
-            font-family: var(--font-mono);
-            font-size: 0.9rem;
-            font-weight: 700;
-            letter-spacing: 0.05em;
-            color: #ffffff;
-            margin-bottom: 0.3rem;
-        }
-
-        .status-message {
-            font-size: 0.8rem;
-            color: var(--dark-300);
-        }
-
-        /* Loading States */
-        .loading-nexgen {
-            text-align: center;
-            padding: 3rem;
-        }
-
-        .scan-line {
-            width: 60px;
-            height: 4px;
-            background: linear-gradient(90deg, var(--neon-blue), var(--neon-cyan));
-            border-radius: 2px;
-            margin: 0 auto 2rem;
-            animation: scanPulse 1.5s ease-in-out infinite;
-        }
-
-        .loading-text h5 {
-            font-family: var(--font-mono);
-            font-size: 1rem;
-            font-weight: 700;
-            letter-spacing: 0.05em;
-            color: #ffffff;
-            margin-bottom: 0.5rem;
-        }
-
-        .loading-text p {
-            color: var(--dark-300);
-            font-size: 0.8rem;
-        }
-
-        .analysis-loading-nexgen {
-            text-align: center;
-            padding: 2rem;
-        }
-
-        .loading-scanner {
-            width: 80px;
-            height: 4px;
-            background: rgba(96, 165, 250, 0.2);
-            border-radius: 2px;
-            margin: 0 auto 1.5rem;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .scanner-line {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 30%;
-            height: 100%;
-            background: linear-gradient(90deg, var(--neon-blue), var(--neon-cyan));
-            border-radius: 2px;
-            animation: scanMove 2s ease-in-out infinite;
-        }
-
-        .loading-info h6 {
-            font-family: var(--font-mono);
-            font-size: 0.9rem;
-            font-weight: 700;
-            letter-spacing: 0.05em;
-            color: #ffffff;
-            margin-bottom: 0.4rem;
-        }
-
-        .loading-info p {
-            color: var(--dark-300);
-            font-size: 0.8rem;
-        }
-
-        /* Error States */
-        .error-nexgen {
-            text-align: center;
-            padding: 2rem;
-        }
-
-        .error-visual {
-            width: 60px;
-            height: 60px;
-            background: rgba(248, 113, 113, 0.1);
-            border: 1px solid rgba(248, 113, 113, 0.3);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 1rem;
-            color: var(--neon-red);
-            font-size: 1.5rem;
-        }
-
-        .error-info h5 {
-            font-family: var(--font-mono);
-            font-size: 0.9rem;
-            font-weight: 700;
-            letter-spacing: 0.05em;
-            color: var(--neon-red);
-            margin-bottom: 0.4rem;
-        }
-
-        .error-info p {
-            color: var(--dark-300);
-            font-size: 0.8rem;
-        }
-
-        /* Progress Modal */
-        .progress-nexgen {
-            text-align: center;
-            padding: 2rem;
-        }
-
-        .progress-visual {
-            margin-bottom: 2rem;
-        }
-
-        .brain-scan {
-            position: relative;
-            display: inline-block;
-            margin-bottom: 2rem;
-        }
-
-        .scan-waves {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-
-        .wave {
-            position: absolute;
-            border: 1px solid;
-            border-radius: 50%;
-            opacity: 0.6;
-        }
-
-        .wave.w1 {
-            width: 80px;
-            height: 80px;
-            top: -40px;
-            left: -40px;
-            border-color: var(--neon-blue);
-            animation: waveExpand 2s ease-in-out infinite;
-        }
-
-        .wave.w2 {
-            width: 100px;
-            height: 100px;
-            top: -50px;
-            left: -50px;
-            border-color: var(--neon-purple);
-            animation: waveExpand 2s ease-in-out infinite 0.7s;
-        }
-
-        .wave.w3 {
-            width: 120px;
-            height: 120px;
-            top: -60px;
-            left: -60px;
-            border-color: var(--neon-cyan);
-            animation: waveExpand 2s ease-in-out infinite 1.4s;
-        }
-
-        .brain-icon {
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.5rem;
-            position: relative;
-            z-index: 2;
-        }
-
-        .progress-info h5 {
-            font-family: var(--font-mono);
-            font-size: 1rem;
-            font-weight: 700;
-            letter-spacing: 0.05em;
-            color: #ffffff;
-            margin-bottom: 1.5rem;
-        }
-
-        .progress-track {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .progress-bar-nexgen {
-            flex: 1;
-            height: 8px;
-            background: rgba(100, 116, 139, 0.2);
-            border-radius: 4px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .progress-fill-nexgen {
-            height: 100%;
-            background: linear-gradient(90deg, var(--neon-blue), var(--neon-cyan));
-            border-radius: 4px;
-            transition: width 0.3s ease;
-            position: relative;
-        }
-
-        .progress-glow {
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 20px;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5));
-            filter: blur(3px);
-        }
-
-        .progress-percent {
-            font-family: var(--font-mono);
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: var(--neon-blue);
-            min-width: 40px;
-        }
-
-        /* Progress Pipeline */
-        .progress-pipeline {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 1rem;
-            max-width: 400px;
-            margin: 0 auto;
-        }
-
-        .pipeline-step {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.5rem;
-            transition: all 0.3s ease;
-        }
-
-        .step-marker {
-            width: 24px;
-            height: 24px;
-            border: 2px solid var(--dark-600);
-            border-radius: 50%;
-            background: var(--dark-800);
-            transition: all 0.3s ease;
-        }
-
-        .pipeline-step.completed .step-marker {
-            background: var(--neon-green);
-            border-color: var(--neon-green);
-            box-shadow: 0 0 15px rgba(52, 211, 153, 0.5);
-        }
-
-        .pipeline-step.active .step-marker {
-            background: var(--neon-blue);
-            border-color: var(--neon-blue);
-            box-shadow: 0 0 15px rgba(96, 165, 250, 0.5);
-            animation: pulse 1.5s infinite;
-        }
-
-        .step-label {
-            font-family: var(--font-mono);
-            font-size: 0.6rem;
-            font-weight: 600;
-            letter-spacing: 0.1em;
-            color: var(--dark-500);
-            transition: color 0.3s ease;
-        }
-
-        .pipeline-step.completed .step-label {
-            color: var(--neon-green);
-        }
-
-        .pipeline-step.active .step-label {
-            color: var(--neon-blue);
-        }
-
-        .pipeline-connector {
-            width: 20px;
-            height: 2px;
-            background: var(--dark-600);
-            transition: background 0.3s ease;
-        }
-
-        /* Animations */
-       @@keyframes gridMove {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(60px, 60px); }
-        }
-
-       @@keyframes meshShift {
-            0%, 100% { 
-                filter: hue-rotate(0deg);
-                transform: scale(1);
-            }
-            50% { 
-                filter: hue-rotate(30deg);
-                transform: scale(1.05);
-            }
-        }
-
-       @@keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.7; transform: scale(1.1); }
-        }
-
-       @@keyframes avatarFloat {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-3px); }
-        }
-
-       @@keyframes ringPulse {
-            0% { transform: scale(1); opacity: 0.3; }
-            50% { transform: scale(1.1); opacity: 0.1; }
-            100% { transform: scale(1); opacity: 0.3; }
-        }
-
-       @@keyframes scanPulse {
-            0%, 100% { transform: scaleX(1); opacity: 1; }
-            50% { transform: scaleX(1.2); opacity: 0.7; }
-        }
-
-       @@keyframes scanMove {
-            0% { left: 0; transform: translateX(-100%); }
-            50% { left: 50%; transform: translateX(-50%); }
-            100% { left: 100%; transform: translateX(0); }
-        }
-
-       @@keyframes waveExpand {
-            0% { transform: scale(0.8); opacity: 0.8; }
-            100% { transform: scale(1.2); opacity: 0; }
-        }
-
-        /* Responsive Design */
-       @@media (max-width: 1200px) {
-            .surveys-grid {
-                grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-            }
-        }
-
-       @@media (max-width: 768px) {
-            .nav-container {
-                flex-wrap: wrap;
-                gap: 1rem;
-            }
-            
-            .nav-center {
-                order: 3;
-                flex-basis: 100%;
-                justify-content: flex-start;
-            }
-            
-            .hero-title {
-                font-size: 2.5rem;
-            }
-            
-            .surveys-grid {
-                grid-template-columns: 1fr;
-                padding: 0 1rem;
-            }
-            
-            .metrics-panel {
-                grid-template-columns: 1fr;
-                padding: 0 1rem;
-            }
-            
-            .quick-actions {
-                grid-template-columns: 1fr;
-            }
-            
-            .services-strip {
-                flex-direction: column;
-            }
-            
-            .results-matrix {
-                grid-template-columns: 1fr;
-            }
-            
-            .progress-pipeline {
-                flex-direction: column;
-                gap: 1rem;
-            }
-            
-            .pipeline-connector {
-                width: 2px;
-                height: 15px;
-            }
-            
-            .nav-actions {
-                flex-direction: column;
-                width: 100%;
-            }
-            
-            .nav-btn {
-                justify-content: center;
-            }
-        }
-
-       @@media (max-width: 480px) {
-            .container-fluid {
-                padding-left: 1rem;
-                padding-right: 1rem;
-            }
-            
-            .hero-nexgen {
-                padding: 2rem 0 1rem;
-            }
-            
-            .hero-title {
-                font-size: 2rem;
-            }
-            
-            .card-header,
-            .action-zone {
-                padding: 1.5rem;
-            }
-            
-            .metrics-panel {
-                padding: 0 1.5rem;
-            }
-            
-            .activity-indicator {
-                padding: 0.8rem 1.5rem;
-            }
-            
-            .org-badge {
-                flex-direction: column;
-                text-align: center;
-                gap: 0.5rem;
-            }
-
-            .participants-list {
-                max-height: 120px;
-            }
-
-            .avatar-stack {
-                justify-content: center;
-            }
-        }
-
-        /* Focus States */
-        .nav-btn:focus,
-        .btn-nexgen:focus,
-        .textarea-nexgen:focus,
-        .primary-action:focus {
-            outline: 2px solid var(--neon-blue);
-            outline-offset: 2px;
-        }
-
-        /* Print Styles */
-       @@media print {
-            .bg-pattern,
-            .top-nav,
-            .modal,
-            .btn-nexgen,
-            .quick-actions {
-                display: none !important;
-            }
-            
-            .survey-card {
-                break-inside: avoid;
-                border: 1px solid #333;
-                background: white;
-                color: black;
-            }
-            
-            .nexgen-dashboard {
-                background: white;
-            }
-        }
-
-        /* Accessibility Improvements */
-       @@media (prefers-reduced-motion: reduce) {
-            *,
-            *::before,
-            *::after {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-            }
-        }
-
-        /* High Contrast Mode */
-       @@media (prefers-contrast: high) {
-            :root {
-                --neon-blue: #4d9fff;
-                --neon-purple: #d499ff;
-                --neon-green: #4dff88;
-                --dark-300: #ffffff;
-                --dark-400: #cccccc;
-            }
-            
-            .survey-card,
-            .modal-nexgen,
-            .services-dashboard {
-                border-width: 2px;
-            }
-        }
-
-        /* Dark Mode Enhancement */
-       @@media (prefers-color-scheme: dark) {
-            .survey-card {
-                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            }
-        }
-        .modal-backdrop {
-    backdrop-filter: blur(12px);
-    background: rgba(15, 23, 42, 0.7);
-    z-index: 1040;
-}
-
-.modal {
-    z-index: 1050;
-}
-
-.modal-nexgen {
-    background: rgba(15, 23, 42, 0.95);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(96, 165, 250, 0.2);
-    border-radius: 20px;
-    overflow: hidden;
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
-    position: relative;
-    z-index: 1060;
-    /* Prevent pointer events from bubbling to backdrop */
-    pointer-events: auto;
-}
-
-.modal-dialog {
-    pointer-events: none;
-}
-
-.modal-dialog .modal-nexgen {
-    pointer-events: auto;
-}
-
-/* Ensure all interactive elements inside modal work properly */
-.modal-nexgen input,
-.modal-nexgen textarea,
-.modal-nexgen button,
-.modal-nexgen select,
-.modal-nexgen .btn-nexgen {
-    pointer-events: auto;
-    position: relative;
-    z-index: 1061;
-}
-
-/* Fix textarea specifically */
-.textarea-nexgen {
-    pointer-events: auto !important;
-    z-index: 1062 !important;
-    position: relative;
-}
-
-.textarea-nexgen:focus {
-    outline: none;
-    border-color: rgba(96, 165, 250, 0.5);
-    background: rgba(255, 255, 255, 0.05);
-    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
-    z-index: 1063;
-}
-
-/* Fix button interactions */
-.btn-nexgen {
-    cursor: pointer;
-    pointer-events: auto !important;
-    z-index: 1061;
-    position: relative;
-}
-
-.btn-nexgen:hover,
-.btn-nexgen:focus,
-.btn-nexgen:active {
-    pointer-events: auto !important;
-}
-
-/* Fix close button */
-.close-nexgen {
-    cursor: pointer;
-    pointer-events: auto !important;
-    z-index: 1065;
-    position: relative;
-}
-
-/* Prevent accidental backdrop clicks */
-.modal-body-nexgen,
-.modal-header-nexgen,
-.modal-footer-nexgen {
-    pointer-events: auto;
-    position: relative;
-}
-/* Enhanced Service Status Icons */
-.service-status-nexgen {
-    display: flex;
-    align-items: center;
-    gap: 0.8rem;
-    font-family: var(--font-mono);
-    font-size: 0.6rem;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-}
-
-.status-icon-wrapper {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.1);
-    transition: all 0.3s ease;
-}
-
-.service-nexgen.online .status-icon-wrapper {
-    background: rgba(52, 211, 153, 0.2);
-    box-shadow: 0 0 15px rgba(52, 211, 153, 0.3);
-}
-
-.service-nexgen.offline .status-icon-wrapper {
-    background: rgba(248, 113, 113, 0.2);
-    box-shadow: 0 0 15px rgba(248, 113, 113, 0.3);
-}
-
-/* Enhanced System Status */
-.system-status .status-title {
-    display: flex;
-    align-items: center;
-    font-family: var(--font-mono);
-    font-size: 0.9rem;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    color: #ffffff;
-    margin-bottom: 0.3rem;
-}
-
-/* Enhanced Error States */
-.error-nexgen .error-info h5 {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-family: var(--font-mono);
-    font-size: 0.9rem;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    color: var(--neon-red);
-    margin-bottom: 0.4rem;
-}
-
-/* Service Strip Status Icons */
-.service-chip .chip-status {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.service-chip.online .chip-status::before {
-    content: '\f058'; /* fa-check-circle */
-    font-family: 'Font Awesome 5 Free';
-    font-weight: 900;
-    font-size: 0.8rem;
-    color: var(--neon-green);
-    position: absolute;
-    top: -2px;
-    right: -2px;
-}
-
-.service-chip.offline .chip-status::before {
-    content: '\f057'; /* fa-times-circle */
-    font-family: 'Font Awesome 5 Free';
-    font-weight: 900;
-    font-size: 0.8rem;
-    color: var(--neon-red);
-    position: absolute;
- 
-}
-
-/* Analysis Results Icons */
-.result-header-nexgen .result-title::before {
-    margin-right: 0.5rem;
-    font-family: 'Font Awesome 5 Free';
-    font-weight: 900;
-}
-
-.result-nexgen.sentiment .result-title::before {
-    content: '\f004'; /* fa-heart */
-    color: var(--neon-pink);
-}
-
-.result-nexgen.risk .result-title::before {
-    content: '\f3ed'; /* fa-shield-virus */
-    color: var(--neon-yellow);
-}
-
-/* Loading States with Icons */
-.loading-nexgen h5::before {
-    content: '\f1ce'; /* fa-circle-notch */
-    font-family: 'Font Awesome 5 Free';
-    font-weight: 900;
-    margin-right: 0.5rem;
-    animation: fa-spin 2s linear infinite;
-    color: var(--neon-blue);
-}
-
-/* Success States */
-.success-nexgen .success-title::before {
-    content: '\f058'; /* fa-check-circle */
-    font-family: 'Font Awesome 5 Free';
-    font-weight: 900;
-    margin-right: 0.5rem;
-    color: var(--neon-green);
-}
+            --neon-blue:#60a5fa;--neon-purple:#c084fc;--neon-green:#34d399;--neon-pink:#f472b6;
+            --neon-yellow:#fbbf24;--neon-red:#f87171;--neon-cyan:#22d3ee;--neon-indigo:#818cf8;
+            --neon-teal:#33b3ae;--neon-amber:#f59e0b;
+            --dark-900:#0f172a;--dark-800:#1e293b;--dark-700:#334155;--dark-600:#475569;
+            --dark-500:#64748b;--dark-400:#94a3b8;--dark-300:#cbd5e1;--dark-200:#e2e8f0;
+            --glass-bg:rgba(255,255,255,0.04);--glass-border:rgba(255,255,255,0.08);
+            --glass-shadow:0 8px 32px rgba(0,0,0,0.12);
+            --font-main:'Space Grotesk',sans-serif;--font-mono:'JetBrains Mono',monospace;
+        }
+
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:var(--font-main);background:var(--dark-900);color:#e2e8f0;overflow-x:hidden}
+        .hero,.hero *:not(.grad):not(.dot){background-color:transparent!important}
+
+        .nex-bg{position:fixed;inset:0;z-index:-1;overflow:hidden}
+        .nex-bg .grid{position:absolute;inset:0;background-image:linear-gradient(rgba(96,165,250,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(96,165,250,0.04) 1px,transparent 1px);background-size:60px 60px;animation:gridDrift 25s linear infinite}
+        .nex-bg .mesh{position:absolute;inset:0;background:radial-gradient(ellipse at 25% 20%,rgba(96,165,250,0.06) 0%,transparent 55%),radial-gradient(ellipse at 75% 60%,rgba(192,132,252,0.05) 0%,transparent 55%),radial-gradient(ellipse at 50% 90%,rgba(52,211,153,0.04) 0%,transparent 55%);animation:meshFloat 18s ease-in-out infinite}
+
+        @@keyframes gridDrift{0%{transform:translate(0,0)}100%{transform:translate(50px,50px)}}
+        @@keyframes meshFloat{0%,100%{filter:hue-rotate(0deg);transform:scale(1)}50%{filter:hue-rotate(20deg);transform:scale(1.03)}}
+        @@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(1.15)}}
+        @@keyframes fadeInUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+        @@keyframes shimmer{0%{left:-100%}100%{left:100%}}
+        @@keyframes scanMove{0%{left:0;transform:translateX(-100%)}50%{left:50%;transform:translateX(-50%)}100%{left:100%;transform:translateX(0)}}
+        @@keyframes waveExpand{0%{transform:scale(.8);opacity:.8}100%{transform:scale(1.3);opacity:0}}
+        @@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+
+        /* ===== TOP NAV ===== */
+        .top-nav{position:relative;z-index:100;padding:.8rem 0;background:rgba(15,23,42,0.75);backdrop-filter:blur(24px);border-bottom:1px solid rgba(129,140,248,0.12)}
+        .nav-inner{max-width:1400px;margin:0 auto;padding:0 2rem;display:flex;align-items:center;gap:2rem}
+        .nav-brand{display:flex;align-items:center;gap:.8rem}
+        .brand-icon{width:38px;height:38px;background:linear-gradient(135deg,var(--neon-indigo),var(--neon-purple));border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.1rem}
+        .brand-txt{font-family:var(--font-mono);font-weight:700;font-size:1rem;letter-spacing:.08em;color:#e2e8f0}
+        .brand-ver{font-family:var(--font-mono);font-size:.6rem;color:var(--neon-green);background:rgba(52,211,153,0.1);padding:.15rem .45rem;border-radius:4px;border:1px solid rgba(52,211,153,0.25);margin-left:.4rem}
+        .nav-spacer{flex:1}
+        .nav-actions{display:flex;gap:.6rem;align-items:center}
+        .nav-btn{display:flex;align-items:center;gap:.5rem;padding:.55rem 1rem;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:#cbd5e1;font-size:.78rem;font-weight:500;cursor:pointer;transition:all .2s;font-family:var(--font-main)}
+        .nav-btn:hover{background:rgba(129,140,248,0.08);border-color:rgba(129,140,248,0.25);color:var(--neon-indigo)}
+        .nav-btn i{font-size:.85rem}
+
+        .ai-chip{display:flex;align-items:center;gap:.6rem;padding:.5rem 1rem;background:rgba(52,211,153,0.06);border:1px solid rgba(52,211,153,0.2);border-radius:10px;cursor:pointer;transition:all .2s}
+        .ai-chip:hover{background:rgba(52,211,153,0.1);border-color:rgba(52,211,153,0.35)}
+        .ai-chip.offline{background:rgba(248,113,113,0.06);border-color:rgba(248,113,113,0.2)}
+        .ai-chip.offline:hover{background:rgba(248,113,113,0.1);border-color:rgba(248,113,113,0.35)}
+        .ai-dot{width:8px;height:8px;border-radius:50%;background:var(--neon-green);animation:pulse 2s infinite;box-shadow:0 0 8px rgba(52,211,153,0.4)}
+        .ai-chip.offline .ai-dot{background:var(--neon-red);box-shadow:0 0 8px rgba(248,113,113,0.4)}
+        .ai-label{font-family:var(--font-mono);font-size:.65rem;font-weight:600;letter-spacing:.08em;color:var(--neon-green)}
+        .ai-chip.offline .ai-label{color:var(--neon-red)}
+        .ai-icon{font-size:1rem;color:var(--neon-green)}
+        .ai-chip.offline .ai-icon{color:var(--neon-red)}
+
+        .org-badge{display:flex;align-items:center;gap:.7rem;padding:.5rem .8rem;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:10px}
+        .org-avatar{width:30px;height:30px;background:linear-gradient(135deg,var(--neon-pink),var(--neon-purple));border-radius:7px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:.7rem}
+        .org-name{font-weight:600;color:#e2e8f0;font-size:.75rem}
+
+        /* ===== HERO ===== */
+        .hero{padding:4rem 0 2rem;text-align:center;position:relative;z-index:10;background:transparent!important}
+        .hero-badge{display:inline-flex;align-items:center;gap:.5rem;padding:.5rem 1.2rem;background:rgba(129,140,248,0.08);border:1px solid rgba(129,140,248,0.2);border-radius:50px;margin-bottom:2rem;font-family:var(--font-mono);font-size:.7rem;font-weight:600;letter-spacing:.1em;color:var(--neon-indigo)}
+        .hero-badge .dot{width:6px;height:6px;background:var(--neon-green);border-radius:50%;animation:pulse 2s infinite}
+        .hero h1{font-size:4rem;font-weight:700;line-height:1.1;margin-bottom:1.5rem;color:#fff}
+        .hero .grad{background:linear-gradient(135deg,var(--neon-blue),var(--neon-purple),var(--neon-pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+        .hero p{font-size:1.1rem;color:var(--dark-300);max-width:600px;margin:0 auto;line-height:1.6}
+
+        /* ===== MAIN ===== */
+        .main{padding:1.5rem 0 4rem;position:relative;z-index:10}
+        .container{max-width:1400px;margin:0 auto;padding:0 2rem}
+
+        /* ===== AI ENGINE ===== */
+        .ai-engine{background:rgba(30,41,59,0.5);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:1.5rem 2rem;margin-bottom:2rem;display:flex;align-items:center;gap:1.5rem;animation:fadeInUp .5s ease both}
+        .ai-engine-icon{width:52px;height:52px;background:linear-gradient(135deg,rgba(129,140,248,0.2),rgba(192,132,252,0.15));border:1px solid rgba(129,140,248,0.25);border-radius:14px;display:flex;align-items:center;justify-content:center;color:var(--neon-indigo);font-size:1.4rem;flex-shrink:0;position:relative}
+        .ai-engine-icon::after{content:'';position:absolute;inset:-3px;border-radius:17px;border:1px solid rgba(129,140,248,0.12);animation:pulse 3s infinite}
+        .ai-engine-info{flex:1}
+        .ai-engine-info h3{font-family:var(--font-mono);font-size:.95rem;font-weight:700;letter-spacing:.05em;color:#fff;margin-bottom:.25rem}
+        .ai-engine-info p{color:var(--dark-400);font-size:.82rem}
+        .ai-engine-status{display:flex;align-items:center;gap:.6rem;padding:.5rem 1.2rem;border-radius:8px;font-family:var(--font-mono);font-size:.65rem;font-weight:700;letter-spacing:.08em}
+        .ai-engine-status.online{background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.25);color:var(--neon-green)}
+        .ai-engine-status.offline{background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.25);color:var(--neon-red)}
+        .ai-engine-status i{font-size:.7rem}
+        .ai-caps{display:flex;gap:.5rem;margin-top:.6rem;flex-wrap:wrap}
+        .ai-cap{display:inline-flex;align-items:center;gap:.35rem;padding:.2rem .6rem;border-radius:5px;font-size:.6rem;font-family:var(--font-mono);font-weight:500;color:var(--dark-300);background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06)}
+        .ai-cap i{font-size:.55rem;color:var(--neon-indigo)}
+
+        /* ===== ALERTS ===== */
+        .alert-nex{display:flex;align-items:center;gap:1rem;padding:.8rem 1.2rem;border-radius:10px;margin-bottom:1.2rem;position:relative;overflow:hidden;backdrop-filter:blur(10px);animation:fadeInUp .4s ease both}
+        .alert-nex::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px}
+        .alert-nex.error{background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.2)}.alert-nex.error::before{background:var(--neon-red)}.alert-nex.error .alert-icon{color:var(--neon-red)}
+        .alert-nex.success{background:rgba(52,211,153,0.08);border:1px solid rgba(52,211,153,0.2)}.alert-nex.success::before{background:var(--neon-green)}.alert-nex.success .alert-icon{color:var(--neon-green)}
+        .alert-nex.warning{background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.2)}.alert-nex.warning::before{background:var(--neon-yellow)}.alert-nex.warning .alert-icon{color:var(--neon-yellow)}
+        .alert-icon{font-size:1.1rem;margin-left:.5rem}
+        .alert-lbl{font-family:var(--font-mono);font-size:.6rem;font-weight:700;letter-spacing:.1em;margin-bottom:.15rem}
+        .alert-txt{font-size:.82rem;color:var(--dark-300)}
+        .alert-x{background:none;border:none;color:var(--dark-400);cursor:pointer;padding:.4rem;border-radius:6px;margin-left:auto;transition:background .2s}.alert-x:hover{background:rgba(255,255,255,0.08)}
+
+        /* ===== SECTION TITLE ===== */
+        .sec-title{text-align:center;margin-bottom:2.5rem}
+        .sec-title h2{font-family:var(--font-mono);font-size:1.3rem;font-weight:700;letter-spacing:.1em;color:#fff;margin-bottom:.6rem}
+        .sec-title .bar{width:80px;height:3px;background:linear-gradient(90deg,var(--neon-indigo),var(--neon-purple));margin:0 auto;border-radius:2px}
+
+        /* ===== CARDS GRID ===== */
+        .cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(440px,1fr));gap:1.5rem}
+
+        .s-card{background:rgba(30,41,59,0.45);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.07);border-radius:18px;overflow:hidden;transition:all .3s cubic-bezier(.4,0,.2,1);position:relative;opacity:0;transform:translateY(25px)}
+        .s-card.in{opacity:1;transform:translateY(0)}
+        .s-card:hover{transform:translateY(-4px);border-color:rgba(129,140,248,0.3);box-shadow:0 16px 40px rgba(129,140,248,0.08)}
+        .s-card .glow{position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--neon-indigo),var(--neon-purple),var(--neon-pink));opacity:0;transition:opacity .3s}
+        .s-card:hover .glow{opacity:1}
+
+        .s-head{padding:1.8rem 1.8rem 1rem;position:relative;z-index:2}
+        .s-title{font-size:1.25rem;font-weight:700;color:#fff;margin-bottom:.8rem;line-height:1.3}
+
+        /* ── Respondent Info ── */
+        .respondent{display:flex;align-items:center;gap:1rem;padding:.8rem 1rem;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:12px;margin-top:.8rem}
+        .resp-avatar{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.9rem;flex-shrink:0;border:2px solid rgba(255,255,255,0.1)}
+        .resp-info{flex:1;min-width:0}
+        .resp-name{font-weight:700;color:#fff;font-size:.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .resp-email{font-size:.68rem;color:var(--dark-400);font-family:var(--font-mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .resp-badge{font-family:var(--font-mono);font-size:.55rem;font-weight:600;letter-spacing:.08em;padding:.25rem .6rem;border-radius:5px;background:rgba(129,140,248,0.1);border:1px solid rgba(129,140,248,0.2);color:var(--neon-indigo);flex-shrink:0}
+
+        /* Metrics */
+        .metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;padding:0 1.5rem;margin-bottom:1rem}
+        .m-chip{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:.8rem;display:flex;align-items:center;gap:.7rem;transition:all .2s}
+        .m-chip:hover{background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.1)}
+        .m-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.85rem}
+        .m-chip.q .m-icon{background:linear-gradient(135deg,var(--neon-indigo),var(--neon-blue))}
+        .m-chip.r .m-icon{background:linear-gradient(135deg,var(--neon-green),var(--neon-teal))}
+        .m-chip.t .m-icon{background:linear-gradient(135deg,var(--neon-purple),var(--neon-pink))}
+        .m-num{font-size:1.2rem;font-weight:700;color:#fff;line-height:1}
+        .m-lbl{font-family:var(--font-mono);font-size:.5rem;font-weight:600;letter-spacing:.1em;color:var(--dark-400)}
+
+        .activity{display:flex;align-items:center;gap:.6rem;padding:.5rem 1.5rem;font-family:var(--font-mono);font-size:.62rem;font-weight:500;letter-spacing:.04em;color:var(--dark-400)}
+        .activity .dot{width:5px;height:5px;background:var(--neon-green);border-radius:50%;animation:pulse 2s infinite}
+
+        /* Actions */
+        .actions{padding:1.2rem 1.8rem;position:relative;z-index:2}
+        .launch-btn{width:100%;background:linear-gradient(135deg,var(--neon-indigo),var(--neon-purple));border:none;border-radius:14px;padding:0;margin-bottom:1rem;cursor:pointer;transition:all .3s;position:relative;overflow:hidden;display:block;text-decoration:none}
+        .launch-btn:hover{transform:translateY(-2px);box-shadow:0 16px 36px rgba(129,140,248,0.2)}
+        .launch-btn .shimmer{position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent);animation:shimmer 3s infinite}
+        .launch-inner{display:flex;align-items:center;gap:1.2rem;padding:1.2rem 1.5rem;position:relative;z-index:2}
+        .launch-icon{width:42px;height:42px;background:rgba(255,255,255,0.12);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.1rem}
+        .launch-txt{flex:1;text-align:left;color:#fff}
+        .launch-title{font-family:var(--font-mono);font-size:.78rem;font-weight:700;letter-spacing:.05em;margin-bottom:.15rem}
+        .launch-sub{font-size:.72rem;opacity:.75}
+        .launch-arrow{color:#fff;font-size:.9rem;transition:transform .2s}
+        .launch-btn:hover .launch-arrow{transform:translateX(4px)}
+
+        .quick-btns{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem}
+        .q-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:.8rem .5rem;background:rgba(255,255,255,0.02);border:1px solid;border-radius:10px;text-decoration:none;transition:all .2s;gap:.4rem;cursor:pointer;min-height:65px}
+        .q-btn:hover{transform:translateY(-2px);text-decoration:none}
+        .q-btn i{font-size:.9rem}
+        .q-btn span{font-family:var(--font-mono);font-size:.52rem;font-weight:600;letter-spacing:.1em}
+        .q-btn.risk{border-color:rgba(248,113,113,0.25);color:var(--neon-red)}.q-btn.risk:hover{background:rgba(248,113,113,0.06)}
+        .q-btn.batch{border-color:rgba(34,211,238,0.25);color:var(--neon-cyan)}.q-btn.batch:hover{background:rgba(34,211,238,0.06)}
+        .q-btn.trend{border-color:rgba(52,211,153,0.25);color:var(--neon-green)}.q-btn.trend:hover{background:rgba(52,211,153,0.06)}
+
+        .disabled-box{display:flex;align-items:center;gap:.8rem;padding:1.2rem;background:rgba(100,116,139,0.04);border:1px solid rgba(100,116,139,0.15);border-radius:10px}
+        .disabled-icon{width:36px;height:36px;background:rgba(100,116,139,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--dark-400);font-size:.95rem}
+        .disabled-title{font-family:var(--font-mono);font-size:.72rem;font-weight:700;letter-spacing:.05em;color:var(--dark-400);margin-bottom:.15rem}
+        .disabled-msg{font-size:.72rem;color:var(--dark-500)}
+
+        /* Empty */
+        .empty-state{grid-column:1/-1;text-align:center;padding:3.5rem 2rem;background:rgba(30,41,59,0.4);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.07);border-radius:18px}
+        .empty-vis{position:relative;display:inline-block;margin-bottom:1.5rem}
+        .empty-icon{width:80px;height:80px;background:rgba(100,116,139,0.08);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2rem;color:var(--dark-400);position:relative;z-index:2}
+        .empty-rings{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}
+        .ring{position:absolute;border:1px solid;border-radius:50%;opacity:.25}
+        .ring.r1{width:100px;height:100px;top:-50px;left:-50px;border-color:var(--neon-indigo);animation:waveExpand 3s infinite}
+        .ring.r2{width:120px;height:120px;top:-60px;left:-60px;border-color:var(--neon-purple);animation:waveExpand 3s infinite 1s}
+        .ring.r3{width:140px;height:140px;top:-70px;left:-70px;border-color:var(--neon-pink);animation:waveExpand 3s infinite 2s}
+        .empty-state h3{font-family:var(--font-mono);font-size:1.1rem;font-weight:700;letter-spacing:.05em;color:#fff;margin-bottom:.5rem}
+        .empty-state p{color:var(--dark-300);margin-bottom:1.5rem;font-size:.88rem}
+        .create-btn{display:inline-flex;align-items:center;gap:.6rem;padding:.8rem 1.8rem;background:linear-gradient(135deg,var(--neon-green),var(--neon-teal));color:#fff;text-decoration:none;border-radius:10px;font-family:var(--font-mono);font-size:.75rem;font-weight:700;letter-spacing:.05em;transition:all .3s;position:relative;overflow:hidden}
+        .create-btn:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(52,211,153,0.25);color:#fff}
+
+        /* Modals — same as before */
+        .modal-backdrop{backdrop-filter:blur(10px);background:rgba(15,23,42,0.7);z-index:1040}
+        .modal{z-index:1050;padding-left:0!important}
+        .modal-dialog{margin-left:auto!important;margin-right:auto!important}
+        .modal.fade .modal-dialog{transform:translateY(-20px);transition:transform .3s ease}
+        .modal.show .modal-dialog{transform:translateY(0)}
+        .m-nex{background:rgba(15,23,42,0.97);backdrop-filter:blur(20px);border:1px solid rgba(129,140,248,0.15);border-radius:18px;overflow:hidden;box-shadow:0 24px 48px rgba(0,0,0,0.4);pointer-events:auto}
+        .modal-dialog{pointer-events:none}.modal-dialog .m-nex{pointer-events:auto}
+        .m-head{position:relative;background:linear-gradient(135deg,rgba(30,41,59,0.95),rgba(51,65,85,0.95));padding:0;border:none;overflow:hidden;border-bottom:1px solid rgba(129,140,248,0.15)}
+        .m-head-pat{position:absolute;inset:0;background:linear-gradient(135deg,rgba(129,140,248,0.08) 0%,transparent 60%)}
+        .m-head-inner{position:relative;display:flex;align-items:center;gap:1.2rem;padding:1.5rem;z-index:2}
+        .m-head-icon{width:44px;height:44px;background:linear-gradient(135deg,var(--neon-indigo),var(--neon-purple));border:1px solid rgba(129,140,248,0.3);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.2rem}
+        .m-head h4{font-family:var(--font-mono);font-size:.95rem;font-weight:700;letter-spacing:.05em;color:#e2e8f0;margin-bottom:.2rem}
+        .m-head p{font-size:.75rem;color:var(--dark-400);margin:0}
+        .m-close{position:absolute;top:1.2rem;right:1.2rem;width:32px;height:32px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:7px;display:flex;align-items:center;justify-content:center;color:var(--dark-300);cursor:pointer;transition:all .2s;z-index:3;font-size:.85rem}
+        .m-close:hover{background:rgba(255,255,255,0.12);color:#fff}
+        .m-body{padding:1.5rem;background:rgba(15,23,42,0.95)}
+        .m-foot{background:rgba(15,23,42,0.9);border:none;border-top:1px solid rgba(255,255,255,0.06);padding:1rem 1.5rem;display:flex;gap:.8rem;justify-content:flex-end}
+        .btn-nex{display:flex;align-items:center;gap:.5rem;padding:.6rem 1.2rem;border-radius:7px;font-family:var(--font-mono);font-size:.65rem;font-weight:600;letter-spacing:.05em;cursor:pointer;transition:all .2s;border:1px solid}
+        .btn-nex.sec{background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.12);color:var(--dark-300)}.btn-nex.sec:hover{background:rgba(255,255,255,0.08);color:#e2e8f0}
+        .btn-nex.pri{background:linear-gradient(135deg,var(--neon-indigo),var(--neon-purple));border-color:transparent;color:#fff}.btn-nex.pri:hover{transform:translateY(-1px);box-shadow:0 8px 16px rgba(129,140,248,0.25)}
+        .m-nex input,.m-nex textarea,.m-nex button,.m-nex select,.m-nex .btn-nex{pointer-events:auto;position:relative;z-index:1061}
+        .m-body,.m-head,.m-foot{pointer-events:auto;position:relative}
+
+        .ta-label{display:flex;align-items:center;gap:.6rem;font-family:var(--font-mono);font-size:.62rem;font-weight:600;letter-spacing:.1em;color:var(--dark-300);margin-bottom:.7rem}
+        .ta-area{width:100%;padding:1rem;background:rgba(15,23,42,0.6);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#e2e8f0;font-family:inherit;font-size:.85rem;resize:vertical;transition:all .2s;pointer-events:auto!important;z-index:1062!important;position:relative}
+        .ta-area:focus{outline:none;border-color:rgba(129,140,248,0.4);background:rgba(15,23,42,0.8);box-shadow:0 0 0 3px rgba(129,140,248,0.08)}
+        .ta-hint{display:flex;align-items:center;gap:.6rem;margin-top:.6rem;padding:.7rem;background:rgba(129,140,248,0.04);border:1px solid rgba(129,140,248,0.12);border-radius:7px;font-size:.72rem;color:var(--dark-300)}
+
+        .res-divider{height:1px;background:linear-gradient(90deg,transparent,rgba(129,140,248,0.25),transparent);margin:1.5rem 0}
+        .res-header{display:flex;align-items:center;gap:.6rem;font-family:var(--font-mono);font-size:.72rem;font-weight:700;letter-spacing:.1em;color:var(--neon-indigo);margin-bottom:1rem}
+        .res-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.8rem;margin-bottom:1.2rem}
+        .res-card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:1rem}
+        .res-card-head{display:flex;align-items:center;gap:.6rem;margin-bottom:.7rem}
+        .res-card-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.75rem;color:#fff}
+        .res-card.sent .res-card-icon{background:linear-gradient(135deg,var(--neon-pink),var(--neon-red))}
+        .res-card.risk .res-card-icon{background:linear-gradient(135deg,var(--neon-yellow),var(--neon-red))}
+        .res-card-title{font-family:var(--font-mono);font-size:.6rem;font-weight:600;letter-spacing:.1em;color:var(--dark-300)}
+        .val-chip{display:inline-block;padding:.3rem .8rem;border-radius:16px;font-family:var(--font-mono);font-size:.62rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;border:1px solid}
+        .val-chip.positive{background:rgba(52,211,153,0.15);border-color:rgba(52,211,153,0.3);color:var(--neon-green)}
+        .val-chip.negative{background:rgba(248,113,113,0.15);border-color:rgba(248,113,113,0.3);color:var(--neon-red)}
+        .val-chip.neutral{background:rgba(100,116,139,0.15);border-color:rgba(100,116,139,0.3);color:var(--dark-300)}
+        .val-chip.unknown{background:rgba(100,116,139,0.1);border-color:rgba(100,116,139,0.2);color:var(--dark-400)}
+        .val-chip.low{background:rgba(52,211,153,0.15);border-color:rgba(52,211,153,0.3);color:var(--neon-green)}
+        .val-chip.moderate{background:rgba(251,191,36,0.15);border-color:rgba(251,191,36,0.3);color:var(--neon-yellow)}
+        .val-chip.high{background:rgba(248,113,113,0.15);border-color:rgba(248,113,113,0.3);color:var(--neon-red)}
+        .val-chip.critical{background:rgba(239,68,68,0.2);border-color:rgba(239,68,68,0.3);color:#fca5a5}
+        .insight-panel{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:1rem;margin-bottom:.8rem}
+        .insight-head{display:flex;align-items:center;gap:.6rem;font-family:var(--font-mono);font-size:.6rem;font-weight:600;letter-spacing:.1em;color:var(--dark-300);margin-bottom:.7rem}
+        .tags{display:flex;flex-wrap:wrap;gap:.4rem}
+        .tag{padding:.25rem .6rem;border-radius:5px;font-size:.65rem;font-weight:500;border:1px solid}
+        .tag.phrase{background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.1);color:var(--dark-200)}
+        .tag.cat{background:rgba(129,140,248,0.12);border-color:rgba(129,140,248,0.25);color:var(--neon-indigo)}
+        .no-data{color:var(--dark-500);font-style:italic;font-size:.72rem;text-align:center;width:100%;padding:.5rem}
+
+        .loading-nex{text-align:center;padding:2rem}
+        .scan-bar{width:60px;height:3px;background:linear-gradient(90deg,var(--neon-indigo),var(--neon-cyan));border-radius:2px;margin:0 auto 1.2rem;animation:pulse 1.5s ease-in-out infinite}
+        .loading-nex h5{font-family:var(--font-mono);font-size:.85rem;font-weight:700;letter-spacing:.05em;color:#fff;margin-bottom:.3rem}
+        .loading-nex p{color:var(--dark-300);font-size:.75rem}
+        .scanner{width:70px;height:3px;background:rgba(129,140,248,0.15);border-radius:2px;margin:0 auto 1rem;position:relative;overflow:hidden}
+        .scanner-line{position:absolute;top:0;left:0;width:30%;height:100%;background:linear-gradient(90deg,var(--neon-indigo),var(--neon-cyan));border-radius:2px;animation:scanMove 2s ease-in-out infinite}
+        .error-nex{text-align:center;padding:1.5rem}
+        .error-vis{width:50px;height:50px;background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto .8rem;color:var(--neon-red);font-size:1.3rem}
+        .error-nex h5{font-family:var(--font-mono);font-size:.8rem;font-weight:700;letter-spacing:.05em;color:var(--neon-red);margin-bottom:.3rem}
+        .error-nex p{color:var(--dark-300);font-size:.75rem}
+
+        .svc-detail{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:1.2rem;position:relative;overflow:hidden;margin-bottom:1rem}
+        .svc-detail::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+        .svc-detail.online::before{background:linear-gradient(90deg,var(--neon-green),var(--neon-teal))}
+        .svc-detail.offline::before{background:linear-gradient(90deg,var(--neon-red),var(--neon-yellow))}
+        .svc-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:.7rem}
+        .svc-icon{width:36px;height:36px;background:rgba(255,255,255,0.08);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#e2e8f0;font-size:1rem}
+        .svc-status{display:flex;align-items:center;gap:.5rem;font-family:var(--font-mono);font-size:.55rem;font-weight:600;letter-spacing:.1em}
+        .svc-detail.online .svc-status{color:var(--neon-green)}.svc-detail.offline .svc-status{color:var(--neon-red)}
+        .svc-detail h6{font-weight:700;color:#fff;margin-bottom:.2rem;font-size:.85rem}
+        .svc-detail p{font-size:.72rem;color:var(--dark-300);margin:0}
+        .svc-caps{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.6rem}
+        .svc-cap{font-size:.55rem;font-family:var(--font-mono);padding:.15rem .45rem;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:4px;color:var(--dark-300);display:flex;align-items:center;gap:.25rem}
+        .svc-cap i{font-size:.45rem;color:var(--neon-indigo)}
+        .sys-status{padding:1.2rem;border-radius:10px;display:flex;align-items:center;gap:1rem}
+        .sys-status.ok{background:rgba(52,211,153,0.06);border:1px solid rgba(52,211,153,0.2)}
+        .sys-status.bad{background:rgba(248,113,113,0.06);border:1px solid rgba(248,113,113,0.2)}
+        .sys-dot{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem;position:relative}
+        .sys-status.ok .sys-dot{background:rgba(52,211,153,0.15);color:var(--neon-green)}
+        .sys-status.bad .sys-dot{background:rgba(248,113,113,0.15);color:var(--neon-red)}
+        .sys-dot::after{content:'';position:absolute;inset:-3px;border:1px solid currentColor;border-radius:50%;opacity:.2;animation:pulse 2s infinite}
+        .sys-title{font-family:var(--font-mono);font-size:.8rem;font-weight:700;letter-spacing:.05em;color:#fff;margin-bottom:.15rem}
+        .sys-msg{font-size:.72rem;color:var(--dark-300)}
+
+        .prog{text-align:center;padding:1.5rem}
+        .brain-wrap{position:relative;display:inline-block;margin-bottom:1.5rem}
+        .brain-waves{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}
+        .bw{position:absolute;border:1px solid;border-radius:50%;opacity:.5}
+        .bw.w1{width:70px;height:70px;top:-35px;left:-35px;border-color:var(--neon-indigo);animation:waveExpand 2s infinite}
+        .bw.w2{width:90px;height:90px;top:-45px;left:-45px;border-color:var(--neon-purple);animation:waveExpand 2s infinite .7s}
+        .bw.w3{width:110px;height:110px;top:-55px;left:-55px;border-color:var(--neon-cyan);animation:waveExpand 2s infinite 1.4s}
+        .brain-icon{width:52px;height:52px;background:linear-gradient(135deg,var(--neon-indigo),var(--neon-purple));border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.3rem;position:relative;z-index:2}
+        .prog h5{font-family:var(--font-mono);font-size:.85rem;font-weight:700;letter-spacing:.05em;color:#fff;margin-bottom:1rem}
+        .prog-track{display:flex;align-items:center;gap:.8rem;margin-bottom:1.5rem}
+        .prog-bar{flex:1;height:6px;background:rgba(100,116,139,0.15);border-radius:3px;overflow:hidden;position:relative}
+        .prog-fill{height:100%;background:linear-gradient(90deg,var(--neon-indigo),var(--neon-cyan));border-radius:3px;transition:width .3s;position:relative}
+        .prog-fill::after{content:'';position:absolute;top:0;right:0;width:16px;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.4));filter:blur(2px)}
+        .prog-pct{font-family:var(--font-mono);font-size:.72rem;font-weight:600;color:var(--neon-indigo);min-width:35px}
+        .pipeline{display:flex;align-items:center;justify-content:center;gap:.7rem;max-width:380px;margin:0 auto}
+        .pipe-step{display:flex;flex-direction:column;align-items:center;gap:.35rem;transition:all .3s}
+        .pipe-dot{width:20px;height:20px;border:2px solid var(--dark-600);border-radius:50%;background:var(--dark-800);transition:all .3s}
+        .pipe-step.done .pipe-dot{background:var(--neon-green);border-color:var(--neon-green);box-shadow:0 0 10px rgba(52,211,153,0.4)}
+        .pipe-step.active .pipe-dot{background:var(--neon-indigo);border-color:var(--neon-indigo);box-shadow:0 0 10px rgba(129,140,248,0.4);animation:pulse 1.5s infinite}
+        .pipe-lbl{font-family:var(--font-mono);font-size:.5rem;font-weight:600;letter-spacing:.1em;color:var(--dark-500);transition:color .3s}
+        .pipe-step.done .pipe-lbl{color:var(--neon-green)}.pipe-step.active .pipe-lbl{color:var(--neon-indigo)}
+        .pipe-line{width:16px;height:2px;background:var(--dark-600);transition:background .3s}
+
+        @@media(max-width:1200px){.cards-grid{grid-template-columns:repeat(auto-fill,minmax(380px,1fr))}}
+        @@media(max-width:768px){
+            .nav-inner{flex-wrap:wrap;gap:.8rem}.nav-spacer{display:none}.nav-actions{width:100%;justify-content:center;flex-wrap:wrap}
+            .hero h1{font-size:2.8rem}.cards-grid{grid-template-columns:1fr;padding:0}.metrics{grid-template-columns:1fr;padding:0 1rem}
+            .quick-btns{grid-template-columns:1fr}.res-grid{grid-template-columns:1fr}.pipeline{flex-direction:column;gap:.5rem}.pipe-line{width:2px;height:12px}
+        }
+        @@media(max-width:480px){.container{padding:0 1rem}.hero{padding:2rem 0 1rem}.hero h1{font-size:2.2rem}.s-head,.actions{padding:1.2rem}}
+        @@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
     </style>
 }
 
-<div class="nexgen-dashboard">
-    <!-- Dynamic Background -->
-    <div class="bg-pattern">
-        <div class="grid-overlay"></div>
-        <div class="gradient-mesh"></div>
-    </div>
+<div class="nex-page">
+    <div class="nex-bg"><div class="grid"></div><div class="mesh"></div></div>
 
-    <!-- Top Navigation Bar -->
+    <!-- Top Navigation -->
     <nav class="top-nav">
-        <div class="nav-container">
+        <div class="nav-inner">
             <div class="nav-brand">
-                <div class="brand-icon">
-                    <i class="fas fa-brain"></i>
-                </div>
-                <div class="brand-text">
-                    <span class="brand-name">NVKN</span>
-                    <span class="brand-version">v1.0</span>
-                </div>
+                <div class="brand-icon"><i class="fa-solid fa-brain"></i></div>
+                <span class="brand-txt">NVKN</span>
+                <span class="brand-ver">v2.0</span>
             </div>
-            
-          
+            <div class="nav-spacer"></div>
             <div class="nav-actions">
-                <button class="nav-btn" onclick="testAIServices()">
-                    <i class="fas fa-satellite-dish"></i>
-                    <span>AI Services connectvity</span>
-                </button>
-                <button class="nav-btn" data-bs-toggle="modal" data-bs-target="#testAnalysisModal">
-                    <i class="fas fa-vial"></i>
-                    <span>Test AI</span>
-                </button>
-            </div>
-            
-            <div class="org-badge">
-                <div class="org-avatar">NK</div>
-                <div class="org-info">
-                    <div class="org-name">NVKN Nærværskonsulenterne</div>
-                    
+                @{
+                    var isOnline = false;
+                    if (ViewBag.ServiceHealth != null)
+                    {
+                        var health = ViewBag.ServiceHealth as Dictionary<string, bool>;
+                        isOnline = health != null && health.Values.Any(v => v);
+                    }
+                }
+                <div class="ai-chip @(isOnline ? "" : "offline")" onclick="showAIStatus()" title="Claude AI Status">
+                    <div class="ai-dot"></div>
+                    <i class="fa-solid fa-sparkles ai-icon"></i>
+                    <span class="ai-label">CLAUDE AI @(isOnline ? "ACTIVE" : "OFFLINE")</span>
                 </div>
+                <button class="nav-btn" data-bs-toggle="modal" data-bs-target="#testModal"><i class="fa-solid fa-flask-vial"></i><span>Test AI</span></button>
+                <div class="org-badge"><div class="org-avatar">NK</div><span class="org-name">NVKN</span></div>
             </div>
         </div>
     </nav>
 
-    <!-- Hero Section -->
-    <section class="hero-nexgen">
-        <div class="container-fluid">
-            <div class="hero-content">
-                <div class="hero-badge">
-                    <span class="badge-dot"></span>
-                    <span>AI-POWERED ANALYTICS</span>
-                </div>
-                <h1 class="hero-title">
-                    Mental Health
-                    <span class="title-gradient">Intelligence</span>
-                    Platform
-                </h1>
-                <p class="hero-description">
-                    Advanced neural analysis for workplace wellness insights, real-time risk detection, 
-                    and data-driven mental health strategies.
-                </p>
-            </div>
+    <!-- Hero -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-badge"><span class="dot"></span><span>CLAUDE AI–POWERED ANALYTICS</span></div>
+            <h1>Mental Health <span class="grad">Intelligence</span> Platform</h1>
+            <p>Advanced AI analysis for workplace wellness insights, real-time risk detection, and data-driven mental health strategies.</p>
         </div>
     </section>
 
     <!-- Main Content -->
-    <main class="main-content">
-        <div class="container-fluid">
-            <!-- AI Services Status Dashboard -->
-            @if (ViewBag.ServiceHealth != null)
-            {
-                var serviceHealth = ViewBag.ServiceHealth as Dictionary<string, bool>;
-                <div class="services-dashboard">
-                    <div class="dashboard-header">
-                        <div class="header-icon">
-                            <i class="fas fa-microchip"></i>
-                        </div>
-                        <div class="header-content">
-                            <h2>AI SYSTEMS STATUS</h2>
-                            <p>Real-time service monitoring</p>
-                        </div>
+    <main class="main">
+        <div class="container">
+            <!-- Claude AI Engine Card -->
+            <div class="ai-engine">
+                <div class="ai-engine-icon"><i class="fa-solid fa-sparkles"></i></div>
+                <div class="ai-engine-info">
+                    <h3>CLAUDE AI ENGINE</h3>
+                    <p>Unified intelligence for sentiment analysis, risk assessment, and workplace insights</p>
+                    <div class="ai-caps">
+                        <span class="ai-cap"><i class="fa-solid fa-heart-pulse"></i> Sentiment Analysis</span>
+                        <span class="ai-cap"><i class="fa-solid fa-shield-halved"></i> Risk Assessment</span>
+                        <span class="ai-cap"><i class="fa-solid fa-key"></i> Key Phrase Extraction</span>
+                        <span class="ai-cap"><i class="fa-solid fa-user-shield"></i> PII Anonymization</span>
+                        <span class="ai-cap"><i class="fa-solid fa-lightbulb"></i> Workplace Insights</span>
+                        <span class="ai-cap"><i class="fa-solid fa-tags"></i> Categorization</span>
                     </div>
-                  <!-- Enhanced Services Strip with Status Icons -->
-<div class="services-strip">
-    @foreach (var service in serviceHealth)
-    {
-        <div class="service-chip @(service.Value ? "online" : "offline")">
-            <div class="chip-status">
-                @if (service.Value)
-                {
-                    <i class="fas fa-check-circle" style="color: #34d399;"></i>
-                }
-                else
-                {
-                    <i class="fas fa-times-circle" style="color: #f87171;"></i>
-                }
-            </div>
-            <div class="chip-name">@service.Key.Replace("Azure", "")</div>
-            <div class="chip-state">
-                @if (service.Value)
-                {
-                    <i class="fas fa-check" style="color: #34d399; margin-right: 0.3rem;"></i>
-                }
-                else
-                {
-                    <i class="fas fa-times" style="color: #f87171; margin-right: 0.3rem;"></i>
-                }
-                @(service.Value ? "ACTIVE" : "DOWN")
-            </div>
-        </div>
-    }
-</div>
                 </div>
-            }
+                <div class="ai-engine-status @(isOnline ? "online" : "offline")">
+                    <i class="fa-solid @(isOnline ? "fa-circle-check" : "fa-circle-xmark")"></i>
+                    <span>@(isOnline ? "ONLINE" : "OFFLINE")</span>
+                </div>
+            </div>
 
-            <!-- Alert System -->
+            <!-- Alerts -->
             @if (TempData["ErrorMessage"] != null)
             {
-                <div class="alert-nexgen error">
-                    <div class="alert-stripe"></div>
-                    <div class="alert-icon"><i class="fas fa-exclamation-triangle"></i></div>
-                    <div class="alert-content">
-                        <div class="alert-label">SYSTEM ERROR</div>
-                        <div class="alert-text">@TempData["ErrorMessage"]</div>
-                    </div>
-                    <button class="alert-dismiss" data-bs-dismiss="alert">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
+                <div class="alert-nex error"><div class="alert-icon"><i class="fa-solid fa-triangle-exclamation"></i></div><div><div class="alert-lbl">SYSTEM ERROR</div><div class="alert-txt">@TempData["ErrorMessage"]</div></div><button class="alert-x" data-bs-dismiss="alert"><i class="fa-solid fa-xmark"></i></button></div>
             }
-
             @if (TempData["SuccessMessage"] != null)
             {
-                <div class="alert-nexgen success">
-                    <div class="alert-stripe"></div>
-                    <div class="alert-icon"><i class="fas fa-check-circle"></i></div>
-                    <div class="alert-content">
-                        <div class="alert-label">SUCCESS</div>
-                        <div class="alert-text">@TempData["SuccessMessage"]</div>
-                    </div>
-                    <button class="alert-dismiss" data-bs-dismiss="alert">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
+                <div class="alert-nex success"><div class="alert-icon"><i class="fa-solid fa-circle-check"></i></div><div><div class="alert-lbl">SUCCESS</div><div class="alert-txt">@TempData["SuccessMessage"]</div></div><button class="alert-x" data-bs-dismiss="alert"><i class="fa-solid fa-xmark"></i></button></div>
             }
-
             @if (TempData["WarningMessage"] != null)
             {
-                <div class="alert-nexgen warning">
-                    <div class="alert-stripe"></div>
-                    <div class="alert-icon"><i class="fas fa-info-circle"></i></div>
-                    <div class="alert-content">
-                        <div class="alert-label">ADVISORY</div>
-                        <div class="alert-text">@TempData["WarningMessage"]</div>
-                    </div>
-                    <button class="alert-dismiss" data-bs-dismiss="alert">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
+                <div class="alert-nex warning"><div class="alert-icon"><i class="fa-solid fa-circle-info"></i></div><div><div class="alert-lbl">ADVISORY</div><div class="alert-txt">@TempData["WarningMessage"]</div></div><button class="alert-x" data-bs-dismiss="alert"><i class="fa-solid fa-xmark"></i></button></div>
             }
 
-            <!-- Survey Grid -->
-            <section class="surveys-grid-section">
-                <div class="section-title">
-                    <h2>ACTIVE QUESTIONNAIRES</h2>
-                    <div class="title-underline"></div>
+            <!-- Response Cards Grid -->
+            <section>
+                <div class="sec-title">
+                    <h2>INDIVIDUAL RESPONSES</h2>
+                    <div class="bar"></div>
                 </div>
 
-                <div class="surveys-grid">
+                <!-- Search Bar -->
+                <div style="max-width:600px;margin:0 auto 2rem;position:relative">
+                    <div style="position:relative">
+                        <i class="fa-solid fa-magnifying-glass" style="position:absolute;left:1.2rem;top:50%;transform:translateY(-50%);color:var(--dark-500);font-size:.9rem;pointer-events:none;transition:color .2s;z-index:2"></i>
+                        <input type="text" id="searchInput" placeholder="Search by name, email, or questionnaire title..."
+                               style="width:100%;padding:.85rem 3rem .85rem 3rem;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:14px;color:#e2e8f0;font-family:var(--font-main);font-size:.88rem;outline:none;transition:all .25s"
+                               onfocus="this.style.borderColor='rgba(129,140,248,0.4)';this.style.boxShadow='0 0 0 3px rgba(129,140,248,0.1)';this.style.background='rgba(255,255,255,0.06)';this.previousElementSibling.style.color='var(--neon-indigo)'"
+                               onblur="this.style.borderColor='rgba(255,255,255,0.08)';this.style.boxShadow='none';this.style.background='rgba(255,255,255,0.04)';this.previousElementSibling.style.color='var(--dark-500)'" />
+                        <button id="clearSearch" onclick="document.getElementById('searchInput').value='';filterCards();this.style.display='none'"
+                                style="display:none;position:absolute;right:1rem;top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:6px;width:28px;height:28px;color:var(--dark-400);cursor:pointer;font-size:.7rem;z-index:2;transition:all .2s">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                    <div id="searchCount" style="text-align:center;margin-top:.6rem;font-family:var(--font-mono);font-size:.6rem;font-weight:600;letter-spacing:.08em;color:var(--dark-500);display:none"></div>
+                </div>
+
+                <div class="cards-grid">
                     @{
-                        var hasAnyQuestionnairesWithResponses = false;
                         var modelList = Model?.ToList() ?? new List<dynamic>();
-                        
-                        foreach (var q in modelList)
-                        {
-                            if (q.ResponseCount > 0)
-                            {
-                                hasAnyQuestionnairesWithResponses = true;
-                                break;
-                            }
-                        }
+                        var avGradients = new[] {
+                            "background:linear-gradient(135deg,#818cf8,#60a5fa)",
+                            "background:linear-gradient(135deg,#c084fc,#f472b6)",
+                            "background:linear-gradient(135deg,#33b3ae,#34d399)",
+                            "background:linear-gradient(135deg,#f59e0b,#fbbf24)",
+                            "background:linear-gradient(135deg,#22d3ee,#60a5fa)"
+                        };
+                        var cardIdx = 0;
                     }
 
-                    @if (Model != null && modelList.Count > 0)
+                    @if (modelList.Count > 0)
                     {
-                        @foreach (var questionnaire in modelList)
+                        @foreach (var resp in modelList)
                         {
-                            @if (questionnaire.ResponseCount > 0)
-                            {
-                                <div class="survey-card">
-                                    <div class="card-glow"></div>
-                                    <div class="card-border"></div>
-                                    
-                                    <div class="card-header">
-                                        <div class="card-title-section">
-                                            <h3 class="card-title">@questionnaire.Title</h3>
-                                            
-                                            @{
-                                                var hasUsers = false;
-                                                var userCount = 0;
-                                                try {
-                                                    if (questionnaire.Users != null)
-                                                    {
-                                                        userCount = questionnaire.Users.Count;
-                                                        hasUsers = userCount > 0;
-                                                    }
-                                                } catch { 
-                                                    hasUsers = false;
-                                                    userCount = 0;
-                                                }
-                                            }
-                                            
-                                           
-                                                            @if (hasUsers)
-                                                            {
-                                                                <div class="participants-section">
-                                                                    <div class="participants-label">PARTICIPANTS (@userCount)</div>
-        
-                                                                    <!-- Avatar Stack with Hover Details -->
-                                                                    <div class="avatar-stack">
-                                                                        @for (int i = 0; i < Math.Min(3, userCount); i++)
-                                                                        {
-                                                                            var user = questionnaire.Users[i];
-                                                                            <div class="user-avatar-enhanced" style="--delay: @(i * 0.1)s">
-                                                                                <div class="avatar-circle">
-                                                                                    @user.UserName.Substring(0, 1).ToUpper()
-                                                                                </div>
-                                                                                <div class="avatar-tooltip">
-                                                                                    <div class="tooltip-content">
-                                                                                        <div class="user-name">@user.UserName</div>
-                                                                                        <div class="user-email">@(user.Email ?? "No email")</div>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
-                                                                        }
-                                                                        @if (userCount > 3)
-                                                                        {
-                                                                            <div class="avatar-more">+@(userCount - 3)</div>
-                                                                        }
-                                                                    </div>
-        
-                                                                    <!-- Participants Details List - FIXED VERSION -->
-                                                                    <div class="participants-list">
-                                                                        @{
-                                                                            // Convert dynamic Users to enumerable and safely iterate
-                                                                            var usersList = questionnaire.Users as IEnumerable<dynamic>;
-                                                                            var displayCount = Math.Min(5, userCount);
-                                                                        }
-            
-                                                                        @for (int i = 0; i < displayCount; i++)
-                                                                        {
-                                                                            var user = questionnaire.Users[i];
-                                                                            <div class="participant-item">
-                                                                                <div class="participant-avatar">
-                                                                                    @user.UserName.Substring(0, 1).ToUpper()
-                                                                                </div>
-                                                                                <div class="participant-details">
-                                                                                    <div class="participant-name">@user.UserName</div>
-                                                                                    <div class="participant-email">@(user.Email ?? "No email available")</div>
-                                                                                </div>
-                                                                            </div>
-                                                                        }
-            
-                                                                        @if (userCount > 5)
-                                                                        {
-                                                                            <div class="participants-overflow">
-                                                                                + @(userCount - 5) more participants
-                                                                            </div>
-                                                                        }
-                                                                    </div>
-                                                                </div>
-                                                            }
-                                        </div>
-                                        
-                                        <!-- FIXED DROPDOWN MENU -->
-                                        <div class="card-menu">
-                                            <div class="dropdown">
-                                                <button class="menu-dots" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                                    <span></span><span></span><span></span>
-                                                </button>
-                                                <ul class="dropdown-menu dropdown-nexgen">
-                                                    <li><a class="dropdown-item" href="@Url.Action("AnalyzeQuestionnaire", new { id = questionnaire.Id })">
-                                                        <i class="fas fa-chart-area"></i>Deep Analysis
-                                                    </a></li>
-                                                    <li><a class="dropdown-item" href="@Url.Action("HighRiskResponses", new { id = questionnaire.Id })">
-                                                        <i class="fas fa-shield-virus"></i>Risk Matrix
-                                                    </a></li>
-                                                    <li><a class="dropdown-item" href="@Url.Action("Dashboard", new { id = questionnaire.Id })">
-                                                        <i class="fas fa-tachometer-alt"></i>Command Center
-                                                    </a></li>
-                                                    <li><hr class="dropdown-divider"></li>
-                                                    <li><a class="dropdown-item" href="@Url.Action("GenerateReport", new { id = questionnaire.Id })">
-                                                        <i class="fas fa-file-export"></i>Export Report
-                                                    </a></li>
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </div>
+                            var userName = (string)(resp.UserName ?? "Anonymous");
+                            var userEmail = (string)(resp.UserEmail ?? "No email");
+                            var initial = userName.Length > 0 ? userName.Substring(0, 1).ToUpper() : "?";
+                            var avStyle = avGradients[cardIdx % avGradients.Length];
+                            cardIdx++;
 
-                                    <div class="metrics-panel">
-                                        <div class="metric-chip questions">
-                                            <div class="metric-icon"><i class="fas fa-question-circle"></i></div>
-                                            <div class="metric-data">
-                                                <div class="metric-number">@questionnaire.QuestionCount</div>
-                                                <div class="metric-text">QUESTIONS</div>
-                                            </div>
+                            <div class="s-card" data-username="@userName.ToLower()" data-email="@userEmail.ToLower()" data-title="@resp.Title.ToLower()">
+                                <div class="glow"></div>
+                                <div class="s-head">
+                                    <h3 class="s-title">@resp.Title</h3>
+
+                                    <!-- Single Respondent -->
+                                    <div class="respondent">
+                                        <div class="resp-avatar" style="@avStyle">@initial</div>
+                                        <div class="resp-info">
+                                            <div class="resp-name">@userName</div>
+                                            <div class="resp-email">@userEmail</div>
                                         </div>
-                                        <div class="metric-chip responses">
-                                            <div class="metric-icon"><i class="fas fa-comments"></i></div>
-                                            <div class="metric-data">
-                                                <div class="metric-number">@questionnaire.ResponseCount</div>
-                                                <div class="metric-text">RESPONSES</div>
-                                            </div>
-                                        </div>
-                                       <div class="metric-chip textdata">
-                                    <div class="metric-icon"><i class="fas fa-comment-medical"></i></div>
-                                    <div class="metric-data">
-                                     
-                                        <div class="metric-number">@questionnaire.AnalyzableResponseCount</div>
-                                       <div class="metric-text">ANALYZABLE DATA</div>
+                                        <div class="resp-badge">RESPONDENT</div>
                                     </div>
                                 </div>
-                                    </div>
 
-                                    @if (questionnaire.LastResponse != null && questionnaire.LastResponse != DateTime.MinValue)
+                                <!-- Metrics -->
+                                <div class="metrics">
+                                    <div class="m-chip q">
+                                        <div class="m-icon"><i class="fa-solid fa-circle-question"></i></div>
+                                        <div><div class="m-num">@resp.QuestionCount</div><div class="m-lbl">QUESTIONS</div></div>
+                                    </div>
+                                    <div class="m-chip r">
+                                        <div class="m-icon"><i class="fa-solid fa-comments"></i></div>
+                                        <div><div class="m-num">@resp.TotalAnswered</div><div class="m-lbl">ANSWERED</div></div>
+                                    </div>
+                                    <div class="m-chip t">
+                                        <div class="m-icon"><i class="fa-solid fa-comment-medical"></i></div>
+                                        <div><div class="m-num">@resp.AnalyzableCount</div><div class="m-lbl">ANALYZABLE</div></div>
+                                    </div>
+                                </div>
+
+                                @if (resp.SubmissionDate != null && resp.SubmissionDate != DateTime.MinValue)
+                                {
+                                    <div class="activity"><div class="dot"></div><span>SUBMITTED: @((DateTime)resp.SubmissionDate)</span></div>
+                                }
+
+                                <!-- Actions -->
+                                <div class="actions">
+                                    @if (resp.AnalyzableCount > 0)
                                     {
-                                        <div class="activity-indicator">
-                                            <div class="activity-pulse"></div>
-                                            <span>LAST ACTIVITY: @((DateTime)questionnaire.LastResponse)</span>
+                                        <button onclick="startProgress(@resp.QuestionnaireId, '@resp.Title', 'analysis')" class="launch-btn">
+                                            <div class="shimmer"></div>
+                                            <div class="launch-inner">
+                                                <div class="launch-icon"><i class="fa-solid fa-rocket"></i></div>
+                                                <div class="launch-txt">
+                                                    <div class="launch-title">LAUNCH AI ANALYSIS</div>
+                                                    <div class="launch-sub">Claude AI neural processing</div>
+                                                </div>
+                                                <div class="launch-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                                            </div>
+                                        </button>
+                                        <div class="quick-btns">
+                                            <button onclick="startProgress(@resp.QuestionnaireId, '@resp.Title', 'risk')" class="q-btn risk">
+                                                <i class="fa-solid fa-triangle-exclamation"></i><span>RISK SCAN</span>
+                                            </button>
+                                            <button onclick="startProgress(@resp.QuestionnaireId, '@resp.Title', 'batch')" class="q-btn batch">
+                                                <i class="fa-solid fa-layer-group"></i><span>BATCH OPS</span>
+                                            </button>
+                                            <button onclick="startProgress(@resp.QuestionnaireId, '@resp.Title', 'trends')" class="q-btn trend">
+                                                <i class="fa-solid fa-chart-line"></i><span>TRENDS</span>
+                                            </button>
                                         </div>
                                     }
-
-                                    <div class="action-zone">
-                                        @if (questionnaire.AnalyzableResponseCount > 0)
-                                                {
-                                                    <button onclick="startAnalysisWithProgress(@questionnaire.Id, '@questionnaire.Title')" 
-                                                           class="primary-action">
-                                                        <div class="action-bg"></div>
-                                                        <div class="action-content">
-                                                            <div class="action-icon">
-                                                                <i class="fas fa-rocket"></i>
-                                                            </div>
-                                                            <div class="action-text">
-                                                                <div class="action-title">LAUNCH AI ANALYSIS</div>
-                                                                <div class="action-subtitle">Neural network processing</div>
-                                                            </div>
-                                                            <div class="action-arrow">
-                                                                <i class="fas fa-arrow-right"></i>
-                                                            </div>
-                                                        </div>
-                                                    </button>
-    
-                                                    <div class="quick-actions">
-                                                        <button onclick="startRiskScanWithProgress(@questionnaire.Id, '@questionnaire.Title')" 
-                                                               class="quick-btn risk-btn">
-                                                            <i class="fas fa-exclamation-triangle"></i>
-                                                            <span>RISK SCAN</span>
-                                                        </button>
-                                                        <button onclick="startBatchOpsWithProgress(@questionnaire.Id, '@questionnaire.Title')" 
-                                                               class="quick-btn batch-btn">
-                                                            <i class="fas fa-layer-group"></i>
-                                                            <span>BATCH OPS</span>
-                                                        </button>
-                                                        <button onclick="startTrendsWithProgress(@questionnaire.Id, '@questionnaire.Title')" 
-                                                               class="quick-btn trend-btn">
-                                                            <i class="fas fa-chart-line"></i>
-                                                            <span>TRENDS</span>
-                                                        </button>
-                                                    </div>
-                                          }
-                                        else
-                                        {
-                                            <div class="disabled-state">
-                                                <div class="disabled-icon">
-                                                    <i class="fas fa-database"></i>
-                                                </div>
-                                                <div class="disabled-text">
-                                                    <div class="disabled-title">INSUFFICIENT DATA</div>
-                                                  <div class="disabled-message">Requires responses for analysis</div>
-                                                </div>
+                                    else
+                                    {
+                                        <div class="disabled-box">
+                                            <div class="disabled-icon"><i class="fa-solid fa-database"></i></div>
+                                            <div>
+                                                <div class="disabled-title">INSUFFICIENT DATA</div>
+                                                <div class="disabled-msg">No analyzable answers in this response</div>
                                             </div>
-                                        }
-                                    </div>
+                                        </div>
+                                    }
                                 </div>
-                            }
-                        }
-                        
-                        @if (!hasAnyQuestionnairesWithResponses)
-                        {
-                            <div class="empty-nexgen">
-                                <div class="empty-visual">
-                                    <div class="empty-icon">
-                                        <i class="fas fa-clipboard-list"></i>
-                                    </div>
-                                    <div class="empty-rings">
-                                        <div class="ring r1"></div>
-                                        <div class="ring r2"></div>
-                                        <div class="ring r3"></div>
-                                    </div>
-                                </div>
-                                <div class="empty-text">
-                                    <h3>NO RESPONSE DATA DETECTED</h3>
-                                    <p>Initialize questionnaires to begin neural analysis workflow</p>
-                                </div>
-                                <a href="@Url.Action("Index", "Questionnaire")" class="create-btn">
-                                    <div class="btn-glow"></div>
-                                    <i class="fas fa-plus"></i>
-                                    <span>CREATE QUESTIONNAIRE</span>
-                                </a>
                             </div>
                         }
                     }
                     else
                     {
-                        <div class="empty-nexgen">
-                            <div class="empty-visual">
-                                <div class="empty-icon">
-                                    <i class="fas fa-clipboard-list"></i>
-                                </div>
-                                <div class="empty-rings">
-                                    <div class="ring r1"></div>
-                                    <div class="ring r2"></div>
-                                    <div class="ring r3"></div>
-                                </div>
+                        <div class="empty-state">
+                            <div class="empty-vis">
+                                <div class="empty-icon"><i class="fa-solid fa-clipboard-list"></i></div>
+                                <div class="empty-rings"><div class="ring r1"></div><div class="ring r2"></div><div class="ring r3"></div></div>
                             </div>
-                            <div class="empty-text">
-                                <h3>NO QUESTIONNAIRES FOUND</h3>
-                                <p>Deploy your first mental health assessment module</p>
-                            </div>
-                            <a href="@Url.Action("Index", "Questionnaire")" class="create-btn">
-                                <div class="btn-glow"></div>
-                                <i class="fas fa-plus"></i>
-                                <span>CREATE QUESTIONNAIRE</span>
-                            </a>
+                            <h3>NO RESPONSES FOUND</h3>
+                            <p>Deploy questionnaires and collect responses to begin AI analysis</p>
+                            <a href="@Url.Action("Index", "Questionnaire")" class="create-btn"><i class="fa-solid fa-plus"></i> CREATE QUESTIONNAIRE</a>
                         </div>
                     }
                 </div>
@@ -2954,650 +528,211 @@
     </main>
 </div>
 
-<!-- Next-Gen AI Services Modal -->
-<div class="modal fade" id="aiServicesModal" tabindex="-1" data-bs-backdrop="true" data-bs-keyboard="true">
+<!-- AI Status Modal -->
+<div class="modal fade" id="aiStatusModal" tabindex="-1" data-bs-backdrop="true" data-bs-keyboard="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-nexgen" onclick="event.stopPropagation();">
-            <div class="modal-header-nexgen">
-                <div class="header-pattern"></div>
-                <div class="header-content">
-                    <div class="modal-icon-nexgen">
-                        <i class="fas fa-satellite-dish"></i>
-                    </div>
-                    <div class="modal-title-group">
-                        <h4>SYSTEM DIAGNOSTICS</h4>
-                        <p>AI services connectivity check</p>
-                    </div>
-                </div>
-                <button type="button" class="close-nexgen" data-bs-dismiss="modal">
-                    <i class="fas fa-times"></i>
-                </button>
+        <div class="m-nex" onclick="event.stopPropagation()">
+            <div class="m-head">
+                <div class="m-head-pat"></div>
+                <div class="m-head-inner"><div class="m-head-icon"><i class="fa-solid fa-satellite-dish"></i></div><div><h4>SYSTEM DIAGNOSTICS</h4><p>Claude AI service connectivity</p></div></div>
+                <button type="button" class="m-close" data-bs-dismiss="modal"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div class="modal-body-nexgen" onclick="event.stopPropagation();">
-                <div id="servicesStatusContent" class="status-container">
-                    <div class="loading-nexgen">
-                        <div class="scan-line"></div>
-                        <div class="loading-text">
-                            <h5>SCANNING SYSTEMS</h5>
-                            <p>Verifying neural network connections...</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer-nexgen">
-                <button type="button" class="btn-nexgen secondary" data-bs-dismiss="modal">
-                    <i class="fas fa-power-off"></i>
-                    <span>CLOSE</span>
-                </button>
-            </div>
+            <div class="m-body" onclick="event.stopPropagation()"><div id="statusContent"><div class="loading-nex"><div class="scan-bar"></div><h5>SCANNING SYSTEMS</h5><p>Verifying Claude AI connection...</p></div></div></div>
+            <div class="m-foot"><button type="button" class="btn-nex sec" data-bs-dismiss="modal"><i class="fa-solid fa-power-off"></i> CLOSE</button></div>
         </div>
     </div>
 </div>
 
-<!-- Next-Gen Test Analysis Modal -->
-<div class="modal fade" id="testAnalysisModal" tabindex="-1" data-bs-backdrop="true" data-bs-keyboard="true">
+<!-- Test Analysis Modal -->
+<div class="modal fade" id="testModal" tabindex="-1" data-bs-backdrop="true" data-bs-keyboard="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-nexgen" onclick="event.stopPropagation();">
-            <div class="modal-header-nexgen">
-                <div class="header-pattern"></div>
-                <div class="header-content">
-                    <div class="modal-icon-nexgen">
-                        <i class="fas fa-vial"></i>
-                    </div>
-                    <div class="modal-title-group">
-                        <h4>NEURAL ANALYSIS LAB</h4>
-                        <p>Test AI capabilities with sample data</p>
-                    </div>
-                </div>
-                <button type="button" class="close-nexgen" data-bs-dismiss="modal">
-                    <i class="fas fa-times"></i>
-                </button>
+        <div class="m-nex" onclick="event.stopPropagation()">
+            <div class="m-head">
+                <div class="m-head-pat"></div>
+                <div class="m-head-inner"><div class="m-head-icon"><i class="fa-solid fa-flask-vial"></i></div><div><h4>AI ANALYSIS LAB</h4><p>Test Claude AI capabilities with sample data</p></div></div>
+                <button type="button" class="m-close" data-bs-dismiss="modal"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div class="modal-body-nexgen" onclick="event.stopPropagation();">
-                <form id="testAnalysisForm" class="test-form-nexgen" onclick="event.stopPropagation();">
-                    <div class="input-nexgen">
-                        <label class="input-label">
-                            <i class="fas fa-comment-dots"></i>
-                            <span>SAMPLE DATA INPUT</span>
-                        </label>
-                        <textarea id="sampleText" class="textarea-nexgen" rows="5" 
-                                onclick="event.stopPropagation();"
-                                placeholder="Enter employee response text for neural analysis testing..."></textarea>
-                        <div class="input-hint">
-                            <div class="hint-icon">💡</div>
-                            <span>Try: "I'm feeling overwhelmed with deadlines and having trouble sleeping"</span>
-                        </div>
+            <div class="m-body" onclick="event.stopPropagation()">
+                <form id="testForm" onclick="event.stopPropagation()">
+                    <div style="margin-bottom:1.2rem">
+                        <label class="ta-label"><i class="fa-solid fa-comment-dots"></i> SAMPLE DATA INPUT</label>
+                        <textarea id="sampleText" class="ta-area" rows="5" onclick="event.stopPropagation()" placeholder="Enter employee response text for AI analysis testing..."></textarea>
+                        <div class="ta-hint"><i class="fa-solid fa-lightbulb" style="color:var(--neon-amber)"></i><span>Try: "I'm feeling overwhelmed with deadlines and having trouble sleeping"</span></div>
                     </div>
                 </form>
-                
-                <div id="testResults" class="test-results-nexgen d-none">
-                    <div class="results-divider-nexgen"></div>
-                    <div class="results-header-nexgen">
-                        <i class="fas fa-chart-network"></i>
-                        <span>ANALYSIS OUTPUT</span>
-                    </div>
+                <div id="testResults" class="d-none">
+                    <div class="res-divider"></div>
+                    <div class="res-header"><i class="fa-solid fa-chart-network"></i> ANALYSIS OUTPUT</div>
                     <div id="testResultsContent"></div>
                 </div>
             </div>
-            <div class="modal-footer-nexgen">
-                <button type="button" class="btn-nexgen secondary" data-bs-dismiss="modal">
-                    <i class="fas fa-times"></i>
-                    <span>CANCEL</span>
-                </button>
-                <button type="button" class="btn-nexgen primary" onclick="performTestAnalysis(); event.stopPropagation();">
-                    <i class="fas fa-play"></i>
-                    <span>RUN ANALYSIS</span>
-                </button>
+            <div class="m-foot">
+                <button type="button" class="btn-nex sec" data-bs-dismiss="modal"><i class="fa-solid fa-xmark"></i> CANCEL</button>
+                <button type="button" class="btn-nex pri" onclick="runTest(); event.stopPropagation()"><i class="fa-solid fa-play"></i> RUN ANALYSIS</button>
             </div>
         </div>
     </div>
 </div>
 
-
-<!-- Next-Gen Progress Modal -->
-<div class="modal fade" id="analysisProgressModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+<!-- Progress Modal -->
+<div class="modal fade" id="progressModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-nexgen" onclick="event.stopPropagation();">
-            <div class="modal-header-nexgen">
-                <div class="header-pattern"></div>
-                <div class="header-content">
-                    <div class="modal-icon-nexgen">
-                        <i class="fas fa-brain"></i>
-                    </div>
-                    <div class="modal-title-group">
-                        <h4>NEURAL PROCESSING</h4>
-                        <p id="progressSubtitle">Analyzing mental health patterns</p>
-                    </div>
-                </div>
+        <div class="m-nex" onclick="event.stopPropagation()">
+            <div class="m-head">
+                <div class="m-head-pat"></div>
+                <div class="m-head-inner"><div class="m-head-icon"><i class="fa-solid fa-brain"></i></div><div><h4>NEURAL PROCESSING</h4><p id="progSub">Analyzing mental health patterns</p></div></div>
             </div>
-            <div class="modal-body-nexgen" onclick="event.stopPropagation();">
-                <div class="progress-nexgen">
-                    <div class="progress-visual">
-                        <div class="brain-scan">
-                            <div class="scan-waves">
-                                <div class="wave w1"></div>
-                                <div class="wave w2"></div>
-                                <div class="wave w3"></div>
-                            </div>
-                            <i class="fas fa-brain brain-icon"></i>
-                        </div>
+            <div class="m-body" onclick="event.stopPropagation()">
+                <div class="prog">
+                    <div class="brain-wrap">
+                        <div class="brain-waves"><div class="bw w1"></div><div class="bw w2"></div><div class="bw w3"></div></div>
+                        <div class="brain-icon"><i class="fa-solid fa-brain"></i></div>
                     </div>
-                    
-                    <div class="progress-info">
-                        <h5 id="progressTitle">PROCESSING QUESTIONNAIRE DATA</h5>
-                        <div class="progress-track">
-                            <div class="progress-bar-nexgen">
-                                <div class="progress-fill-nexgen"></div>
-                                <div class="progress-glow"></div>
-                            </div>
-                            <div class="progress-percent">0%</div>
-                        </div>
-                    </div>
-
-                    <div class="progress-pipeline">
-                        <div class="pipeline-step completed">
-                            <div class="step-marker"></div>
-                            <div class="step-label">INIT</div>
-                        </div>
-                        <div class="pipeline-connector"></div>
-                        <div class="pipeline-step">
-                            <div class="step-marker"></div>
-                            <div class="step-label">PARSE</div>
-                        </div>
-                        <div class="pipeline-connector"></div>
-                        <div class="pipeline-step">
-                            <div class="step-marker"></div>
-                            <div class="step-label">ANALYZE</div>
-                        </div>
-                        <div class="pipeline-connector"></div>
-                        <div class="pipeline-step">
-                            <div class="step-marker"></div>
-                            <div class="step-label">ASSESS</div>
-                        </div>
-                        <div class="pipeline-connector"></div>
-                        <div class="pipeline-step">
-                            <div class="step-marker"></div>
-                            <div class="step-label">REPORT</div>
-                        </div>
-                    </div>
+                    <h5 id="progTitle">PROCESSING QUESTIONNAIRE DATA</h5>
+                    <div class="prog-track"><div class="prog-bar"><div class="prog-fill" style="width:0%"></div></div><div class="prog-pct">0%</div></div>
+                    <div class="pipeline" id="pipeline"></div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
 @section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@@11"></script>
     <script>
-        // Enhanced progress functions for all three buttons
-        function startRiskScanWithProgress(questionnaireId, title) {
-            document.getElementById('progressSubtitle').textContent = `Risk scanning "${title}"`;
-            document.getElementById('progressTitle').textContent = 'SCANNING FOR RISK INDICATORS';
-            
-            // Update pipeline for risk scan
-            updatePipelineSteps(['INIT', 'SCAN', 'DETECT', 'ASSESS', 'ALERT']);
-            
-            const modal = new bootstrap.Modal(document.getElementById('analysisProgressModal'));
+        var actionUrls = {
+            analysis: '@Url.Action("AnalyzeQuestionnaire")',
+            risk: '@Url.Action("HighRiskResponses")',
+            batch: '@Url.Action("BatchAnalyze")',
+            trends: '@Url.Action("AnalyzeTrends")',
+            health: '@Url.Action("ServiceHealth")',
+            test: '@Url.Action("TestAnalysis")'
+        };
+
+        var pipeConfigs = {
+            analysis: { sub: 'Processing', title: 'PROCESSING RESPONSE DATA', steps: ['INIT','PARSE','ANALYZE','ASSESS','REPORT'] },
+            risk:     { sub: 'Risk scanning', title: 'SCANNING FOR RISK INDICATORS', steps: ['INIT','SCAN','DETECT','ASSESS','ALERT'] },
+            batch:    { sub: 'Batch processing', title: 'EXECUTING BATCH OPERATIONS', steps: ['INIT','QUEUE','PROCESS','VERIFY','COMPLETE'] },
+            trends:   { sub: 'Analyzing trends in', title: 'CALCULATING TREND PATTERNS', steps: ['INIT','COLLECT','PATTERN','TREND','VISUAL'] }
+        };
+
+        function startProgress(id, title, type) {
+            var cfg = pipeConfigs[type];
+            document.getElementById('progSub').textContent = cfg.sub + ' "' + title + '"';
+            document.getElementById('progTitle').textContent = cfg.title;
+            buildPipeline(cfg.steps);
+            var modal = new bootstrap.Modal(document.getElementById('progressModal'));
             modal.show();
-            
-            animateProgress(() => {
-                window.location.href = '@Url.Action("HighRiskResponses")?id=' + questionnaireId;
-            });
+            animateProgress(function() { window.location.href = actionUrls[type] + '?id=' + id; });
         }
 
-        function startBatchOpsWithProgress(questionnaireId, title) {
-            document.getElementById('progressSubtitle').textContent = `Batch processing "${title}"`;
-            document.getElementById('progressTitle').textContent = 'EXECUTING BATCH OPERATIONS';
-            
-            // Update pipeline for batch operations
-            updatePipelineSteps(['INIT', 'QUEUE', 'PROCESS', 'VERIFY', 'COMPLETE']);
-            
-            const modal = new bootstrap.Modal(document.getElementById('analysisProgressModal'));
-            modal.show();
-            
-            animateProgress(() => {
-                window.location.href = '@Url.Action("BatchAnalyze")?id=' + questionnaireId;
+        function buildPipeline(steps) {
+            var html = '';
+            steps.forEach(function(s, i) {
+                html += '<div class="pipe-step ' + (i === 0 ? 'done' : '') + '"><div class="pipe-dot"></div><div class="pipe-lbl">' + s + '</div></div>';
+                if (i < steps.length - 1) html += '<div class="pipe-line"></div>';
             });
+            document.getElementById('pipeline').innerHTML = html;
         }
 
-        function startTrendsWithProgress(questionnaireId, title) {
-            document.getElementById('progressSubtitle').textContent = `Analyzing trends in "${title}"`;
-            document.getElementById('progressTitle').textContent = 'CALCULATING TREND PATTERNS';
-            
-            // Update pipeline for trends analysis
-            updatePipelineSteps(['INIT', 'COLLECT', 'PATTERN', 'TREND', 'VISUAL']);
-            
-            const modal = new bootstrap.Modal(document.getElementById('analysisProgressModal'));
-            modal.show();
-            
-            animateProgress(() => {
-                window.location.href = '@Url.Action("AnalyzeTrends")?id=' + questionnaireId;
-            });
-        }
-
-        // Updated main analysis function to use the new pipeline system
-        function startAnalysisWithProgress(questionnaireId, title) {
-            document.getElementById('progressSubtitle').textContent = `Processing "${title}"`;
-            document.getElementById('progressTitle').textContent = 'PROCESSING QUESTIONNAIRE DATA';
-            
-            // Update pipeline for main analysis
-            updatePipelineSteps(['INIT', 'PARSE', 'ANALYZE', 'ASSESS', 'REPORT']);
-            
-            const modal = new bootstrap.Modal(document.getElementById('analysisProgressModal'));
-            modal.show();
-            
-            animateProgress(() => {
-                window.location.href = '@Url.Action("AnalyzeQuestionnaire")?id=' + questionnaireId;
-            });
-        }
-
-        // Helper function to update pipeline steps
-        function updatePipelineSteps(stepLabels) {
-            const pipeline = document.querySelector('.progress-pipeline');
-            let pipelineHTML = '';
-            
-            stepLabels.forEach((label, index) => {
-                const isFirst = index === 0;
-                
-                pipelineHTML += `
-                    <div class="pipeline-step ${isFirst ? 'completed' : ''}">
-                        <div class="step-marker"></div>
-                        <div class="step-label">${label}</div>
-                    </div>
-                `;
-                
-                // Add connector except for last step
-                if (index < stepLabels.length - 1) {
-                    pipelineHTML += '<div class="pipeline-connector"></div>';
-                }
-            });
-            
-            pipeline.innerHTML = pipelineHTML;
-        }
-
-        // Reusable progress animation function
-        function animateProgress(onComplete) {
-            let progress = 0;
-            const progressFill = document.querySelector('.progress-fill-nexgen');
-            const progressPercent = document.querySelector('.progress-percent');
-            const steps = document.querySelectorAll('.pipeline-step');
-            
-            const interval = setInterval(() => {
-                progress += Math.random() * 12 + 3;
-                if (progress > 95) progress = 95;
-                
-                progressFill.style.width = progress + '%';
-                progressPercent.textContent = Math.round(progress) + '%';
-                
-                // Update pipeline
-                const currentStep = Math.floor(progress / 20);
-                steps.forEach((step, index) => {
-                    step.classList.remove('active', 'completed');
-                    if (index < currentStep) {
-                        step.classList.add('completed');
-                    } else if (index === currentStep) {
-                        step.classList.add('active');
-                    }
-                });
-                
-                if (progress >= 95) {
-                    clearInterval(interval);
-                    
-                    setTimeout(() => {
-                        progressFill.style.width = '100%';
-                        progressPercent.textContent = '100%';
-                        
-                        steps.forEach(step => {
-                            step.classList.remove('active');
-                            step.classList.add('completed');
-                        });
-                        
-                        setTimeout(() => {
-                            onComplete();
-                        }, 800);
-                    }, 300);
+        function animateProgress(onDone) {
+            var p = 0, fill = document.querySelector('.prog-fill'), pct = document.querySelector('.prog-pct'), steps = document.querySelectorAll('.pipe-step');
+            var iv = setInterval(function() {
+                p += Math.random() * 12 + 3;
+                if (p > 95) p = 95;
+                fill.style.width = p + '%'; pct.textContent = Math.round(p) + '%';
+                var cur = Math.floor(p / 20);
+                steps.forEach(function(s, i) { s.classList.remove('active', 'done'); if (i < cur) s.classList.add('done'); else if (i === cur) s.classList.add('active'); });
+                if (p >= 95) {
+                    clearInterval(iv);
+                    setTimeout(function() { fill.style.width = '100%'; pct.textContent = '100%'; steps.forEach(function(s) { s.classList.remove('active'); s.classList.add('done'); }); setTimeout(onDone, 700); }, 300);
                 }
             }, 150);
         }
 
-        function testAIServices() {
-            const modal = new bootstrap.Modal(document.getElementById('aiServicesModal'), {
-                backdrop: true,
-                keyboard: true,
-                focus: true
-            });
+        function showAIStatus() {
+            var modal = new bootstrap.Modal(document.getElementById('aiStatusModal'));
             modal.show();
-            
-            $.get('@Url.Action("ServiceHealth")')
-                .done(function(data) {
-                    if (data.success && data.services) {
-                        let content = '<div class="services-matrix">';
-                        
-                        const langService = data.services['AzureLanguageService'] || false;
-                        const openaiService = data.services['AzureOpenAI'] || false;
-                        
-                        content += createNexGenServiceCard('LANGUAGE ENGINE', 'Sentiment & linguistic analysis', langService, 'fa-language');
-                        content += createNexGenServiceCard('NEURAL NETWORK', 'AI-powered risk detection', openaiService, 'fa-brain');
-                        
-                        content += '</div>';
-                        
-                        const allOnline = langService && openaiService;
-                        const systemStatusIcon = allOnline ? 'fa-check-circle' : 'fa-exclamation-triangle';
-                        const systemStatusColor = allOnline ? '#34d399' : '#fbbf24';
-                        
-                        content += `
-                            <div class="system-status ${allOnline ? 'operational' : 'degraded'}">
-                                <div class="status-indicator">
-                                    <div class="indicator-ring"></div>
-                                    <i class="fas ${systemStatusIcon}" style="color: ${systemStatusColor};"></i>
-                                </div>
-                                <div class="status-info">
-                                    <div class="status-title">
-                                        <i class="fas ${systemStatusIcon}" style="color: ${systemStatusColor}; margin-right: 0.5rem;"></i>
-                                        ${allOnline ? 'ALL SYSTEMS OPERATIONAL' : 'SYSTEM DEGRADED'}
-                                    </div>
-                                    <div class="status-message">${data.message}</div>
-                                </div>
-                            </div>
-                        `;
-                        
-                        document.getElementById('servicesStatusContent').innerHTML = content;
-                    } else {
-                        document.getElementById('servicesStatusContent').innerHTML = `
-                            <div class="error-nexgen">
-                                <div class="error-visual">
-                                    <i class="fas fa-times-circle" style="color: #f87171; font-size: 2rem;"></i>
-                                </div>
-                                <div class="error-info">
-                                    <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                        <i class="fas fa-times-circle" style="color: #f87171;"></i>
-                                        <h5>DIAGNOSTIC FAILED</h5>
-                                    </div>
-                                    <p>${data.error || 'Unable to verify system status'}</p>
-                                </div>
-                            </div>
-                        `;
-                    }
-                })
-                .fail(function() {
-                    document.getElementById('servicesStatusContent').innerHTML = `
-                        <div class="error-nexgen">
-                            <div class="error-visual">
-                                <i class="fas fa-wifi-slash" style="color: #f87171; font-size: 2rem;"></i>
-                            </div>
-                            <div class="error-info">
-                                <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                    <i class="fas fa-times-circle" style="color: #f87171;"></i>
-                                    <h5>CONNECTION TIMEOUT</h5>
-                                </div>
-                                <p>Unable to reach diagnostic endpoint</p>
-                            </div>
-                        </div>
-                    `;
-                });
+            $.get(actionUrls.health).done(function(data) {
+                if (data.success && data.services) {
+                    var online = true; for (var k in data.services) { if (!data.services[k]) online = false; }
+                    var html = '<div class="svc-detail ' + (online ? 'online' : 'offline') + '"><div class="svc-top"><div class="svc-icon"><i class="fa-solid fa-sparkles"></i></div><div class="svc-status"><i class="fa-solid ' + (online ? 'fa-circle-check' : 'fa-circle-xmark') + '"></i> ' + (online ? 'ACTIVE' : 'OFFLINE') + '</div></div><h6>CLAUDE AI ENGINE</h6><p>Unified intelligence — sentiment, risk assessment, insights & anonymization</p><div class="svc-caps"><span class="svc-cap"><i class="fa-solid fa-heart-pulse"></i> Sentiment</span><span class="svc-cap"><i class="fa-solid fa-shield-halved"></i> Risk</span><span class="svc-cap"><i class="fa-solid fa-key"></i> Key Phrases</span><span class="svc-cap"><i class="fa-solid fa-user-shield"></i> PII Removal</span><span class="svc-cap"><i class="fa-solid fa-lightbulb"></i> Insights</span><span class="svc-cap"><i class="fa-solid fa-tags"></i> Categories</span></div></div>';
+                    html += '<div class="sys-status ' + (online ? 'ok' : 'bad') + '"><div class="sys-dot"><i class="fa-solid ' + (online ? 'fa-circle-check' : 'fa-triangle-exclamation') + '"></i></div><div><div class="sys-title">' + (online ? 'ALL SYSTEMS OPERATIONAL' : 'SERVICE DEGRADED') + '</div><div class="sys-msg">' + (data.message || '') + '</div></div></div>';
+                    document.getElementById('statusContent').innerHTML = html;
+                } else { document.getElementById('statusContent').innerHTML = '<div class="error-nex"><div class="error-vis"><i class="fa-solid fa-circle-xmark"></i></div><h5>DIAGNOSTIC FAILED</h5><p>' + (data.error || 'Unable to verify') + '</p></div>'; }
+            }).fail(function() { document.getElementById('statusContent').innerHTML = '<div class="error-nex"><div class="error-vis"><i class="fa-solid fa-wifi-exclamation"></i></div><h5>CONNECTION TIMEOUT</h5><p>Unable to reach diagnostic endpoint</p></div>'; });
         }
 
-       function createNexGenServiceCard(name, description, isOnline, icon) {
-            const statusClass = isOnline ? 'online' : 'offline';
-            const statusText = isOnline ? 'ACTIVE' : 'OFFLINE';
-            const statusIcon = isOnline ? 'fa-check-circle' : 'fa-times-circle';
-            const statusIconColor = isOnline ? '#34d399' : '#f87171';
-            
-            return `
-                <div class="service-nexgen ${statusClass}">
-                    <div class="service-border"></div>
-                    <div class="service-content">
-                        <div class="service-header">
-                            <div class="service-icon-nexgen">
-                                <i class="fas ${icon}"></i>
-                            </div>
-                            <div class="service-status-nexgen">
-                                <div class="status-icon-wrapper">
-                                    <i class="fas ${statusIcon}" style="color: ${statusIconColor}; font-size: 1.2rem;"></i>
-                                </div>
-                                <span>${statusText}</span>
-                            </div>
-                        </div>
-                        <div class="service-details">
-                            <h6>${name}</h6>
-                            <p>${description}</p>
-                        </div>
-                    </div>
-                </div>
-            `;
+        function runTest() {
+            var text = document.getElementById('sampleText').value.trim();
+            if (!text) { Swal.fire({ title: 'INPUT REQUIRED', text: 'Please enter sample text for analysis', icon: 'warning', customClass: { popup: 'swal-nex', title: 'swal-t-nex', confirmButton: 'swal-btn-nex' } }); return false; }
+            var resDiv = document.getElementById('testResults'), content = document.getElementById('testResultsContent');
+            content.innerHTML = '<div style="text-align:center;padding:1.5rem"><div class="scanner"><div class="scanner-line"></div></div><h6 style="font-family:var(--font-mono);font-size:.8rem;color:#fff;margin-bottom:.3rem">NEURAL PROCESSING</h6><p style="font-size:.72rem;color:var(--dark-300)">Analyzing with Claude AI...</p></div>';
+            resDiv.classList.remove('d-none');
+            $.post(actionUrls.test, { sampleText: text }).done(function(data) {
+                if (data.success) { content.innerHTML = buildResults(data); } else { content.innerHTML = '<div class="error-nex"><div class="error-vis"><i class="fa-solid fa-triangle-exclamation"></i></div><h5>ANALYSIS FAILED</h5><p>' + data.message + '</p></div>'; }
+            }).fail(function() { content.innerHTML = '<div class="error-nex"><div class="error-vis"><i class="fa-solid fa-circle-xmark"></i></div><h5>CONNECTION ERROR</h5><p>Claude AI unreachable</p></div>'; });
+            return false;
         }
 
-        // Enhanced Test Analysis with proper event handling
-        function performTestAnalysis() {
-            const sampleText = document.getElementById('sampleText').value.trim();
-            
-            if (!sampleText) {
-                Swal.fire({
-                    title: 'INPUT REQUIRED',
-                    text: 'Please enter sample text for analysis',
-                    icon: 'warning',
-                    confirmButtonClass: 'swal-btn-nexgen',
-                    customClass: {
-                        popup: 'swal-nexgen',
-                        title: 'swal-title-nexgen'
-                    }
-                });
-                return false; // Prevent form submission
-            }
-
-            const resultsDiv = document.getElementById('testResults');
-            const contentDiv = document.getElementById('testResultsContent');
-            
-            contentDiv.innerHTML = `
-                <div class="analysis-loading-nexgen">
-                    <div class="loading-scanner">
-                        <div class="scanner-line"></div>
-                    </div>
-                    <div class="loading-info">
-                        <h6>NEURAL PROCESSING</h6>
-                        <p>Analyzing semantic patterns...</p>
-                    </div>
-                </div>
-            `;
-            resultsDiv.classList.remove('d-none');
-
-            $.post('@Url.Action("TestAnalysis")', { sampleText: sampleText })
-                .done(function(data) {
-                    if (data.success) {
-                        contentDiv.innerHTML = createNexGenResults(data);
-                    } else {
-                        contentDiv.innerHTML = `
-                            <div class="error-nexgen">
-                                <div class="error-visual">
-                                    <i class="fas fa-exclamation-triangle"></i>
-                                </div>
-                                <div class="error-info">
-                                    <h5>ANALYSIS FAILED</h5>
-                                    <p>${data.message}</p>
-                                </div>
-                            </div>
-                        `;
-                    }
-                })
-                .fail(function() {
-                    contentDiv.innerHTML = `
-                        <div class="error-nexgen">
-                            <div class="error-visual">
-                                <i class="fas fa-times-circle"></i>
-                            </div>
-                            <div class="error-info">
-                                <h5>CONNECTION ERROR</h5>
-                                <p>Neural network unreachable</p>
-                            </div>
-                        </div>
-                    `;
-                });
-            
-            return false; // Prevent form submission
+        function buildResults(data) {
+            var sentClass = { positive: 'positive', negative: 'negative', neutral: 'neutral' }[data.sentiment?.toLowerCase()] || 'unknown';
+            var riskClass = { low: 'low', moderate: 'moderate', high: 'high', critical: 'critical' }[data.riskLevel?.toLowerCase()] || 'unknown';
+            var html = '<div class="res-grid"><div class="res-card sent"><div class="res-card-head"><div class="res-card-icon"><i class="fa-solid fa-heart-pulse"></i></div><div class="res-card-title">SENTIMENT</div></div><div style="text-align:center"><span class="val-chip ' + sentClass + '">' + (data.sentiment || 'UNKNOWN') + '</span></div></div>';
+            html += '<div class="res-card risk"><div class="res-card-head"><div class="res-card-icon"><i class="fa-solid fa-shield-halved"></i></div><div class="res-card-title">RISK LEVEL</div></div><div style="text-align:center"><span class="val-chip ' + riskClass + '">' + (data.riskLevel || 'UNKNOWN') + '</span></div></div></div>';
+            html += '<div class="insight-panel"><div class="insight-head"><i class="fa-solid fa-key"></i> KEY PHRASES DETECTED</div><div class="tags">';
+            if (data.keyPhrases && data.keyPhrases.length > 0) { data.keyPhrases.forEach(function(p) { html += '<span class="tag phrase">' + p + '</span>'; }); } else { html += '<span class="no-data">No phrases detected</span>'; }
+            html += '</div></div><div class="insight-panel"><div class="insight-head"><i class="fa-solid fa-tags"></i> CATEGORY CLASSIFICATION</div><div class="tags">';
+            if (data.insights && data.insights.length > 0) { data.insights.forEach(function(c) { html += '<span class="tag cat">' + c + '</span>'; }); } else { html += '<span class="no-data">No categories identified</span>'; }
+            html += '</div></div>'; return html;
         }
 
-        function createNexGenResults(data) {
-            return `
-                <div class="results-nexgen">
-                    <div class="results-matrix">
-                        <div class="result-nexgen sentiment">
-                            <div class="result-header-nexgen">
-                                <div class="result-icon-nexgen">
-                                    <i class="fas fa-heart-pulse"></i>
-                                </div>
-                                <div class="result-title">SENTIMENT</div>
-                            </div>
-                            <div class="result-value-nexgen">
-                                <div class="value-chip ${getSentimentClass(data.sentiment)}">${data.sentiment || 'UNKNOWN'}</div>
-                            </div>
-                        </div>
-                        
-                        <div class="result-nexgen risk">
-                            <div class="result-header-nexgen">
-                                <div class="result-icon-nexgen">
-                                    <i class="fas fa-shield-virus"></i>
-                                </div>
-                                <div class="result-title">RISK LEVEL</div>
-                            </div>
-                            <div class="result-value-nexgen">
-                                <div class="value-chip ${getRiskClass(data.riskLevel)}">${data.riskLevel || 'UNKNOWN'}</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="insights-nexgen">
-                        <div class="insight-panel">
-                            <div class="panel-header-nexgen">
-                                <i class="fas fa-key"></i>
-                                <span>KEY PHRASES DETECTED</span>
-                            </div>
-                            <div class="tags-container">
-                                ${data.keyPhrases && data.keyPhrases.length > 0 ? 
-                                    data.keyPhrases.map(phrase => 
-                                        `<div class="tag-nexgen phrase">${phrase}</div>`
-                                    ).join('') : 
-                                    '<div class="no-data-nexgen">No phrases detected</div>'}
-                            </div>
-                        </div>
-                        
-                        <div class="insight-panel">
-                            <div class="panel-header-nexgen">
-                                <i class="fas fa-tags"></i>
-                                <span>CATEGORY CLASSIFICATION</span>
-                            </div>
-                            <div class="tags-container">
-                                ${data.insights && data.insights.length > 0 ? 
-                                    data.insights.map(category => 
-                                        `<div class="tag-nexgen category">${category}</div>`
-                                    ).join('') : 
-                                    '<div class="no-data-nexgen">No categories identified</div>'}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
+        var ss = document.createElement('style');
+        ss.textContent = '.swal-nex{background:rgba(15,23,42,.95)!important;backdrop-filter:blur(20px)!important;border:1px solid rgba(129,140,248,.2)!important;border-radius:1rem!important;color:#e2e8f0!important}.swal-t-nex{color:#818cf8!important;font-weight:700!important;letter-spacing:.05em!important}.swal-btn-nex{background:linear-gradient(135deg,#818cf8,#6366f1)!important;border:none!important;border-radius:.5rem!important;padding:.75rem 1.5rem!important;font-weight:600!important;letter-spacing:.025em!important}';
+        document.head.appendChild(ss);
 
-        function getSentimentClass(sentiment) {
-            switch(sentiment?.toLowerCase()) {
-                case 'positive': return 'positive';
-                case 'negative': return 'negative';
-                case 'neutral': return 'neutral';
-                default: return 'unknown';
-            }
-        }
+        // ===== SEARCH FILTERING =====
+        function filterCards() {
+            var query = document.getElementById('searchInput').value.toLowerCase().trim();
+            var cards = document.querySelectorAll('.s-card');
+            var clearBtn = document.getElementById('clearSearch');
+            var countEl = document.getElementById('searchCount');
+            var visible = 0;
 
-        function getRiskClass(riskLevel) {
-            switch(riskLevel?.toLowerCase()) {
-                case 'low': return 'low';
-                case 'moderate': return 'moderate';
-                case 'high': return 'high';
-                case 'critical': return 'critical';
-                default: return 'unknown';
-            }
-        }
+            clearBtn.style.display = query.length > 0 ? 'flex' : 'none';
+            clearBtn.style.alignItems = 'center';
+            clearBtn.style.justifyContent = 'center';
 
-        // Custom SweetAlert styling
-        const swalStyle = document.createElement('style');
-        swalStyle.textContent = `
-            .swal-nexgen {
-                background: rgba(15, 23, 42, 0.95) !important;
-                backdrop-filter: blur(20px) !important;
-                border: 1px solid rgba(59, 130, 246, 0.3) !important;
-                border-radius: 1rem !important;
-                color: #e2e8f0 !important;
-            }
-            .swal-title-nexgen {
-                color: #60a5fa !important;
-                font-weight: 700 !important;
-                letter-spacing: 0.05em !important;
-            }
-            .swal-btn-nexgen {
-                background: linear-gradient(135deg, #3b82f6, #1d4ed8) !important;
-                border: none !important;
-                border-radius: 0.5rem !important;
-                padding: 0.75rem 1.5rem !important;
-                font-weight: 600 !important;
-                text-transform: uppercase !important;
-                letter-spacing: 0.025em !important;
-            }
-        `;
-        document.head.appendChild(swalStyle);
+            cards.forEach(function(card) {
+                var name = card.getAttribute('data-username') || '';
+                var email = card.getAttribute('data-email') || '';
+                var title = card.getAttribute('data-title') || '';
+                var match = !query || name.indexOf(query) > -1 || email.indexOf(query) > -1 || title.indexOf(query) > -1;
 
-        // Animate elements on scroll
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('animate-in');
-                }
+                card.style.display = match ? '' : 'none';
+                if (match) visible++;
             });
-        }, observerOptions);
 
-        // NEW: Fix modal click issues
+            if (query.length > 0) {
+                countEl.style.display = 'block';
+                countEl.textContent = visible + ' OF ' + cards.length + ' RESPONSES FOUND';
+            } else {
+                countEl.style.display = 'none';
+            }
+
+            // Show/hide empty state
+            var emptyState = document.querySelector('.empty-state');
+            if (emptyState && cards.length > 0) {
+                // Don't touch the empty state if there are cards
+            }
+        }
+
+        document.getElementById('searchInput').addEventListener('input', filterCards);
+
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize scroll observer for cards
-            document.querySelectorAll('.survey-card').forEach(card => {
-                observer.observe(card);
-            });
-
-            // Prevent modal from closing when clicking inside modal content
-            const modalContents = document.querySelectorAll('.modal-nexgen');
-            modalContents.forEach(function(modalContent) {
-                modalContent.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                });
-            });
-
-            // Prevent modal from closing when clicking on form elements
-            const formElements = document.querySelectorAll('.modal input, .modal textarea, .modal button, .modal select');
-            formElements.forEach(function(element) {
-                element.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                });
-            });
-
-            // Fix Bootstrap modal backdrop issues
-            const modals = document.querySelectorAll('.modal');
-            modals.forEach(function(modal) {
-                modal.addEventListener('show.bs.modal', function() {
-                    document.body.style.paddingRight = '';
-                });
-                
-                modal.addEventListener('hidden.bs.modal', function() {
-                    document.body.style.paddingRight = '';
-                });
-            });
-
-            // Additional event prevention for specific modal elements
-            document.querySelectorAll('.modal-nexgen, .modal-body-nexgen, .modal-header-nexgen, .modal-footer-nexgen').forEach(function(element) {
-                element.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                });
-            });
+            var obs = new IntersectionObserver(function(entries) { entries.forEach(function(e) { if (e.isIntersecting) e.target.classList.add('in'); }); }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+            document.querySelectorAll('.s-card').forEach(function(c) { obs.observe(c); });
+            document.querySelectorAll('.m-nex').forEach(function(m) { m.addEventListener('click', function(e) { e.stopPropagation(); }); });
         });
     </script>
 }

@@ -7,7 +7,7 @@ using Web.ViewModel.SocialMediaVM;
 namespace Web.Areas.Admin.Controllers
 {
 
-   
+    [Area("Admin")]
     public class SocialMediaController : Controller
     {
         private readonly ISocialMediaRepository _context;

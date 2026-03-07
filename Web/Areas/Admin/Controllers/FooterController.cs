@@ -16,7 +16,7 @@ namespace Web.Areas.Admin.Controllers
 {
 
 
-    
+    [Area("Admin")]
     public class FooterController : Controller
     {
         private readonly IFooterRepository _footer;

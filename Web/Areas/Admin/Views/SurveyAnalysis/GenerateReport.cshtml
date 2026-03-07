@@ -1,908 +1,417 @@
 ﻿@* Views/Admin/SurveyAnalysis/GenerateReport.cshtml *@
 
 @{
-    ViewData["Title"] = $"Analysis Report - {ViewBag.QuestionnaireName}";
- 
-}
-
-<div class="container-fluid">
-    <!-- Header Section -->
-    <div class="row mb-4 d-print-none">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <nav aria-label="breadcrumb">
-                        <ol class="breadcrumb">
-                            <li class="breadcrumb-item">
-                                <a href="@Url.Action("Index")">
-                                    <i class="fas fa-brain"></i> Analysis Dashboard
-                                </a>
-                            </li>
-                            <li class="breadcrumb-item">
-                                <a href="@Url.Action("AnalyzeQuestionnaire", new { id = ViewBag.QuestionnaireId })">
-                                    @ViewBag.QuestionnaireName
-                                </a>
-                            </li>
-                            <li class="breadcrumb-item active">Analysis Report</li>
-                        </ol>
-                    </nav>
-                    <h1 class="h3 mb-1">
-                        <i class="fas fa-file-medical text-primary me-2"></i>
-                        Mental Health Analysis Report
-                    </h1>
-                    <p class="text-muted mb-0">Comprehensive workplace mental health assessment for client presentation</p>
-                </div>
-                <div class="text-end">
-                    <div class="btn-group" role="group">
-                        <button type="button" class="btn btn-primary btn-sm" onclick="window.print()">
-                            <i class="fas fa-print"></i> Print Report
-                        </button>
-                        <button type="button" class="btn btn-success btn-sm" onclick="downloadPDF()">
-                            <i class="fas fa-file-pdf"></i> Download PDF
-                        </button>
-                        <a href="@Url.Action("DownloadReport", new { id = ViewBag.QuestionnaireId })"
-                           class="btn btn-outline-info btn-sm">
-                            <i class="fas fa-download"></i> Download Text
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Report Content -->
-    <div id="reportContent" class="report-container">
-        <!-- Report Header -->
-        <div class="row mb-5">
-            <div class="col-12">
-                <div class="report-header text-center">
-                    <div class="company-logo mb-3">
-                        <h2 class="text-primary mb-0">
-                            <i class="fas fa-user-md me-2"></i>
-                            NVKN Nærværskonsulenterne
-                        </h2>
-                        <p class="text-muted mb-0">Mental Health Consultancy - Workplace Wellness Specialists</p>
-                    </div>
-
-                    <hr class="my-4">
-
-                    <h1 class="report-title mb-3">
-                        Workplace Mental Health Analysis Report
-                    </h1>
-                    <h3 class="text-muted mb-4">@ViewBag.QuestionnaireName</h3>
-
-                    <div class="report-meta">
-                        <div class="row justify-content-center">
-                            <div class="col-md-8">
-                                <table class="table table-borderless">
-                                    <tr>
-                                        <td class="text-end"><strong>Report Date:</strong></td>
-                                        <td>@ViewBag.GeneratedDate.ToString("MMMM dd, yyyy")</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="text-end"><strong>Analysis Period:</strong></td>
-                                        <td>@DateTime.Now.AddMonths(-1).ToString("MMM yyyy") - @DateTime.Now.ToString("MMM yyyy")</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="text-end"><strong>Consultant:</strong></td>
-                                        <td>NVKN Mental Health Professional</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="text-end"><strong>Report Type:</strong></td>
-                                        <td>AI-Powered Mental Health Assessment</td>
-                                    </tr>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Executive Summary Section -->
-        <div class="row mb-5">
-            <div class="col-12">
-                <div class="report-section">
-                    <h2 class="section-title">
-                        <i class="fas fa-clipboard-list me-2 text-primary"></i>
-                        Executive Summary
-                    </h2>
-                    <div class="content-box">
-                        @if (!string.IsNullOrEmpty(ViewBag.Report))
-                        {
-                            <div class="executive-summary">
-                                @Html.Raw(((string)ViewBag.Report).Replace("\n", "<br />"))
-                            </div>
-                        }
-                        else
-                        {
-                            <div class="executive-summary">
-                                <p class="lead">
-                                    This comprehensive mental health analysis was conducted using advanced AI technology
-                                    to assess workplace mental wellness, identify risk factors, and provide targeted
-                                    intervention recommendations for optimal employee wellbeing.
-                                </p>
-
-                                <h4>Key Findings:</h4>
-                                <ul>
-                                    <li>Overall workplace mental health score indicates a <strong>positive environment</strong> with targeted areas for improvement</li>
-                                    <li>AI analysis identified specific <strong>intervention opportunities</strong> to enhance employee wellbeing</li>
-                                    <li>Risk assessment protocols successfully flagged cases requiring <strong>immediate professional attention</strong></li>
-                                    <li>Data-driven insights provide <strong>actionable recommendations</strong> for management implementation</li>
-                                </ul>
-
-                                <h4>Recommendations:</h4>
-                                <p>
-                                    Based on AI analysis of employee responses, NVKN recommends implementing targeted
-                                    mental health interventions focusing on stress management, work-life balance, and
-                                    enhanced management support systems.
-                                </p>
-                            </div>
-                        }
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Key Metrics Section -->
-        <div class="row mb-5">
-            <div class="col-12">
-                <div class="report-section">
-                    <h2 class="section-title">
-                        <i class="fas fa-chart-bar me-2 text-primary"></i>
-                        Key Mental Health Metrics
-                    </h2>
-                    <div class="content-box">
-                        <div class="row text-center">
-                            <div class="col-md-3 mb-4">
-                                <div class="metric-card">
-                                    <div class="metric-icon text-primary mb-2">
-                                        <i class="fas fa-users fa-2x"></i>
-                                    </div>
-                                    <h3 class="metric-value">247</h3>
-                                    <p class="metric-label">Total Participants</p>
-                                    <small class="text-muted">Response Rate: 94%</small>
-                                </div>
-                            </div>
-                            <div class="col-md-3 mb-4">
-                                <div class="metric-card">
-                                    <div class="metric-icon text-success mb-2">
-                                        <i class="fas fa-heart fa-2x"></i>
-                                    </div>
-                                    <h3 class="metric-value">78%</h3>
-                                    <p class="metric-label">Mental Health Score</p>
-                                    <small class="text-success">+15% from baseline</small>
-                                </div>
-                            </div>
-                            <div class="col-md-3 mb-4">
-                                <div class="metric-card">
-                                    <div class="metric-icon text-warning mb-2">
-                                        <i class="fas fa-shield-alt fa-2x"></i>
-                                    </div>
-                                    <h3 class="metric-value">8</h3>
-                                    <p class="metric-label">High Risk Cases</p>
-                                    <small class="text-warning">Requiring attention</small>
-                                </div>
-                            </div>
-                            <div class="col-md-3 mb-4">
-                                <div class="metric-card">
-                                    <div class="metric-icon text-info mb-2">
-                                        <i class="fas fa-smile fa-2x"></i>
-                                    </div>
-                                    <h3 class="metric-value">67%</h3>
-                                    <p class="metric-label">Positive Sentiment</p>
-                                    <small class="text-info">Employee satisfaction</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Risk Assessment Section -->
-        <div class="row mb-5">
-            <div class="col-md-6">
-                <div class="report-section">
-                    <h3 class="section-subtitle">
-                        <i class="fas fa-shield-alt me-2 text-primary"></i>
-                        Risk Distribution Analysis
-                    </h3>
-                    <div class="content-box">
-                        <div class="risk-distribution">
-                            <div class="risk-item mb-3">
-                                <div class="d-flex justify-content-between align-items-center mb-1">
-                                    <span class="d-flex align-items-center">
-                                        <span class="risk-indicator bg-success me-2"></span>
-                                        <strong>Low Risk</strong>
-                                    </span>
-                                    <span class="fw-bold">156 employees (63%)</span>
-                                </div>
-                                <div class="progress" style="height: 12px;">
-                                    <div class="progress-bar bg-success" style="width: 63%"></div>
-                                </div>
-                            </div>
-
-                            <div class="risk-item mb-3">
-                                <div class="d-flex justify-content-between align-items-center mb-1">
-                                    <span class="d-flex align-items-center">
-                                        <span class="risk-indicator bg-warning me-2"></span>
-                                        <strong>Moderate Risk</strong>
-                                    </span>
-                                    <span class="fw-bold">75 employees (30%)</span>
-                                </div>
-                                <div class="progress" style="height: 12px;">
-                                    <div class="progress-bar bg-warning" style="width: 30%"></div>
-                                </div>
-                            </div>
-
-                            <div class="risk-item mb-3">
-                                <div class="d-flex justify-content-between align-items-center mb-1">
-                                    <span class="d-flex align-items-center">
-                                        <span class="risk-indicator bg-danger me-2"></span>
-                                        <strong>High Risk</strong>
-                                    </span>
-                                    <span class="fw-bold">14 employees (6%)</span>
-                                </div>
-                                <div class="progress" style="height: 12px;">
-                                    <div class="progress-bar bg-danger" style="width: 6%"></div>
-                                </div>
-                            </div>
-
-                            <div class="risk-item">
-                                <div class="d-flex justify-content-between align-items-center mb-1">
-                                    <span class="d-flex align-items-center">
-                                        <span class="risk-indicator bg-dark me-2"></span>
-                                        <strong>Critical Risk</strong>
-                                    </span>
-                                    <span class="fw-bold">2 employees (1%)</span>
-                                </div>
-                                <div class="progress" style="height: 12px;">
-                                    <div class="progress-bar bg-dark" style="width: 1%"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-6">
-                <div class="report-section">
-                    <h3 class="section-subtitle">
-                        <i class="fas fa-heart me-2 text-primary"></i>
-                        Sentiment Analysis Overview
-                    </h3>
-                    <div class="content-box">
-                        <div class="sentiment-summary">
-                            <div class="sentiment-stat mb-3">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="d-flex align-items-center">
-                                        <i class="fas fa-smile text-success me-2"></i>
-                                        <strong>Positive Responses</strong>
-                                    </span>
-                                    <span class="fw-bold text-success">67.2%</span>
-                                </div>
-                                <small class="text-muted">Employees expressing satisfaction and positive mental health</small>
-                            </div>
-
-                            <div class="sentiment-stat mb-3">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="d-flex align-items-center">
-                                        <i class="fas fa-meh text-secondary me-2"></i>
-                                        <strong>Neutral Responses</strong>
-                                    </span>
-                                    <span class="fw-bold text-secondary">21.8%</span>
-                                </div>
-                                <small class="text-muted">Balanced emotional state with room for improvement</small>
-                            </div>
-
-                            <div class="sentiment-stat">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="d-flex align-items-center">
-                                        <i class="fas fa-frown text-danger me-2"></i>
-                                        <strong>Negative Responses</strong>
-                                    </span>
-                                    <span class="fw-bold text-danger">11.0%</span>
-                                </div>
-                                <small class="text-muted">Employees experiencing stress, anxiety, or dissatisfaction</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Priority Interventions Section -->
-        <div class="row mb-5">
-            <div class="col-12">
-                <div class="report-section">
-                    <h2 class="section-title">
-                        <i class="fas fa-user-md me-2 text-primary"></i>
-                        NVKN Recommended Interventions
-                    </h2>
-                    <div class="content-box">
-                        <p class="lead mb-4">
-                            Based on AI analysis of employee responses, NVKN recommends the following evidence-based
-                            interventions to enhance workplace mental health and employee wellbeing.
-                        </p>
-
-                        <div class="intervention-priority mb-4">
-                            <h4 class="text-danger mb-3">
-                                <i class="fas fa-exclamation-triangle me-2"></i>
-                                Priority 1: Immediate Actions (0-2 weeks)
-                            </h4>
-                            <div class="intervention-item">
-                                <h6>Mental Health Crisis Support</h6>
-                                <p>
-                                    Immediate professional intervention for 16 employees identified as high or critical risk.
-                                    NVKN will provide confidential support sessions and crisis management protocols.
-                                </p>
-                                <div class="d-flex gap-2 mb-2">
-                                    <span class="badge bg-danger">Critical Priority</span>
-                                    <span class="badge bg-outline-secondary">16 Employees</span>
-                                    <span class="badge bg-outline-info">Confidential Process</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="intervention-priority mb-4">
-                            <h4 class="text-warning mb-3">
-                                <i class="fas fa-clock me-2"></i>
-                                Priority 2: Short-term Initiatives (2-8 weeks)
-                            </h4>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="intervention-item">
-                                        <h6>Stress Management Workshop Series</h6>
-                                        <p>Comprehensive stress reduction training targeting workload management and coping strategies.</p>
-                                        <span class="badge bg-warning text-dark">High Impact</span>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="intervention-item">
-                                        <h6>Manager Mental Health Training</h6>
-                                        <p>Leadership development focused on recognizing and supporting employee mental wellness.</p>
-                                        <span class="badge bg-primary">Management Focus</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="intervention-priority">
-                            <h4 class="text-primary mb-3">
-                                <i class="fas fa-chart-line me-2"></i>
-                                Priority 3: Long-term Strategy (2-6 months)
-                            </h4>
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <div class="intervention-item">
-                                        <h6>Workplace Culture Enhancement</h6>
-                                        <p>Systematic improvement of organizational culture and communication patterns.</p>
-                                        <span class="badge bg-info">Strategic</span>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="intervention-item">
-                                        <h6>Preventive Mental Health Program</h6>
-                                        <p>Ongoing mental wellness monitoring and early intervention systems.</p>
-                                        <span class="badge bg-success">Preventive</span>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="intervention-item">
-                                        <h6>Career Development Clarity</h6>
-                                        <p>Enhanced career path communication and professional growth opportunities.</p>
-                                        <span class="badge bg-secondary">Development</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Detailed Findings Section -->
-        <div class="row mb-5">
-            <div class="col-md-6">
-                <div class="report-section">
-                    <h3 class="section-subtitle">
-                        <i class="fas fa-search me-2 text-primary"></i>
-                        Detailed Analysis Findings
-                    </h3>
-                    <div class="content-box">
-                        <div class="finding-item mb-3">
-                            <h6 class="text-success">
-                                <i class="fas fa-check-circle me-2"></i>Positive Indicators
-                            </h6>
-                            <ul class="small">
-                                <li>Strong team collaboration reported by 78% of employees</li>
-                                <li>High job satisfaction in creative and development roles</li>
-                                <li>Effective communication with immediate supervisors</li>
-                                <li>Positive response to flexible work arrangements</li>
-                            </ul>
-                        </div>
-
-                        <div class="finding-item mb-3">
-                            <h6 class="text-warning">
-                                <i class="fas fa-exclamation-triangle me-2"></i>Areas for Improvement
-                            </h6>
-                            <ul class="small">
-                                <li>Workload distribution inconsistencies across departments</li>
-                                <li>Limited career advancement clarity</li>
-                                <li>Deadline pressure affecting work-life balance</li>
-                                <li>Insufficient mental health resource awareness</li>
-                            </ul>
-                        </div>
-
-                        <div class="finding-item">
-                            <h6 class="text-danger">
-                                <i class="fas fa-alert me-2"></i>Critical Concerns
-                            </h6>
-                            <ul class="small">
-                                <li>Sleep disruption reported by high-risk individuals</li>
-                                <li>Chronic stress indicators in specific departments</li>
-                                <li>Limited access to mental health support resources</li>
-                                <li>Management communication gaps in some teams</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-6">
-                <div class="report-section">
-                    <h3 class="section-subtitle">
-                        <i class="fas fa-lightbulb me-2 text-primary"></i>
-                        AI-Generated Insights
-                    </h3>
-                    <div class="content-box">
-                        <div class="insight-box mb-3 p-3 bg-light rounded">
-                            <h6 class="text-primary mb-2">
-                                <i class="fas fa-robot me-2"></i>Machine Learning Analysis
-                            </h6>
-                            <p class="small mb-0">
-                                Advanced natural language processing identified key themes in employee responses,
-                                revealing underlying patterns not immediately apparent through traditional analysis methods.
-                            </p>
-                        </div>
-
-                        <div class="insight-box mb-3 p-3 bg-light rounded">
-                            <h6 class="text-info mb-2">
-                                <i class="fas fa-brain me-2"></i>Predictive Risk Modeling
-                            </h6>
-                            <p class="small mb-0">
-                                AI risk assessment successfully identified 92% of employees requiring mental health
-                                intervention, enabling proactive rather than reactive mental health support.
-                            </p>
-                        </div>
-
-                        <div class="insight-box p-3 bg-light rounded">
-                            <h6 class="text-success mb-2">
-                                <i class="fas fa-target me-2"></i>Intervention Targeting
-                            </h6>
-                            <p class="small mb-0">
-                                Data analysis reveals specific workplace factors contributing to mental health outcomes,
-                                allowing for highly targeted and cost-effective intervention strategies.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Implementation Timeline -->
-        <div class="row mb-5">
-            <div class="col-12">
-                <div class="report-section">
-                    <h2 class="section-title">
-                        <i class="fas fa-calendar-alt me-2 text-primary"></i>
-                        Implementation Timeline & Next Steps
-                    </h2>
-                    <div class="content-box">
-                        <div class="timeline">
-                            <div class="timeline-item">
-                                <div class="timeline-badge bg-danger">
-                                    <i class="fas fa-exclamation"></i>
-                                </div>
-                                <div class="timeline-content">
-                                    <h6>Week 1-2: Immediate Crisis Response</h6>
-                                    <p>Contact and support high-risk employees identified by AI analysis. Implement emergency mental health protocols.</p>
-                                    <span class="badge bg-danger">Critical</span>
-                                </div>
-                            </div>
-
-                            <div class="timeline-item">
-                                <div class="timeline-badge bg-warning">
-                                    <i class="fas fa-users"></i>
-                                </div>
-                                <div class="timeline-content">
-                                    <h6>Week 3-6: Group Interventions</h6>
-                                    <p>Launch stress management workshops and manager training programs based on identified workplace factors.</p>
-                                    <span class="badge bg-warning text-dark">High Priority</span>
-                                </div>
-                            </div>
-
-                            <div class="timeline-item">
-                                <div class="timeline-badge bg-primary">
-                                    <i class="fas fa-cogs"></i>
-                                </div>
-                                <div class="timeline-content">
-                                    <h6>Month 2-3: Workplace System Changes</h6>
-                                    <p>Implement organizational changes to address systemic workplace mental health factors.</p>
-                                    <span class="badge bg-primary">Organizational</span>
-                                </div>
-                            </div>
-
-                            <div class="timeline-item">
-                                <div class="timeline-badge bg-success">
-                                    <i class="fas fa-chart-line"></i>
-                                </div>
-                                <div class="timeline-content">
-                                    <h6>Month 4-6: Monitoring & Evaluation</h6>
-                                    <p>Conduct follow-up assessments to measure intervention effectiveness and adjust strategies.</p>
-                                    <span class="badge bg-success">Evaluation</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Report Footer -->
-        <div class="row">
-            <div class="col-12">
-                <div class="report-footer text-center py-4 border-top">
-                    <div class="row">
-                        <div class="col-md-4">
-                            <h6 class="text-primary">NVKN Nærværskonsulenterne</h6>
-                            <small class="text-muted">
-                                Mental Health Consultancy<br>
-                                Workplace Wellness Specialists<br>
-                                Copenhagen, Denmark
-                            </small>
-                        </div>
-                        <div class="col-md-4">
-                            <h6 class="text-primary">Technology</h6>
-                            <small class="text-muted">
-                                Powered by Azure AI<br>
-                                Advanced Language Processing<br>
-                                Machine Learning Risk Assessment
-                            </small>
-                        </div>
-                        <div class="col-md-4">
-                            <h6 class="text-primary">Contact</h6>
-                            <small class="text-muted">
-                                Professional Mental Health Support<br>
-                                Confidential Consultation Available<br>
-                                www.nvkn.dk
-                            </small>
-                        </div>
-                    </div>
-
-                    <hr class="my-3">
-
-                    <p class="text-muted small mb-0">
-                        <i class="fas fa-shield-alt me-1"></i>
-                        This report contains confidential mental health information and should be handled in accordance with
-                        Danish data protection regulations and professional mental health standards.
-                        Generated on @ViewBag.GeneratedDate.ToString("MMMM dd, yyyy 'at' HH:mm")
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-@section Scripts {
-    <script>
-        // Download PDF functionality
-        function downloadPDF() {
-            Swal.fire({
-                title: 'Generate PDF Report',
-                text: 'This will create a comprehensive PDF report suitable for client presentations.',
-                icon: 'info',
-                showCancelButton: true,
-                confirmButtonText: 'Generate PDF',
-                cancelButtonText: 'Cancel'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Show loading
-                    Swal.fire({
-                        title: 'Generating PDF...',
-                        text: 'Please wait while we create your professional mental health report.',
-                        icon: 'info',
-                        allowOutsideClick: false,
-                        showConfirmButton: false,
-                        didOpen: () => {
-                            Swal.showLoading();
-                        }
-                    });
-
-                    // In real implementation, this would call a PDF generation service
-                    setTimeout(() => {
-                        Swal.fire('PDF Generated', 'Your mental health analysis report has been created successfully.', 'success');
-                        // window.location.href = '/path/to/generated/pdf';
-                    }, 3000);
-                }
-            });
-        }
-
-        // Print optimization
-        window.addEventListener('beforeprint', function() {
-            // Hide non-essential elements for printing
-            document.querySelectorAll('.d-print-none').forEach(el => {
-                el.style.display = 'none';
-            });
-        });
-
-        window.addEventListener('afterprint', function() {
-            // Restore elements after printing
-            document.querySelectorAll('.d-print-none').forEach(el => {
-                el.style.display = '';
-            });
-        });
-
-        // Auto-generate table of contents for long reports
-        document.addEventListener('DOMContentLoaded', function() {
-            const sections = document.querySelectorAll('.section-title, .section-subtitle');
-            if (sections.length > 3) {
-                // Could add automatic TOC generation here for very long reports
-            }
-        });
-    </script>
+    ViewData["Title"] = $"Analysis Report — {ViewBag.QuestionnaireName}";
 }
 
 @section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <style>
-        /* Print Styles */
-        @@media print {
-            .d-print-none
+        @@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
 
-        {
-            display: none !important;
+        :root{
+            --neon-blue:#60a5fa;--neon-purple:#c084fc;--neon-green:#34d399;--neon-pink:#f472b6;
+            --neon-yellow:#fbbf24;--neon-red:#f87171;--neon-cyan:#22d3ee;--neon-indigo:#818cf8;
+            --neon-teal:#33b3ae;--neon-amber:#f59e0b;--neon-orange:#fb923c;
+            --dark-900:#0f172a;--dark-800:#1e293b;--dark-700:#334155;--dark-600:#475569;
+            --dark-500:#64748b;--dark-400:#94a3b8;--dark-300:#cbd5e1;--dark-200:#e2e8f0;
+            --glass-bg:rgba(255,255,255,0.04);--glass-border:rgba(255,255,255,0.08);
+            --font-main:'Space Grotesk',sans-serif;--font-mono:'JetBrains Mono',monospace;
         }
 
-        .report-container {
-            margin: 0;
-            padding: 0;
-        }
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:var(--font-main);background:var(--dark-900);color:#e2e8f0;overflow-x:hidden}
 
-        .card, .card-body {
-            border: none !important;
-            box-shadow: none !important;
-        }
+        .nex-bg{position:fixed;inset:0;z-index:-1;overflow:hidden}
+        .nex-bg .grid{position:absolute;inset:0;background-image:linear-gradient(rgba(129,140,248,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(129,140,248,0.04) 1px,transparent 1px);background-size:60px 60px;animation:gridDrift 25s linear infinite}
+        .nex-bg .mesh{position:absolute;inset:0;background:radial-gradient(ellipse at 20% 15%,rgba(96,165,250,0.06) 0%,transparent 55%),radial-gradient(ellipse at 80% 50%,rgba(192,132,252,0.05) 0%,transparent 55%),radial-gradient(ellipse at 40% 85%,rgba(52,211,153,0.04) 0%,transparent 55%);animation:meshFloat 18s ease-in-out infinite}
 
-        .report-section {
-            page-break-inside: avoid;
-            margin-bottom: 2rem;
-        }
+        @@keyframes gridDrift{0%{transform:translate(0,0)}100%{transform:translate(60px,60px)}}
+        @@keyframes meshFloat{0%,100%{filter:hue-rotate(0deg);transform:scale(1)}50%{filter:hue-rotate(8deg);transform:scale(1.02)}}
+        @@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.15)}}
+        @@keyframes barGrow{from{width:0}to{width:var(--w)}}
 
-        .section-title {
-            page-break-after: avoid;
-        }
+        .container{max-width:1100px;margin:0 auto;padding:0 2rem}
 
-        }
+        /* ===== SCREEN HEADER (hidden on print) ===== */
+        .page-header{position:relative;z-index:10;padding:2rem 0 1.5rem;border-bottom:1px solid rgba(129,140,248,0.12)}
+        .breadcrumb-nex{display:flex;align-items:center;gap:.7rem;margin-bottom:1.8rem;font-family:var(--font-mono);font-size:.65rem;letter-spacing:.08em;flex-wrap:wrap}
+        .breadcrumb-nex a{color:var(--dark-400);text-decoration:none;display:flex;align-items:center;gap:.4rem;transition:color .2s}
+        .breadcrumb-nex a:hover{color:var(--neon-indigo)}
+        .breadcrumb-nex .sep{color:var(--dark-600);font-size:.5rem}
+        .breadcrumb-nex .current{color:var(--neon-indigo);font-weight:600}
+        .header-row{display:flex;justify-content:space-between;align-items:flex-start;gap:2rem}
+        .header-left{flex:1}
+        .header-badge{display:inline-flex;align-items:center;gap:.5rem;padding:.4rem 1rem;background:rgba(129,140,248,0.08);border:1px solid rgba(129,140,248,0.25);border-radius:50px;margin-bottom:1.5rem;font-family:var(--font-mono);font-size:.6rem;font-weight:600;letter-spacing:.1em;color:var(--neon-indigo)}
+        .header-badge .dot{width:6px;height:6px;background:var(--neon-indigo);border-radius:50%;animation:pulse 1.5s infinite}
+        .header-title{font-size:2.4rem;font-weight:700;line-height:1.1;margin-bottom:.8rem;color:#fff}
+        .header-title .grad{background:linear-gradient(135deg,var(--neon-blue),var(--neon-indigo),var(--neon-purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+        .header-sub{font-size:.92rem;color:var(--dark-300);line-height:1.6}
+        .header-actions{display:flex;flex-wrap:wrap;gap:.7rem;padding-top:.5rem}
+        .h-btn{display:flex;align-items:center;gap:.6rem;padding:.65rem 1.2rem;border-radius:10px;text-decoration:none;font-family:var(--font-mono);font-size:.68rem;font-weight:600;letter-spacing:.04em;transition:all .25s;border:1px solid;cursor:pointer;background:none}
+        .h-btn:hover{transform:translateY(-2px);text-decoration:none}
+        .h-btn.sec{background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.1);color:var(--dark-300)}.h-btn.sec:hover{background:rgba(129,140,248,0.08);border-color:rgba(129,140,248,0.25);color:var(--neon-indigo)}
+        .h-btn.indigo{background:rgba(129,140,248,0.08);border-color:rgba(129,140,248,0.25);color:var(--neon-indigo)}.h-btn.indigo:hover{background:rgba(129,140,248,0.15)}
+        .h-btn.green{background:rgba(52,211,153,0.08);border-color:rgba(52,211,153,0.25);color:var(--neon-green)}.h-btn.green:hover{background:rgba(52,211,153,0.15)}
 
-        /* Report Styling */
-        .report-container {
-            background: white;
-            padding: 2rem;
-            margin: 0 auto;
-            max-width: 1200px;
-        }
+        /* ===== CARDS ===== */
+        .nex-card{background:rgba(30,41,59,0.45);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.07);border-radius:18px;overflow:hidden;position:relative;margin-bottom:1.5rem}
+        .nex-card .top-glow{position:absolute;top:0;left:0;right:0;height:2px;opacity:0;transition:opacity .3s}
+        .nex-card:hover .top-glow{opacity:1}
+        .c-head{padding:1.5rem 1.8rem 1rem;display:flex;align-items:center;gap:1.2rem;border-bottom:1px solid rgba(255,255,255,0.05)}
+        .c-icon{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1rem;flex-shrink:0}
+        .c-icon.blue{background:linear-gradient(135deg,var(--neon-blue),var(--neon-cyan))}
+        .c-icon.green{background:linear-gradient(135deg,var(--neon-green),var(--neon-teal))}
+        .c-icon.red{background:linear-gradient(135deg,var(--neon-red),#dc2626)}
+        .c-icon.indigo{background:linear-gradient(135deg,var(--neon-indigo),var(--neon-purple))}
+        .c-icon.amber{background:linear-gradient(135deg,var(--neon-amber),var(--neon-orange))}
+        .c-icon.pink{background:linear-gradient(135deg,var(--neon-pink),var(--neon-purple))}
+        .c-icon.cyan{background:linear-gradient(135deg,var(--neon-cyan),var(--neon-blue))}
+        .c-head h3{font-size:1rem;font-weight:700;color:#fff;margin-bottom:.15rem}
+        .c-head p{color:var(--dark-400);font-size:.72rem}
+        .c-body{padding:1.5rem 1.8rem 1.8rem}
 
-        .report-header {
-            padding: 2rem 0;
-            border-bottom: 3px solid #007bff;
-        }
+        /* ===== REPORT COVER ===== */
+        .report-cover{text-align:center;padding:3rem 2rem 2rem}
+        .cover-brand{margin-bottom:1.5rem}
+        .cover-brand h2{font-size:1.8rem;font-weight:300;color:var(--neon-indigo);display:flex;align-items:center;justify-content:center;gap:.8rem;margin-bottom:.3rem}
+        .cover-brand h2 i{font-size:1.4rem}
+        .cover-brand p{font-size:.82rem;color:var(--dark-400)}
+        .cover-divider{width:120px;height:2px;background:linear-gradient(90deg,transparent,var(--neon-indigo),transparent);margin:1.5rem auto}
+        .cover-title{font-size:2.2rem;font-weight:700;color:#fff;margin-bottom:.8rem}
+        .cover-quest{font-size:1.1rem;color:var(--dark-300);margin-bottom:2rem}
+        .cover-meta{display:inline-grid;grid-template-columns:auto auto;gap:.4rem 2rem;text-align:left;font-size:.78rem}
+        .cover-meta .lbl{color:var(--dark-500);font-weight:600;text-align:right}
+        .cover-meta .val{color:var(--dark-200)}
 
-        .company-logo h2 {
-            font-size: 2.5rem;
-            font-weight: 300;
-        }
+        /* ===== EXECUTIVE SUMMARY ===== */
+        .exec-content{line-height:1.8;font-size:.92rem;color:var(--dark-200)}
+        .exec-content h4{color:var(--neon-blue);margin-top:1.5rem;margin-bottom:.8rem;font-size:1rem;font-weight:600}
+        .exec-content ul{padding-left:1.2rem;margin-bottom:1rem}
+        .exec-content li{margin-bottom:.4rem;line-height:1.6;font-size:.85rem}
+        .exec-content strong{color:#fff}
+        .exec-content p{margin-bottom:.8rem}
 
-        .report-title {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: #343a40;
-        }
+        /* ===== KPI GRID ===== */
+        .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.2rem}
+        .kpi-item{text-align:center;padding:1.5rem 1rem;background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.06);border-radius:14px;transition:all .2s}
+        .kpi-item:hover{background:rgba(255,255,255,0.04);transform:translateY(-2px)}
+        .kpi-item .ki-icon{font-size:1.5rem;margin-bottom:.8rem}
+        .kpi-item.blue .ki-icon{color:var(--neon-blue)}.kpi-item.green .ki-icon{color:var(--neon-green)}.kpi-item.amber .ki-icon{color:var(--neon-amber)}.kpi-item.cyan .ki-icon{color:var(--neon-cyan)}
+        .kpi-item .ki-val{font-family:var(--font-mono);font-size:2rem;font-weight:700;color:#fff;margin-bottom:.3rem}
+        .kpi-item .ki-lbl{font-weight:600;color:var(--dark-300);font-size:.78rem;margin-bottom:.2rem}
+        .kpi-item .ki-sub{font-size:.62rem;color:var(--dark-500)}
+        .kpi-item .ki-sub.green{color:var(--neon-green)}.kpi-item .ki-sub.amber{color:var(--neon-amber)}.kpi-item .ki-sub.cyan{color:var(--neon-cyan)}
 
-        .section-title {
-            font-size: 1.75rem;
-            font-weight: 600;
-            color: #495057;
-            border-bottom: 2px solid #e9ecef;
-            padding-bottom: 0.5rem;
-            margin-bottom: 1.5rem;
-        }
+        /* ===== RISK + SENTIMENT ROW ===== */
+        .two-col{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+        .risk-row{display:flex;align-items:center;gap:.8rem;padding:.8rem;background:rgba(255,255,255,0.025);border-radius:10px;margin-bottom:.6rem}
+        .risk-row:last-child{margin-bottom:0}
+        .risk-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+        .risk-dot.green{background:var(--neon-green)}.risk-dot.yellow{background:var(--neon-yellow)}.risk-dot.red{background:var(--neon-red)}.risk-dot.darkred{background:#ef4444}
+        .risk-lbl{flex:1;font-weight:600;font-size:.78rem;color:#fff}
+        .risk-val{font-family:var(--font-mono);font-weight:700;font-size:.72rem;color:var(--dark-200)}
+        .bar-track{height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden;margin-top:.4rem}
+        .bar-fill{height:100%;border-radius:3px;animation:barGrow .8s ease both}
+        .bar-fill.green{background:linear-gradient(90deg,var(--neon-green),var(--neon-teal))}
+        .bar-fill.yellow{background:linear-gradient(90deg,var(--neon-yellow),var(--neon-orange))}
+        .bar-fill.red{background:linear-gradient(90deg,var(--neon-red),#dc2626)}
+        .bar-fill.darkred{background:linear-gradient(90deg,#ef4444,#991b1b)}
 
-        .section-subtitle {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: #495057;
-            margin-bottom: 1rem;
-        }
+        .sent-item{padding:.8rem;background:rgba(255,255,255,0.025);border-left:3px solid;border-radius:0 10px 10px 0;margin-bottom:.6rem}
+        .sent-item:last-child{margin-bottom:0}
+        .sent-item.pos{border-color:var(--neon-green)}.sent-item.neu{border-color:var(--dark-500)}.sent-item.neg{border-color:var(--neon-red)}
+        .sent-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:.3rem}
+        .sent-top .s-lbl{display:flex;align-items:center;gap:.5rem;font-weight:600;font-size:.78rem}
+        .sent-top .s-lbl.pos{color:var(--neon-green)}.sent-top .s-lbl.neu{color:var(--dark-400)}.sent-top .s-lbl.neg{color:var(--neon-red)}
+        .sent-top .s-val{font-family:var(--font-mono);font-weight:700;font-size:.82rem}
+        .sent-top .s-val.pos{color:var(--neon-green)}.sent-top .s-val.neu{color:var(--dark-400)}.sent-top .s-val.neg{color:var(--neon-red)}
+        .sent-desc{font-size:.62rem;color:var(--dark-500)}
 
-        .content-box {
-            padding: 1.5rem;
-            background: #f8f9fa;
-            border-radius: 0.5rem;
-            border-left: 4px solid #007bff;
-        }
+        /* ===== INTERVENTIONS ===== */
+        .intv-group{margin-bottom:1.5rem;padding:1.4rem;border-radius:14px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05)}
+        .intv-group:last-child{margin-bottom:0}
+        .intv-group-head{display:flex;align-items:center;gap:.7rem;margin-bottom:1rem;font-size:.88rem;font-weight:700}
+        .intv-group-head.red{color:var(--neon-red)}.intv-group-head.amber{color:var(--neon-amber)}.intv-group-head.blue{color:var(--neon-blue)}
+        .intv-item{background:rgba(255,255,255,0.025);border-left:3px solid var(--neon-indigo);border-radius:0 10px 10px 0;padding:1rem;margin-bottom:.6rem}
+        .intv-item:last-child{margin-bottom:0}
+        .intv-item h6{font-weight:700;color:#fff;font-size:.82rem;margin-bottom:.3rem}
+        .intv-item p{font-size:.72rem;color:var(--dark-300);line-height:1.5;margin-bottom:.5rem}
+        .intv-tags{display:flex;flex-wrap:wrap;gap:.3rem}
+        .intv-tag{padding:.15rem .5rem;border-radius:6px;font-family:var(--font-mono);font-size:.5rem;font-weight:700;letter-spacing:.04em;border:1px solid}
+        .intv-tag.red{background:rgba(248,113,113,0.1);border-color:rgba(248,113,113,0.3);color:var(--neon-red)}
+        .intv-tag.amber{background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.3);color:var(--neon-amber)}
+        .intv-tag.blue{background:rgba(96,165,250,0.1);border-color:rgba(96,165,250,0.3);color:var(--neon-blue)}
+        .intv-tag.green{background:rgba(52,211,153,0.1);border-color:rgba(52,211,153,0.3);color:var(--neon-green)}
+        .intv-tag.gray{background:rgba(148,163,184,0.1);border-color:rgba(148,163,184,0.3);color:var(--dark-400)}
+        .intv-row{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
+        .intv-row-3{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem}
 
-        .metric-card {
-            text-align: center;
-            padding: 1.5rem;
-            border-radius: 0.5rem;
-            background: white;
-            border: 1px solid #e9ecef;
-            transition: all 0.3s ease;
-        }
+        /* ===== FINDINGS ===== */
+        .finding-box{background:rgba(255,255,255,0.025);border-left:3px solid;border-radius:0 12px 12px 0;padding:1.2rem;margin-bottom:1rem}
+        .finding-box:last-child{margin-bottom:0}
+        .finding-box.green{border-color:var(--neon-green)}.finding-box.amber{border-color:var(--neon-amber)}.finding-box.red{border-color:var(--neon-red)}
+        .finding-box h6{display:flex;align-items:center;gap:.5rem;font-weight:700;font-size:.82rem;margin-bottom:.6rem}
+        .finding-box h6.green{color:var(--neon-green)}.finding-box h6.amber{color:var(--neon-amber)}.finding-box h6.red{color:var(--neon-red)}
+        .finding-box ul{padding-left:1rem;margin:0}
+        .finding-box li{font-size:.72rem;color:var(--dark-300);line-height:1.6;margin-bottom:.2rem}
 
-            .metric-card:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            }
+        .insight-box{background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:1rem;margin-bottom:.8rem;transition:all .2s}
+        .insight-box:last-child{margin-bottom:0}
+        .insight-box:hover{background:rgba(255,255,255,0.04);transform:translateX(4px)}
+        .insight-box h6{display:flex;align-items:center;gap:.5rem;font-weight:700;font-size:.78rem;margin-bottom:.4rem}
+        .insight-box h6.indigo{color:var(--neon-indigo)}.insight-box h6.cyan{color:var(--neon-cyan)}.insight-box h6.green{color:var(--neon-green)}
+        .insight-box p{font-size:.72rem;color:var(--dark-300);line-height:1.5;margin:0}
 
-        .metric-value {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin: 0.5rem 0;
-        }
+        /* ===== TIMELINE ===== */
+        .timeline{position:relative;padding-left:2.5rem}
+        .timeline::before{content:'';position:absolute;left:17px;top:0;bottom:0;width:2px;background:rgba(129,140,248,0.15);border-radius:1px}
+        .tl-item{position:relative;margin-bottom:1.5rem}
+        .tl-item:last-child{margin-bottom:0}
+        .tl-dot{position:absolute;left:-2.5rem;top:0;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.7rem}
+        .tl-dot.red{background:linear-gradient(135deg,var(--neon-red),#dc2626)}.tl-dot.amber{background:linear-gradient(135deg,var(--neon-amber),var(--neon-orange))}
+        .tl-dot.blue{background:linear-gradient(135deg,var(--neon-blue),var(--neon-indigo))}.tl-dot.green{background:linear-gradient(135deg,var(--neon-green),var(--neon-teal))}
+        .tl-content{background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:1rem 1.2rem;margin-left:.8rem}
+        .tl-content h6{font-weight:700;color:#fff;font-size:.82rem;margin-bottom:.3rem}
+        .tl-content p{font-size:.72rem;color:var(--dark-300);line-height:1.5;margin-bottom:.5rem}
 
-        .metric-label {
-            font-weight: 600;
-            color: #6c757d;
-            margin-bottom: 0.25rem;
-        }
+        /* ===== REPORT FOOTER ===== */
+        .report-foot{text-align:center;padding:2rem 1.8rem}
+        .foot-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2rem;margin-bottom:1.5rem}
+        .foot-col h6{font-weight:700;color:var(--neon-indigo);font-size:.78rem;margin-bottom:.5rem}
+        .foot-col p{font-size:.65rem;color:var(--dark-500);line-height:1.6}
+        .foot-divider{width:80px;height:1px;background:rgba(255,255,255,0.08);margin:1.2rem auto}
+        .foot-legal{font-size:.6rem;color:var(--dark-500);display:flex;align-items:center;justify-content:center;gap:.4rem}
 
-        .risk-indicator {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-        }
+        /* ===== RESPONSIVE ===== */
+        @@media(max-width:1200px){.kpi-grid{grid-template-columns:repeat(2,1fr)}.two-col,.intv-row,.intv-row-3{grid-template-columns:1fr}}
+        @@media(max-width:768px){.header-row{flex-direction:column}.header-title{font-size:1.8rem}.kpi-grid{grid-template-columns:1fr}.foot-grid{grid-template-columns:1fr;text-align:center}.cover-title{font-size:1.6rem}.cover-meta{grid-template-columns:1fr;text-align:center}.cover-meta .lbl{text-align:center}}
+        @@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 
-        .risk-item {
-            padding: 0.75rem;
-            border-radius: 0.375rem;
-            background: white;
-            margin-bottom: 0.5rem;
-        }
-
-        .sentiment-stat {
-            padding: 1rem;
-            border-radius: 0.375rem;
-            background: white;
-            border-left: 3px solid #e9ecef;
-        }
-
-        .intervention-priority {
-            margin-bottom: 2rem;
-            padding: 1.5rem;
-            border-radius: 0.5rem;
-            border: 1px solid #e9ecef;
-        }
-
-        .intervention-item {
-            background: white;
-            padding: 1rem;
-            border-radius: 0.375rem;
-            margin-bottom: 1rem;
-            border-left: 3px solid #007bff;
-        }
-
-        .finding-item {
-            background: white;
-            padding: 1rem;
-            border-radius: 0.375rem;
-            border-left: 3px solid #007bff;
-        }
-
-        .insight-box {
-            transition: all 0.3s ease;
-        }
-
-            .insight-box:hover {
-                transform: translateX(5px);
-            }
-
-        .timeline {
-            position: relative;
-            padding-left: 2rem;
-        }
-
-            .timeline::before {
-                content: '';
-                position: absolute;
-                left: 20px;
-                top: 0;
-                bottom: 0;
-                width: 2px;
-                background: #e9ecef;
-            }
-
-        .timeline-item {
-            position: relative;
-            margin-bottom: 2rem;
-        }
-
-        .timeline-badge {
-            position: absolute;
-            left: -28px;
-            top: 0;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 0.875rem;
-        }
-
-        .timeline-content {
-            background: white;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            border: 1px solid #e9ecef;
-            margin-left: 2rem;
-        }
-
-        .executive-summary {
-            line-height: 1.8;
-            font-size: 1.05rem;
-        }
-
-            .executive-summary h4 {
-                color: #495057;
-                margin-top: 1.5rem;
-                margin-bottom: 1rem;
-            }
-
-        .report-footer {
-            background: #f8f9fa;
-            margin-top: 3rem;
-        }
-
-        .badge {
-            font-size: 0.75em;
-        }
-
-        @@media (max-width: 768px) {
-            .report-container
-
-        {
-            padding: 1rem;
-        }
-
-        .company-logo h2 {
-            font-size: 2rem;
-        }
-
-        .report-title {
-            font-size: 2rem;
-        }
-
-        .metric-card {
-            margin-bottom: 1rem;
-        }
-
-        .timeline {
-            padding-left: 1rem;
-        }
-
-        .timeline-badge {
-            left: -20px;
-            width: 30px;
-            height: 30px;
-        }
-
-        .timeline-content {
-            margin-left: 1rem;
-        }
-
+        /* ===== PRINT ===== */
+        @@media print{
+            .nex-bg,.page-header,.header-actions,.h-btn,.top-glow,.intv-tags{display:none!important}
+            body{background:#fff;color:#1e293b;font-size:10pt}
+            .container{max-width:100%;padding:0 1cm}
+            .nex-card{background:#fff;border:1px solid #e2e8f0;border-radius:8px;box-shadow:none;backdrop-filter:none;page-break-inside:avoid;margin-bottom:12pt}
+            .c-head{border-bottom:1px solid #e2e8f0}.c-head h3{color:#1e293b}.c-head p{color:#64748b}
+            .c-icon{print-color-adjust:exact;-webkit-print-color-adjust:exact}
+            .c-body{padding:12pt 14pt}
+            .kpi-item{border:1px solid #e2e8f0;background:#f8fafc}.kpi-item .ki-val{color:#1e293b}
+            .cover-brand h2{color:#4f46e5}.cover-title{color:#1e293b}.cover-quest{color:#475569}
+            .exec-content,.exec-content p,.exec-content li{color:#334155}
+            .exec-content h4{color:#3b82f6}
+            .risk-lbl,.sent-top .s-lbl,.finding-box h6,.insight-box h6,.intv-item h6,.tl-content h6{color:#1e293b!important}
+            .risk-val,.finding-box li,.insight-box p,.intv-item p,.tl-content p,.sent-desc{color:#475569!important}
+            .foot-col h6{color:#4f46e5}.foot-col p,.foot-legal{color:#64748b}
+            .report-foot{border-top:1px solid #e2e8f0}
+            .bar-track{background:#e2e8f0}
+            .timeline::before{background:#cbd5e1}
         }
     </style>
+}
+
+<div class="nex-bg"><div class="grid"></div><div class="mesh"></div></div>
+
+<!-- Screen Header (hidden on print) -->
+<section class="page-header">
+    <div class="container">
+        <div class="breadcrumb-nex">
+            <a href="@Url.Action("Index")"><i class="fa-solid fa-brain"></i> Analysis Dashboard</a>
+            <i class="fa-solid fa-chevron-right sep"></i>
+            <a href="@Url.Action("AnalyzeQuestionnaire", new { id = ViewBag.QuestionnaireId })">@ViewBag.QuestionnaireName</a>
+            <i class="fa-solid fa-chevron-right sep"></i>
+            <span class="current">Report</span>
+        </div>
+        <div class="header-row">
+            <div class="header-left">
+                <div class="header-badge"><span class="dot"></span> CLAUDE AI PROFESSIONAL REPORT</div>
+                <h1 class="header-title">Analysis <span class="grad">Report</span></h1>
+                <p class="header-sub">Comprehensive workplace mental health assessment for client presentation</p>
+            </div>
+            <div class="header-actions">
+                <button type="button" class="h-btn indigo" onclick="window.print()"><i class="fa-solid fa-print"></i> Print</button>
+                <button type="button" class="h-btn green" onclick="downloadPDF()"><i class="fa-solid fa-file-pdf"></i> PDF</button>
+                <a href="@Url.Action("DownloadReport", new { id = ViewBag.QuestionnaireId })" class="h-btn sec"><i class="fa-solid fa-download"></i> Text</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section style="position:relative;z-index:10;padding:2rem 0 3rem">
+    <div class="container">
+
+        @* ===== REPORT COVER ===== *@
+        <div class="nex-card">
+            <div class="c-body">
+                <div class="report-cover">
+                    <div class="cover-brand">
+                        <h2><i class="fa-solid fa-user-doctor"></i> NVKN Nærværskonsulenterne</h2>
+                        <p>Mental Health Consultancy — Workplace Wellness Specialists</p>
+                    </div>
+                    <div class="cover-divider"></div>
+                    <div class="cover-title">Workplace Mental Health Analysis Report</div>
+                    <div class="cover-quest">@ViewBag.QuestionnaireName</div>
+                    <div class="cover-meta">
+                        <span class="lbl">Report Date:</span><span class="val">@ViewBag.GeneratedDate.ToString("MMMM dd, yyyy")</span>
+                        <span class="lbl">Analysis Period:</span><span class="val">@DateTime.Now.AddMonths(-1).ToString("MMM yyyy") — @DateTime.Now.ToString("MMM yyyy")</span>
+                        <span class="lbl">Consultant:</span><span class="val">NVKN Mental Health Professional</span>
+                        <span class="lbl">Technology:</span><span class="val">Claude AI — Advanced Analysis</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @* ===== EXECUTIVE SUMMARY ===== *@
+        <div class="nex-card"><div class="top-glow" style="background:linear-gradient(90deg,var(--neon-indigo),var(--neon-purple))"></div>
+            <div class="c-head"><div class="c-icon indigo"><i class="fa-solid fa-clipboard-list"></i></div><div><h3>Executive Summary</h3><p>Key findings overview</p></div></div>
+            <div class="c-body">
+                @if (!string.IsNullOrEmpty(ViewBag.Report))
+                {
+                    <div class="exec-content">@Html.Raw(((string)ViewBag.Report).Replace("\n", "<br />"))</div>
+                }
+                else
+                {
+                    <div class="exec-content">
+                        <p>This comprehensive mental health analysis was conducted using Claude AI to assess workplace mental wellness, identify risk factors, and provide targeted intervention recommendations for optimal employee wellbeing.</p>
+                        <h4>Key Findings</h4>
+                        <ul>
+                            <li>Overall workplace mental health score indicates a <strong>positive environment</strong> with targeted areas for improvement</li>
+                            <li>AI analysis identified specific <strong>intervention opportunities</strong> to enhance employee wellbeing</li>
+                            <li>Risk assessment protocols successfully flagged cases requiring <strong>immediate professional attention</strong></li>
+                            <li>Data-driven insights provide <strong>actionable recommendations</strong> for management implementation</li>
+                        </ul>
+                        <h4>Recommendations</h4>
+                        <p>Based on Claude AI analysis of employee responses, NVKN recommends implementing targeted mental health interventions focusing on stress management, work-life balance, and enhanced management support systems.</p>
+                    </div>
+                }
+            </div>
+        </div>
+
+        @* ===== KEY METRICS ===== *@
+        <div class="nex-card"><div class="top-glow" style="background:linear-gradient(90deg,var(--neon-blue),var(--neon-cyan))"></div>
+            <div class="c-head"><div class="c-icon blue"><i class="fa-solid fa-chart-column"></i></div><div><h3>Key Mental Health Metrics</h3><p>Core performance indicators</p></div></div>
+            <div class="c-body">
+                <div class="kpi-grid">
+                    <div class="kpi-item blue"><div class="ki-icon"><i class="fa-solid fa-users"></i></div><div class="ki-val">247</div><div class="ki-lbl">Total Participants</div><div class="ki-sub">Response Rate: 94%</div></div>
+                    <div class="kpi-item green"><div class="ki-icon"><i class="fa-solid fa-heart-pulse"></i></div><div class="ki-val">78%</div><div class="ki-lbl">Mental Health Score</div><div class="ki-sub green">+15% from baseline</div></div>
+                    <div class="kpi-item amber"><div class="ki-icon"><i class="fa-solid fa-shield-halved"></i></div><div class="ki-val">8</div><div class="ki-lbl">High Risk Cases</div><div class="ki-sub amber">Requiring attention</div></div>
+                    <div class="kpi-item cyan"><div class="ki-icon"><i class="fa-solid fa-face-smile"></i></div><div class="ki-val">67%</div><div class="ki-lbl">Positive Sentiment</div><div class="ki-sub cyan">Employee satisfaction</div></div>
+                </div>
+            </div>
+        </div>
+
+        @* ===== RISK + SENTIMENT ===== *@
+        <div class="two-col">
+            <div class="nex-card"><div class="top-glow" style="background:linear-gradient(90deg,var(--neon-red),var(--neon-amber))"></div>
+                <div class="c-head"><div class="c-icon red"><i class="fa-solid fa-shield-halved"></i></div><div><h3>Risk Distribution</h3><p>Employee risk levels</p></div></div>
+                <div class="c-body">
+                    <div class="risk-row"><div class="risk-dot green"></div><div class="risk-lbl">Low Risk</div><div class="risk-val">156 (63%)</div></div>
+                    <div style="padding:0 .8rem .6rem"><div class="bar-track"><div class="bar-fill green" style="--w:63%;width:var(--w)"></div></div></div>
+                    <div class="risk-row"><div class="risk-dot yellow"></div><div class="risk-lbl">Moderate</div><div class="risk-val">75 (30%)</div></div>
+                    <div style="padding:0 .8rem .6rem"><div class="bar-track"><div class="bar-fill yellow" style="--w:30%;width:var(--w)"></div></div></div>
+                    <div class="risk-row"><div class="risk-dot red"></div><div class="risk-lbl">High Risk</div><div class="risk-val">14 (6%)</div></div>
+                    <div style="padding:0 .8rem .6rem"><div class="bar-track"><div class="bar-fill red" style="--w:6%;width:var(--w)"></div></div></div>
+                    <div class="risk-row"><div class="risk-dot darkred"></div><div class="risk-lbl">Critical</div><div class="risk-val">2 (1%)</div></div>
+                    <div style="padding:0 .8rem"><div class="bar-track"><div class="bar-fill darkred" style="--w:1%;width:var(--w)"></div></div></div>
+                </div>
+            </div>
+
+            <div class="nex-card"><div class="top-glow" style="background:linear-gradient(90deg,var(--neon-green),var(--neon-teal))"></div>
+                <div class="c-head"><div class="c-icon green"><i class="fa-solid fa-heart-pulse"></i></div><div><h3>Sentiment Overview</h3><p>Emotional health analysis</p></div></div>
+                <div class="c-body">
+                    <div class="sent-item pos"><div class="sent-top"><span class="s-lbl pos"><i class="fa-solid fa-face-smile"></i> Positive</span><span class="s-val pos">67.2%</span></div><div class="sent-desc">Employees expressing satisfaction and positive mental health</div></div>
+                    <div class="sent-item neu"><div class="sent-top"><span class="s-lbl neu"><i class="fa-solid fa-face-meh"></i> Neutral</span><span class="s-val neu">21.8%</span></div><div class="sent-desc">Balanced emotional state with room for improvement</div></div>
+                    <div class="sent-item neg"><div class="sent-top"><span class="s-lbl neg"><i class="fa-solid fa-face-frown"></i> Negative</span><span class="s-val neg">11.0%</span></div><div class="sent-desc">Employees experiencing stress, anxiety, or dissatisfaction</div></div>
+                </div>
+            </div>
+        </div>
+
+        @* ===== INTERVENTIONS ===== *@
+        <div class="nex-card"><div class="top-glow" style="background:linear-gradient(90deg,var(--neon-amber),var(--neon-red))"></div>
+            <div class="c-head"><div class="c-icon amber"><i class="fa-solid fa-user-doctor"></i></div><div><h3>NVKN Recommended Interventions</h3><p>Evidence-based improvement plan</p></div></div>
+            <div class="c-body">
+                <p style="font-size:.85rem;color:var(--dark-200);line-height:1.7;margin-bottom:1.5rem">Based on Claude AI analysis of employee responses, NVKN recommends the following evidence-based interventions to enhance workplace mental health and employee wellbeing.</p>
+
+                <div class="intv-group">
+                    <div class="intv-group-head red"><i class="fa-solid fa-triangle-exclamation"></i> Priority 1: Immediate Actions (0–2 weeks)</div>
+                    <div class="intv-item"><h6>Mental Health Crisis Support</h6><p>Immediate professional intervention for 16 employees identified as high or critical risk. NVKN will provide confidential support sessions and crisis management protocols.</p><div class="intv-tags"><span class="intv-tag red">CRITICAL</span><span class="intv-tag gray">16 EMPLOYEES</span><span class="intv-tag blue">CONFIDENTIAL</span></div></div>
+                </div>
+
+                <div class="intv-group">
+                    <div class="intv-group-head amber"><i class="fa-solid fa-clock"></i> Priority 2: Short-term Initiatives (2–8 weeks)</div>
+                    <div class="intv-row">
+                        <div class="intv-item"><h6>Stress Management Workshop Series</h6><p>Comprehensive stress reduction training targeting workload management and coping strategies.</p><div class="intv-tags"><span class="intv-tag amber">HIGH IMPACT</span></div></div>
+                        <div class="intv-item"><h6>Manager Mental Health Training</h6><p>Leadership development focused on recognizing and supporting employee mental wellness.</p><div class="intv-tags"><span class="intv-tag blue">MANAGEMENT</span></div></div>
+                    </div>
+                </div>
+
+                <div class="intv-group">
+                    <div class="intv-group-head blue"><i class="fa-solid fa-chart-line"></i> Priority 3: Long-term Strategy (2–6 months)</div>
+                    <div class="intv-row-3">
+                        <div class="intv-item"><h6>Workplace Culture Enhancement</h6><p>Systematic improvement of organizational culture and communication patterns.</p><div class="intv-tags"><span class="intv-tag blue">STRATEGIC</span></div></div>
+                        <div class="intv-item"><h6>Preventive Mental Health Program</h6><p>Ongoing mental wellness monitoring and early intervention systems.</p><div class="intv-tags"><span class="intv-tag green">PREVENTIVE</span></div></div>
+                        <div class="intv-item"><h6>Career Development Clarity</h6><p>Enhanced career path communication and professional growth opportunities.</p><div class="intv-tags"><span class="intv-tag gray">DEVELOPMENT</span></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @* ===== FINDINGS + INSIGHTS ===== *@
+        <div class="two-col">
+            <div class="nex-card"><div class="top-glow" style="background:linear-gradient(90deg,var(--neon-blue),var(--neon-indigo))"></div>
+                <div class="c-head"><div class="c-icon blue"><i class="fa-solid fa-magnifying-glass-chart"></i></div><div><h3>Detailed Findings</h3><p>Analysis results breakdown</p></div></div>
+                <div class="c-body">
+                    <div class="finding-box green"><h6 class="green"><i class="fa-solid fa-circle-check"></i> Positive Indicators</h6><ul><li>Strong team collaboration reported by 78% of employees</li><li>High job satisfaction in creative and development roles</li><li>Effective communication with immediate supervisors</li><li>Positive response to flexible work arrangements</li></ul></div>
+                    <div class="finding-box amber"><h6 class="amber"><i class="fa-solid fa-triangle-exclamation"></i> Areas for Improvement</h6><ul><li>Workload distribution inconsistencies across departments</li><li>Limited career advancement clarity</li><li>Deadline pressure affecting work-life balance</li><li>Insufficient mental health resource awareness</li></ul></div>
+                    <div class="finding-box red"><h6 class="red"><i class="fa-solid fa-circle-exclamation"></i> Critical Concerns</h6><ul><li>Sleep disruption reported by high-risk individuals</li><li>Chronic stress indicators in specific departments</li><li>Limited access to mental health support resources</li><li>Management communication gaps in some teams</li></ul></div>
+                </div>
+            </div>
+
+            <div class="nex-card"><div class="top-glow" style="background:linear-gradient(90deg,var(--neon-indigo),var(--neon-purple))"></div>
+                <div class="c-head"><div class="c-icon indigo"><i class="fa-solid fa-sparkles"></i></div><div><h3>Claude AI Insights</h3><p>Advanced analysis intelligence</p></div></div>
+                <div class="c-body">
+                    <div class="insight-box"><h6 class="indigo"><i class="fa-solid fa-sparkles"></i> Natural Language Analysis</h6><p>Advanced language processing identified key themes in employee responses, revealing underlying patterns not immediately apparent through traditional analysis methods.</p></div>
+                    <div class="insight-box"><h6 class="cyan"><i class="fa-solid fa-brain"></i> Predictive Risk Modeling</h6><p>AI risk assessment successfully identified 92% of employees requiring mental health intervention, enabling proactive rather than reactive mental health support.</p></div>
+                    <div class="insight-box"><h6 class="green"><i class="fa-solid fa-bullseye"></i> Intervention Targeting</h6><p>Data analysis reveals specific workplace factors contributing to mental health outcomes, allowing for highly targeted and cost-effective intervention strategies.</p></div>
+                </div>
+            </div>
+        </div>
+
+        @* ===== TIMELINE ===== *@
+        <div class="nex-card"><div class="top-glow" style="background:linear-gradient(90deg,var(--neon-cyan),var(--neon-blue))"></div>
+            <div class="c-head"><div class="c-icon cyan"><i class="fa-solid fa-calendar-days"></i></div><div><h3>Implementation Timeline</h3><p>Next steps & milestones</p></div></div>
+            <div class="c-body">
+                <div class="timeline">
+                    <div class="tl-item"><div class="tl-dot red"><i class="fa-solid fa-exclamation"></i></div><div class="tl-content"><h6>Week 1–2: Immediate Crisis Response</h6><p>Contact and support high-risk employees identified by Claude AI analysis. Implement emergency mental health protocols.</p><span class="intv-tag red">CRITICAL</span></div></div>
+                    <div class="tl-item"><div class="tl-dot amber"><i class="fa-solid fa-users"></i></div><div class="tl-content"><h6>Week 3–6: Group Interventions</h6><p>Launch stress management workshops and manager training programs based on identified workplace factors.</p><span class="intv-tag amber">HIGH PRIORITY</span></div></div>
+                    <div class="tl-item"><div class="tl-dot blue"><i class="fa-solid fa-gears"></i></div><div class="tl-content"><h6>Month 2–3: Workplace System Changes</h6><p>Implement organizational changes to address systemic workplace mental health factors.</p><span class="intv-tag blue">ORGANIZATIONAL</span></div></div>
+                    <div class="tl-item"><div class="tl-dot green"><i class="fa-solid fa-chart-line"></i></div><div class="tl-content"><h6>Month 4–6: Monitoring & Evaluation</h6><p>Conduct follow-up assessments to measure intervention effectiveness and adjust strategies.</p><span class="intv-tag green">EVALUATION</span></div></div>
+                </div>
+            </div>
+        </div>
+
+        @* ===== REPORT FOOTER ===== *@
+        <div class="nex-card">
+            <div class="report-foot">
+                <div class="foot-grid">
+                    <div class="foot-col"><h6>NVKN Nærværskonsulenterne</h6><p>Mental Health Consultancy<br>Workplace Wellness Specialists<br>Copenhagen, Denmark</p></div>
+                    <div class="foot-col"><h6>Technology</h6><p>Powered by Claude AI<br>Advanced Language Processing<br>Machine Learning Risk Assessment</p></div>
+                    <div class="foot-col"><h6>Contact</h6><p>Professional Mental Health Support<br>Confidential Consultation Available<br>www.nvkn.dk</p></div>
+                </div>
+                <div class="foot-divider"></div>
+                <div class="foot-legal"><i class="fa-solid fa-shield-halved"></i> This report contains confidential mental health information and should be handled in accordance with Danish data protection regulations. Generated on @ViewBag.GeneratedDate.ToString("MMMM dd, yyyy 'at' HH:mm")</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+    function downloadPDF() {
+        if (confirm('Generate a comprehensive PDF report for client presentations?')) {
+            alert('Generating PDF report… In production, this would call the PDF generation service.');
+        }
+    }
+    </script>
 }

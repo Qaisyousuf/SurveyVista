@@ -472,16 +472,14 @@ namespace Web.Controllers
                     {
                         Id = a.Id,
                         Text = a.Text,
-                        IsOtherOption = a.IsOtherOption,  // ← ADD THIS LINE!
-                        ConditionJson = a.ConditionJson
+                        IsOtherOption = a.IsOtherOption,    // NEW
+                        ConditionJson = a.ConditionJson      // NEW
                     }).ToList()
                 }).ToList()
             };
 
             return viewModel;
         }
-
-
 
     }
 }

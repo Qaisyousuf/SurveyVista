@@ -3,864 +3,360 @@
     ViewData["Title"] = "Send Questionnaire";
 }
 
-<style>
-    /* Modern Design System with Advanced Visual Effects */
-    @@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
-
-    :root {
-        --primary-color: #6366f1;
-        --primary-light: #8b5cf6;
-        --primary-dark: #4338ca;
-        --primary-ultra: #3730a3;
-        --success-color: #10b981;
-        --success-light: #34d399;
-        --success-dark: #059669;
-        --info-color: #06b6d4;
-        --info-light: #22d3ee;
-        --info-dark: #0891b2;
-        --warning-color: #f59e0b;
-        --warning-light: #fbbf24;
-        --warning-dark: #d97706;
-        --danger-color: #ef4444;
-        --danger-light: #fca5a5;
-        --danger-dark: #dc2626;
-        --gray-50: #f8fafc;
-        --gray-100: #f1f5f9;
-        --gray-200: #e2e8f0;
-        --gray-300: #cbd5e1;
-        --gray-400: #94a3b8;
-        --gray-500: #64748b;
-        --gray-600: #475569;
-        --gray-700: #334155;
-        --gray-800: #1e293b;
-        --gray-900: #0f172a;
-        /* Advanced Shadows */
-        --shadow-glow: 0 0 40px rgba(99, 102, 241, 0.15);
-        --shadow-ultra: 0 32px 64px -12px rgba(0, 0, 0, 0.25);
-        --shadow-floating: 0 20px 40px -8px rgba(99, 102, 241, 0.2);
-        --shadow-premium: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 80px rgba(99, 102, 241, 0.1);
-        /* Border Radius */
-        --border-radius-sm: 12px;
-        --border-radius-md: 16px;
-        --border-radius-lg: 24px;
-        --border-radius-xl: 32px;
-        --border-radius-2xl: 40px;
-        /* Animations */
-        --ease-premium: cubic-bezier(0.23, 1, 0.32, 1);
-        --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
-    }
-
-    * {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-        box-sizing: border-box;
-    }
-
-    body {
-        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-        min-height: 100vh;
-        margin: 0;
-        padding: 0;
-        position: relative;
-    }
-
-    .container {
-        max-width: 900px;
-        margin: 0 auto;
-        padding: 3rem 1rem;
-        position: relative;
-        z-index: 1;
-    }
-
-
-
-    /* Premium Glass Morphism Header */
-    .page-header {
-        background: rgba(255, 255, 255, 0.25);
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        border-radius: var(--border-radius-2xl);
-        box-shadow: var(--shadow-premium);
-        padding: 3rem;
-        margin-bottom: 3rem;
-        position: relative;
-        overflow: hidden;
-        animation: slideDown 0.8s var(--ease-premium);
-    }
-
-        .page-header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 6px;
-            background: linear-gradient(90deg, var(--primary-color), var(--info-color), var(--success-color), var(--warning-color), var(--primary-light) );
-            background-size: 200% 100%;
-            animation: gradientFlow 3s ease-in-out infinite;
+@section Styles {
+    <style>
+        @@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+        :root {
+            --neon-blue:#60a5fa;--neon-purple:#c084fc;--neon-green:#34d399;--neon-pink:#f472b6;
+            --neon-yellow:#fbbf24;--neon-red:#f87171;--neon-cyan:#22d3ee;--neon-teal:#33b3ae;--neon-indigo:#818cf8;
+            --dark-900:#0f172a;--dark-800:#1e293b;--dark-700:#334155;--dark-600:#475569;
+            --dark-500:#64748b;--dark-400:#94a3b8;--dark-300:#cbd5e1;--dark-200:#e2e8f0;
+            --glass-bg:rgba(255,255,255,0.05);--glass-border:rgba(255,255,255,0.1);--glass-shadow:0 8px 32px rgba(0,0,0,0.12);
+            --font-main:'Space Grotesk',sans-serif;--font-mono:'JetBrains Mono',monospace;
         }
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:var(--font-main);background:var(--dark-900);color:#e2e8f0;overflow-x:hidden}
+        .nexgen-send{min-height:100vh;position:relative}
 
-    @@keyframes gradientFlow {
-        0%, 100%
+        .bg-pattern{position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:-1;overflow:hidden}
+        .grid-overlay{position:absolute;inset:0;background-image:linear-gradient(rgba(96,165,250,0.1) 1px,transparent 1px),linear-gradient(90deg,rgba(96,165,250,0.1) 1px,transparent 1px);background-size:60px 60px;animation:gridMove 20s linear infinite}
+        .gradient-mesh{position:absolute;inset:0;background:radial-gradient(circle at 20% 20%,rgba(96,165,250,0.15) 0%,transparent 50%),radial-gradient(circle at 80% 60%,rgba(192,132,252,0.15) 0%,transparent 50%),radial-gradient(circle at 40% 80%,rgba(52,211,153,0.15) 0%,transparent 50%);animation:meshShift 15s ease-in-out infinite}
+        @@keyframes gridMove{0%{transform:translate(0,0)}100%{transform:translate(60px,60px)}}
+        @@keyframes meshShift{0%,100%{filter:hue-rotate(0deg);transform:scale(1)}50%{filter:hue-rotate(30deg);transform:scale(1.05)}}
+        @@keyframes fadeInUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+        @@keyframes slideIn{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:translateX(0)}}
 
-    {
-        background-position: 0% 50%;
-    }
+        /* NAV */
+        .top-nav{position:sticky;top:0;z-index:100;background:rgba(15,23,42,0.85);backdrop-filter:blur(20px);border-bottom:1px solid rgba(96,165,250,0.15);padding:0.8rem 2rem}
+        .nav-container{max-width:100%;margin:0 auto;padding:0 1rem;display:flex;align-items:center;justify-content:space-between;gap:1rem}
+        .nav-brand{display:flex;align-items:center;gap:0.8rem}
+        .brand-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--neon-green),var(--neon-teal));display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;box-shadow:0 4px 16px rgba(52,211,153,0.3)}
+        .brand-text{display:flex;flex-direction:column}
+        .brand-name{font-family:var(--font-mono);font-size:0.72rem;font-weight:700;color:#fff;letter-spacing:0.1em}
+        .brand-version{font-family:var(--font-mono);font-size:0.58rem;color:var(--dark-500)}
+        .breadcrumb-nex{display:flex;align-items:center;gap:0.6rem;font-family:var(--font-mono);font-size:0.7rem}
+        .breadcrumb-nex .crumb{color:var(--dark-400);text-decoration:none;transition:color 0.2s}
+        .breadcrumb-nex .crumb:hover{color:var(--neon-blue)}
+        .breadcrumb-nex .crumb.active{color:var(--neon-green)}
+        .breadcrumb-nex i.sep{font-size:0.5rem;color:var(--dark-600)}
+        .nav-btn{display:inline-flex;align-items:center;gap:0.5rem;padding:0.5rem 1.2rem;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:var(--dark-300);font-family:var(--font-mono);font-size:0.7rem;font-weight:600;transition:all 0.2s;text-decoration:none}
+        .nav-btn:hover{background:rgba(255,255,255,0.1);border-color:rgba(96,165,250,0.3);color:#fff;text-decoration:none}
 
-    50% {
-        background-position: 100% 50%;
-    }
+        /* MAIN */
+        .send-content{max-width:1200px;margin:0 auto;padding:1.5rem 2rem}
 
-    }
+        /* ALERTS */
+        .nex-alert{border-radius:12px;padding:0.85rem 1.3rem;font-size:0.82rem;font-weight:500;margin-bottom:1.2rem;display:flex;align-items:center;gap:0.6rem;backdrop-filter:blur(10px);animation:fadeInUp 0.4s ease both}
+        .nex-alert-success{background:rgba(52,211,153,0.1);color:var(--neon-green);border:1px solid rgba(52,211,153,0.25)}
+        .nex-alert-error{background:rgba(248,113,113,0.1);color:var(--neon-red);border:1px solid rgba(248,113,113,0.25)}
+        .nex-alert .btn-close-nex{margin-left:auto;background:none;border:none;color:inherit;opacity:0.6;cursor:pointer;font-size:1rem;padding:0;line-height:1;transition:opacity 0.2s}
+        .nex-alert .btn-close-nex:hover{opacity:1}
 
-    .page-header::after {
-        content: '';
-        position: absolute;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
-        animation: shimmer 4s ease-in-out infinite;
-        pointer-events: none;
-    }
+        /* HERO */
+        .send-hero{background:var(--glass-bg);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:20px;overflow:hidden;box-shadow:var(--glass-shadow);margin-bottom:1.5rem;position:relative;animation:fadeInUp 0.5s ease both}
+        .send-hero::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--neon-green),var(--neon-teal),var(--neon-cyan))}
+        .send-hero-inner{padding:1.5rem 2rem;display:flex;align-items:center;gap:1.2rem;flex-wrap:wrap}
+        .send-hero-icon{width:50px;height:50px;border-radius:14px;background:linear-gradient(135deg,var(--neon-green),var(--neon-teal));display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;flex-shrink:0;box-shadow:0 8px 24px rgba(52,211,153,0.3)}
+        .send-hero-title{font-size:1.3rem;font-weight:700;color:#fff;margin-bottom:0.1rem}
+        .send-hero-sub{font-size:0.8rem;color:var(--dark-400)}
+        .send-hero-pills{margin-left:auto;display:flex;gap:0.5rem;flex-wrap:wrap}
+        .hero-pill{font-family:var(--font-mono);font-size:0.68rem;font-weight:700;padding:0.35rem 0.8rem;border-radius:100px;border:1px solid}
+        .hero-pill.survey{color:var(--neon-indigo);background:rgba(129,140,248,0.1);border-color:rgba(129,140,248,0.3)}
 
-    @@keyframes shimmer {
-        0%, 100%
+        /* FORM CARD */
+        .send-form-card{background:var(--glass-bg);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:20px;overflow:hidden;box-shadow:var(--glass-shadow);animation:fadeInUp 0.5s ease 0.08s both;position:relative}
+        .send-form-card::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--neon-green),var(--neon-cyan),var(--neon-indigo));z-index:1;border-radius:20px 20px 0 0}
 
-    {
-        transform: rotate(0deg) scale(0.8);
-        opacity: 0.3;
-    }
+        /* FORM GROUP */
+        .nex-form-group{padding:1.5rem 2rem;border-bottom:1px solid rgba(255,255,255,0.04)}
+        .nex-form-group:last-child{border-bottom:none}
+        .nex-label{display:flex;align-items:center;gap:0.7rem;font-size:0.88rem;font-weight:700;color:#fff;margin-bottom:0.8rem}
+        .nex-label-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.85rem;color:#fff;flex-shrink:0}
+        .nex-label-icon.green{background:linear-gradient(135deg,var(--neon-green),var(--neon-teal));box-shadow:0 4px 12px rgba(52,211,153,0.25)}
+        .nex-label-icon.blue{background:linear-gradient(135deg,var(--neon-blue),var(--neon-cyan));box-shadow:0 4px 12px rgba(96,165,250,0.25)}
+        .nex-label-icon.purple{background:linear-gradient(135deg,var(--neon-indigo),var(--neon-purple));box-shadow:0 4px 12px rgba(129,140,248,0.25)}
+        .nex-label-icon.yellow{background:linear-gradient(135deg,var(--neon-yellow),#f59e0b);box-shadow:0 4px 12px rgba(251,191,36,0.25)}
+        .nex-label-sub{font-family:var(--font-mono);font-size:0.6rem;color:var(--dark-500);font-weight:600;margin-left:auto;text-transform:uppercase;letter-spacing:0.05em}
 
-    50% {
-        transform: rotate(180deg) scale(1.2);
-        opacity: 0.6;
-    }
+        /* INPUTS */
+        .nex-input,.nex-textarea,.nex-datetime{width:100%;padding:0.85rem 1.2rem;border-radius:12px;font-size:0.88rem;font-weight:500;color:#fff;background:rgba(255,255,255,0.04);border:1.5px solid rgba(255,255,255,0.1);transition:all 0.3s;font-family:var(--font-main);outline:none}
+        .nex-input:focus,.nex-textarea:focus,.nex-datetime:focus{border-color:rgba(52,211,153,0.5);box-shadow:0 0 0 3px rgba(52,211,153,0.1),0 8px 24px rgba(0,0,0,0.15);background:rgba(255,255,255,0.06)}
+        .nex-input::placeholder,.nex-textarea::placeholder{color:var(--dark-600)}
+        .nex-input:disabled{background:linear-gradient(135deg,rgba(129,140,248,0.15),rgba(192,132,252,0.15));border-color:rgba(129,140,248,0.3);color:var(--neon-indigo);font-weight:700;cursor:not-allowed;text-align:center}
+        .nex-textarea{min-height:100px;resize:vertical;line-height:1.7;font-family:var(--font-mono);font-size:0.8rem}
+        .nex-datetime{color-scheme:dark}
+        .nex-datetime::-webkit-calendar-picker-indicator{filter:invert(0.7);cursor:pointer}
 
-    }
+        /* ===== SIDE-BY-SIDE PICKER — FORCED HORIZONTAL ===== */
+        .picker-layout{display:flex;flex-direction:row;border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);background:rgba(0,0,0,0.15)}
+        .picker-panel{flex:1;min-width:0;display:flex;flex-direction:column;height:380px}
+        .picker-panel + .picker-divider + .picker-panel {} /* right panel */
 
-    .header-content {
-        display: flex;
-        align-items: center;
-        gap: 2rem;
-        position: relative;
-        z-index: 2;
-    }
+        .panel-head{padding:0.7rem 1rem;display:flex;align-items:center;gap:0.6rem;border-bottom:1px solid rgba(255,255,255,0.06);flex-shrink:0}
+        .panel-head.left{background:rgba(96,165,250,0.06)}
+        .panel-head.right{background:rgba(52,211,153,0.06)}
+        .panel-badge{width:24px;height:24px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:0.65rem;font-weight:700;color:#fff}
+        .panel-badge.blue{background:linear-gradient(135deg,var(--neon-blue),var(--neon-cyan))}
+        .panel-badge.green{background:linear-gradient(135deg,var(--neon-green),var(--neon-teal))}
+        .panel-title{font-family:var(--font-mono);font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em}
+        .panel-title.blue{color:var(--neon-blue)}
+        .panel-title.green{color:var(--neon-green)}
+        .panel-count{margin-left:auto;font-family:var(--font-mono);font-size:0.6rem;font-weight:700;color:var(--dark-500);background:rgba(255,255,255,0.05);padding:0.15rem 0.5rem;border-radius:100px}
 
-    .header-icon {
-        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 50%, var(--info-color) 100%);
-        color: white;
-        width: 80px;
-        height: 80px;
-        border-radius: var(--border-radius-lg);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 2.25rem;
-        box-shadow: var(--shadow-floating);
-        position: relative;
-        animation: iconPulse 3s ease-in-out infinite;
-    }
+        .panel-search{padding:0.5rem 0.7rem;border-bottom:1px solid rgba(255,255,255,0.04);position:relative;flex-shrink:0}
+        .panel-search input{width:100%;padding:0.55rem 0.8rem 0.55rem 2.2rem;border-radius:8px;font-size:0.78rem;color:#fff;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);outline:none;font-family:var(--font-main);transition:all 0.2s}
+        .panel-search input:focus{border-color:rgba(96,165,250,0.4);background:rgba(255,255,255,0.06)}
+        .panel-search input::placeholder{color:var(--dark-600)}
+        .panel-search i{position:absolute;left:1.2rem;top:50%;transform:translateY(-50%);color:var(--dark-600);font-size:0.75rem;pointer-events:none}
 
-        .header-icon::before {
-            content: '';
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            background: linear-gradient(45deg, var(--primary-color), var(--info-color), var(--success-color), var(--primary-color));
-            border-radius: var(--border-radius-lg);
-            z-index: -1;
-            background-size: 300% 300%;
-            animation: borderFlow 3s ease infinite;
+        .panel-list{flex:1;overflow-y:auto;padding:0.3rem}
+        .panel-list::-webkit-scrollbar{width:4px}
+        .panel-list::-webkit-scrollbar-track{background:transparent}
+        .panel-list::-webkit-scrollbar-thumb{background:var(--dark-600);border-radius:100px}
+
+        .user-row{display:flex;align-items:center;gap:0.65rem;padding:0.55rem 0.7rem;border-radius:9px;cursor:pointer;transition:all 0.15s;margin-bottom:0.15rem}
+        .user-row:hover{background:rgba(96,165,250,0.08)}
+        .user-row.in-selected{opacity:0.3;pointer-events:none}
+        .user-row-avatar{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;color:#fff;flex-shrink:0}
+        .user-row-avatar.av-blue{background:linear-gradient(135deg,var(--neon-blue),var(--neon-purple))}
+        .user-row-avatar.av-green{background:linear-gradient(135deg,var(--neon-green),var(--neon-teal))}
+        .user-row-info{flex:1;min-width:0}
+        .user-row-name{font-size:0.8rem;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .user-row-email{font-family:var(--font-mono);font-size:0.65rem;color:var(--dark-400);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .user-row-action{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:0.75rem;flex-shrink:0;transition:all 0.2s}
+        .user-row-action.add{color:var(--neon-green);background:rgba(52,211,153,0.1)}
+        .user-row:hover .user-row-action.add{background:rgba(52,211,153,0.2)}
+        .user-row-action.remove{color:var(--neon-red);background:rgba(248,113,113,0.1)}
+        .user-row:hover .user-row-action.remove{background:rgba(248,113,113,0.2)}
+
+        .picker-divider{width:1px;background:rgba(255,255,255,0.06);flex-shrink:0}
+
+        .panel-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:2rem 1rem;text-align:center}
+        .panel-empty-icon{font-size:1.8rem;color:var(--dark-600);margin-bottom:0.5rem}
+        .panel-empty-text{font-size:0.73rem;color:var(--dark-500);max-width:200px;line-height:1.5}
+
+        .panel-actions{padding:0.4rem 0.7rem;border-top:1px solid rgba(255,255,255,0.04);display:flex;gap:0.3rem;flex-shrink:0}
+        .panel-action-btn{flex:1;padding:0.4rem;border-radius:7px;border:none;font-family:var(--font-mono);font-size:0.62rem;font-weight:700;cursor:pointer;transition:all 0.2s;text-transform:uppercase;letter-spacing:0.04em}
+        .panel-action-btn.select-all{background:rgba(52,211,153,0.08);color:var(--neon-green);border:1px solid rgba(52,211,153,0.2)}
+        .panel-action-btn.select-all:hover{background:rgba(52,211,153,0.15)}
+        .panel-action-btn.deselect-all{background:rgba(248,113,113,0.08);color:var(--neon-red);border:1px solid rgba(248,113,113,0.2)}
+        .panel-action-btn.deselect-all:hover{background:rgba(248,113,113,0.15)}
+
+        /* ===== TWO-COLUMN ROW (Textarea + Expiration) ===== */
+        .two-col-row{display:flex;gap:1.5rem;padding:1.5rem 2rem;border-bottom:1px solid rgba(255,255,255,0.04)}
+        .two-col-row .col-left{flex:1;min-width:0}
+        .two-col-row .col-right{width:340px;flex-shrink:0}
+
+        /* DIVIDER */
+        .or-divider{display:flex;align-items:center;gap:0.8rem;margin:0.8rem 0}
+        .or-divider .line{flex:1;height:1px;background:rgba(255,255,255,0.06)}
+        .or-divider .or-text{font-family:var(--font-mono);font-size:0.6rem;font-weight:700;color:var(--dark-600);text-transform:uppercase;letter-spacing:0.1em}
+
+        /* HELPER */
+        .nex-helper{margin-top:0.6rem;font-size:0.73rem;color:var(--dark-500);background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-left:3px solid var(--neon-cyan);border-radius:0 8px 8px 0;padding:0.5rem 0.9rem;display:flex;align-items:flex-start;gap:0.4rem}
+        .nex-helper i{color:var(--neon-cyan);margin-top:0.1rem;flex-shrink:0}
+
+        /* VALIDATION */
+        .field-validation-error,.text-danger{color:var(--neon-red);font-size:0.73rem;font-weight:600;margin-top:0.5rem;display:block;background:rgba(248,113,113,0.08);padding:0.4rem 0.7rem;border-radius:8px;border-left:3px solid var(--neon-red)}
+        .input-validation-error{border-color:rgba(248,113,113,0.5) !important;box-shadow:0 0 0 3px rgba(248,113,113,0.1) !important}
+
+        /* SUBMIT */
+        .submit-section{padding:1.5rem 2rem 2rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+        .submit-summary{display:flex;align-items:center;gap:0.6rem}
+        .summary-badge{font-family:var(--font-mono);font-size:0.78rem;font-weight:700;padding:0.45rem 1rem;border-radius:10px;display:flex;align-items:center;gap:0.4rem}
+        .summary-badge.recipients{color:var(--neon-green);background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.25)}
+        .summary-badge.recipients .num{font-size:1rem}
+
+        .nex-submit{display:inline-flex;align-items:center;gap:0.7rem;padding:0.9rem 2.5rem;border-radius:14px;font-family:var(--font-mono);font-size:0.85rem;font-weight:700;color:#fff;background:linear-gradient(135deg,var(--neon-green),var(--neon-teal));border:none;cursor:pointer;transition:all 0.3s;box-shadow:0 8px 24px rgba(52,211,153,0.3);text-transform:uppercase;letter-spacing:0.06em;position:relative;overflow:hidden}
+        .nex-submit::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);transition:left 0.5s}
+        .nex-submit:hover::before{left:100%}
+        .nex-submit:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(52,211,153,0.4)}
+        .nex-submit:active{transform:translateY(-1px)}
+        .nex-submit:disabled{background:var(--dark-600);box-shadow:none;cursor:not-allowed;transform:none}
+        .nex-submit:disabled::before{display:none}
+        .nex-submit i{font-size:1.1rem}
+
+        /* RESPONSIVE */
+        @@media(max-width:992px){
+            .picker-layout{flex-direction:column}
+            .picker-panel{height:260px}
+            .picker-divider{width:auto;height:1px}
+            .two-col-row{flex-direction:column}
+            .two-col-row .col-right{width:100%}
         }
-
-    @@keyframes iconPulse {
-        0%, 100%
-
-    {
-        transform: scale(1);
-    }
-
-    50% {
-        transform: scale(1.05);
-    }
-
-    }
-
-    @@keyframes borderFlow {
-        0%, 100%
-
-    {
-        background-position: 0% 50%;
-    }
-
-    50% {
-        background-position: 100% 50%;
-    }
-
-    }
-
-    .header-text h1 {
-        font-size: 3rem;
-        font-weight: 900;
-        background: linear-gradient(135deg, var(--gray-800) 0%, var(--primary-color) 50%, var(--info-color) 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        margin: 0 0 0.75rem;
-        line-height: 1.2;
-        animation: textShimmer 4s ease-in-out infinite;
-    }
-
-    @@keyframes textShimmer {
-        0%, 100%
-
-    {
-        background-position: 0% 50%;
-    }
-
-    50% {
-        background-position: 100% 50%;
-    }
-
-    }
-
-    .header-subtitle {
-        color: var(--gray-700);
-        font-size: 1.25rem;
-        font-weight: 500;
-        line-height: 1.6;
-        opacity: 0.9;
-    }
-
-    /* Premium Info Cards */
-    .info-cards {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 2rem;
-        margin-bottom: 3rem;
-    }
-
-    .info-card {
-        background: rgba(255, 255, 255, 0.2);
-        backdrop-filter: blur(15px);
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        border-radius: var(--border-radius-xl);
-        padding: 2rem;
-        box-shadow: var(--shadow-floating);
-        position: relative;
-        overflow: hidden;
-        transition: all 0.4s var(--ease-premium);
-        animation: slideUp 0.8s var(--ease-premium);
-    }
-
-        .info-card:nth-child(1) {
-            animation-delay: 0.2s;
-            animation-fill-mode: both;
+        @@media(max-width:768px){
+            .send-content{padding:1rem}
+            .send-hero-inner{padding:1.2rem;flex-direction:column;align-items:flex-start}
+            .send-hero-pills{margin-left:0}
+            .nex-form-group{padding:1.2rem 1.3rem}
+            .two-col-row{padding:1.2rem 1.3rem}
+            .submit-section{flex-direction:column;padding:1.2rem 1.3rem 1.5rem}
+            .nex-submit{width:100%;justify-content:center}
+            .nav-container{flex-wrap:wrap}
+            .breadcrumb-nex{order:3;flex-basis:100%}
         }
-
-        .info-card:nth-child(2) {
-            animation-delay: 0.4s;
-            animation-fill-mode: both;
-        }
-
-        .info-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, var(--info-color), var(--success-color));
-            transition: all 0.3s ease;
-        }
-
-        .info-card:hover {
-            transform: translateY(-8px) scale(1.02);
-            box-shadow: var(--shadow-ultra);
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-            .info-card:hover::before {
-                height: 6px;
-                background: linear-gradient(90deg, var(--primary-color), var(--info-color), var(--success-color));
-            }
-
-        .info-card h4 {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--gray-800);
-            margin: 0 0 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-    .info-card-icon {
-        background: linear-gradient(135deg, var(--info-color), var(--info-light));
-        color: white;
-        width: 40px;
-        height: 40px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.125rem;
-        box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
-    }
-
-    /* Ultra-Premium Form Card */
-    .form-card {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(30px);
-        border: 1px solid rgba(255, 255, 255, 0.4);
-        border-radius: var(--border-radius-2xl);
-        box-shadow: var(--shadow-premium);
-        overflow: hidden;
-        position: relative;
-        animation: slideUp 0.8s var(--ease-premium) 0.6s both;
-    }
-
-        .form-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 6px;
-            background: linear-gradient(90deg, var(--success-color), var(--info-color), var(--primary-color), var(--warning-color), var(--success-color) );
-            background-size: 200% 100%;
-            animation: gradientFlow 4s ease-in-out infinite;
-        }
-
-    .form-header {
-        background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 50%, rgba(6, 182, 212, 0.05) 100% );
-        padding: 3rem;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-        position: relative;
-    }
-
-    .form-title {
-        display: flex;
-        align-items: center;
-        gap: 1.5rem;
-        margin: 0;
-    }
-
-    .form-icon {
-        background: linear-gradient(135deg, var(--success-color) 0%, var(--success-light) 100%);
-        color: white;
-        width: 60px;
-        height: 60px;
-        border-radius: var(--border-radius-lg);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.75rem;
-        box-shadow: var(--shadow-floating);
-        position: relative;
-        animation: iconBounce 2s ease-in-out infinite;
-    }
-
-    @@keyframes iconBounce {
-        0%, 100%
-
-    {
-        transform: translateY(0);
-    }
-
-    50% {
-        transform: translateY(-4px);
-    }
-
-    }
-
-    .form-title h2 {
-        font-size: 2rem;
-        font-weight: 800;
-        background: linear-gradient(135deg, var(--gray-800), var(--primary-color));
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        margin: 0;
-    }
-
-    .form-body {
-        padding: 3rem;
-        background: rgba(255, 255, 255, 0.5);
-    }
-
-    /* Ultra-Premium Form Groups */
-    .form-group {
-        margin-bottom: 2.5rem;
-        position: relative;
-    }
-
-        .form-group:last-child {
-            margin-bottom: 0;
-        }
-
-    /* Beautiful Labels */
-    .control-label {
-        display: block;
-        font-size: 1.125rem;
-        font-weight: 700;
-        color: var(--gray-800);
-        margin-bottom: 1rem;
-        position: relative;
-        padding-left: 2.5rem;
-    }
-
-        .control-label i {
-            position: absolute;
-            left: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-            color: white;
-            width: 32px;
-            height: 32px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1rem;
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-        }
-
-        .control-label::after {
-            content: '';
-            position: absolute;
-            bottom: -6px;
-            left: 2.5rem;
-            width: 60px;
-            height: 3px;
-            background: linear-gradient(90deg, var(--primary-color), var(--info-color));
-            border-radius: 2px;
-            opacity: 0.7;
-        }
-
-    /* Premium Form Controls */
-    .form-control {
-        width: 100%;
-        padding: 1.25rem 1.5rem;
-        border: 2px solid rgba(203, 213, 225, 0.6);
-        border-radius: var(--border-radius-lg);
-        font-size: 1.125rem;
-        font-weight: 500;
-        color: var(--gray-800);
-        background: rgba(255, 255, 255, 0.8);
-        backdrop-filter: blur(10px);
-        transition: all 0.3s var(--ease-premium);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-        position: relative;
-    }
-
-        .form-control:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15), 0 8px 25px rgba(99, 102, 241, 0.2), inset 0 1px 3px rgba(0, 0, 0, 0.05);
-            transform: translateY(-2px) scale(1.01);
-            background: rgba(255, 255, 255, 0.95);
-        }
-
-        .form-control:disabled {
-            background: linear-gradient(135deg, var(--info-color), var(--info-light));
-            color: white;
-            border: none;
-            cursor: not-allowed;
-            font-weight: 700;
-            text-align: center;
-            box-shadow: var(--shadow-floating);
-        }
-
-            .form-control:disabled:focus {
-                transform: none;
-                box-shadow: var(--shadow-floating);
-            }
-
-    /* Special Textarea */
-    textarea.form-control {
-        min-height: 140px;
-        resize: vertical;
-        line-height: 1.7;
-        font-family: 'JetBrains Mono', 'Monaco', monospace;
-        background: linear-gradient(135deg, rgba(248, 250, 252, 0.9), rgba(241, 245, 249, 0.9));
-        border-color: var(--info-color);
-    }
-
-        textarea.form-control:focus {
-            border-color: var(--info-dark);
-            box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.15), 0 8px 25px rgba(6, 182, 212, 0.2);
-        }
-
-    /* DateTime Input */
-    .datetime-input {
-        background: linear-gradient(135deg, rgba(245, 158, 11, 0.05), rgba(251, 191, 36, 0.05));
-        border-color: var(--warning-color);
-    }
-
-        .datetime-input:focus {
-            border-color: var(--warning-dark);
-            box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.15), 0 8px 25px rgba(245, 158, 11, 0.2);
-        }
-
-    /* Ultra-Premium Submit Button */
-    .btn-submit {
-        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 50%, var(--info-color) 100%);
-        color: white;
-        border: none;
-        padding: 1.5rem 3rem;
-        border-radius: var(--border-radius-xl);
-        font-weight: 800;
-        font-size: 1.25rem;
-        transition: all 0.4s var(--ease-premium);
-        box-shadow: var(--shadow-floating);
-        position: relative;
-        overflow: hidden;
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        gap: 1rem;
-        min-width: 250px;
-        justify-content: center;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-        .btn-submit::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent );
-            transition: left 0.6s ease;
-        }
-
-        .btn-submit::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            transition: width 0.6s ease, height 0.6s ease;
-        }
-
-        .btn-submit:hover::before {
-            left: 100%;
-        }
-
-        .btn-submit:hover::after {
-            width: 300px;
-            height: 300px;
-        }
-
-        .btn-submit:hover {
-            background: linear-gradient(135deg, var(--primary-light) 0%, var(--info-color) 50%, var(--success-color) 100%);
-            transform: translateY(-6px) scale(1.05);
-            box-shadow: var(--shadow-ultra);
-        }
-
-        .btn-submit:active {
-            transform: translateY(-2px) scale(1.02);
-        }
-
-        .btn-submit i {
-            font-size: 1.5rem;
-            z-index: 1;
-            position: relative;
-        }
-
-        .btn-submit span {
-            z-index: 1;
-            position: relative;
-        }
-
-    /* Validation Styling */
-    .text-danger {
-        color: var(--danger-color);
-        font-size: 0.875rem;
-        font-weight: 600;
-        margin-top: 0.75rem;
-        display: block;
-        background: rgba(239, 68, 68, 0.1);
-        padding: 0.5rem 0.75rem;
-        border-radius: var(--border-radius-sm);
-        border-left: 4px solid var(--danger-color);
-    }
-
-    .input-validation-error {
-        border-color: var(--danger-color) !important;
-        box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.15) !important;
-        animation: shake 0.5s ease-in-out;
-    }
-
-    @@keyframes shake {
-        0%, 100%
-
-    {
-        transform: translateX(0);
-    }
-
-    25% {
-        transform: translateX(-5px);
-    }
-
-    75% {
-        transform: translateX(5px);
-    }
-
-    }
-
-    /* Helper Text */
-    .helper-text {
-        margin-top: 0.75rem;
-        font-size: 0.875rem;
-        color: var(--gray-600);
-        background: rgba(248, 250, 252, 0.8);
-        padding: 0.75rem 1rem;
-        border-radius: var(--border-radius-sm);
-        border-left: 3px solid var(--info-color);
-        backdrop-filter: blur(5px);
-    }
-
-    /* Animations */
-    @@keyframes slideDown {
-        from
-
-    {
-        opacity: 0;
-        transform: translateY(-50px) scale(0.95);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-
-    }
-
-    @@keyframes slideUp {
-        from
-
-    {
-        opacity: 0;
-        transform: translateY(50px) scale(0.95);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-
-    }
-
-    /* Alert Styling */
-    .alert {
-        border-radius: var(--border-radius-lg);
-        padding: 1.25rem 1.5rem;
-        margin-bottom: 2rem;
-        border: none;
-        box-shadow: var(--shadow-floating);
-        animation: slideDown 0.6s var(--ease-premium);
-        backdrop-filter: blur(10px);
-    }
-
-    .alert-success {
-        background: linear-gradient(135deg, var(--success-color) 0%, var(--success-light) 100%);
-        color: white;
-    }
-
-    .alert-danger {
-        background: linear-gradient(135deg, var(--danger-color) 0%, var(--danger-light) 100%);
-        color: white;
-    }
-
-    /* Responsive Design */
-    @@media (max-width: 768px) {
-        .container
-
-    {
-        padding: 2rem 1rem;
-    }
-
-    .page-header {
-        padding: 2rem;
-    }
-
-    .header-content {
-        flex-direction: column;
-        text-align: center;
-        gap: 1.5rem;
-    }
-
-    .header-text h1 {
-        font-size: 2.5rem;
-    }
-
-    .form-body {
-        padding: 2rem;
-    }
-
-    .form-header {
-        padding: 2rem;
-    }
-
-    .btn-submit {
-        width: 100%;
-    }
-
-    .info-cards {
-        grid-template-columns: 1fr;
-    }
-
-    }
-
-    /* Loading States */
-    .btn-submit.loading {
-        background: var(--gray-400);
-        cursor: not-allowed;
-        transform: none;
-    }
-
-        .btn-submit.loading::after {
-            content: "";
-            width: 20px;
-            height: 20px;
-            border: 2px solid transparent;
-            border-top-color: currentColor;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-left: 0.75rem;
-        }
-
-    @@keyframes spin {
-        0%
-
-    {
-        transform: rotate(0deg);
-    }
-
-    100% {
-        transform: rotate(360deg);
-    }
-
-    }
-</style>
-
-<div class="container">
-
-
-    <!-- Success/Error Messages -->
-    @if (TempData["Success"] != null)
-    {
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="bi bi-check-circle-fill"></i> @TempData["Success"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">×</button>
-        </div>
-    }
-
-    @if (TempData["Error"] != null)
-    {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="bi bi-exclamation-triangle-fill"></i> @TempData["Error"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">×</button>
-        </div>
-    }
-
-    <!-- Premium Page Header -->
-    <div class="page-header">
-        <div class="header-content">
-            <div class="header-icon">
-                <i class="bi bi-rocket-takeoff-fill"></i>
+        @@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0.01ms !important;animation-iteration-count:1 !important;transition-duration:0.01ms !important}}
+        @@media print{.bg-pattern,.top-nav{display:none !important}.send-form-card,.send-hero{background:white;color:black;border:1px solid #ccc;backdrop-filter:none}}
+    </style>
+}
+
+@{
+    var users = ViewBag.Users as IEnumerable<dynamic> ?? Enumerable.Empty<dynamic>();
+}
+
+<div class="nexgen-send">
+    <div class="bg-pattern"><div class="grid-overlay"></div><div class="gradient-mesh"></div></div>
+
+    <nav class="top-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <div class="brand-icon"><i class="bi bi-send-fill"></i></div>
+                <div class="brand-text"><span class="brand-name">DISTRIBUTE</span><span class="brand-version">v1.0</span></div>
             </div>
-            <div class="header-text">
-                <h1>Send Questionnaire</h1>
-                <p class="header-subtitle">Distribute your questionnaire with style and precision to multiple recipients</p>
-            </div>
+            <nav class="breadcrumb-nex">
+                <a asp-controller="Questionnaire" asp-action="Index" class="crumb"><i class="bi bi-collection"></i> SURVEYS</a>
+                <i class="bi bi-chevron-right sep"></i>
+                <span class="crumb active">SEND QUESTIONNAIRE</span>
+            </nav>
+            <a asp-controller="Questionnaire" asp-action="Index" class="nav-btn"><i class="bi bi-arrow-left"></i> Back</a>
         </div>
-    </div>
+    </nav>
 
-    <!-- Premium Info Cards -->
-   
+    <div class="send-content">
 
-    <!-- Ultra-Premium Form -->
-    <div class="form-card">
-        <div class="form-header">
-            <div class="form-title">
-                <div class="form-icon">
-                    <i class="bi bi-envelope-paper-heart-fill"></i>
+        @if (TempData["Success"] != null)
+        { <div class="nex-alert nex-alert-success"><i class="bi bi-check-circle-fill"></i> @TempData["Success"]<button class="btn-close-nex" onclick="this.parentElement.remove()">×</button></div> }
+        @if (TempData["Error"] != null)
+        { <div class="nex-alert nex-alert-error"><i class="bi bi-exclamation-triangle-fill"></i> @TempData["Error"]<button class="btn-close-nex" onclick="this.parentElement.remove()">×</button></div> }
+
+        <!-- Hero -->
+        <div class="send-hero">
+            <div class="send-hero-inner">
+                <div class="send-hero-icon"><i class="bi bi-rocket-takeoff-fill"></i></div>
+                <div>
+                    <h1 class="send-hero-title">Send Questionnaire</h1>
+                    <div class="send-hero-sub">Select recipients and distribute your questionnaire</div>
                 </div>
-                <h2>Questionnaire Distribution Center</h2>
+                <div class="send-hero-pills">
+                    <span class="hero-pill survey"><i class="bi bi-file-text"></i> @ViewBag.questionnaireName</span>
+                </div>
             </div>
         </div>
 
-        <div class="form-body">
-            <form asp-action="SendQuestionnaire">
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <!-- Form -->
+        <div class="send-form-card">
+            <form asp-action="SendQuestionnaire" id="sendForm">
+                <div asp-validation-summary="ModelOnly" class="text-danger" style="margin:1rem 2rem 0;"></div>
+                <input type="hidden" asp-for="QuestionnaireId" />
 
-                <!-- Questionnaire Selection -->
-                <div class="form-group">
-                    <label asp-for="QuestionnaireId" class="control-label">
-                        <i class="bi bi-clipboard-data-fill"></i>
-                        Selected Questionnaire
+                <!-- Recipients: Side-by-Side Picker -->
+                <div class="nex-form-group">
+                    <label class="nex-label">
+                        <span class="nex-label-icon blue"><i class="bi bi-people-fill"></i></span>
+                        Select Recipients
+                        <span class="nex-label-sub" id="recipientCount">0 selected</span>
                     </label>
-                    <input type="text" class="form-control" value="@ViewBag.questionnaireName" disabled />
-                    
-                </div>
 
-                <!-- Email Addresses -->
-                <div class="form-group">
-                    <label asp-for="Emails" class="control-label">
-                        <i class="bi bi-people-fill"></i>
-                        Email Recipients
-                    </label>
-                    <textarea asp-for="Emails"
-                              class="form-control"
-                              placeholder="Enter email addresses separated by commas
+                    <div class="picker-layout">
+                        <!-- LEFT: Available -->
+                        <div class="picker-panel">
+                            <div class="panel-head left">
+                                <span class="panel-badge blue"><i class="bi bi-people"></i></span>
+                                <span class="panel-title blue">Available Users</span>
+                                <span class="panel-count" id="availCount">0</span>
+                            </div>
+                            <div class="panel-search">
+                                <i class="bi bi-search"></i>
+                                <input type="text" id="searchAvail" placeholder="Search by name or email..." />
+                            </div>
+                            <div class="panel-list" id="availList">
+                                @foreach (var user in users)
+                                {
+                                    string uName = user.UserName ?? "Unknown";
+                                    string uEmail = user.UserEmail ?? "";
+                                    string initial = !string.IsNullOrEmpty(uName) ? uName.Substring(0, 1).ToUpper() : "U";
+                                    <div class="user-row avail-user" data-email="@uEmail" data-name="@uName">
+                                        <div class="user-row-avatar av-blue">@initial</div>
+                                        <div class="user-row-info">
+                                            <div class="user-row-name">@uName</div>
+                                            <div class="user-row-email">@uEmail</div>
+                                        </div>
+                                        <div class="user-row-action add"><i class="bi bi-plus"></i></div>
+                                    </div>
+                                }
+                            </div>
+                            <div class="panel-actions">
+                                <button type="button" class="panel-action-btn select-all" id="selectAllBtn"><i class="bi bi-check-all"></i> Select All</button>
+                            </div>
+                        </div>
 
-Example:
-john.doe@company.com, jane.smith@organization.org, user@domain.com
+                        <div class="picker-divider"></div>
 
-💡 Tip: You can paste from Excel, CSV, or any text format"
-                              rows="5"></textarea>
-                 
-                    <div class="helper-text">
-                        <i class="bi bi-info-circle-fill me-2"></i>
-                        <strong>Pro Tip:</strong> Copy and paste email lists from Excel, Google Sheets, or any text document. The system will automatically format them correctly.
+                        <!-- RIGHT: Selected -->
+                        <div class="picker-panel">
+                            <div class="panel-head right">
+                                <span class="panel-badge green"><i class="bi bi-check-lg"></i></span>
+                                <span class="panel-title green">Selected Recipients</span>
+                                <span class="panel-count" id="selCount">0</span>
+                            </div>
+                            <div class="panel-list" id="selectedList">
+                                <div class="panel-empty" id="emptySelected">
+                                    <div class="panel-empty-icon"><i class="bi bi-inbox"></i></div>
+                                    <div class="panel-empty-text">Click users from the left to add them as recipients</div>
+                                </div>
+                            </div>
+                            <div class="panel-actions">
+                                <button type="button" class="panel-action-btn deselect-all" id="deselectAllBtn"><i class="bi bi-x-lg"></i> Remove All</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Expiration Date -->
-                <div class="form-group">
-                    <label asp-for="ExpirationDateTime" class="control-label">
-                        <i class="bi bi-calendar-event-fill"></i>
-                        Survey Expiration
-                    </label>
-                    <input asp-for="ExpirationDateTime"
-                           class="form-control datetime-input"
-                           type="datetime-local"
-                           min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
-                  
-                 
+                <!-- Two-Column: Textarea + Expiration side-by-side -->
+                <div class="two-col-row">
+                    <!-- Left: Manual Emails -->
+                    <div class="col-left">
+                        <label class="nex-label">
+                            <span class="nex-label-icon purple"><i class="bi bi-envelope-fill"></i></span>
+                            Manual Email Entry
+                        </label>
+                        <textarea asp-for="Emails" class="nex-textarea" id="emailTextarea"
+                                  placeholder="Type or paste additional emails, separated by commas&#10;Example: john@@company.com, jane@@org.com"
+                                  rows="4"></textarea>
+                        <span asp-validation-for="Emails" class="field-validation-error"></span>
+                        <div class="nex-helper">
+                            <i class="bi bi-info-circle-fill"></i>
+                            <span>Both the user picker and this field combine. Duplicates are handled automatically.</span>
+                        </div>
+                    </div>
+
+                    <!-- Right: Expiration -->
+                    <div class="col-right">
+                        <label class="nex-label">
+                            <span class="nex-label-icon yellow"><i class="bi bi-calendar-event-fill"></i></span>
+                            Survey Expiration
+                        </label>
+                        <input asp-for="ExpirationDateTime" class="nex-input nex-datetime" type="datetime-local"
+                               min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
+                        <span asp-validation-for="ExpirationDateTime" class="field-validation-error"></span>
+                        <div class="nex-helper">
+                            <i class="bi bi-clock"></i>
+                            <span>Links expire on this date. Defaults to 30 days if left empty.</span>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Hidden Fields -->
-                <input type="hidden" asp-for="QuestionnaireId" />
-
-                <!-- Ultra-Premium Submit Button -->
-                <div class="form-group text-center">
-                    <button type="submit" class="btn-submit">
+                <!-- Submit -->
+                <div class="submit-section">
+                    <div class="submit-summary">
+                        <div class="summary-badge recipients">
+                            <i class="bi bi-people-fill"></i>
+                            <span class="num" id="totalRecipients">0</span> recipients
+                        </div>
+                    </div>
+                    <button type="submit" class="nex-submit" id="submitBtn">
                         <i class="bi bi-send-fill"></i>
-                        <span>Send Survey</span>
+                        <span>Send Questionnaire</span>
                     </button>
                 </div>
             </form>
@@ -868,38 +364,133 @@ john.doe@company.com, jane.smith@organization.org, user@domain.com
     </div>
 </div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Basic form interactions
-        const form = document.querySelector('form');
-        const submitBtn = document.querySelector('.btn-submit');
+@section Scripts {
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const availList = document.getElementById('availList');
+        const selectedList = document.getElementById('selectedList');
+        const emptySelected = document.getElementById('emptySelected');
+        const searchAvail = document.getElementById('searchAvail');
+        const emailTextarea = document.getElementById('emailTextarea');
+        const recipientCount = document.getElementById('recipientCount');
+        const availCount = document.getElementById('availCount');
+        const selCount = document.getElementById('selCount');
+        const totalRecipients = document.getElementById('totalRecipients');
+        const form = document.getElementById('sendForm');
+        const submitBtn = document.getElementById('submitBtn');
         const expirationInput = document.querySelector('input[name="ExpirationDateTime"]');
 
-        // Auto-dismiss alerts
-        const alerts = document.querySelectorAll('.alert');
-        alerts.forEach(alert => {
-            setTimeout(() => {
-                alert.style.opacity = '0';
-                alert.style.transform = 'translateY(-30px) scale(0.95)';
-                setTimeout(() => alert.remove(), 400);
-            }, 6000);
+        let selectedEmails = new Set();
+        updateAvailCount();
+
+        // Search
+        searchAvail.addEventListener('input', function () {
+            const q = this.value.toLowerCase().trim();
+            availList.querySelectorAll('.avail-user').forEach(row => {
+                const match = !q || row.dataset.name.toLowerCase().includes(q) || row.dataset.email.toLowerCase().includes(q);
+                row.style.display = match ? '' : 'none';
+            });
         });
 
-        // Form submission with loading state
+        // Click to add
+        availList.addEventListener('click', function (e) {
+            const row = e.target.closest('.avail-user');
+            if (!row || row.classList.contains('in-selected')) return;
+            addUser(row.dataset.email, row.dataset.name);
+        });
+
+        // Select All
+        document.getElementById('selectAllBtn').addEventListener('click', function () {
+            availList.querySelectorAll('.avail-user').forEach(row => {
+                if (!row.classList.contains('in-selected') && row.style.display !== 'none') {
+                    addUser(row.dataset.email, row.dataset.name, true);
+                }
+            });
+            syncAll();
+        });
+
+        // Deselect All
+        document.getElementById('deselectAllBtn').addEventListener('click', function () {
+            selectedEmails.clear();
+            selectedList.querySelectorAll('.user-row').forEach(r => r.remove());
+            availList.querySelectorAll('.avail-user').forEach(r => r.classList.remove('in-selected'));
+            syncAll();
+        });
+
+        function addUser(email, name, batch) {
+            const key = email.toLowerCase().trim();
+            if (!key || selectedEmails.has(key)) return;
+            selectedEmails.add(key);
+
+            const availRow = availList.querySelector('.avail-user[data-email="' + email + '"]');
+            if (availRow) availRow.classList.add('in-selected');
+
+            const initial = name ? name.charAt(0).toUpperCase() : 'U';
+            const row = document.createElement('div');
+            row.className = 'user-row';
+            row.dataset.email = key;
+            row.style.animation = 'slideIn 0.2s ease both';
+            row.innerHTML = '<div class="user-row-avatar av-green">' + initial + '</div>' +
+                '<div class="user-row-info"><div class="user-row-name">' + (name || key) + '</div>' +
+                '<div class="user-row-email">' + key + '</div></div>' +
+                '<div class="user-row-action remove"><i class="bi bi-x-lg"></i></div>';
+            row.addEventListener('click', function () { removeUser(key, row); });
+            selectedList.appendChild(row);
+
+            if (!batch) syncAll();
+        }
+
+        function removeUser(key, row) {
+            selectedEmails.delete(key);
+            row.remove();
+            availList.querySelectorAll('.avail-user').forEach(r => {
+                if (r.dataset.email.toLowerCase() === key) r.classList.remove('in-selected');
+            });
+            syncAll();
+        }
+
+        function syncAll() {
+            const manualEmails = emailTextarea.value.split(/[,;\n]+/).map(e => e.trim().toLowerCase()).filter(e => e && e.includes('@@'));
+            const allEmails = new Set([...selectedEmails, ...manualEmails]);
+            emailTextarea.value = Array.from(allEmails).join(', ');
+            const count = allEmails.size;
+            recipientCount.textContent = count + ' selected';
+            selCount.textContent = selectedEmails.size;
+            totalRecipients.textContent = count;
+            updateAvailCount();
+            emptySelected.style.display = selectedEmails.size > 0 ? 'none' : '';
+        }
+
+        function updateAvailCount() {
+            availCount.textContent = availList.querySelectorAll('.avail-user:not(.in-selected)').length;
+        }
+
+        emailTextarea.addEventListener('input', function () {
+            const manualEmails = this.value.split(/[,;\n]+/).map(e => e.trim().toLowerCase()).filter(e => e && e.includes('@@'));
+            const allEmails = new Set([...selectedEmails, ...manualEmails]);
+            recipientCount.textContent = allEmails.size + ' selected';
+            totalRecipients.textContent = allEmails.size;
+        });
+
+        // Default expiration
+        if (expirationInput && !expirationInput.value) {
+            const d = new Date(); d.setDate(d.getDate() + 30); d.setHours(9, 0, 0, 0);
+            expirationInput.value = d.toISOString().slice(0, 16);
+        }
+
+        // Submit loading
         if (form && submitBtn) {
-            form.addEventListener('submit', function() {
+            form.addEventListener('submit', function () {
+                syncAll();
                 submitBtn.disabled = true;
-                submitBtn.classList.add('loading');
                 submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i><span>Sending...</span>';
             });
         }
 
-        // Set default expiration (30 days from now)
-        if (expirationInput && !expirationInput.value) {
-            const defaultDate = new Date();
-            defaultDate.setDate(defaultDate.getDate() + 30);
-            defaultDate.setHours(9, 0, 0, 0);
-            expirationInput.value = defaultDate.toISOString().slice(0, 16);
-        }
+        // Auto-dismiss alerts
+        document.querySelectorAll('.nex-alert').forEach(a => {
+            setTimeout(() => { a.style.opacity = '0'; a.style.transform = 'translateY(-20px)'; setTimeout(() => a.remove(), 300); }, 6000);
+        });
     });
-</script>
+    </script>
+}

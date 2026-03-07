@@ -15,6 +15,7 @@ using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 using System.Web;
+using Web.Authorization;
 using Web.ViewModel.QuestionnaireVM;
 
 
@@ -22,7 +23,8 @@ namespace Web.Areas.Admin.Controllers
 {
 
 
-   
+    [Area("Admin")]
+    [HasPermission(Permissions.Questionnaires.View)]
     public class QuestionnaireController : Controller
     {
         private readonly IQuestionnaireRepository _questionnaire;
@@ -97,7 +99,7 @@ namespace Web.Areas.Admin.Controllers
             });
         }
         [HttpGet]
-        [Authorize(Roles = "Admin")]
+        [HasPermission(Permissions.Questionnaires.Create)]
         public IActionResult Create()
 
 
@@ -121,7 +123,7 @@ namespace Web.Areas.Admin.Controllers
             return View(questionnaire);
         }
         [HttpPost]
-        [Authorize(Roles = "Admin")]
+        [HasPermission(Permissions.Questionnaires.Create)]
         public async Task<IActionResult> Create(QuestionnaireViewModel viewmodel)
         {
             if (ModelState.IsValid)
@@ -133,10 +135,10 @@ namespace Web.Areas.Admin.Controllers
                     Description = viewmodel.Description,
                 };
 
-                var questions = viewmodel.Questions;
-
-                foreach (var questionViewModel in viewmodel.Questions)
+                for (int qIndex = 0; qIndex < viewmodel.Questions.Count; qIndex++)
                 {
+                    var questionViewModel = viewmodel.Questions[qIndex];
+
                     var question = new Question
                     {
                         QuestionnaireId = questionViewModel.QuestionnaireId,
@@ -145,20 +147,62 @@ namespace Web.Areas.Admin.Controllers
                         Answers = new List<Answer>()
                     };
 
-                    foreach (var answerViewModel in questionViewModel.Answers)
+                    // Handle Image type questions — save uploaded files
+                    if (questionViewModel.Type == QuestionType.Image)
                     {
-                        // Skip empty answers
-                        if (string.IsNullOrWhiteSpace(answerViewModel.Text))
-                            continue;
+                        var imageFiles = HttpContext.Request.Form.Files
+                            .Where(f => f.Name.StartsWith($"ImageFiles_{qIndex}_"))
+                            .OrderBy(f => f.Name)
+                            .ToList();
 
-                        var answer = new Answer
+                        foreach (var imageFile in imageFiles)
                         {
-                            Text = answerViewModel.Text,
-                            QuestionId = answerViewModel.QuestionId,
-                            IsOtherOption = answerViewModel.IsOtherOption // NEW: Handle IsOtherOption property
-                        };
+                            if (imageFile != null && imageFile.Length > 0)
+                            {
+                                var fileExtension = Path.GetExtension(imageFile.FileName);
+                                var uniqueFileName = $"{Guid.NewGuid()}{fileExtension}";
+                                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "questionimages");
 
-                        question.Answers.Add(answer);
+                                if (!Directory.Exists(uploadsFolder))
+                                    Directory.CreateDirectory(uploadsFolder);
+
+                                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                                using (var stream = new FileStream(filePath, FileMode.Create))
+                                {
+                                    await imageFile.CopyToAsync(stream);
+                                }
+
+                                var answer = new Answer
+                                {
+                                    Text = $"/uploads/questionimages/{uniqueFileName}",
+                                    QuestionId = question.Id,
+                                    IsOtherOption = false,
+                                    ConditionJson = null
+                                };
+
+                                question.Answers.Add(answer);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // Handle all other question types
+                        if (questionViewModel.Answers != null)
+                        {
+                            foreach (var answerModel in questionViewModel.Answers)
+                            {
+                                var answer = new Answer
+                                {
+                                    Text = answerModel.Text,
+                                    QuestionId = answerModel.QuestionId,
+                                    IsOtherOption = answerModel.IsOtherOption,
+                                    ConditionJson = answerModel.ConditionJson  // Save the condition JSON
+                                };
+
+                                question.Answers.Add(answer);
+                            }
+                        }
                     }
 
                     questionnaire.Questions.Add(question);
@@ -174,7 +218,7 @@ namespace Web.Areas.Admin.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "Admin")]
+        [HasPermission(Permissions.Questionnaires.Edit)]
         public IActionResult Edit(int id)
         {
             var questionTypes = Enum.GetValues(typeof(QuestionType))
@@ -217,7 +261,7 @@ namespace Web.Areas.Admin.Controllers
 
             return View(viewModel);
         }
-        [Authorize(Roles = "Admin")]
+        [HasPermission(Permissions.Questionnaires.Edit)]
         [HttpPost]
         public async Task<IActionResult> Edit(EditQuestionnaireViewModel viewModel)
         {
@@ -513,7 +557,8 @@ namespace Web.Areas.Admin.Controllers
             }
         }
         [HttpGet]
-        [Authorize(Roles = "Admin")]
+
+        [HasPermission(Permissions.Questionnaires.Delete)]
         public IActionResult Delete(int id)
         {
             var questionTypes = Enum.GetValues(typeof(QuestionType)).Cast<QuestionType>();
@@ -551,6 +596,7 @@ namespace Web.Areas.Admin.Controllers
 
         [HttpPost]
         [ActionName("Delete")]
+        [HasPermission(Permissions.Questionnaires.Delete)]
         public async Task<IActionResult> DeleteConfirm(int id)
         {
             try
@@ -579,6 +625,7 @@ namespace Web.Areas.Admin.Controllers
         }
 
         [HttpGet]
+        
         public IActionResult Details(int id)
         {
             var questionTypes = Enum.GetValues(typeof(QuestionType)).Cast<QuestionType>();
@@ -615,21 +662,25 @@ namespace Web.Areas.Admin.Controllers
         }
 
         [HttpGet]
+        [HasPermission(Permissions.Questionnaires.Send)]
         public IActionResult SendQuestionnaire(int id)
         {
             var quesstionnaireFromDb = _questionnaire.GetQuestionnaireWithQuestionAndAnswer(id);
             var sendquestionviewmodel = new SendQuestionnaireViewModel();
-
             sendquestionviewmodel.QuestionnaireId = id;
             ViewBag.questionnaireName = quesstionnaireFromDb.Title;
 
-            return View(sendquestionviewmodel);
+            // Users who have submitted ANY questionnaire response
+            ViewBag.Users = _context.Responses
+                .Select(r => new { r.UserName, r.UserEmail })
+                .Distinct()
+                .ToList();
 
+            return View(sendquestionviewmodel);
         }
 
-
         [HttpPost]
-
+        [HasPermission(Permissions.Questionnaires.Send)]
         public async Task<IActionResult> SendQuestionnaire(SendQuestionnaireViewModel viewModel)
         {
             if (!ModelState.IsValid)
@@ -834,7 +885,7 @@ namespace Web.Areas.Admin.Controllers
         // Add these methods to your existing QuestionnaireController class
 
         [HttpGet]
-        [Authorize(Roles = "Admin")]
+        
         public IActionResult SetLogic(int id)
         {
             var questionnaire = _questionnaire.GetQuestionnaireWithQuestionAndAnswer(id);

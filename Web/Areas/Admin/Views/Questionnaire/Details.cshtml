@@ -1,804 +1,309 @@
 ﻿@model QuestionnaireViewModel
-
 @{
     ViewData["Title"] = "Questionnaire Details";
+    var totalAnswers = Model.Questions?.Sum(q => q.Answers?.Count ?? 0) ?? 0;
+    var otherCount = Model.Questions?.Count(q => q.Answers != null && q.Answers.Any(a => a.IsOtherOption)) ?? 0;
+    var typeCount = Model.Questions?.Select(q => q.Type).Distinct().Count() ?? 0;
+    var qCount = Model.Questions?.Count ?? 0;
 }
 
 <style>
-    /* Modern Design System */
     @@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-
     :root {
-        --primary-color: #6366f1;
-        --primary-light: #8b5cf6;
-        --primary-dark: #4338ca;
-        --success-color: #10b981;
-        --success-light: #34d399;
-        --success-dark: #059669;
-        --info-color: #06b6d4;
-        --info-light: #22d3ee;
-        --info-dark: #0891b2;
-        --warning-color: #f59e0b;
-        --warning-light: #fbbf24;
-        --warning-dark: #d97706;
-        --gray-50: #f8fafc;
-        --gray-100: #f1f5f9;
-        --gray-200: #e2e8f0;
-        --gray-300: #cbd5e1;
-        --gray-400: #94a3b8;
-        --gray-500: #64748b;
-        --gray-600: #475569;
-        --gray-700: #334155;
-        --gray-800: #1e293b;
-        --gray-900: #0f172a;
-        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-        --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-        --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
-        --border-radius-sm: 8px;
-        --border-radius-md: 12px;
-        --border-radius-lg: 16px;
-        --border-radius-xl: 24px;
-    }
-
-    * {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    }
-
-    body {
-        background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
-        min-height: 100vh;
-        padding: 2rem 0;
-    }
-
-    .container {
-        max-width: 1200px;
-    }
-
-    /* Header Section */
-    .page-header {
-        background: white;
-        border-radius: var(--border-radius-xl);
-        box-shadow: var(--shadow-xl);
-        padding: 2.5rem;
-        margin-bottom: 2rem;
-        position: relative;
-        overflow: hidden;
-    }
-
-        .page-header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, var(--primary-color), var(--primary-light), var(--info-color));
-        }
-
-    .header-content {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        flex-wrap: wrap;
-        gap: 1.5rem;
-    }
-
-    .header-info {
-        display: flex;
-        align-items: center;
-        gap: 1.5rem;
-    }
-
-    .header-icon {
-        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
-        color: white;
-        width: 64px;
-        height: 64px;
-        border-radius: var(--border-radius-lg);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.75rem;
-        box-shadow: var(--shadow-lg);
-    }
-
-    .header-text h1 {
-        font-size: 2rem;
-        font-weight: 800;
-        color: var(--gray-800);
-        margin: 0 0 0.5rem;
-    }
-
-    .header-subtitle {
-        color: var(--gray-600);
-        font-size: 1rem;
-        font-weight: 500;
-    }
-
-    .back-button {
-        background: linear-gradient(135deg, var(--gray-500) 0%, var(--gray-600) 100%);
-        color: white;
-        border: none;
-        padding: 0.75rem 1.5rem;
-        border-radius: var(--border-radius-md);
-        font-weight: 600;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        transition: all 0.3s ease;
-        box-shadow: var(--shadow-md);
-    }
-
-        .back-button:hover {
-            background: linear-gradient(135deg, var(--gray-600) 0%, var(--gray-700) 100%);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
-            color: white;
-            text-decoration: none;
-        }
-
-    /* Main Content */
-    .main-content {
-        background: white;
-        border-radius: var(--border-radius-xl);
-        box-shadow: var(--shadow-xl);
-        overflow: hidden;
-        margin-bottom: 2rem;
-    }
-
-    /* Overview Section */
-    .overview-section {
-        background: linear-gradient(135deg, var(--gray-50) 0%, var(--gray-100) 100%);
-        padding: 2.5rem;
-        border-bottom: 1px solid var(--gray-200);
-    }
-
-    .overview-header {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        margin-bottom: 2rem;
-    }
-
-    .overview-icon {
-        background: var(--info-color);
-        color: white;
-        width: 48px;
-        height: 48px;
-        border-radius: var(--border-radius-md);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.5rem;
-    }
-
-    .overview-title {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: var(--gray-800);
-        margin: 0;
-    }
-
-    .overview-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 1.5rem;
-    }
-
-    .overview-card {
-        background: white;
-        padding: 1.5rem;
-        border-radius: var(--border-radius-lg);
-        border: 1px solid var(--gray-200);
-        box-shadow: var(--shadow-sm);
-        transition: all 0.3s ease;
-    }
-
-        .overview-card:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
-        }
-
-    .overview-card-header {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        margin-bottom: 1rem;
-    }
-
-    .overview-card-icon {
-        width: 36px;
-        height: 36px;
-        border-radius: var(--border-radius-sm);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.1rem;
-        color: white;
-    }
-
-        .overview-card-icon.warning {
-            background: var(--warning-color);
-        }
-
-        .overview-card-icon.primary {
-            background: var(--primary-color);
-        }
-
-        .overview-card-icon.success {
-            background: var(--success-color);
-        }
-
-        .overview-card-icon.info {
-            background: var(--info-color);
-        }
-
-    .overview-card-label {
-        font-size: 0.875rem;
-        font-weight: 600;
-        color: var(--gray-500);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    .overview-card-value {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: var(--gray-800);
-        word-break: break-word;
-        line-height: 1.3;
-    }
-
-    .description-card {
-        grid-column: 1 / -1;
-    }
-
-    .description-content {
-        color: var(--gray-700);
-        line-height: 1.6;
-        font-size: 1rem;
-        margin-top: 0.5rem;
-    }
-
-    /* Questions Section */
-    .questions-section {
-        padding: 2.5rem;
-    }
-
-    .questions-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 2rem;
-        flex-wrap: wrap;
-        gap: 1rem;
-    }
-
-    .questions-title {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-    }
-
-    .questions-icon {
-        background: var(--success-color);
-        color: white;
-        width: 48px;
-        height: 48px;
-        border-radius: var(--border-radius-md);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.5rem;
-    }
-
-    .questions-title h2 {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: var(--gray-800);
-        margin: 0;
-    }
-
-    .questions-count {
-        background: linear-gradient(135deg, var(--success-color) 0%, var(--success-dark) 100%);
-        color: white;
-        padding: 0.5rem 1rem;
-        border-radius: var(--border-radius-md);
-        font-weight: 600;
-        font-size: 0.875rem;
-        box-shadow: var(--shadow-sm);
-    }
-
-    /* Question Cards */
-    .questions-grid {
-        display: grid;
-        gap: 2rem;
-    }
-
-    .question-card {
-        background: linear-gradient(135deg, var(--gray-50) 0%, white 100%);
-        border-radius: var(--border-radius-lg);
-        border: 1px solid var(--gray-200);
-        box-shadow: var(--shadow-md);
-        overflow: hidden;
-        transition: all 0.3s ease;
-    }
-
-        .question-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-xl);
-        }
-
-    .question-header {
-        background: linear-gradient(135deg, var(--success-color) 0%, var(--success-dark) 100%);
-        color: white;
-        padding: 1.5rem;
-        position: relative;
-        overflow: hidden;
-    }
-
-        .question-header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20"><defs><radialGradient id="a" cx="50%" cy="0%" r="100%"><stop offset="0%" stop-color="white" stop-opacity="0.1"/><stop offset="100%" stop-color="white" stop-opacity="0"/></radialGradient></defs><rect width="100" height="20" fill="url(%23a)"/></svg>');
-            opacity: 0.3;
-        }
-
-    .question-meta {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 1rem;
-        position: relative;
-        z-index: 1;
-    }
-
-    .question-id {
-        background: rgba(255, 255, 255, 0.2);
-        padding: 0.375rem 0.75rem;
-        border-radius: var(--border-radius-sm);
-        font-weight: 600;
-        font-size: 0.875rem;
-    }
-
-    .question-type {
-        background: rgba(255, 255, 255, 0.2);
-        padding: 0.375rem 0.75rem;
-        border-radius: var(--border-radius-sm);
-        font-weight: 600;
-        font-size: 0.875rem;
-    }
-
-    .question-text {
-        font-size: 1.25rem;
-        font-weight: 700;
-        margin: 0;
-        position: relative;
-        z-index: 1;
-        line-height: 1.4;
-    }
-
-    /* Answers Section */
-    .answers-section {
-        padding: 2rem;
-    }
-
-    .answers-header {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        margin-bottom: 1.5rem;
-    }
-
-    .answers-icon {
-        background: var(--info-color);
-        color: white;
-        width: 32px;
-        height: 32px;
-        border-radius: var(--border-radius-sm);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1rem;
-    }
-
-    .answers-title {
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: var(--gray-800);
-        margin: 0;
-    }
-
-    .answers-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 1rem;
-    }
-
-    .answer-card {
-        background: white;
-        border: 2px solid var(--gray-200);
-        border-radius: var(--border-radius-md);
-        padding: 1rem;
-        transition: all 0.3s ease;
-        position: relative;
-    }
-
-        .answer-card:hover {
-            border-color: var(--info-color);
-            box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
-            transform: translateY(-1px);
-        }
-
-        .answer-card.other-option {
-            border-color: var(--warning-color);
-            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 20%, white 100%);
-        }
-
-            .answer-card.other-option::before {
-                content: "OTHER";
-                position: absolute;
-                top: -8px;
-                left: 12px;
-                background: var(--warning-color);
-                color: white;
-                padding: 0.25rem 0.5rem;
-                border-radius: var(--border-radius-sm);
-                font-size: 0.625rem;
-                font-weight: 700;
-                letter-spacing: 0.5px;
-            }
-
-    .answer-meta {
-        display: flex;
-        align-items: center;
-        justify-content: between;
-        gap: 0.75rem;
-        margin-bottom: 0.75rem;
-    }
-
-    .answer-id {
-        background: linear-gradient(135deg, var(--info-color) 0%, var(--info-dark) 100%);
-        color: white;
-        padding: 0.25rem 0.5rem;
-        border-radius: var(--border-radius-sm);
-        font-weight: 600;
-        font-size: 0.75rem;
-    }
-
-    .answer-text {
-        font-size: 1rem;
-        font-weight: 600;
-        color: var(--gray-800);
-        line-height: 1.4;
-        word-break: break-word;
-    }
-
-    /* Empty State */
-    .empty-state {
-        text-align: center;
-        padding: 3rem;
-        color: var(--gray-500);
-    }
-
-        .empty-state i {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            color: var(--gray-400);
-        }
-
-        .empty-state h3 {
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-
-    /* Stats Summary */
-    .stats-summary {
-        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
-        color: white;
-        padding: 2rem;
-        margin-bottom: 2rem;
-        border-radius: var(--border-radius-lg);
-        box-shadow: var(--shadow-lg);
-    }
-
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-        gap: 1.5rem;
-        text-align: center;
-    }
-
-    .stat-item {
-        padding: 1rem;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: var(--border-radius-md);
-        backdrop-filter: blur(10px);
-    }
-
-    .stat-number {
-        font-size: 2rem;
-        font-weight: 800;
-        display: block;
-        margin-bottom: 0.25rem;
-    }
-
-    .stat-label {
-        font-size: 0.875rem;
-        font-weight: 500;
-        opacity: 0.9;
-    }
-
-    /* Footer Actions */
-    .footer-actions {
-        text-align: center;
-        margin-top: 2rem;
-    }
-
-    /* Responsive Design */
-    @@media (max-width: 768px) {
-        .container
-
-    {
-        padding: 0 1rem;
-    }
-
-    .header-content {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .header-info {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 1rem;
-    }
-
-    .overview-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .questions-header {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .answers-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    }
-
-    /* Animations */
-    .fade-in {
-        animation: fadeIn 0.6s ease-out;
-    }
-
-    @@keyframes fadeIn {
-        from
-
-    {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-
-    }
-
-    .slide-in {
-        animation: slideIn 0.4s ease-out;
-    }
-
-    @@keyframes slideIn {
-        from
-
-    {
-        opacity: 0;
-        transform: translateX(-20px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-
+        --bg:#0f1923;--bg-card:#1a2332;--bg-elevated:#1f2b3d;--bg-input:#16202e;
+        --text-primary:#e8edf2;--text-secondary:#9ba8b9;--text-muted:#5e6e82;--text-faint:#3d4e63;
+        --teal:#33b3ae;--teal-soft:rgba(51,179,174,0.1);--teal-medium:rgba(51,179,174,0.2);--teal-glow:rgba(51,179,174,0.12);--teal-dark:#2a9490;
+        --amber:#f59e0b;--amber-soft:rgba(245,158,11,0.1);--amber-border:rgba(245,158,11,0.35);
+        --purple:#7c3aed;--purple-soft:rgba(124,58,237,0.1);--purple-border:rgba(124,58,237,0.35);
+        --red:#ef4444;--red-soft:rgba(239,68,68,0.1);
+        --green:#10b981;--green-soft:rgba(16,185,129,0.1);--green-border:rgba(16,185,129,0.35);
+        --info:#06b6d4;--info-soft:rgba(6,182,212,0.1);--info-border:rgba(6,182,212,0.35);
+        --border:rgba(255,255,255,0.06);--border-light:rgba(255,255,255,0.04);
+        --shadow-xs:0 1px 3px rgba(0,0,0,0.2);--shadow-sm:0 2px 8px rgba(0,0,0,0.25);--shadow-md:0 4px 16px rgba(0,0,0,0.3);--shadow-lg:0 8px 32px rgba(0,0,0,0.35);--shadow-teal:0 4px 20px rgba(51,179,174,0.2);
+        --radius-sm:8px;--radius-md:12px;--radius-lg:16px;
+        --transition:all 0.2s cubic-bezier(0.4,0,0.2,1);--transition-spring:all 0.35s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    @@keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    @@keyframes scaleIn{from{opacity:0;transform:scale(0.96)}to{opacity:1;transform:scale(1)}}
+    @@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    @@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+    @@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+    *{box-sizing:border-box}
+
+    .details-page{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);min-height:100vh;padding:32px 40px 80px;-webkit-font-smoothing:antialiased;color:var(--text-primary)}
+
+    /* ===== PAGE HEADER ===== */
+    .page-top{max-width:1100px;margin:0 auto 28px;animation:slideUp .5s ease both}
+    .page-breadcrumb{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-muted);margin-bottom:16px}
+    .page-breadcrumb a{color:var(--text-muted);text-decoration:none;transition:var(--transition)}
+    .page-breadcrumb a:hover{color:var(--teal)}
+    .page-breadcrumb .sep{color:var(--text-faint)}
+    .page-title-row{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+    .page-title{font-size:28px;font-weight:700;color:var(--text-primary);letter-spacing:-0.5px;margin:0;display:flex;align-items:center;gap:14px}
+    .page-title-icon{width:44px;height:44px;border-radius:var(--radius-md);background:linear-gradient(135deg,var(--teal),var(--teal-dark));display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff;box-shadow:var(--shadow-teal)}
+    .page-title-accent{display:inline-block;width:8px;height:8px;background:var(--teal);border-radius:50%;margin-left:4px;vertical-align:super;animation:pulse 2s ease infinite}
+    .btn-back{display:inline-flex;align-items:center;gap:8px;padding:10px 22px;background:var(--bg-card);color:var(--text-secondary);border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-weight:500;font-family:inherit;cursor:pointer;transition:var(--transition);text-decoration:none}
+    .btn-back:hover{background:var(--bg-elevated);border-color:rgba(255,255,255,0.1);color:var(--text-primary);text-decoration:none}
+
+    /* ===== STATS BAR ===== */
+    .stats-bar{max-width:1100px;margin:0 auto 24px;display:grid;grid-template-columns:repeat(4,1fr);gap:16px;animation:slideUp .5s ease .08s both}
+    .stat-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:20px 24px;text-align:center;transition:var(--transition);position:relative;overflow:hidden}
+    .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:3px 3px 0 0}
+    .stat-card:nth-child(1)::before{background:var(--teal)}
+    .stat-card:nth-child(2)::before{background:var(--info)}
+    .stat-card:nth-child(3)::before{background:var(--amber)}
+    .stat-card:nth-child(4)::before{background:var(--purple)}
+    .stat-card:hover{box-shadow:var(--shadow-sm);border-color:rgba(255,255,255,0.1);transform:translateY(-2px)}
+    .stat-number{font-size:32px;font-weight:800;line-height:1;margin-bottom:6px;background:linear-gradient(135deg,var(--text-primary),var(--text-secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .stat-card:nth-child(1) .stat-number{background:linear-gradient(135deg,var(--teal),#5eead4);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .stat-card:nth-child(2) .stat-number{background:linear-gradient(135deg,var(--info),#67e8f9);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .stat-card:nth-child(3) .stat-number{background:linear-gradient(135deg,var(--amber),#fcd34d);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .stat-card:nth-child(4) .stat-number{background:linear-gradient(135deg,var(--purple),#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .stat-label{font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.6px}
+
+    /* ===== META CARD ===== */
+    .meta-card{max-width:1100px;margin:0 auto 24px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px 32px;box-shadow:var(--shadow-xs);animation:slideUp .5s ease .12s both;transition:var(--transition)}
+    .meta-card:hover{box-shadow:var(--shadow-sm);border-color:rgba(255,255,255,0.08)}
+    .meta-section-header{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+    .meta-section-icon{width:36px;height:36px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff}
+    .meta-section-icon.info-icon{background:var(--info)}
+    .meta-section-title{font-size:16px;font-weight:700;color:var(--text-primary);margin:0}
+    .meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+    .meta-item{padding:16px 20px;background:var(--bg-elevated);border:1px solid var(--border-light);border-radius:var(--radius-sm);transition:var(--transition)}
+    .meta-item:hover{border-color:rgba(255,255,255,0.08)}
+    .meta-item.full-width{grid-column:1/-1}
+    .meta-label{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+    .meta-label i{font-size:12px;color:var(--teal)}
+    .meta-value{font-size:15px;font-weight:600;color:var(--text-primary);line-height:1.4;word-break:break-word}
+    .meta-value.id-value{color:var(--teal);font-family:'JetBrains Mono',monospace}
+    .description-value{font-size:14px;font-weight:400;color:var(--text-secondary);line-height:1.7}
+    .description-value p{margin:0}
+    .empty-desc{color:var(--text-faint);font-style:italic;font-weight:400}
+
+    /* ===== QUESTIONS SECTION ===== */
+    .questions-section{max-width:1100px;margin:0 auto;animation:slideUp .5s ease .18s both}
+    .questions-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+    .questions-title{display:flex;align-items:center;gap:12px}
+    .questions-icon{width:36px;height:36px;border-radius:var(--radius-sm);background:var(--green);display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff}
+    .questions-title h2{font-size:18px;font-weight:700;color:var(--text-primary);margin:0}
+    .questions-count-pill{display:flex;align-items:center;gap:6px;background:var(--green-soft);border:1px solid var(--green-border);border-radius:100px;padding:6px 16px;font-size:12px;font-weight:600;color:var(--green)}
+
+    /* ===== QUESTION CARD ===== */
+    .q-card{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-md);margin-bottom:16px;overflow:hidden;transition:var(--transition);box-shadow:var(--shadow-xs)}
+    .q-card:hover{box-shadow:var(--shadow-sm);border-color:rgba(255,255,255,0.1)}
+    .q-card-header{padding:18px 24px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:var(--transition);position:relative}
+    .q-card-header:hover{background:var(--bg-elevated)}
+    .q-card-header::after{content:'';position:absolute;bottom:0;left:24px;right:24px;height:1px;background:var(--border-light)}
+    .q-num{width:32px;height:32px;border-radius:var(--radius-sm);background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
+    .q-text-wrap{flex:1;min-width:0}
+    .q-text{font-size:15px;font-weight:600;color:var(--text-primary);margin:0;line-height:1.5}
+    .q-meta-tags{display:flex;align-items:center;gap:8px;margin-top:6px;flex-wrap:wrap}
+    .q-tag{font-size:10px;font-weight:600;padding:3px 10px;border-radius:100px;white-space:nowrap;text-transform:uppercase;letter-spacing:0.3px}
+    .q-tag.type-tag{color:var(--teal);background:var(--teal-soft);border:1px solid var(--teal-medium)}
+    .q-tag.id-tag{color:var(--text-muted);background:var(--bg-input);border:1px solid var(--border)}
+    .q-tag.ans-count-tag{color:var(--info);background:var(--info-soft);border:1px solid var(--info-border)}
+    .q-tag.other-tag{color:var(--amber);background:var(--amber-soft);border:1px solid var(--amber-border)}
+    .q-chevron{color:var(--text-faint);font-size:14px;transition:transform .25s ease;padding:4px;flex-shrink:0}
+    .q-chevron.open{transform:rotate(180deg)}
+
+    /* ===== ANSWER AREA ===== */
+    .q-answers{display:none;padding:20px 24px;animation:fadeIn .2s ease}
+    .q-answers.show{display:block}
+    .ans-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+    .ans-card{display:flex;align-items:flex-start;gap:10px;padding:12px 16px;background:var(--bg-elevated);border:1.5px solid var(--border);border-radius:var(--radius-sm);transition:var(--transition);position:relative}
+    .ans-card:hover{border-color:rgba(255,255,255,0.1);background:var(--bg-hover)}
+    .ans-card.is-other{border-color:var(--amber-border);background:var(--amber-soft)}
+    .ans-card.is-other::before{content:'OTHER';position:absolute;top:-7px;left:12px;background:var(--amber);color:#fff;padding:1px 7px;border-radius:4px;font-size:8px;font-weight:700;letter-spacing:0.5px}
+    .ans-bullet{width:24px;height:24px;border-radius:6px;background:var(--info-soft);border:1px solid var(--info-border);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--info);flex-shrink:0;margin-top:1px}
+    .ans-card.is-other .ans-bullet{background:var(--amber-soft);border-color:var(--amber-border);color:var(--amber)}
+    .ans-content{flex:1;min-width:0}
+    .ans-text{font-size:13px;font-weight:500;color:var(--text-primary);line-height:1.5;word-break:break-word}
+    .ans-id{font-size:10px;color:var(--text-faint);margin-top:3px;font-family:'JetBrains Mono',monospace}
+
+    /* ===== EMPTY STATE ===== */
+    .empty-state{text-align:center;padding:48px 24px;color:var(--text-muted)}
+    .empty-state-icon{width:64px;height:64px;border-radius:var(--radius-lg);background:var(--bg-elevated);display:flex;align-items:center;justify-content:center;font-size:28px;color:var(--text-faint);margin:0 auto 16px}
+    .empty-state h3{font-size:16px;font-weight:600;color:var(--text-secondary);margin:0 0 6px}
+    .empty-state p{font-size:13px;color:var(--text-muted);margin:0}
+
+    .no-answers-msg{text-align:center;padding:20px;color:var(--text-muted);font-size:13px;font-style:italic}
+
+    /* ===== FOOTER ===== */
+    .footer-row{max-width:1100px;margin:28px auto 0;display:flex;justify-content:center;gap:12px;animation:slideUp .5s ease .25s both}
+    .btn-edit{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;background:var(--teal);color:#fff;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;transition:var(--transition-spring);box-shadow:var(--shadow-teal);text-decoration:none}
+    .btn-edit:hover{background:var(--teal-dark);transform:translateY(-2px);box-shadow:0 8px 28px rgba(51,179,174,0.25);color:#fff;text-decoration:none}
+
+    /* ===== RESPONSIVE ===== */
+    @@media(max-width:768px){
+        .details-page{padding:16px}
+        .stats-bar{grid-template-columns:repeat(2,1fr);gap:10px}
+        .meta-grid{grid-template-columns:1fr}
+        .ans-grid{grid-template-columns:1fr}
+        .page-title-row{flex-direction:column;align-items:flex-start}
+        .footer-row{flex-direction:column}
+        .footer-row .btn-back,.footer-row .btn-edit{width:100%;justify-content:center}
     }
 </style>
 
-<div class="container">
+<div class="details-page">
+
     <!-- Page Header -->
-    <div class="page-header fade-in">
-        <div class="header-content">
-            <div class="header-info">
-                <div class="header-icon">
-                    <i class="bi bi-file-text-fill"></i>
-                </div>
-                <div class="header-text">
-                    <h1>Questionnaire Details</h1>
-                    <p class="header-subtitle">Complete overview of questionnaire structure and content</p>
-                </div>
-            </div>
-            <a asp-action="Index" class="back-button">
-                <i class="bi bi-arrow-left"></i>
-                Back to List
-            </a>
+    <div class="page-top">
+        <div class="page-breadcrumb">
+            <a href="@Url.Action("Index", "Questionnaire")">Questionnaires</a>
+            <span class="sep">/</span>
+            <span>Details</span>
+        </div>
+        <div class="page-title-row">
+            <h1 class="page-title">
+                <span class="page-title-icon"><i class="bi bi-file-text-fill"></i></span>
+                Questionnaire Details<span class="page-title-accent"></span>
+            </h1>
+            <a href="@Url.Action("Index", "Questionnaire")" class="btn-back"><i class="bi bi-arrow-left"></i> Back to List</a>
         </div>
     </div>
 
-    <!-- Stats Summary -->
-    <div class="stats-summary fade-in">
-        <div class="stats-grid">
-            <div class="stat-item">
-                <span class="stat-number">@Model.Questions.Count</span>
-                <span class="stat-label">Questions</span>
+    <!-- Stats Bar -->
+    <div class="stats-bar">
+        <div class="stat-card">
+            <div class="stat-number">@qCount</div>
+            <div class="stat-label">Questions</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">@totalAnswers</div>
+            <div class="stat-label">Total Answers</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">@otherCount</div>
+            <div class="stat-label">Other Options</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">@typeCount</div>
+            <div class="stat-label">Question Types</div>
+        </div>
+    </div>
+
+    <!-- Overview Meta -->
+    <div class="meta-card">
+        <div class="meta-section-header">
+            <div class="meta-section-icon info-icon"><i class="bi bi-info-circle-fill"></i></div>
+            <h2 class="meta-section-title">Overview</h2>
+        </div>
+        <div class="meta-grid">
+            <div class="meta-item">
+                <div class="meta-label"><i class="bi bi-hash"></i> ID</div>
+                <div class="meta-value id-value">#@Model.Id</div>
             </div>
-            <div class="stat-item">
-                <span class="stat-number">@Model.Questions.Sum(q => q.Answers.Count)</span>
-                <span class="stat-label">Total Answers</span>
+            <div class="meta-item">
+                <div class="meta-label"><i class="bi bi-card-heading"></i> Title</div>
+                <div class="meta-value">@Model.Title</div>
             </div>
-            <div class="stat-item">
-                <span class="stat-number">@Model.Questions.Count(q => q.Answers.Any(a => a.IsOtherOption))</span>
-                <span class="stat-label">Other Options</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-number">@Model.Questions.Select(q => q.Type).Distinct().Count()</span>
-                <span class="stat-label">Question Types</span>
+            <div class="meta-item full-width">
+                <div class="meta-label"><i class="bi bi-card-text"></i> Description</div>
+                @if (!string.IsNullOrEmpty(Model.Description))
+                {
+                    <div class="description-value">@Html.Raw(Model.Description)</div>
+                }
+                else
+                {
+                    <div class="description-value empty-desc">No description provided</div>
+                }
             </div>
         </div>
     </div>
 
-    <!-- Main Content -->
-    <div class="main-content fade-in">
-        <!-- Overview Section -->
-        <div class="overview-section">
-            <div class="overview-header">
-                <div class="overview-icon">
-                    <i class="bi bi-info-circle-fill"></i>
-                </div>
-                <h2 class="overview-title">Overview</h2>
+    <!-- Questions -->
+    <div class="questions-section">
+        <div class="questions-header">
+            <div class="questions-title">
+                <div class="questions-icon"><i class="bi bi-question-circle-fill"></i></div>
+                <h2>Questions</h2>
             </div>
-
-            <div class="overview-grid">
-                <div class="overview-card slide-in">
-                    <div class="overview-card-header">
-                        <div class="overview-card-icon warning">
-                            <i class="bi bi-hash"></i>
-                        </div>
-                        <span class="overview-card-label">ID</span>
-                    </div>
-                    <div class="overview-card-value">#@Model.Id</div>
-                </div>
-
-                <div class="overview-card slide-in">
-                    <div class="overview-card-header">
-                        <div class="overview-card-icon primary">
-                            <i class="bi bi-card-heading"></i>
-                        </div>
-                        <span class="overview-card-label">Title</span>
-                    </div>
-                    <div class="overview-card-value">@Model.Title</div>
-                </div>
-
-                <div class="overview-card description-card slide-in">
-                    <div class="overview-card-header">
-                        <div class="overview-card-icon info">
-                            <i class="bi bi-card-text"></i>
-                        </div>
-                        <span class="overview-card-label">Description</span>
-                    </div>
-                    <div class="description-content">
-                        @if (!string.IsNullOrEmpty(Model.Description))
-                        {
-                            @Html.Raw(Model.Description)
-                        }
-                        else
-                        {
-                            <em class="text-muted">No description provided</em>
-                        }
-                    </div>
-                </div>
+            <div class="questions-count-pill">
+                <i class="bi bi-check2-circle"></i>
+                @qCount Question@(qCount != 1 ? "s" : "")
             </div>
         </div>
 
-        <!-- Questions Section -->
-        <div class="questions-section">
-            <div class="questions-header">
-                <div class="questions-title">
-                    <div class="questions-icon">
-                        <i class="bi bi-question-circle-fill"></i>
-                    </div>
-                    <h2>Questions</h2>
-                </div>
-                <div class="questions-count">
-                    @Model.Questions.Count Question@(Model.Questions.Count != 1 ? "s" : "")
-                </div>
-            </div>
-
-            @if (Model.Questions.Any())
-            {
-                <div class="questions-grid">
-                    @foreach (var question in Model.Questions.Select((q, index) => new { Question = q, Index = index }))
-                    {
-                        <div class="question-card slide-in">
-                            <div class="question-header">
-                                <div class="question-meta">
-                                    <span class="question-id">ID: @question.Question.Id</span>
-                                    <span class="question-type">@question.Question.Type</span>
+        @if (Model.Questions != null && Model.Questions.Any())
+        {
+            <div class="questions-list">
+                @foreach (var question in Model.Questions.Select((q, index) => new { Q = q, Idx = index }))
+                {
+                    var ansCount = question.Q.Answers?.Count ?? 0;
+                    var hasOther = question.Q.Answers != null && question.Q.Answers.Any(a => a.IsOtherOption);
+                    <div class="q-card" data-qi="@question.Idx">
+                        <div class="q-card-header" onclick="toggleQ(@question.Idx)">
+                            <span class="q-num">@(question.Idx + 1)</span>
+                            <div class="q-text-wrap">
+                                <p class="q-text">@question.Q.Text</p>
+                                <div class="q-meta-tags">
+                                    <span class="q-tag type-tag">@question.Q.Type.ToString().Replace("_", " ")</span>
+                                    <span class="q-tag id-tag">ID: @question.Q.Id</span>
+                                    <span class="q-tag ans-count-tag"><i class="bi bi-list-ul"></i> @ansCount answer@(ansCount != 1 ? "s" : "")</span>
+                                    @if (hasOther)
+                                    {
+                                        <span class="q-tag other-tag"><i class="bi bi-chat-dots"></i> Has Other</span>
+                                    }
                                 </div>
-                                <h3 class="question-text">
-                                    Question @(question.Index + 1): @question.Question.Text
-                                </h3>
                             </div>
-
-                            <div class="answers-section">
-                                <div class="answers-header">
-                                    <div class="answers-icon">
-                                        <i class="bi bi-list-ul"></i>
-                                    </div>
-                                    <h4 class="answers-title">
-                                        Answers (@question.Question.Answers.Count)
-                                    </h4>
-                                </div>
-
-                                @if (question.Question.Answers.Any())
-                                {
-                                    <div class="answers-grid">
-                                        @foreach (var answer in question.Question.Answers)
-                                        {
-                                            <div class="answer-card @(answer.IsOtherOption ? "other-option" : "")">
-                                                <div class="answer-meta">
-                                                    <span class="answer-id">ID: @answer.Id</span>
-                                                </div>
-                                                <div class="answer-text">@answer.Text</div>
+                            <span class="q-chevron" id="chevron_@question.Idx"><i class="bi bi-chevron-down"></i></span>
+                        </div>
+                        <div class="q-answers" id="qAns_@question.Idx">
+                            @if (question.Q.Answers != null && question.Q.Answers.Any())
+                            {
+                                <div class="ans-grid">
+                                    @foreach (var answer in question.Q.Answers.Select((a, ai) => new { A = a, Ai = ai }))
+                                    {
+                                        <div class="ans-card @(answer.A.IsOtherOption ? "is-other" : "")">
+                                            <span class="ans-bullet">@((char)('A' + answer.Ai))</span>
+                                            <div class="ans-content">
+                                                <div class="ans-text">@answer.A.Text</div>
+                                                <div class="ans-id">ID: @answer.A.Id</div>
                                             </div>
-                                        }
-                                    </div>
-                                }
-                                else
-                                {
-                                    <div class="empty-state">
-                                        <i class="bi bi-inbox"></i>
-                                        <h3>No Answers</h3>
-                                        <p>This question doesn't have any answer options.</p>
-                                    </div>
-                                }
-                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="no-answers-msg"><i class="bi bi-inbox"></i> No answer options for this question</div>
+                            }
                         </div>
-                    }
-                </div>
-            }
-            else
-            {
-                <div class="empty-state">
-                    <i class="bi bi-question-circle"></i>
-                    <h3>No Questions</h3>
-                    <p>This questionnaire doesn't contain any questions yet.</p>
-                </div>
-            }
-        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <div class="empty-state-icon"><i class="bi bi-question-circle"></i></div>
+                <h3>No Questions</h3>
+                <p>This questionnaire doesn't contain any questions yet.</p>
+            </div>
+        }
     </div>
 
-    <!-- Footer Actions -->
-    <div class="footer-actions">
-        <a asp-action="Index" class="back-button">
-            <i class="bi bi-arrow-left"></i>
-            Back to List
-        </a>
+    <!-- Footer -->
+    <div class="footer-row">
+        <a href="@Url.Action("Index", "Questionnaire")" class="btn-back"><i class="bi bi-arrow-left"></i> Back to List</a>
+        <a href="@Url.Action("Edit", "Questionnaire", new { id = Model.Id })" class="btn-edit"><i class="bi bi-pencil"></i> Edit Questionnaire</a>
     </div>
 </div>
+
+<script>
+    function toggleQ(idx) {
+        const body = document.getElementById('qAns_' + idx);
+        const chev = document.getElementById('chevron_' + idx);
+        body.classList.toggle('show');
+        chev.classList.toggle('open');
+    }
+
+    // Auto-expand first question
+    document.addEventListener('DOMContentLoaded', function () {
+        const first = document.querySelector('.q-answers');
+        const firstChev = document.querySelector('.q-chevron');
+        if (first) { first.classList.add('show'); }
+        if (firstChev) { firstChev.classList.add('open'); }
+    });
+</script>

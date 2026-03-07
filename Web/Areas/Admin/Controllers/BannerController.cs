@@ -8,7 +8,7 @@ using Web.ViewModel.BannerVM;
 namespace Web.Areas.Admin.Controllers
 {
 
-   
+    [Area("Admin")]
     public class BannerController : Controller
     {
         private readonly IBannerRepository _banner;

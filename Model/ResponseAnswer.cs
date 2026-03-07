@@ -15,5 +15,8 @@ namespace Model
         [ForeignKey("ResponseDetailId")]
         public ResponseDetail? ResponseDetail { get; set; }
         public int AnswerId { get; set; }
+
+        [ForeignKey("AnswerId")]    
+        public Answer? Answer { get; set; } 
     }
 }

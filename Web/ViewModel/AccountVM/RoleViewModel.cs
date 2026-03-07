@@ -4,11 +4,12 @@ namespace Web.ViewModel.AccountVM
 {
     public class RoleViewModel
     {
-        public string? Id { get; set; }  // Role ID, useful for edits
+        public string? Id { get; set; }
 
         [Required]
         [Display(Name = "Role Name")]
-        public string? Name { get; set; }  // Role name
+        public string? Name { get; set; }
 
+        public List<string>? SelectedPermissions { get; set; }
     }
 }

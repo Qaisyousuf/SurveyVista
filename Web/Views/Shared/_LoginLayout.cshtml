@@ -10,492 +10,710 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
+        :root {
+            --nav-bg: rgba(4, 5, 12, 0.92);
+            --nav-bg-scrolled: rgba(2, 3, 8, 0.98);
+            --accent: #3b7bf7;
+            --accent-glow: rgba(59, 123, 247, 0.12);
+            --accent-border: rgba(59, 123, 247, 0.15);
+            --teal: #22c9b0;
+            --teal-glow: rgba(34, 201, 176, 0.10);
+            --text-primary: rgba(255, 255, 255, 0.93);
+            --text-secondary: rgba(255, 255, 255, 0.55);
+            --text-muted: rgba(255, 255, 255, 0.35);
+            --surface: rgba(255, 255, 255, 0.03);
+            --surface-hover: rgba(59, 123, 247, 0.08);
+            --border: rgba(255, 255, 255, 0.05);
+            --border-hover: rgba(59, 123, 247, 0.2);
+            --danger: #f87171;
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { box-sizing: border-box; }
+
         body {
-            font-family: 'Inter', sans-serif;
-            background: #000000;
-            color: white;
+            font-family: 'DM Sans', sans-serif;
+            background: #030408;
+            color: var(--text-primary);
             position: relative;
             min-height: 100vh;
         }
 
-            /* Background Effects */
-            body::before {
-                content: '';
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: radial-gradient(circle at 15% 25%, rgba(59, 130, 246, 0.03) 0%, transparent 35%), radial-gradient(circle at 85% 75%, rgba(20, 184, 166, 0.02) 0%, transparent 35%), radial-gradient(circle at 50% 50%, rgba(249, 115, 22, 0.01) 0%, transparent 40%);
-                z-index: -1;
-            }
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 600px 400px at 10% 20%, rgba(59, 123, 247, 0.025) 0%, transparent 100%),
+                radial-gradient(ellipse 500px 350px at 90% 80%, rgba(34, 201, 176, 0.02) 0%, transparent 100%);
+            z-index: -1;
+            pointer-events: none;
+        }
 
-        /* Ultra Modern Glassmorphism Navbar */
-        .navbar {
-            background: rgba(5, 8, 18, 0.85) !important;
-            backdrop-filter: blur(25px) saturate(1.8);
-            border-bottom: 1px solid rgba(59, 130, 246, 0.15);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 60px rgba(59, 130, 246, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-            padding: 14px 0;
+        /* ══════════════════════════════════════
+           NAVBAR
+           ══════════════════════════════════════ */
+        .site-navbar {
             position: sticky;
             top: 0;
             z-index: 1000;
-            transition: all 0.3s ease;
+            background: var(--nav-bg);
+            backdrop-filter: blur(24px) saturate(1.6);
+            -webkit-backdrop-filter: blur(24px) saturate(1.6);
+            border-bottom: 1px solid var(--border);
+            transition: background var(--transition), box-shadow var(--transition);
         }
 
-            .navbar::before {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, transparent 30%, rgba(20, 184, 166, 0.05) 70%, rgba(249, 115, 22, 0.03) 100%);
-                border-radius: inherit;
-                z-index: -1;
-            }
-
-        /* Enhanced Brand Styling */
-        .navbar-brand {
-            font-weight: 900;
-            font-size: 1.5rem;
-            color: #ffffff !important;
-            text-decoration: none;
-            background: linear-gradient(135deg, #3b82f6 0%, #14b8a6 50%, #f97316 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            letter-spacing: -0.02em;
-            text-transform: uppercase;
-            position: relative;
-            transition: all 0.4s ease;
+        .site-navbar.scrolled {
+            background: var(--nav-bg-scrolled);
+            box-shadow: 0 4px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(59, 123, 247, 0.06);
         }
 
-            .navbar-brand::after {
-                content: '';
-                position: absolute;
-                bottom: -4px;
-                left: 0;
-                width: 0;
-                height: 2px;
-                background: linear-gradient(90deg, #3b82f6, #14b8a6, #f97316);
-                transition: width 0.4s ease;
-                border-radius: 1px;
-            }
-
-            .navbar-brand:hover::after {
-                width: 100%;
-            }
-
-            .navbar-brand:hover {
-                transform: translateY(-2px) scale(1.02);
-                filter: drop-shadow(0 4px 8px rgba(59, 130, 246, 0.3));
-            }
-
-        /* Compact Modern Toggle Button */
-        .navbar-toggler {
-            border: 1px solid rgba(59, 130, 246, 0.3) !important;
-            border-radius: 8px !important;
-            padding: 6px 10px !important;
-            background: rgba(59, 130, 246, 0.08) !important;
-            backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            width: 42px;
-            height: 36px;
-        }
-
-            .navbar-toggler::before {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: -100%;
-                width: 100%;
-                height: 100%;
-                background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-                transition: left 0.5s ease;
-            }
-
-            .navbar-toggler:hover::before {
-                left: 100%;
-            }
-
-            .navbar-toggler:focus {
-                box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
-                border-color: rgba(59, 130, 246, 0.5) !important;
-            }
-
-            .navbar-toggler:hover {
-                background: rgba(59, 130, 246, 0.15) !important;
-                border-color: rgba(59, 130, 246, 0.5) !important;
-                transform: scale(1.05);
-            }
-
-        .navbar-toggler-icon {
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%2859, 130, 246, 1%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2.5' d='m4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
-            transition: all 0.3s ease;
-            width: 22px !important;
-            height: 18px !important;
-        }
-
-        /* Modern Account Dropdown */
-        .account-dropdown {
-            position: relative;
-        }
-
-        .account-dropdown-toggle {
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.12), rgba(20, 184, 166, 0.08)) !important;
-            border: 1px solid rgba(59, 130, 246, 0.3) !important;
-            color: rgba(255, 255, 255, 0.9) !important;
-            font-weight: 600;
-            border-radius: 8px !important;
-            padding: 8px 14px !important;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            text-decoration: none;
-            position: relative;
-            overflow: hidden;
-            backdrop-filter: blur(15px);
-            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
-            font-size: 0.85rem;
-            display: inline-flex;
+        .nav-inner {
+            display: flex;
             align-items: center;
+            width: 100%;
+            padding: 0 32px;
+            height: 64px;
             gap: 8px;
         }
 
-            .account-dropdown-toggle:hover {
-                background: linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(20, 184, 166, 0.18)) !important;
-                border-color: rgba(59, 130, 246, 0.5) !important;
-                color: #ffffff !important;
-                transform: translateY(-2px);
-                box-shadow: 0 6px 16px rgba(59, 130, 246, 0.25);
-            }
-
-            .account-dropdown-toggle::after {
-                border: none !important;
-                content: '\f078' !important;
-                font-family: 'Font Awesome 6 Free' !important;
-                font-weight: 900 !important;
-                font-size: 0.7rem !important;
-                margin-left: 4px !important;
-                transition: transform 0.3s ease !important;
-            }
-
-            .account-dropdown-toggle[aria-expanded="true"]::after {
-                transform: rotate(180deg) !important;
-            }
-
-        /* Modern Dropdown Menu */
-        .dropdown-menu {
-            background: rgba(5, 8, 18, 0.95) !important;
-            backdrop-filter: blur(25px) saturate(1.8) !important;
-            border: 1px solid rgba(59, 130, 246, 0.2) !important;
-            border-radius: 12px !important;
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 60px rgba(59, 130, 246, 0.1) !important;
-            padding: 8px !important;
-            margin-top: 8px !important;
-            min-width: 240px !important;
-            animation: dropdownFadeIn 0.3s ease-out;
+        /* ── Brand ── */
+        .nav-brand {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 1.35rem;
+            letter-spacing: -0.03em;
+            text-decoration: none;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: opacity var(--transition);
+            flex-shrink: 0;
         }
 
-        @@keyframes dropdownFadeIn {
-            from
+        .nav-brand:hover { opacity: 0.85; color: var(--text-primary); }
 
-        {
-            opacity: 0;
-            transform: translateY(-10px) scale(0.95);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-        }
-
-        }
-
-        /* User Info in Dropdown */
-        .user-info {
-            background: rgba(59, 130, 246, 0.1) !important;
-            border: 1px solid rgba(59, 130, 246, 0.2) !important;
-            border-radius: 8px !important;
-            padding: 12px !important;
-            margin-bottom: 8px !important;
-            display: flex !important;
-            align-items: center !important;
-            gap: 10px !important;
-        }
-
-        .user-avatar {
+        .brand-mark {
             width: 32px;
             height: 32px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #3b82f6 0%, #14b8a6 100%);
+            border-radius: var(--radius-sm);
+            background: linear-gradient(135deg, var(--accent) 0%, var(--teal) 100%);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: 700;
-            color: white;
+            color: #fff;
+            box-shadow: 0 2px 12px rgba(59, 123, 247, 0.3);
             flex-shrink: 0;
-            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
         }
 
-        .user-details h6 {
-            color: rgba(255, 255, 255, 0.95) !important;
+        .brand-text {
+            background: linear-gradient(135deg, #fff 30%, rgba(255,255,255,0.7) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* ── Desktop Links ── */
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-links .nav-link {
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 0.875rem;
+            padding: 7px 14px;
+            border-radius: var(--radius-sm);
+            text-decoration: none;
+            transition: color var(--transition), background var(--transition);
+            position: relative;
+            white-space: nowrap;
+        }
+
+        .nav-links .nav-link:hover {
+            color: var(--text-primary);
+            background: var(--surface-hover);
+        }
+
+        .nav-links .nav-link.active {
+            color: var(--accent);
+            background: var(--accent-glow);
+        }
+
+        /* ── Right Section ── */
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: auto;
+        }
+
+        /* ── Account Dropdown ── */
+        .account-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 5px 5px 5px 18px;
+            border-radius: 100px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            background: linear-gradient(135deg, #0d1a2e 0%, #0a1322 40%, #080f1c 100%);
+            color: rgba(255, 255, 255, 0.85);
+            font-weight: 500;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all var(--transition);
+            text-decoration: none;
+            position: relative;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+        }
+
+        .account-btn:hover {
+            background: linear-gradient(135deg, #112240 0%, #0e1a30 40%, #0b1428 100%);
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+        }
+
+        .account-btn .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--teal), #18a896);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #fff;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(34, 201, 176, 0.3);
+        }
+
+        .account-btn .chevron {
+            font-size: 0.6rem;
+            transition: transform var(--transition);
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .account-btn[aria-expanded="true"] .chevron {
+            transform: rotate(180deg);
+        }
+
+        /* ── Dropdown Menu ── */
+        .dropdown-menu {
+            background: rgba(6, 8, 18, 0.98) !important;
+            backdrop-filter: blur(30px) saturate(1.6) !important;
+            -webkit-backdrop-filter: blur(30px) saturate(1.6) !important;
+            border: 1px solid rgba(255, 255, 255, 0.06) !important;
+            border-radius: var(--radius-md) !important;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7), 0 0 1px rgba(255, 255, 255, 0.08) !important;
+            padding: 6px !important;
+            margin-top: 10px !important;
+            min-width: 220px !important;
+            animation: menuReveal 0.2s ease-out;
+        }
+
+        @@keyframes menuReveal {
+            from { opacity: 0; transform: translateY(-6px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .dropdown-user-card {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: var(--radius-sm);
+            background: var(--surface);
+            margin-bottom: 4px;
+        }
+
+        .dropdown-user-card .user-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--teal));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #fff;
+            flex-shrink: 0;
+        }
+
+        .dropdown-user-card .user-name {
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 0.875rem;
+            line-height: 1.2;
+        }
+
+        .dropdown-user-card .user-role {
+            color: var(--text-muted);
+            font-size: 0.7rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+        }
+
+        .dropdown-section-label {
+            color: var(--text-muted) !important;
+            font-size: 0.65rem !important;
             font-weight: 600 !important;
-            margin: 0 !important;
-            font-size: 0.9rem !important;
-        }
-
-        .user-details small {
-            color: rgba(255, 255, 255, 0.6) !important;
-            font-size: 0.75rem !important;
             text-transform: uppercase !important;
-            letter-spacing: 0.5px !important;
-            font-weight: 500 !important;
+            letter-spacing: 0.8px !important;
+            padding: 8px 12px 4px !important;
         }
 
-        .dropdown-header {
-            color: rgba(255, 255, 255, 0.7) !important;
-            font-weight: 600 !important;
-            font-size: 0.75rem !important;
-            text-transform: uppercase !important;
-            letter-spacing: 0.5px !important;
-            padding: 8px 12px 4px 12px !important;
-            margin-bottom: 4px !important;
-        }
-
-        .dropdown-item {
-            color: rgba(255, 255, 255, 0.85) !important;
+        .dropdown-menu .dropdown-item {
+            color: var(--text-secondary) !important;
             font-weight: 500 !important;
-            padding: 10px 12px !important;
-            border-radius: 8px !important;
-            transition: all 0.3s ease !important;
-            margin: 2px 0 !important;
+            font-size: 0.835rem !important;
+            padding: 9px 12px !important;
+            border-radius: var(--radius-sm) !important;
             display: flex !important;
             align-items: center !important;
             gap: 10px !important;
-            font-size: 0.85rem !important;
-            position: relative !important;
-            overflow: hidden !important;
+            transition: all var(--transition) !important;
+            border: none !important;
+            background: transparent !important;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
         }
 
-            .dropdown-item:hover {
-                background: rgba(59, 130, 246, 0.15) !important;
-                color: #ffffff !important;
-                transform: translateX(4px) !important;
-                box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2) !important;
-            }
+        .dropdown-menu .dropdown-item:hover {
+            color: var(--text-primary) !important;
+            background: var(--surface-hover) !important;
+        }
 
-            .dropdown-item.danger-item {
-                color: rgba(239, 68, 68, 0.9) !important;
-            }
+        .dropdown-menu .dropdown-item i {
+            width: 16px;
+            text-align: center;
+            font-size: 0.85rem;
+            opacity: 0.7;
+        }
 
-                .dropdown-item.danger-item:hover {
-                    background: rgba(239, 68, 68, 0.15) !important;
-                    color: rgba(255, 255, 255, 0.95) !important;
-                    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2) !important;
-                }
+        .dropdown-menu .dropdown-item:hover i {
+            opacity: 1;
+        }
 
-            .dropdown-item.admin-item {
-                color: rgba(20, 184, 166, 0.9) !important;
-            }
+        .dropdown-menu .dropdown-item.item-admin {
+            color: var(--teal) !important;
+        }
 
-                .dropdown-item.admin-item:hover {
-                    background: rgba(20, 184, 166, 0.15) !important;
-                    color: rgba(255, 255, 255, 0.95) !important;
-                    box-shadow: 0 4px 12px rgba(20, 184, 166, 0.2) !important;
-                }
+        .dropdown-menu .dropdown-item.item-admin:hover {
+            background: var(--teal-glow) !important;
+            color: var(--teal) !important;
+        }
+
+        .dropdown-menu .dropdown-item.item-danger {
+            color: var(--danger) !important;
+        }
+
+        .dropdown-menu .dropdown-item.item-danger:hover {
+            background: rgba(248, 113, 113, 0.1) !important;
+            color: var(--danger) !important;
+        }
 
         .dropdown-divider {
-            border-color: rgba(59, 130, 246, 0.2) !important;
-            margin: 8px 0 !important;
+            border-color: var(--border) !important;
+            margin: 4px 8px !important;
         }
 
-        /* Sign In Button for unauthenticated users */
-        .btn-outline-info.signin-btn {
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.12), rgba(20, 184, 166, 0.08)) !important;
-            border: 1px solid rgba(59, 130, 246, 0.4) !important;
-            color: rgba(255, 255, 255, 0.9) !important;
-            font-weight: 600;
-            border-radius: 8px !important;
-            padding: 8px 14px !important;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            text-decoration: none;
-            position: relative;
-            overflow: hidden;
-            backdrop-filter: blur(15px);
-            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
-            font-size: 0.85rem;
+        /* ── Sign In Button ── */
+        .signin-btn {
             display: inline-flex;
             align-items: center;
             gap: 6px;
+            padding: 8px 18px;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #fff;
+            background: linear-gradient(135deg, var(--accent), #3672e8);
+            border: none;
+            text-decoration: none;
+            transition: all var(--transition);
+            box-shadow: 0 2px 12px rgba(59, 123, 247, 0.25);
+            cursor: pointer;
         }
 
-            .btn-outline-info.signin-btn:hover {
-                background: linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(20, 184, 166, 0.18)) !important;
-                border-color: rgba(59, 130, 246, 0.6) !important;
-                color: #ffffff !important;
-                transform: translateY(-2px);
-                box-shadow: 0 6px 16px rgba(59, 130, 246, 0.25);
-            }
+        .signin-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 24px rgba(59, 123, 247, 0.35);
+            color: #fff;
+        }
 
-        /* Main content styling */
+        .signin-btn:active {
+            transform: translateY(0);
+        }
+
+        /* ── Mobile Toggle ── */
+        .nav-toggle {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            background: var(--surface);
+            cursor: pointer;
+            transition: all var(--transition);
+            position: relative;
+            padding: 0;
+        }
+
+        .nav-toggle:hover {
+            background: var(--surface-hover);
+            border-color: var(--border-hover);
+        }
+
+        .hamburger {
+            width: 18px;
+            height: 14px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .hamburger span {
+            display: block;
+            width: 100%;
+            height: 2px;
+            background: var(--text-secondary);
+            border-radius: 2px;
+            transition: all 0.3s ease;
+            transform-origin: center;
+        }
+
+        .nav-toggle.active .hamburger span:nth-child(1) {
+            transform: translateY(6px) rotate(45deg);
+        }
+
+        .nav-toggle.active .hamburger span:nth-child(2) {
+            opacity: 0;
+            transform: scaleX(0);
+        }
+
+        .nav-toggle.active .hamburger span:nth-child(3) {
+            transform: translateY(-6px) rotate(-45deg);
+        }
+
+        /* ── Mobile Nav ── */
+        .mobile-nav {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: rgba(4, 5, 14, 0.99);
+            backdrop-filter: blur(30px) saturate(1.6);
+            -webkit-backdrop-filter: blur(30px) saturate(1.6);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 16px 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+            animation: mobileSlide 0.25s ease-out;
+        }
+
+        @@keyframes mobileSlide {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .mobile-nav.open {
+            display: block;
+        }
+
+        .mobile-nav .mobile-links {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 12px 0;
+        }
+
+        .mobile-nav .mobile-links .nav-link {
+            display: block;
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 0.9rem;
+            padding: 11px 14px;
+            border-radius: var(--radius-sm);
+            text-decoration: none;
+            transition: all var(--transition);
+        }
+
+        .mobile-nav .mobile-links .nav-link:hover,
+        .mobile-nav .mobile-links .nav-link.active {
+            color: var(--text-primary);
+            background: var(--surface-hover);
+        }
+
+        .mobile-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 8px 0 12px;
+        }
+
+        .mobile-user-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            background: var(--surface);
+            margin-bottom: 8px;
+        }
+
+        .mobile-user-section .m-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--teal));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #fff;
+            flex-shrink: 0;
+        }
+
+        .mobile-user-section .m-name {
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .mobile-user-section .m-role {
+            color: var(--text-muted);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 500;
+        }
+
+        .mobile-action {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            padding: 11px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 0.875rem;
+            font-weight: 500;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            transition: all var(--transition);
+            text-decoration: none;
+        }
+
+        .mobile-action i {
+            width: 18px;
+            text-align: center;
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+
+        .mobile-action.action-admin {
+            color: var(--teal);
+        }
+
+        .mobile-action.action-admin:hover {
+            background: var(--teal-glow);
+        }
+
+        .mobile-action.action-danger {
+            color: var(--danger);
+        }
+
+        .mobile-action.action-danger:hover {
+            background: rgba(248, 113, 113, 0.1);
+        }
+
+        .mobile-signin {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 12px;
+            border-radius: 100px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #fff;
+            background: linear-gradient(135deg, var(--accent), #3672e8);
+            border: none;
+            text-decoration: none;
+            box-shadow: 0 2px 16px rgba(59, 123, 247, 0.25);
+            transition: all var(--transition);
+        }
+
+        .mobile-signin:hover {
+            box-shadow: 0 6px 24px rgba(59, 123, 247, 0.35);
+            color: #fff;
+        }
+
+        /* ── Main Content ── */
         main {
-            min-height: calc(100vh - 80px);
+            min-height: calc(100vh - 64px);
             position: relative;
             z-index: 1;
         }
 
-        /* Icon styling */
-        .dropdown-item i {
-            width: 16px;
-            text-align: center;
-            font-size: 0.9rem;
-        }
-
-        .bi {
-            margin-right: 6px;
-        }
-
-        /* Smooth Navbar Scroll Effect */
-        .navbar.scrolled {
-            background: rgba(2, 4, 12, 0.95) !important;
-            backdrop-filter: blur(30px) saturate(2);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 80px rgba(59, 130, 246, 0.08);
-            padding: 10px 0;
-        }
-
-        /* Responsive Design */
+        /* ══════════════════════════════════════
+           RESPONSIVE
+           ══════════════════════════════════════ */
         @@media (max-width: 768px) {
-            .navbar
+            .nav-inner { height: 56px; padding: 0 16px; }
+            .nav-links { display: none !important; }
+            .nav-right .desktop-only { display: none !important; }
+            .nav-toggle { display: flex; }
 
-        {
-            padding: 10px 0;
+            .brand-mark { width: 28px; height: 28px; font-size: 0.75rem; border-radius: 6px; }
+            .nav-brand { font-size: 1.2rem; gap: 8px; }
         }
 
-        .navbar-brand {
-            font-size: 1.3rem;
+        @@media (min-width: 769px) {
+            .mobile-nav { display: none !important; }
+            .nav-toggle { display: none !important; }
         }
 
-        .navbar-collapse {
-            background: rgba(5, 8, 18, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 12px;
-            margin-top: 12px;
-            padding: 16px;
-            border: 1px solid rgba(59, 130, 246, 0.15);
+        @@media (max-width: 480px) {
+            .nav-inner { padding: 0 12px; }
+            .nav-brand { font-size: 1.1rem; }
         }
 
-        .dropdown-menu {
-            min-width: 200px !important;
-            margin-top: 4px !important;
-        }
-
-        .account-dropdown-toggle {
-            padding: 6px 12px !important;
-            font-size: 0.8rem;
-        }
-
-        .user-avatar {
-            width: 28px;
-            height: 28px;
-            font-size: 0.8rem;
-        }
-
-        .user-details h6 {
-            font-size: 0.8rem !important;
-        }
-
-        .user-details small {
-            font-size: 0.7rem !important;
-        }
-
-        }
-
-        /* Ultra smooth collapse animation */
-        .navbar-collapse {
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .collapsing {
-            transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        @@media (min-width: 1400px) {
+            .nav-inner { padding: 0 48px; }
         }
     </style>
-
-    <script>
-        // Add scroll effect to navbar
-        window.addEventListener('scroll', function() {
-            const navbar = document.querySelector('.navbar');
-            if (window.scrollY > 50) {
-                navbar.classList.add('scrolled');
-            } else {
-                navbar.classList.remove('scrolled');
-            }
-        });
-    </script>
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Online Survey</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                    </ul>
-                    <ul class="navbar-nav">
-                        @if (User.Identity.IsAuthenticated)
-                        {
-                            <li class="nav-item dropdown account-dropdown">
-                                <button class="btn dropdown-toggle account-dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="bi bi-person-circle"></i>
-                                    <span>Account</span>
-                                </button>
-                                <ul class="dropdown-menu dropdown-menu-end">
-                                    <li class="user-info">
+        <nav class="site-navbar" id="siteNavbar">
+            <div class="nav-inner">
+                <!-- Brand -->
+                <a class="nav-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                    <div class="brand-mark"><i class="bi bi-bar-chart-fill" style="font-size: 0.9rem;"></i></div>
+                    <span class="brand-text">Online Survey</span>
+                </a>
+
+                <!-- Desktop Navigation Links (empty in this layout) -->
+                <ul class="nav-links">
+                </ul>
+
+                <!-- Right Section -->
+                <div class="nav-right">
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <!-- Desktop Account Dropdown -->
+                        <div class="dropdown desktop-only">
+                            <button class="account-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span>Account</span>
+                                <i class="bi bi-chevron-down chevron"></i>
+                                <div class="avatar">
+                                    @(User.Identity.Name?.Substring(0, 1).ToUpper() ?? "U")
+                                </div>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li>
+                                    <div class="dropdown-user-card">
                                         <div class="user-avatar">
                                             @(User.Identity.Name?.Substring(0, 1).ToUpper() ?? "U")
                                         </div>
-                                        <div class="user-details">
-                                            <h6>@User.Identity.Name</h6>
-                                            <small>Account Holder</small>
+                                        <div>
+                                            <div class="user-name">@User.Identity.Name</div>
+                                            <div class="user-role">Account Holder</div>
                                         </div>
-                                    </li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li><h6 class="dropdown-header">Actions</h6></li>
-                                    <li>
-                                        <a class="dropdown-item admin-item" asp-controller="Admin" asp-action="Index" asp-area="Admin">
-                                            <i class="bi bi-gear"></i>Admin Dashboard
-                                        </a>
-                                    </li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li>
-                                        <form asp-area="Admin" asp-controller="Admin" asp-action="Logout" method="post" class="d-inline w-100">
-                                            <button type="submit" class="dropdown-item danger-item w-100" style="border: none; background: none;">
-                                                <i class="bi bi-box-arrow-left"></i>Logout
-                                            </button>
-                                        </form>
-                                    </li>
-                                </ul>
-                            </li>
-                        }
-                        else
-                        {
-                            <li class="nav-item">
-                                <a asp-controller="Account" asp-action="Login" class="btn btn-outline-info signin-btn">
-                                    <i class="bi bi-box-arrow-right"></i>Sign In
-                                </a>
-                            </li>
-                        }
-                    </ul>
+                                    </div>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><h6 class="dropdown-section-label">Manage</h6></li>
+                                <li>
+                                    <a class="dropdown-item item-admin" asp-controller="Admin" asp-action="Index" asp-area="Admin">
+                                        <i class="bi bi-grid-1x2"></i>Admin Dashboard
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form asp-area="Admin" asp-controller="Admin" asp-action="Logout" method="post" class="d-inline w-100">
+                                        <button type="submit" class="dropdown-item item-danger">
+                                            <i class="bi bi-arrow-bar-left"></i>Log Out
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    }
+                    else
+                    {
+                        <!-- Desktop Sign In -->
+                        <a asp-controller="Account" asp-action="Login" class="signin-btn desktop-only">
+                            <span>Sign In</span>
+                            <i class="bi bi-arrow-right"></i>
+                        </a>
+                    }
+
+                    <!-- Mobile Toggle -->
+                    <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+                        <div class="hamburger">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </button>
                 </div>
+            </div>
+
+            <!-- Mobile Navigation -->
+            <div class="mobile-nav" id="mobileNav">
+                <div class="mobile-divider"></div>
+
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <div class="mobile-user-section">
+                        <div class="m-avatar">
+                            @(User.Identity.Name?.Substring(0, 1).ToUpper() ?? "U")
+                        </div>
+                        <div>
+                            <div class="m-name">@User.Identity.Name</div>
+                            <div class="m-role">Account Holder</div>
+                        </div>
+                    </div>
+                    <a class="mobile-action action-admin" asp-controller="Admin" asp-action="Index" asp-area="Admin">
+                        <i class="bi bi-grid-1x2"></i>Admin Dashboard
+                    </a>
+                    <form asp-area="Admin" asp-controller="Admin" asp-action="Logout" method="post">
+                        <button type="submit" class="mobile-action action-danger">
+                            <i class="bi bi-arrow-bar-left"></i>Log Out
+                        </button>
+                    </form>
+                }
+                else
+                {
+                    <a asp-controller="Account" asp-action="Login" class="mobile-signin">
+                        <span>Sign In</span>
+                        <i class="bi bi-arrow-right"></i>
+                    </a>
+                }
             </div>
         </nav>
     </header>
@@ -507,6 +725,46 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script>
+        // Scroll effect
+        const navbar = document.getElementById('siteNavbar');
+        let ticking = false;
+        window.addEventListener('scroll', () => {
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    navbar.classList.toggle('scrolled', window.scrollY > 30);
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        });
+
+        // Mobile toggle
+        const toggle = document.getElementById('navToggle');
+        const mobileNav = document.getElementById('mobileNav');
+        toggle.addEventListener('click', () => {
+            toggle.classList.toggle('active');
+            mobileNav.classList.toggle('open');
+        });
+
+        // Close mobile nav on link click
+        mobileNav.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                toggle.classList.remove('active');
+                mobileNav.classList.remove('open');
+            });
+        });
+
+        // Close mobile nav on outside click
+        document.addEventListener('click', (e) => {
+            if (!navbar.contains(e.target)) {
+                toggle.classList.remove('active');
+                mobileNav.classList.remove('open');
+            }
+        });
+    </script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

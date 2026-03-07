@@ -36,8 +36,14 @@ namespace Data
         public DbSet<ResponseAnswer> ResponseAnswers { get; set; }
 
         public DbSet<SentNewsletterEamil> SentNewsletterEamils { get; set; }
+        public DbSet<ResponseAnalysis> ResponseAnalyses { get; set; }
+        public DbSet<QuestionnaireAnalysisSnapshot> QuestionnaireAnalysisSnapshots { get; set; }
 
+        public DbSet<CaseNote> CaseNotes { get; set; }
+        public DbSet<CaseStatusEntry> CaseStatusEntries { get; set; }
+        public DbSet<ActionPlan> ActionPlans { get; set; }
 
+        public DbSet<UserTrajectoryCache> UserTrajectoryCaches { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<FooterSocialMedia>()
@@ -87,6 +93,30 @@ namespace Data
                 .OnDelete(DeleteBehavior.Restrict);
 
 
+            modelBuilder.Entity<ResponseAnalysis>()
+    .HasOne(ra => ra.Response)
+    .WithMany()
+    .HasForeignKey(ra => ra.ResponseId)
+    .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<ResponseAnalysis>()
+                .HasOne(ra => ra.Question)
+                .WithMany()
+                .HasForeignKey(ra => ra.QuestionId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<QuestionnaireAnalysisSnapshot>()
+                .HasOne(s => s.Questionnaire)
+                .WithMany()
+                .HasForeignKey(s => s.QuestionnaireId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+
+            modelBuilder.Entity<ResponseAnswer>()
+     .HasOne(ra => ra.Answer)
+     .WithMany()
+     .HasForeignKey(ra => ra.AnswerId)
+     .OnDelete(DeleteBehavior.NoAction);
             base.OnModelCreating(modelBuilder);
         }
 

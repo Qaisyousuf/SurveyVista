@@ -21,7 +21,7 @@ using System.Text.RegularExpressions;
 namespace Web.Areas.Admin.Controllers
 {
 
-  
+    [Area("Admin")]
     public class NewslettersController : Controller
     {
         private readonly INewsLetterRepository _repository;

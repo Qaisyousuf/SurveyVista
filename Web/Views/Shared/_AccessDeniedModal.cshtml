@@ -1,0 +1,77 @@
+﻿<!-- Access Denied Modal — shared across all admin pages -->
+<div class="modal-overlay" id="accessDeniedModal" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(2,6,23,0.8);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:2rem;">
+    <div style="background:#1e293b;border:1px solid rgba(255,255,255,0.08);border-radius:20px;width:100%;max-width:460px;position:relative;animation:adSlideUp .3s ease;overflow:hidden;">
+        <div style="position:absolute;top:0;left:0;right:0;height:3px;border-radius:20px 20px 0 0;background:linear-gradient(90deg,#f87171,#dc2626);"></div>
+        
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:1.5rem 1.75rem 1rem;">
+            <div style="display:flex;align-items:center;gap:0.85rem;">
+                <div style="width:42px;height:42px;border-radius:12px;background:rgba(248,113,113,0.15);display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:#f87171;">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <div>
+                    <h3 style="font-size:1.1rem;font-weight:700;color:#f8fafc;margin:0;">Access Denied</h3>
+                    <p style="font-size:0.78rem;color:#94a3b8;margin:2px 0 0;">Insufficient permissions</p>
+                </div>
+            </div>
+            <button type="button" onclick="closeAccessDeniedModal()" style="width:36px;height:36px;border-radius:10px;border:1px solid rgba(255,255,255,0.08);background:none;color:#94a3b8;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:0.9rem;">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div style="text-align:center;padding:1rem 1.75rem 2rem;">
+            <div style="width:70px;height:70px;border-radius:16px;background:rgba(248,113,113,0.12);border:1px solid rgba(248,113,113,0.2);display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;font-size:1.8rem;color:#f87171;animation:adShake .6s ease-in-out;">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            <h4 style="font-size:1.15rem;font-weight:700;color:#f8fafc;margin:0 0 0.5rem;">You Don't Have Permission</h4>
+            <p style="font-size:0.85rem;color:#94a3b8;line-height:1.7;margin:0 0 1.5rem;">
+                Your current role does not include the required privileges for this action.
+                Please contact your <span style="color:#f87171;font-weight:600;">system administrator</span> to request access.
+            </p>
+            <div style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem 1rem;background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.15);border-radius:10px;margin:0 0 1.5rem;text-align:left;">
+                <i class="fa-solid fa-circle-info" style="color:#f87171;flex-shrink:0;"></i>
+                <span style="font-size:0.78rem;color:#cbd5e1;line-height:1.5;">
+                    Logged in as: <strong style="color:#f8fafc;">@User.Identity?.Name</strong>
+                </span>
+            </div>
+            <button type="button" onclick="closeAccessDeniedModal()" style="display:inline-flex;align-items:center;gap:0.5rem;padding:0.65rem 1.5rem;border-radius:10px;font-family:'Space Grotesk',sans-serif;font-size:0.85rem;font-weight:600;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:#e2e8f0;cursor:pointer;">
+                <i class="fa-solid fa-arrow-left"></i> Go Back
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+    @@keyframes adSlideUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+    @@keyframes adShake { 0%,100%{transform:translateX(0)} 15%{transform:translateX(-8px)} 30%{transform:translateX(8px)} 45%{transform:translateX(-6px)} 60%{transform:translateX(6px)} 75%{transform:translateX(-3px)} 90%{transform:translateX(3px)} }
+</style>
+
+<script>
+    function openAccessDeniedModal() {
+        var m = document.getElementById('accessDeniedModal');
+        m.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+    function closeAccessDeniedModal() {
+        var m = document.getElementById('accessDeniedModal');
+        m.style.display = 'none';
+        document.body.style.overflow = '';
+    }
+    document.getElementById('accessDeniedModal').addEventListener('click', function(e) {
+        if (e.target === this) closeAccessDeniedModal();
+    });
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && document.getElementById('accessDeniedModal').style.display === 'flex') {
+            closeAccessDeniedModal();
+        }
+    });
+    // Auto-show if redirected with ?accessDenied=true
+(function() {
+    var params = new URLSearchParams(window.location.search);
+    if (params.get('accessDenied') === 'true') {
+        openAccessDeniedModal();
+        // Clean URL without reloading
+        var cleanUrl = window.location.pathname + window.location.search.replace(/[?&]accessDenied=true/, '').replace(/^\?$/, '');
+        window.history.replaceState({}, '', cleanUrl);
+    }
+})();
+</script>

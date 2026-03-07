@@ -1,0 +1,68 @@
+﻿@{
+    ViewData["Title"] = "Access Denied";
+}
+
+@section Styles {
+<style>
+    @@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
+    .ad-wrapper { min-height:100vh; background:#0f172a; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden; font-family:'Space Grotesk',sans-serif; }
+    .ad-bg { position:absolute; inset:0; z-index:0; }
+    .ad-bg .grid { position:absolute; inset:0; background-image:linear-gradient(rgba(248,113,113,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(248,113,113,0.04) 1px,transparent 1px); background-size:60px 60px; }
+    .ad-bg .mesh { position:absolute; inset:0; background:radial-gradient(circle at 30% 40%,rgba(248,113,113,0.1) 0%,transparent 50%),radial-gradient(circle at 70% 60%,rgba(96,165,250,0.06) 0%,transparent 50%); }
+
+    .ad-card { position:relative; z-index:10; text-align:center; max-width:480px; width:100%; padding:3rem 2.5rem; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:24px; backdrop-filter:blur(12px); }
+    .ad-card .glow { position:absolute; top:0; left:0; right:0; height:3px; border-radius:24px 24px 0 0; background:linear-gradient(90deg,#f87171,#dc2626); }
+
+    .ad-icon { width:80px; height:80px; border-radius:20px; background:rgba(248,113,113,0.12); border:1px solid rgba(248,113,113,0.2); display:flex; align-items:center; justify-content:center; margin:0 auto 1.5rem; font-size:2rem; color:#f87171; animation:shake .6s ease-in-out; }
+    @@keyframes shake { 0%,100%{transform:translateX(0)} 15%{transform:translateX(-8px)} 30%{transform:translateX(8px)} 45%{transform:translateX(-6px)} 60%{transform:translateX(6px)} 75%{transform:translateX(-3px)} 90%{transform:translateX(3px)} }
+
+    .ad-code { font-family:'JetBrains Mono',monospace; font-size:3.5rem; font-weight:700; color:#f87171; line-height:1; margin-bottom:0.5rem; }
+    .ad-title { font-size:1.3rem; font-weight:700; color:#f8fafc; margin-bottom:0.75rem; }
+    .ad-text { font-size:0.88rem; color:#94a3b8; line-height:1.7; margin-bottom:2rem; }
+    .ad-text strong { color:#f87171; }
+
+    .ad-info { display:flex; align-items:center; gap:0.75rem; padding:0.85rem 1.25rem; background:rgba(248,113,113,0.08); border:1px solid rgba(248,113,113,0.15); border-radius:12px; margin-bottom:2rem; text-align:left; }
+    .ad-info i { color:#f87171; font-size:1.1rem; flex-shrink:0; }
+    .ad-info span { font-size:0.8rem; color:#cbd5e1; line-height:1.5; }
+
+    .ad-actions { display:flex; gap:0.75rem; justify-content:center; flex-wrap:wrap; }
+    .ad-btn { display:inline-flex; align-items:center; gap:0.5rem; padding:0.65rem 1.5rem; border-radius:10px; font-family:'Space Grotesk',sans-serif; font-size:0.85rem; font-weight:600; border:none; cursor:pointer; transition:all .25s; text-decoration:none; }
+    .ad-btn.pri { background:linear-gradient(135deg,#60a5fa,#22d3ee); color:#fff; }
+    .ad-btn.pri:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(96,165,250,0.3); }
+    .ad-btn.sec { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#e2e8f0; }
+    .ad-btn.sec:hover { background:rgba(255,255,255,0.08); border-color:rgba(255,255,255,0.15); }
+
+    .ad-user { font-family:'JetBrains Mono',monospace; font-size:0.7rem; color:#475569; margin-top:1.5rem; }
+</style>
+}
+
+<div class="ad-wrapper">
+    <div class="ad-bg"><div class="grid"></div><div class="mesh"></div></div>
+
+    <div class="ad-card">
+        <div class="glow"></div>
+
+        <div class="ad-icon"><i class="fa-solid fa-shield-halved"></i></div>
+        <div class="ad-code">403</div>
+        <h1 class="ad-title">Access Denied</h1>
+        <p class="ad-text">
+            You <strong>do not have permission</strong> to access this resource.
+            Your current role does not include the required privileges for this action.
+        </p>
+
+        <div class="ad-info">
+            <i class="fa-solid fa-circle-info"></i>
+            <span>If you believe this is an error, please contact your system administrator to request the appropriate permissions for your role.</span>
+        </div>
+
+        <div class="ad-actions">
+            <a href="javascript:history.back()" class="ad-btn sec"><i class="fa-solid fa-arrow-left"></i> Go Back</a>
+            <a href="@Url.Action("Index", "Dashboard", new { area = "Admin" })" class="ad-btn pri"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+        </div>
+
+        <div class="ad-user">
+            <i class="fa-solid fa-user"></i> Logged in as: @User.Identity?.Name
+        </div>
+    </div>
+</div>

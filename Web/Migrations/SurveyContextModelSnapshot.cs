@@ -155,6 +155,71 @@ namespace Web.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Model.ActionPlan", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ActionType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AssignedTo")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AssignedToEmail")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("CompletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CompletionNotes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedByEmail")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CreatedByName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Priority")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ResponseId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("ScheduledDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ResponseId");
+
+                    b.ToTable("ActionPlans");
+                });
+
             modelBuilder.Entity("Model.Address", b =>
                 {
                     b.Property<int>("Id")
@@ -329,6 +394,81 @@ namespace Web.Migrations
                     b.ToTable("Banners");
                 });
 
+            modelBuilder.Entity("Model.CaseNote", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AuthorEmail")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AuthorName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsConfidential")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("NoteText")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ResponseId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ResponseId");
+
+                    b.ToTable("CaseNotes");
+                });
+
+            modelBuilder.Entity("Model.CaseStatusEntry", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("ChangedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ChangedByEmail")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ChangedByName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Reason")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ResponseId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ResponseId");
+
+                    b.ToTable("CaseStatusEntries");
+                });
+
             modelBuilder.Entity("Model.Footer", b =>
                 {
                     b.Property<int>("Id")
@@ -487,6 +627,66 @@ namespace Web.Migrations
                     b.ToTable("Questionnaires");
                 });
 
+            modelBuilder.Entity("Model.QuestionnaireAnalysisSnapshot", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AnalyzedResponses")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CriticalRiskCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ExecutiveSummary")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("GeneratedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("HighRiskCount")
+                        .HasColumnType("int");
+
+                    b.Property<int>("LowRiskCount")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ModerateRiskCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("MostCommonKeyPhrasesJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("OverallNegativeSentiment")
+                        .HasColumnType("float");
+
+                    b.Property<double>("OverallNeutralSentiment")
+                        .HasColumnType("float");
+
+                    b.Property<double>("OverallPositiveSentiment")
+                        .HasColumnType("float");
+
+                    b.Property<int>("QuestionnaireId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TopWorkplaceIssuesJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("TotalResponses")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QuestionnaireId");
+
+                    b.ToTable("QuestionnaireAnalysisSnapshots");
+                });
+
             modelBuilder.Entity("Model.Response", b =>
                 {
                     b.Property<int>("Id")
@@ -514,6 +714,98 @@ namespace Web.Migrations
                     b.ToTable("Responses");
                 });
 
+            modelBuilder.Entity("Model.ResponseAnalysis", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("AnalyzedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("AnonymizedText")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CategoriesJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("EmotionalIndicatorsJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("InsightsJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("KeyPhrasesJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("NegativeScore")
+                        .HasColumnType("float");
+
+                    b.Property<double>("NeutralScore")
+                        .HasColumnType("float");
+
+                    b.Property<double>("PositiveScore")
+                        .HasColumnType("float");
+
+                    b.Property<string>("ProtectiveFactorsJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("QuestionId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("QuestionText")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RecommendedAction")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("RequiresImmediateAttention")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("ResponseId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("RiskIndicatorsJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RiskLevel")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("RiskScore")
+                        .HasColumnType("float");
+
+                    b.Property<double>("SentimentConfidence")
+                        .HasColumnType("float");
+
+                    b.Property<string>("SentimentLabel")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("WorkplaceFactorsJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QuestionId");
+
+                    b.HasIndex("ResponseId");
+
+                    b.ToTable("ResponseAnalyses");
+                });
+
             modelBuilder.Entity("Model.ResponseAnswer", b =>
                 {
                     b.Property<int>("Id")
@@ -529,6 +821,8 @@ namespace Web.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AnswerId");
 
                     b.HasIndex("ResponseDetailId");
 
@@ -675,6 +969,43 @@ namespace Web.Migrations
                     b.ToTable("Subscriptions");
                 });
 
+            modelBuilder.Entity("Model.UserTrajectoryCache", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AnalyzedResponseCount")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("LastResponseDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("PreviousSummary")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TrajectoryJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserEmail")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UserTrajectoryCaches");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -726,6 +1057,17 @@ namespace Web.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Model.ActionPlan", b =>
+                {
+                    b.HasOne("Model.Response", "Response")
+                        .WithMany("ActionPlans")
+                        .HasForeignKey("ResponseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Response");
+                });
+
             modelBuilder.Entity("Model.Answer", b =>
                 {
                     b.HasOne("Model.Question", "Question")
@@ -735,6 +1077,28 @@ namespace Web.Migrations
                         .IsRequired();
 
                     b.Navigation("Question");
+                });
+
+            modelBuilder.Entity("Model.CaseNote", b =>
+                {
+                    b.HasOne("Model.Response", "Response")
+                        .WithMany("CaseNotes")
+                        .HasForeignKey("ResponseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Response");
+                });
+
+            modelBuilder.Entity("Model.CaseStatusEntry", b =>
+                {
+                    b.HasOne("Model.Response", "Response")
+                        .WithMany("StatusHistory")
+                        .HasForeignKey("ResponseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Response");
                 });
 
             modelBuilder.Entity("Model.FooterSocialMedia", b =>
@@ -786,6 +1150,17 @@ namespace Web.Migrations
                     b.Navigation("Questionnaire");
                 });
 
+            modelBuilder.Entity("Model.QuestionnaireAnalysisSnapshot", b =>
+                {
+                    b.HasOne("Model.Questionnaire", "Questionnaire")
+                        .WithMany()
+                        .HasForeignKey("QuestionnaireId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Questionnaire");
+                });
+
             modelBuilder.Entity("Model.Response", b =>
                 {
                     b.HasOne("Model.Questionnaire", "Questionnaire")
@@ -797,13 +1172,40 @@ namespace Web.Migrations
                     b.Navigation("Questionnaire");
                 });
 
+            modelBuilder.Entity("Model.ResponseAnalysis", b =>
+                {
+                    b.HasOne("Model.Question", "Question")
+                        .WithMany()
+                        .HasForeignKey("QuestionId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Model.Response", "Response")
+                        .WithMany()
+                        .HasForeignKey("ResponseId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Question");
+
+                    b.Navigation("Response");
+                });
+
             modelBuilder.Entity("Model.ResponseAnswer", b =>
                 {
+                    b.HasOne("Model.Answer", "Answer")
+                        .WithMany()
+                        .HasForeignKey("AnswerId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
                     b.HasOne("Model.ResponseDetail", "ResponseDetail")
                         .WithMany("ResponseAnswers")
                         .HasForeignKey("ResponseDetailId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Answer");
 
                     b.Navigation("ResponseDetail");
                 });
@@ -844,7 +1246,13 @@ namespace Web.Migrations
 
             modelBuilder.Entity("Model.Response", b =>
                 {
+                    b.Navigation("ActionPlans");
+
+                    b.Navigation("CaseNotes");
+
                     b.Navigation("ResponseDetails");
+
+                    b.Navigation("StatusHistory");
                 });
 
             modelBuilder.Entity("Model.ResponseDetail", b =>

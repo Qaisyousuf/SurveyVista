@@ -346,7 +346,7 @@ namespace Web.Controllers
             </div>
             
             <div style='text-align: center; margin: 30px 0;'>
-                <a href='https://unabused-terina-wavier.ngrok-free.dev/Account/Login' class='btn'>
+                <a href='https://18fd-2a0d-e487-311f-699e-4819-e39c-a8df-8179.ngrok-free.app/Account/Login' class='btn'>
                     🚀 Login to A-Survey
                 </a>
             </div>

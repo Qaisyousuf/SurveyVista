@@ -9,7 +9,7 @@ using Web.ViewModel.QuestionnaireVM;
 namespace Web.Areas.Admin.Controllers
 {
 
-
+    [Area("Admin")]
     public class UserResponseController : Controller
     {
         private readonly SurveyContext _context;

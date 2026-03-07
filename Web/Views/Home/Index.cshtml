@@ -4,195 +4,614 @@
 }
 
 <style>
-    @@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-
-    #MainContent {
-        background: #000000;
-        font-family: 'Inter', sans-serif;
+    /* ══════════════════════════════════════
+       MAIN SECTION — TWO COLUMN
+       ══════════════════════════════════════ */
+    .main-section {
         position: relative;
-        min-height: 60vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 40px 0;
+        overflow: hidden;
+        background: #030408;
+        padding: 90px 0;
     }
 
-    #MainContent::before {
+    .main-section::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background:
+            radial-gradient(ellipse 600px 400px at 20% 40%, rgba(59, 123, 247, 0.04) 0%, transparent 100%),
+            radial-gradient(ellipse 500px 350px at 80% 60%, rgba(34, 201, 176, 0.03) 0%, transparent 100%);
+        z-index: 0;
+        pointer-events: none;
+    }
+
+    .main-section .s-grid {
+        position: absolute;
+        inset: 0;
+        background-image:
+            linear-gradient(rgba(255, 255, 255, 0.01) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.01) 1px, transparent 1px);
+        background-size: 60px 60px;
+        z-index: 1;
+        pointer-events: none;
+        mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 20%, transparent 100%);
+        -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 20%, transparent 100%);
+    }
+
+    .main-wrap {
+        position: relative;
+        z-index: 10;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 32px;
+    }
+
+    /* ── Two Column Grid ── */
+    .two-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 56px;
+        align-items: center;
+    }
+
+    /* ══════════════════════════════════════
+       LEFT COLUMN — Content (no card)
+       ══════════════════════════════════════ */
+    .left-col {
+        padding-right: 8px;
+    }
+
+    .lc-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 5px 14px 5px 8px;
+        border-radius: 100px;
+        background: rgba(59, 123, 247, 0.06);
+        border: 1px solid rgba(59, 123, 247, 0.12);
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.68rem;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.5);
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        margin-bottom: 20px;
+    }
+
+    .lc-tag .tag-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #3b7bf7;
+        box-shadow: 0 0 6px rgba(59, 123, 247, 0.5);
+        animation: dotPulse 2.5s ease-in-out infinite;
+    }
+
+    @@keyframes dotPulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.4; }
+    }
+
+    .lc-title {
+        font-family: 'Outfit', 'DM Sans', sans-serif;
+        font-size: clamp(1.5rem, 3vw, 2.2rem);
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        line-height: 1.15;
+        color: #fff;
+        margin-bottom: 20px;
+    }
+
+    .lc-sep {
+        width: 40px;
+        height: 2px;
+        background: linear-gradient(90deg, rgba(59, 123, 247, 0.4), rgba(34, 201, 176, 0.3));
+        border-radius: 2px;
+        margin-bottom: 20px;
+    }
+
+    .lc-body {
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.88rem;
+        color: rgba(255, 255, 255, 0.48);
+        line-height: 1.8;
+        margin-bottom: 32px;
+    }
+
+    .lc-cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 13px 34px;
+        border-radius: 10px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #fff;
+        background: linear-gradient(135deg, #0d1a2e 0%, #080f1c 100%);
+        border: 1px solid rgba(59, 123, 247, 0.18);
+        text-decoration: none;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .lc-cta:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 28px rgba(59, 123, 247, 0.15);
+        border-color: rgba(59, 123, 247, 0.3);
+        color: #fff;
+    }
+
+    .lc-cta i { font-size: 0.85rem; transition: transform 0.3s ease; }
+    .lc-cta:hover i { transform: scale(1.15); }
+
+    /* ══════════════════════════════════════
+       RIGHT COLUMN — 4 Cards (2x2)
+       ══════════════════════════════════════ */
+    .right-col {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 14px;
+    }
+
+    .why-card {
+        position: relative;
+        background: rgba(255, 255, 255, 0.015);
+        border: 1px solid rgba(255, 255, 255, 0.04);
+        border-radius: 16px;
+        padding: 26px 20px 24px;
+        overflow: hidden;
+        transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .why-card::before {
         content: '';
         position: absolute;
         top: 0;
         left: 0;
         right: 0;
-        bottom: 0;
-        background: radial-gradient(circle at 25% 25%, rgba(59, 130, 246, 0.08) 0%, transparent 35%), radial-gradient(circle at 75% 75%, rgba(20, 184, 166, 0.06) 0%, transparent 35%), radial-gradient(circle at 50% 50%, rgba(249, 115, 22, 0.04) 0%, transparent 40%), linear-gradient(135deg, #010203 0%, #050812 30%, #010203 70%, #000101 100%);
-        z-index: 0;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, var(--wc-accent), transparent);
+        opacity: 0;
+        transition: opacity 0.35s ease;
     }
 
-    .tech-pattern-main {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-image: radial-gradient(circle at 30% 30%, rgba(59, 130, 246, 0.08) 0%, transparent 2px), radial-gradient(circle at 70% 70%, rgba(20, 184, 166, 0.06) 0%, transparent 2px), linear-gradient(90deg, rgba(255, 255, 255, 0.01) 1px, transparent 1px), linear-gradient(180deg, rgba(255, 255, 255, 0.01) 1px, transparent 1px);
-        background-size: 120px 120px, 150px 150px, 60px 60px, 60px 60px;
-        z-index: 1;
+    .why-card:hover::before { opacity: 1; }
+
+    .why-card:hover {
+        background: rgba(255, 255, 255, 0.035);
+        border-color: rgba(255, 255, 255, 0.07);
+        transform: translateY(-4px);
+        box-shadow: 0 12px 36px rgba(0, 0, 0, 0.25);
     }
 
-    .container-fluid {
-        position: relative;
-        z-index: 10;
+    .wc--trust    { --wc-accent: #3b7bf7; }
+    .wc--security { --wc-accent: #22c9b0; }
+    .wc--support  { --wc-accent: #a78bfa; }
+    .wc--results  { --wc-accent: #fbbf24; }
+
+    .wc-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 11px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        margin-bottom: 16px;
+        transition: all 0.35s ease;
     }
 
-    .main-content-wrapper {
-        background: rgba(59, 130, 246, 0.05);
-        backdrop-filter: blur(25px);
-        border: 1px solid rgba(59, 130, 246, 0.15);
-        border-radius: 24px;
-        padding: 40px 40px;
-        text-align: center;
-        max-width: 900px;
-        margin: 0 auto;
-        transition: all 0.3s ease;
-        position: relative;
-        z-index: 10;
+    .why-card:hover .wc-icon { transform: scale(1.1); }
+
+    .wc--trust .wc-icon {
+        background: rgba(59, 123, 247, 0.08);
+        border: 1px solid rgba(59, 123, 247, 0.12);
+        color: #3b7bf7;
     }
+    .wc--trust:hover .wc-icon { box-shadow: 0 4px 14px rgba(59, 123, 247, 0.18); }
 
-        .main-content-wrapper:hover {
-            background: rgba(59, 130, 246, 0.08);
-            border-color: rgba(59, 130, 246, 0.25);
-            transform: translateY(-5px);
-            box-shadow: 0 25px 50px rgba(59, 130, 246, 0.1);
-        }
-
-    .main-title {
-        font-size: clamp(1.5rem, 3vw, 2.5rem);
-        font-weight: 900;
-        line-height: 1.2;
-        margin-bottom: 20px;
-        letter-spacing: -0.02em;
-        color: #ffffff !important;
+    .wc--security .wc-icon {
+        background: rgba(34, 201, 176, 0.08);
+        border: 1px solid rgba(34, 201, 176, 0.12);
+        color: #22c9b0;
     }
+    .wc--security:hover .wc-icon { box-shadow: 0 4px 14px rgba(34, 201, 176, 0.18); }
 
-    .main-content {
-        font-size: 1.2rem;
-        color: rgba(255, 255, 255, 0.9) !important;
-        line-height: 1.7;
-        margin-bottom: 30px;
-        position: relative;
-        z-index: 10;
+    .wc--support .wc-icon {
+        background: rgba(167, 139, 250, 0.08);
+        border: 1px solid rgba(167, 139, 250, 0.12);
+        color: #a78bfa;
     }
+    .wc--support:hover .wc-icon { box-shadow: 0 4px 14px rgba(167, 139, 250, 0.18); }
 
-    .btn-main {
-        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-        color: white !important;
-        padding: 16px 40px;
-        border: 1px solid rgba(59, 130, 246, 0.3);
-        border-radius: 12px;
+    .wc--results .wc-icon {
+        background: rgba(251, 191, 36, 0.08);
+        border: 1px solid rgba(251, 191, 36, 0.12);
+        color: #fbbf24;
+    }
+    .wc--results:hover .wc-icon { box-shadow: 0 4px 14px rgba(251, 191, 36, 0.18); }
+
+    .wc-title {
+        font-family: 'Outfit', 'DM Sans', sans-serif;
+        font-size: 0.88rem;
         font-weight: 700;
-        font-size: 1.1rem;
-        text-decoration: none;
+        color: rgba(255, 255, 255, 0.9);
+        margin-bottom: 7px;
+        letter-spacing: -0.01em;
+    }
+
+    .wc-desc {
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.74rem;
+        color: rgba(255, 255, 255, 0.38);
+        line-height: 1.5;
+    }
+
+    .wc-tag {
         display: inline-block;
-        transition: all 0.3s ease;
-        box-shadow: 0 8px 25px rgba(30, 41, 59, 0.4);
+        margin-top: 12px;
+        padding: 3px 9px;
+        border-radius: 100px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.58rem;
+        font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        position: relative;
-        z-index: 10;
     }
 
-        .btn-main:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 30px rgba(30, 41, 59, 0.6);
-            color: white !important;
-            text-decoration: none;
-            background: linear-gradient(135deg, #0f172a 0%, #020617 100%);
-            border-color: rgba(59, 130, 246, 0.5);
+    .wc--trust .wc-tag    { background: rgba(59, 123, 247, 0.07); color: rgba(59, 123, 247, 0.6); border: 1px solid rgba(59, 123, 247, 0.1); }
+    .wc--security .wc-tag { background: rgba(34, 201, 176, 0.07); color: rgba(34, 201, 176, 0.6); border: 1px solid rgba(34, 201, 176, 0.1); }
+    .wc--support .wc-tag  { background: rgba(167, 139, 250, 0.07); color: rgba(167, 139, 250, 0.6); border: 1px solid rgba(167, 139, 250, 0.1); }
+    .wc--results .wc-tag  { background: rgba(251, 191, 36, 0.07); color: rgba(251, 191, 36, 0.6); border: 1px solid rgba(251, 191, 36, 0.1); }
+
+    /* ══════════════════════════════════════
+       CONTACT MODAL
+       ══════════════════════════════════════ */
+    .contact-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+    }
+
+    .contact-overlay.active { display: flex; }
+
+    .contact-backdrop {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        animation: bIn 0.25s ease-out;
+    }
+
+    @@keyframes bIn { from { opacity: 0; } to { opacity: 1; } }
+
+    .contact-modal {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        max-width: 400px;
+        background: rgba(8, 10, 22, 0.98);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 32px 80px rgba(0, 0, 0, 0.6);
+        animation: mIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @@keyframes mIn {
+        from { opacity: 0; transform: translateY(16px) scale(0.97); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .cm-header {
+        position: relative;
+        padding: 28px 28px 20px;
+        text-align: center;
+    }
+
+    .cm-header::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 24px;
+        right: 24px;
+        height: 1px;
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .cm-close {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        background: rgba(255, 255, 255, 0.03);
+        color: rgba(255, 255, 255, 0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 0.85rem;
+        transition: all 0.25s ease;
+    }
+
+    .cm-close:hover {
+        background: rgba(255, 255, 255, 0.06);
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    .cm-icon-wrap {
+        width: 50px;
+        height: 50px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, rgba(59, 123, 247, 0.1), rgba(34, 201, 176, 0.08));
+        border: 1px solid rgba(59, 123, 247, 0.12);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 14px;
+        font-size: 1.2rem;
+        color: #3b7bf7;
+    }
+
+    .cm-title {
+        font-family: 'Outfit', 'DM Sans', sans-serif;
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 4px;
+    }
+
+    .cm-subtitle {
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.78rem;
+        color: rgba(255, 255, 255, 0.4);
+    }
+
+    .cm-body {
+        padding: 20px 24px 28px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .cm-option {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 14px 16px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.04);
+        text-decoration: none;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .cm-option:hover {
+        background: rgba(255, 255, 255, 0.04);
+        border-color: rgba(255, 255, 255, 0.08);
+        transform: translateX(4px);
+    }
+
+    .cm-opt-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        flex-shrink: 0;
+        transition: all 0.3s ease;
+    }
+
+    .cm-option:hover .cm-opt-icon { transform: scale(1.08); }
+
+    .cm-opt-icon--phone {
+        background: rgba(34, 201, 176, 0.08);
+        border: 1px solid rgba(34, 201, 176, 0.12);
+        color: #22c9b0;
+    }
+    .cm-option:hover .cm-opt-icon--phone { box-shadow: 0 4px 14px rgba(34, 201, 176, 0.15); }
+
+    .cm-opt-icon--email {
+        background: rgba(59, 123, 247, 0.08);
+        border: 1px solid rgba(59, 123, 247, 0.12);
+        color: #3b7bf7;
+    }
+    .cm-option:hover .cm-opt-icon--email { box-shadow: 0 4px 14px rgba(59, 123, 247, 0.15); }
+
+    .cm-opt-info { flex: 1; min-width: 0; }
+
+    .cm-opt-label {
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.35);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 2px;
+    }
+
+    .cm-opt-value {
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.85);
+    }
+
+    .cm-opt-arrow {
+        color: rgba(255, 255, 255, 0.15);
+        font-size: 0.75rem;
+        flex-shrink: 0;
+        transition: all 0.3s ease;
+    }
+
+    .cm-option:hover .cm-opt-arrow {
+        color: rgba(255, 255, 255, 0.35);
+        transform: translateX(2px);
+    }
+
+    /* ══════════════════════════════════════
+       RESPONSIVE
+       ══════════════════════════════════════ */
+    @@media (max-width: 900px) {
+        .two-col {
+            grid-template-columns: 1fr;
+            gap: 40px;
         }
 
-   
-   
+        .left-col {
+            padding-right: 0;
+            text-align: center;
+        }
+
+        .lc-sep { margin-left: auto; margin-right: auto; }
+
+        .right-col {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+    }
 
     @@media (max-width: 768px) {
-        #MainContent
-
-    {
-        padding: 30px 20px;
+        .main-section { padding: 60px 0 70px; }
+        .main-wrap { padding: 0 20px; }
+        .lc-title { font-size: clamp(1.3rem, 5vw, 1.8rem); }
+        .lc-body { font-size: 0.84rem; }
+        .lc-cta { padding: 11px 28px; font-size: 0.85rem; }
+        .why-card { padding: 22px 18px 20px; }
     }
 
-    .main-content-wrapper {
-        padding: 30px 25px;
-        margin: 0 15px;
-        max-width: 90%;
-    }
-
-    .main-title {
-        font-size: 16px;
-        margin-bottom: 20px;
-    }
-
-    .main-content {
-        font-size: 1rem;
-        margin-bottom: 25px;
-    }
-
-    .btn-main {
-        padding: 14px 32px;
-        font-size: 1rem;
-        width: 100%;
-        max-width: 250px;
-    }
-
-    .floating-elements-main {
-        display: none;
-    }
-
-    
-
-    @@media (max-width: 480px) {
-        .main-content-wrapper
-
-    {
-        padding: 25px 20px;
-        margin: 0 10px;
-        max-width: 95%;
-    }
-
-    .main-title {
-        font-size: 16px;
-        margin-bottom: 15px;
-    }
-
-    .main-content {
-        font-size: 0.9rem;
-        margin-bottom: 20px;
-    }
-
-    .btn-main {
-        padding: 12px 28px;
-        font-size: 0.9rem;
-    }
-
+    @@media (max-width: 520px) {
+        .main-section { padding: 48px 0 56px; }
+        .main-wrap { padding: 0 14px; }
+        .lc-title { font-size: clamp(1.2rem, 5vw, 1.5rem); }
+        .lc-cta {  justify-content: center; }
+        .right-col { grid-template-columns: 1fr; max-width: 360px; gap: 10px; }
+        .contact-modal { max-width: calc(100% - 32px); border-radius: 16px; }
+        .cm-header { padding: 24px 20px 18px; }
+        .cm-body { padding: 16px 18px 24px; }
     }
 </style>
 
-<section id="MainContent" class="text-white">
-    <div class="tech-pattern-main"></div>
+<section class="main-section">
+    <div class="s-grid"></div>
 
-    <div class="floating-elements-main">
-        <div class="floating-element-main"></div>
-        <div class="floating-element-main"></div>
-        <div class="floating-element-main"></div>
-    </div>
+    <div class="main-wrap">
+        <div class="two-col">
+            <!-- ── Left Column — Content ── -->
+            <div class="left-col">
+                <div class="lc-tag">
+                    <span class="tag-dot"></span>
+                    About Us
+                </div>
+                <h2 class="lc-title">@Model.Title.ToUpper()</h2>
+                <div class="lc-sep"></div>
+                <div class="lc-body">@Html.Raw(Model.Content)</div>
+                <button type="button" class="lc-cta" id="contactOpen">
+                    <i class="bi bi-envelope"></i>
+                    Contact
+                </button>
+            </div>
 
-    <div class="container-fluid py-1">
-        <div class="main-content-wrapper">
-            <h4 class="main-title">@Model.Title.ToUpper()</h4>
-            <p class="main-content">@Html.Raw(Model.Content)</p>
-            <a href="#" class="btn-main">Contact</a>
+            <!-- ── Right Column — 4 Cards (2x2) ── -->
+            <div class="right-col">
+                <div class="why-card wc--trust">
+                    <div class="wc-icon"><i class="bi bi-building-check"></i></div>
+                    <div class="wc-title">Trusted by Organizations</div>
+                    <div class="wc-desc">Serving 25+ Danish organizations with reliable mental health intelligence.</div>
+                    <span class="wc-tag">25+ Clients</span>
+                </div>
+
+                <div class="why-card wc--security">
+                    <div class="wc-icon"><i class="bi bi-shield-lock"></i></div>
+                    <div class="wc-title">Enterprise Security</div>
+                    <div class="wc-desc">GDPR-compliant with end-to-end encryption. Your data stays private.</div>
+                    <span class="wc-tag">GDPR Ready</span>
+                </div>
+
+                <div class="why-card wc--support">
+                    <div class="wc-icon"><i class="bi bi-headset"></i></div>
+                    <div class="wc-title">Dedicated Support</div>
+                    <div class="wc-desc">Personalized onboarding and ongoing Danish-language support.</div>
+                    <span class="wc-tag">Danish Support</span>
+                </div>
+
+                <div class="why-card wc--results">
+                    <div class="wc-icon"><i class="bi bi-lightning-charge"></i></div>
+                    <div class="wc-title">Proven Results</div>
+                    <div class="wc-desc">AI-powered analysis for measurable wellbeing improvements.</div>
+                    <span class="wc-tag">AI Powered</span>
+                </div>
+            </div>
         </div>
     </div>
 </section>
+
+<!-- ══════════════════════════════════════
+     CONTACT MODAL
+     ══════════════════════════════════════ -->
+<div class="contact-overlay" id="contactOverlay">
+    <div class="contact-backdrop" id="contactBackdrop"></div>
+    <div class="contact-modal">
+        <div class="cm-header">
+            <button class="cm-close" id="contactClose"><i class="bi bi-x-lg"></i></button>
+            <div class="cm-icon-wrap"><i class="bi bi-chat-dots"></i></div>
+            <div class="cm-title">Get in Touch</div>
+            <div class="cm-subtitle">Choose how you'd like to reach us</div>
+        </div>
+        <div class="cm-body">
+            <a href="tel:+4561777336" class="cm-option">
+                <div class="cm-opt-icon cm-opt-icon--phone"><i class="bi bi-telephone"></i></div>
+                <div class="cm-opt-info">
+                    <div class="cm-opt-label">Call us</div>
+                    <div class="cm-opt-value">+45 61 777 336</div>
+                </div>
+                <i class="bi bi-chevron-right cm-opt-arrow"></i>
+            </a>
+            <a href="mailto:info@seosoft.dk" class="cm-option">
+                <div class="cm-opt-icon cm-opt-icon--email"><i class="bi bi-envelope"></i></div>
+                <div class="cm-opt-info">
+                    <div class="cm-opt-label">Email us</div>
+                    <div class="cm-opt-value">info@seosoft.dk</div>
+                </div>
+                <i class="bi bi-chevron-right cm-opt-arrow"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        const overlay = document.getElementById('contactOverlay');
+        const openBtn = document.getElementById('contactOpen');
+        const closeBtn = document.getElementById('contactClose');
+        const backdrop = document.getElementById('contactBackdrop');
+
+        function openModal() { overlay.classList.add('active'); document.body.style.overflow = 'hidden'; }
+        function closeModal() { overlay.classList.remove('active'); document.body.style.overflow = ''; }
+
+        openBtn.addEventListener('click', openModal);
+        closeBtn.addEventListener('click', closeModal);
+        backdrop.addEventListener('click', closeModal);
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && overlay.classList.contains('active')) closeModal();
+        });
+    })();
+</script>
 
 @section Scripts {
     @{

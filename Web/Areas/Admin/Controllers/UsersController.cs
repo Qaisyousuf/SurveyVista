@@ -4,12 +4,14 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Model;
 using System.Security.Claims;
+using Web.Authorization;
 using Web.ViewModel.AccountVM;
 
 namespace Web.Areas.Admin.Controllers
 {
-
-    [Authorize(Roles = "Admin")]
+    [HasPermission(Permissions.Users.View)]
+    [Area("Admin")]
+   
     public class UsersController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
@@ -22,27 +24,32 @@ namespace Web.Areas.Admin.Controllers
         }
         public async Task<IActionResult> Index()
         {
-            var users = _userManager.Users.ToList(); // Consider pagination or asynchronous list retrieval if the user list is very large.
+            var users = _userManager.Users.ToList();
             var models = new List<RegisterViewModel>();
 
             foreach (var user in users)
             {
-                var roles = await _userManager.GetRolesAsync(user); // Await the asynchronous call to get roles.
+                var roles = await _userManager.GetRolesAsync(user);
                 var model = new RegisterViewModel
                 {
-                    Id=user.Id,
+                    Id = user.Id,
                     Email = user.Email,
-                    FirstName = user.FirstName, // Assuming these fields are in ApplicationUser
+                    FirstName = user.FirstName,
                     LastName = user.LastName,
-                    SelectedRoles = roles.ToList() // Now roles is properly awaited and converted to List<string>.
+                    SelectedRoles = roles.ToList()
                 };
                 models.Add(model);
             }
 
+            // Pass roles for the modals
+            ViewBag.Roles = _roleManager.Roles
+                .Select(r => new SelectListItem { Value = r.Name, Text = r.Name })
+                .ToList();
+
             return View(models);
         }
 
-
+        [HasPermission(Permissions.Users.Create)]
         public IActionResult Register()
         {
             var model = new RegisterViewModel
@@ -52,6 +59,8 @@ namespace Web.Areas.Admin.Controllers
             return View(model);
         }
 
+
+        [HasPermission(Permissions.Users.Create)]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel model)
@@ -100,6 +109,8 @@ namespace Web.Areas.Admin.Controllers
         }
 
 
+
+        [HasPermission(Permissions.Users.Delete)]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteSelected(List<string> selectedUserIds)
@@ -120,7 +131,7 @@ namespace Web.Areas.Admin.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-
+        [HasPermission(Permissions.Users.Edit)]
         [HttpGet]
         public async Task<IActionResult> Edit(string id)
         {
@@ -150,8 +161,11 @@ namespace Web.Areas.Admin.Controllers
             return View(viewModel);
         }
 
+
+        [HasPermission(Permissions.Users.Edit)]
         [HttpPost]
         [ValidateAntiForgeryToken]
+
         public async Task<IActionResult> Edit(EditUserViewModel model)
         {
             var user = await _userManager.FindByIdAsync(model.Id);
@@ -196,8 +210,93 @@ namespace Web.Areas.Admin.Controllers
             return View(model);
         }
 
+        [HasPermission(Permissions.Users.Create)]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RegisterAjax(RegisterViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
+                return Json(new { success = false, errors });
+            }
+
+            var existingUser = await _userManager.FindByEmailAsync(model.Email);
+            if (existingUser != null)
+            {
+                return Json(new { success = false, errors = new List<string> { "A user with this email already exists." } });
+            }
+
+            var user = new ApplicationUser
+            {
+                UserName = model.Email,
+                Email = model.Email,
+                FirstName = model.FirstName,
+                LastName = model.LastName
+            };
+
+            var result = await _userManager.CreateAsync(user, model.Password);
+            if (result.Succeeded)
+            {
+                if (model.SelectedRoles != null && model.SelectedRoles.Any())
+                {
+                    foreach (var role in model.SelectedRoles)
+                    {
+                        await _userManager.AddToRoleAsync(user, role);
+                    }
+                }
+
+                return Json(new { success = true, message = "User created successfully." });
+            }
+
+            var createErrors = result.Errors.Select(e => e.Description).ToList();
+            return Json(new { success = false, errors = createErrors });
+        }
 
 
+        [HasPermission(Permissions.Users.Edit)]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditAjax(EditUserViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
+                return Json(new { success = false, errors });
+            }
+
+            var user = await _userManager.FindByIdAsync(model.Id);
+            if (user == null)
+            {
+                return Json(new { success = false, errors = new List<string> { $"User with Id = {model.Id} cannot be found." } });
+            }
+
+            user.FirstName = model.FirstName;
+            user.LastName = model.LastName;
+
+            var result = await _userManager.UpdateAsync(user);
+            if (result.Succeeded)
+            {
+                var currentRoles = await _userManager.GetRolesAsync(user);
+                await _userManager.RemoveFromRolesAsync(user, currentRoles);
+
+                if (model.SelectedRoles != null && model.SelectedRoles.Any())
+                {
+                    await _userManager.AddToRolesAsync(user, model.SelectedRoles);
+                }
+
+                return Json(new { success = true, message = "User updated successfully." });
+            }
+
+            var updateErrors = result.Errors.Select(e => e.Description).ToList();
+            return Json(new { success = false, errors = updateErrors });
+        }
 
     }
 }

@@ -20,5 +20,10 @@ namespace Model
 
 
         public List<ResponseDetail> ResponseDetails { get; set; } = new List<ResponseDetail>();
+
+
+        public List<CaseNote> CaseNotes { get; set; } = new List<CaseNote>();
+        public List<CaseStatusEntry> StatusHistory { get; set; } = new List<CaseStatusEntry>();
+        public List<ActionPlan> ActionPlans { get; set; } = new List<ActionPlan>();
     }
 }
