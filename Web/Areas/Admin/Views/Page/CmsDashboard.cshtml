@@ -1,0 +1,604 @@
+﻿@model Web.ViewModel.CmsVM.CmsDashboardViewModel
+@{
+    ViewData["Title"] = "CMS Dashboard";
+}
+
+<style>
+ 
+
+@@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
+:root{--neon-blue:#60a5fa;--neon-purple:#c084fc;--neon-green:#34d399;--neon-pink:#f472b6;--neon-yellow:#fbbf24;--neon-red:#f87171;--neon-cyan:#22d3ee;--neon-teal:#33b3ae;--neon-indigo:#818cf8;--neon-orange:#fb923c;--dark-900:#0f172a;--dark-800:#1e293b;--dark-700:#334155;--dark-600:#475569;--dark-500:#64748b;--dark-400:#94a3b8;--dark-300:#cbd5e1;--dark-200:#e2e8f0;--font-main:'Space Grotesk',sans-serif;--font-mono:'JetBrains Mono',monospace}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font-main);background:var(--dark-900);color:#e2e8f0;overflow-x:hidden}
+
+/* BG */
+.cms-bg{position:fixed;inset:0;z-index:-1;overflow:hidden}
+.cms-bg .grid{position:absolute;inset:0;background-image:linear-gradient(rgba(129,140,248,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(129,140,248,0.05) 1px,transparent 1px);background-size:60px 60px;animation:cmsDrift 25s linear infinite}
+.cms-bg .mesh{position:absolute;inset:0;background:radial-gradient(ellipse at 25% 20%,rgba(129,140,248,0.08) 0%,transparent 55%),radial-gradient(ellipse at 75% 60%,rgba(192,132,252,0.06) 0%,transparent 55%),radial-gradient(ellipse at 50% 90%,rgba(52,211,153,0.05) 0%,transparent 55%)}
+@@keyframes cmsDrift{0%{transform:translate(0,0)}100%{transform:translate(60px,60px)}}
+@@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+.cms-wrap{max-width:1200px;margin:0 auto;padding:1.5rem 2rem;position:relative;z-index:1}
+
+/* Header */
+.cms-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;flex-wrap:wrap;gap:1rem;animation:fadeUp .4s ease both}
+.cms-brand{display:flex;align-items:center;gap:1rem}
+.cms-brand-icon{width:46px;height:46px;border-radius:13px;background:linear-gradient(135deg,var(--neon-indigo),var(--neon-purple));display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:#fff;box-shadow:0 6px 20px rgba(129,140,248,0.3)}
+.cms-brand h1{font-size:1.4rem;font-weight:700;color:#fff;line-height:1.2}
+.cms-brand p{font-size:.78rem;color:var(--dark-400);font-family:var(--font-mono)}
+
+/* Tabs */
+.cms-tabs{display:flex;gap:.3rem;background:rgba(15,23,42,0.6);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:.3rem;margin-bottom:1.8rem;overflow-x:auto;animation:fadeUp .4s ease .05s both}
+.cms-tab{display:flex;align-items:center;gap:.45rem;padding:.6rem 1.2rem;border-radius:10px;font-family:var(--font-mono);font-size:.72rem;font-weight:600;color:var(--dark-400);cursor:pointer;transition:all .25s;white-space:nowrap;border:1px solid transparent;letter-spacing:.03em}
+.cms-tab:hover{color:var(--dark-200);background:rgba(255,255,255,0.04)}
+.cms-tab.active{color:#fff;background:rgba(129,140,248,0.12);border-color:rgba(129,140,248,0.3)}
+.cms-tab .tab-count{font-size:.55rem;background:rgba(255,255,255,0.08);padding:.1rem .4rem;border-radius:4px;min-width:20px;text-align:center}
+.cms-tab.active .tab-count{background:rgba(129,140,248,0.2);color:var(--neon-indigo)}
+
+/* Tab Content */
+.cms-tab-content{display:none;animation:fadeUp .35s ease both}
+.cms-tab-content.active{display:block}
+
+/* Stats Row (Overview) */
+.cms-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:1rem;margin-bottom:2rem}
+.cms-stat{background:rgba(20,30,52,0.85);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:1.4rem;text-align:center;position:relative;overflow:hidden;transition:all .25s;cursor:pointer}
+.cms-stat:hover{border-color:rgba(255,255,255,0.15);transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,0.2)}
+.cms-stat::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.cms-stat:nth-child(1)::before{background:linear-gradient(90deg,var(--neon-indigo),var(--neon-purple))}
+.cms-stat:nth-child(2)::before{background:linear-gradient(90deg,var(--neon-yellow),var(--neon-orange))}
+.cms-stat:nth-child(3)::before{background:linear-gradient(90deg,var(--neon-green),var(--neon-teal))}
+.cms-stat:nth-child(4)::before{background:linear-gradient(90deg,var(--neon-blue),var(--neon-cyan))}
+.cms-stat:nth-child(5)::before{background:linear-gradient(90deg,var(--neon-pink),var(--neon-red))}
+.cms-stat-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1rem;margin:0 auto .6rem}
+.cms-stat:nth-child(1) .cms-stat-icon{background:rgba(129,140,248,0.15);color:var(--neon-indigo)}
+.cms-stat:nth-child(2) .cms-stat-icon{background:rgba(251,191,36,0.15);color:var(--neon-yellow)}
+.cms-stat:nth-child(3) .cms-stat-icon{background:rgba(52,211,153,0.15);color:var(--neon-green)}
+.cms-stat:nth-child(4) .cms-stat-icon{background:rgba(96,165,250,0.15);color:var(--neon-blue)}
+.cms-stat:nth-child(5) .cms-stat-icon{background:rgba(244,114,182,0.15);color:var(--neon-pink)}
+.cms-stat-num{font-family:var(--font-mono);font-size:1.8rem;font-weight:800;color:#fff;line-height:1;margin-bottom:.3rem}
+.cms-stat-lbl{font-family:var(--font-mono);font-size:.6rem;font-weight:600;color:var(--dark-400);letter-spacing:.08em;text-transform:uppercase}
+
+/* Overview Quick Cards */
+.cms-quick-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:1.2rem;margin-bottom:1.5rem}
+.cms-quick-card{background:rgba(20,30,52,0.85);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.08);border-radius:16px;overflow:hidden;transition:all .25s}
+.cms-quick-card:hover{border-color:rgba(255,255,255,0.14);transform:translateY(-2px)}
+.cms-qc-head{padding:1.1rem 1.4rem;display:flex;align-items:center;gap:.8rem;border-bottom:1px solid rgba(255,255,255,0.05)}
+.cms-qc-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:.85rem;color:#fff;flex-shrink:0}
+.cms-qc-head h4{font-family:var(--font-mono);font-size:.8rem;font-weight:700;color:#fff;letter-spacing:.04em;margin:0}
+.cms-qc-head .qc-count{margin-left:auto;font-family:var(--font-mono);font-size:.6rem;color:var(--dark-400);background:rgba(255,255,255,0.05);padding:.15rem .5rem;border-radius:5px}
+.cms-qc-body{padding:1rem 1.4rem}
+.cms-qc-item{display:flex;align-items:center;gap:.6rem;padding:.5rem 0;border-bottom:1px solid rgba(255,255,255,0.03);font-size:.82rem;color:var(--dark-300)}
+.cms-qc-item:last-child{border-bottom:none}
+.cms-qc-item .qc-bullet{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.cms-qc-item .qc-title{flex:1;font-weight:500;color:var(--dark-200)}
+.cms-qc-item .qc-sub{font-size:.68rem;color:var(--dark-500);font-family:var(--font-mono)}
+.cms-qc-foot{padding:.8rem 1.4rem;border-top:1px solid rgba(255,255,255,0.04)}
+.cms-qc-link{display:inline-flex;align-items:center;gap:.4rem;font-family:var(--font-mono);font-size:.65rem;font-weight:600;color:var(--neon-indigo);cursor:pointer;transition:color .2s}
+.cms-qc-link:hover{color:#fff}
+
+/* Section Card (for each tab) */
+.cms-section{background:rgba(20,30,52,0.85);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.08);border-radius:18px;overflow:hidden;margin-bottom:1.5rem}
+.cms-sec-head{padding:1.3rem 1.8rem;display:flex;align-items:center;gap:1rem;border-bottom:1px solid rgba(255,255,255,0.05)}
+.cms-sec-icon{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:.95rem;color:#fff;flex-shrink:0}
+.cms-sec-head h3{font-family:var(--font-mono);font-size:.92rem;font-weight:700;color:#fff;letter-spacing:.04em;margin:0}
+.cms-sec-head p{font-size:.75rem;color:var(--dark-400);margin:0}
+.cms-sec-head .sec-actions{margin-left:auto;display:flex;gap:.4rem}
+.cms-add-btn{display:inline-flex;align-items:center;gap:.4rem;padding:.45rem 1rem;border:1px solid rgba(52,211,153,0.3);border-radius:8px;background:rgba(52,211,153,0.06);color:var(--neon-green);font-family:var(--font-mono);font-size:.65rem;font-weight:600;cursor:pointer;transition:all .25s;letter-spacing:.04em}
+.cms-add-btn:hover{background:rgba(52,211,153,0.15);border-color:rgba(52,211,153,0.5);color:#fff;transform:translateY(-1px)}
+.cms-sec-body{padding:1.2rem 1.8rem}
+
+/* Table */
+.cms-table{width:100%;border-collapse:collapse}
+.cms-table th{padding:.7rem 1rem;font-family:var(--font-mono);font-size:.62rem;font-weight:700;color:var(--dark-400);text-transform:uppercase;letter-spacing:.06em;text-align:left;border-bottom:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.015)}
+.cms-table td{padding:.8rem 1rem;border-bottom:1px solid rgba(255,255,255,0.04);font-size:.88rem;color:var(--dark-200);vertical-align:middle}
+.cms-table tr:last-child td{border-bottom:none}
+.cms-table tr:hover{background:rgba(255,255,255,0.02)}
+.cms-table .cell-title{font-weight:600;color:#fff}
+.cms-table .cell-sub{font-size:.72rem;color:var(--dark-500);font-family:var(--font-mono)}
+.cms-table .cell-url{font-size:.75rem;color:var(--neon-blue);word-break:break-all;font-family:var(--font-mono)}
+.cms-table .cell-badge{display:inline-flex;padding:.2rem .5rem;border-radius:5px;font-family:var(--font-mono);font-size:.52rem;font-weight:700;letter-spacing:.04em;border:1px solid}
+.cms-table .badge-indigo{background:rgba(129,140,248,0.1);border-color:rgba(129,140,248,0.2);color:var(--neon-indigo)}
+.cms-table .badge-green{background:rgba(52,211,153,0.1);border-color:rgba(52,211,153,0.2);color:var(--neon-green)}
+.cms-table .badge-blue{background:rgba(96,165,250,0.1);border-color:rgba(96,165,250,0.2);color:var(--neon-blue)}
+.cms-table .badge-yellow{background:rgba(251,191,36,0.1);border-color:rgba(251,191,36,0.2);color:var(--neon-yellow)}
+
+/* Action buttons in table */
+.cms-act{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:7px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.02);color:var(--dark-400);cursor:pointer;transition:all .2s;font-size:.7rem}
+.cms-act:hover{background:rgba(255,255,255,0.06);color:#fff;border-color:rgba(255,255,255,0.15)}
+.cms-act.edit:hover{color:var(--neon-blue);border-color:rgba(96,165,250,0.3)}
+.cms-act.del:hover{color:var(--neon-red);border-color:rgba(248,113,113,0.3)}
+.cms-acts{display:flex;gap:.3rem}
+
+/* Empty state */
+.cms-empty{text-align:center;padding:2.5rem;color:var(--dark-500);font-size:.88rem;font-style:italic}
+.cms-empty i{display:block;font-size:1.5rem;margin-bottom:.6rem;opacity:.4}
+
+/* SweetAlert theme */
+.swal-cms{background:rgba(15,23,42,0.96)!important;backdrop-filter:blur(24px)!important;border:1px solid rgba(129,140,248,0.15)!important;border-radius:18px!important;color:#e2e8f0!important}
+.swal-cms-title{color:var(--neon-indigo)!important;font-family:'Space Grotesk',sans-serif!important;font-weight:700!important;font-size:1.2rem!important}
+.swal-cms .swal2-html-container{color:var(--dark-200)!important;font-size:.9rem!important}
+.swal-cms .swal2-confirm{font-family:'JetBrains Mono',monospace!important;font-size:.68rem!important;font-weight:600!important;letter-spacing:.05em!important;padding:.55rem 1.5rem!important;border-radius:10px!important;text-transform:uppercase!important}
+.swal-cms .swal2-cancel{font-family:'JetBrains Mono',monospace!important;font-size:.68rem!important;font-weight:600!important;padding:.55rem 1.5rem!important;border-radius:10px!important;background:rgba(255,255,255,0.06)!important;color:var(--dark-300)!important;border:1px solid rgba(255,255,255,0.1)!important}
+
+/* Modal form fields */
+.cms-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;text-align:left}
+.cms-form-grid.single{grid-template-columns:1fr}
+.cms-field{display:flex;flex-direction:column;gap:.3rem}
+.cms-field.full{grid-column:1/-1}
+.cms-field label{font-size:.72rem;font-weight:600;color:var(--dark-400);font-family:var(--font-mono);letter-spacing:.04em}
+.cms-field input,.cms-field select,.cms-field textarea{background:rgba(15,23,42,0.7);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#e2e8f0;padding:.5rem .8rem;font-family:var(--font-main);font-size:.85rem;outline:none;transition:border-color .2s}
+.cms-field input:focus,.cms-field select:focus,.cms-field textarea:focus{border-color:rgba(129,140,248,0.4)}
+.cms-field textarea{resize:vertical;min-height:70px}
+.cms-field select{cursor:pointer}
+.cms-field select option{background:var(--dark-800);color:#e2e8f0}
+.cms-chk-grid{display:flex;flex-wrap:wrap;gap:.5rem}
+.cms-chk{display:flex;align-items:center;gap:.4rem;padding:.3rem .7rem;border:1px solid rgba(255,255,255,0.08);border-radius:6px;font-size:.78rem;color:var(--dark-300);cursor:pointer;transition:all .2s}
+.cms-chk:hover{border-color:rgba(129,140,248,0.3);background:rgba(129,140,248,0.04)}
+.cms-chk input[type="checkbox"]{accent-color:var(--neon-indigo);width:14px;height:14px}
+
+/* Responsive */
+@@media(max-width:768px){.cms-stats{grid-template-columns:repeat(2,1fr)}.cms-quick-grid{grid-template-columns:1fr}.cms-tabs{flex-wrap:nowrap;overflow-x:auto}.cms-form-grid{grid-template-columns:1fr}.cms-header{flex-direction:column;align-items:flex-start}.cms-table{font-size:.8rem}}
+@@media(max-width:480px){.cms-stats{grid-template-columns:1fr}}
+</style>
+
+<div class="cms-bg"><div class="grid"></div><div class="mesh"></div></div>
+
+<div class="cms-wrap">
+
+    <!-- Header -->
+    <div class="cms-header">
+        <div class="cms-brand">
+            <div class="cms-brand-icon"><i class="bi bi-grid-1x2-fill"></i></div>
+            <div><h1>CMS Dashboard</h1></div>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="cms-tabs">
+        <div class="cms-tab active" data-tab="overview"><i class="bi bi-speedometer2"></i> Overview <span class="tab-count">@Model.TotalItems</span></div>
+        <div class="cms-tab" data-tab="pages"><i class="bi bi-file-earmark-text"></i> Pages <span class="tab-count">@Model.PageCount</span></div>
+        <div class="cms-tab" data-tab="banners"><i class="bi bi-image"></i> Banners <span class="tab-count">@Model.BannerCount</span></div>
+        <div class="cms-tab" data-tab="footers"><i class="bi bi-layout-text-window-reverse"></i> Footers <span class="tab-count">@Model.FooterCount</span></div>
+        <div class="cms-tab" data-tab="social"><i class="bi bi-share"></i> Social Media <span class="tab-count">@Model.SocialMediaCount</span></div>
+        <div class="cms-tab" data-tab="address"><i class="bi bi-geo-alt"></i> Address <span class="tab-count">@Model.AddressCount</span></div>
+    </div>
+
+    <!-- ═══ OVERVIEW TAB ═══ -->
+    <div class="cms-tab-content active" id="tab-overview">
+        <div class="cms-stats">
+            <div class="cms-stat" onclick="switchTab('pages')"><div class="cms-stat-icon"><i class="bi bi-file-earmark-text"></i></div><div class="cms-stat-num">@Model.PageCount</div><div class="cms-stat-lbl">Pages</div></div>
+            <div class="cms-stat" onclick="switchTab('banners')"><div class="cms-stat-icon"><i class="bi bi-image"></i></div><div class="cms-stat-num">@Model.BannerCount</div><div class="cms-stat-lbl">Banners</div></div>
+            <div class="cms-stat" onclick="switchTab('footers')"><div class="cms-stat-icon"><i class="bi bi-layout-text-window-reverse"></i></div><div class="cms-stat-num">@Model.FooterCount</div><div class="cms-stat-lbl">Footers</div></div>
+            <div class="cms-stat" onclick="switchTab('social')"><div class="cms-stat-icon"><i class="bi bi-share"></i></div><div class="cms-stat-num">@Model.SocialMediaCount</div><div class="cms-stat-lbl">Social Links</div></div>
+            <div class="cms-stat" onclick="switchTab('address')"><div class="cms-stat-icon"><i class="bi bi-geo-alt"></i></div><div class="cms-stat-num">@Model.AddressCount</div><div class="cms-stat-lbl">Addresses</div></div>
+        </div>
+        <div class="cms-quick-grid">
+            <!-- Pages Quick Card -->
+            <div class="cms-quick-card">
+                <div class="cms-qc-head"><div class="cms-qc-icon" style="background:linear-gradient(135deg,var(--neon-indigo),var(--neon-purple))"><i class="bi bi-file-earmark-text"></i></div><h4>Pages</h4><span class="qc-count">@Model.PageCount items</span></div>
+                <div class="cms-qc-body">
+                    @foreach (var p in Model.Pages.Take(4))
+                    {<div class="cms-qc-item"><span class="qc-bullet" style="background:var(--neon-indigo)"></span><span class="qc-title">@p.Title</span><span class="qc-sub">@(p.banner?.Title ?? "No banner")</span></div>}
+                    @if (!Model.Pages.Any()) {<div class="cms-qc-item" style="color:var(--dark-500);font-style:italic">No pages created yet</div>}
+                </div>
+                <div class="cms-qc-foot"><span class="cms-qc-link" onclick="switchTab('pages')"><i class="bi bi-arrow-right"></i> Manage Pages</span></div>
+            </div>
+            <!-- Banners Quick Card -->
+            <div class="cms-quick-card">
+                <div class="cms-qc-head"><div class="cms-qc-icon" style="background:linear-gradient(135deg,var(--neon-yellow),var(--neon-orange))"><i class="bi bi-image"></i></div><h4>Banners</h4><span class="qc-count">@Model.BannerCount items</span></div>
+                <div class="cms-qc-body">
+                    @foreach (var b in Model.Banners.Take(4))
+                    {<div class="cms-qc-item"><span class="qc-bullet" style="background:var(--neon-yellow)"></span><span class="qc-title">@b.Title</span><span class="qc-sub">@(b.ImageUrl?.Length > 30 ? b.ImageUrl.Substring(0,30)+"..." : b.ImageUrl)</span></div>}
+                    @if (!Model.Banners.Any()) {<div class="cms-qc-item" style="color:var(--dark-500);font-style:italic">No banners created yet</div>}
+                </div>
+                <div class="cms-qc-foot"><span class="cms-qc-link" onclick="switchTab('banners')"><i class="bi bi-arrow-right"></i> Manage Banners</span></div>
+            </div>
+            <!-- Footers Quick Card -->
+            <div class="cms-quick-card">
+                <div class="cms-qc-head"><div class="cms-qc-icon" style="background:linear-gradient(135deg,var(--neon-green),var(--neon-teal))"><i class="bi bi-layout-text-window-reverse"></i></div><h4>Footers</h4><span class="qc-count">@Model.FooterCount items</span></div>
+                <div class="cms-qc-body">
+                    @foreach (var f in Model.Footers.Take(4))
+                    {<div class="cms-qc-item"><span class="qc-bullet" style="background:var(--neon-green)"></span><span class="qc-title">@f.Name</span><span class="qc-sub">@(f.FooterSocialMedias?.Count ?? 0) social links</span></div>}
+                    @if (!Model.Footers.Any()) {<div class="cms-qc-item" style="color:var(--dark-500);font-style:italic">No footers created yet</div>}
+                </div>
+                <div class="cms-qc-foot"><span class="cms-qc-link" onclick="switchTab('footers')"><i class="bi bi-arrow-right"></i> Manage Footers</span></div>
+            </div>
+            <!-- Social Media Quick Card -->
+            <div class="cms-quick-card">
+                <div class="cms-qc-head"><div class="cms-qc-icon" style="background:linear-gradient(135deg,var(--neon-blue),var(--neon-cyan))"><i class="bi bi-share"></i></div><h4>Social Media</h4><span class="qc-count">@Model.SocialMediaCount links</span></div>
+                <div class="cms-qc-body">
+                    @foreach (var s in Model.SocialMedias.Take(4))
+                    {<div class="cms-qc-item"><span class="qc-bullet" style="background:var(--neon-blue)"></span><span class="qc-title">@s.Name</span><span class="qc-sub">@(s.Url?.Length > 30 ? s.Url.Substring(0,30)+"..." : s.Url)</span></div>}
+                    @if (!Model.SocialMedias.Any()) {<div class="cms-qc-item" style="color:var(--dark-500);font-style:italic">No social links yet</div>}
+                </div>
+                <div class="cms-qc-foot"><span class="cms-qc-link" onclick="switchTab('social')"><i class="bi bi-arrow-right"></i> Manage Social Media</span></div>
+            </div>
+            <!-- Address Quick Card -->
+            <div class="cms-quick-card">
+                <div class="cms-qc-head"><div class="cms-qc-icon" style="background:linear-gradient(135deg,var(--neon-pink),var(--neon-red))"><i class="bi bi-geo-alt"></i></div><h4>Addresses</h4><span class="qc-count">@Model.AddressCount items</span></div>
+                <div class="cms-qc-body">
+                    @foreach (var a in Model.Addresses.Take(4))
+                    {<div class="cms-qc-item"><span class="qc-bullet" style="background:var(--neon-pink)"></span><span class="qc-title">@a.Street, @a.City</span><span class="qc-sub">@a.Country</span></div>}
+                    @if (!Model.Addresses.Any()) {<div class="cms-qc-item" style="color:var(--dark-500);font-style:italic">No addresses yet</div>}
+                </div>
+                <div class="cms-qc-foot"><span class="cms-qc-link" onclick="switchTab('address')"><i class="bi bi-arrow-right"></i> Manage Addresses</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ PAGES TAB ═══ -->
+    <div class="cms-tab-content" id="tab-pages">
+        <div class="cms-section">
+            <div class="cms-sec-head">
+                <div class="cms-sec-icon" style="background:linear-gradient(135deg,var(--neon-indigo),var(--neon-purple))"><i class="bi bi-file-earmark-text"></i></div>
+                <div><h3>Pages</h3><p>Manage CMS pages with banners and footers</p></div>
+                <div class="sec-actions"><button class="cms-add-btn" onclick="openPageModal()"><i class="bi bi-plus-lg"></i> Add Page</button></div>
+            </div>
+            <div class="cms-sec-body">
+                <table class="cms-table">
+                    <thead><tr><th>Title</th><th>Slug</th><th>Banner</th><th>Footer</th><th>Actions</th></tr></thead>
+                    <tbody id="pagesTableBody">
+                        @foreach (var p in Model.Pages)
+                        {<tr><td class="cell-title">@p.Title</td><td class="cell-sub">@p.Slug</td><td><span class="cell-badge badge-yellow">@(p.banner?.Title ?? "—")</span></td><td><span class="cell-badge badge-green">@(p.footer?.Name ?? "—")</span></td><td><div class="cms-acts"><button class="cms-act edit" onclick="openPageModal(@p.Id)"><i class="bi bi-pencil"></i></button><button class="cms-act del" onclick="deleteItem('Page',@p.Id)"><i class="bi bi-trash3"></i></button></div></td></tr>}
+                        @if (!Model.Pages.Any()) {<tr><td colspan="5"><div class="cms-empty"><i class="bi bi-file-earmark-x"></i>No pages yet. Create your first page.</div></td></tr>}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ BANNERS TAB ═══ -->
+    <div class="cms-tab-content" id="tab-banners">
+        <div class="cms-section">
+            <div class="cms-sec-head">
+                <div class="cms-sec-icon" style="background:linear-gradient(135deg,var(--neon-yellow),var(--neon-orange))"><i class="bi bi-image"></i></div>
+                <div><h3>Banners</h3><p>Hero banners and promotional images</p></div>
+                <div class="sec-actions"><button class="cms-add-btn" onclick="openBannerModal()"><i class="bi bi-plus-lg"></i> Add Banner</button></div>
+            </div>
+            <div class="cms-sec-body">
+                <table class="cms-table">
+                    <thead><tr><th>Title</th><th>Description</th><th>Link URL</th><th>Image URL</th><th>Actions</th></tr></thead>
+                    <tbody id="bannersTableBody">
+                        @foreach (var b in Model.Banners)
+                        {<tr><td class="cell-title">@b.Title</td><td>@(b.Description?.Length > 50 ? b.Description.Substring(0,50)+"..." : b.Description)</td><td class="cell-url">@(b.LinkUrl?.Length > 35 ? b.LinkUrl.Substring(0,35)+"..." : b.LinkUrl)</td><td class="cell-url">@(b.ImageUrl?.Length > 35 ? b.ImageUrl.Substring(0,35)+"..." : b.ImageUrl)</td><td><div class="cms-acts"><button class="cms-act edit" onclick="openBannerModal(@b.Id)"><i class="bi bi-pencil"></i></button><button class="cms-act del" onclick="deleteItem('Banner',@b.Id)"><i class="bi bi-trash3"></i></button></div></td></tr>}
+                        @if (!Model.Banners.Any()) {<tr><td colspan="5"><div class="cms-empty"><i class="bi bi-image"></i>No banners yet.</div></td></tr>}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ FOOTERS TAB ═══ -->
+    <div class="cms-tab-content" id="tab-footers">
+        <div class="cms-section">
+            <div class="cms-sec-head">
+                <div class="cms-sec-icon" style="background:linear-gradient(135deg,var(--neon-green),var(--neon-teal))"><i class="bi bi-layout-text-window-reverse"></i></div>
+                <div><h3>Footers</h3><p>Footer content with social media links</p></div>
+                <div class="sec-actions"><button class="cms-add-btn" onclick="openFooterModal()"><i class="bi bi-plus-lg"></i> Add Footer</button></div>
+            </div>
+            <div class="cms-sec-body">
+                <table class="cms-table">
+                    <thead><tr><th>Name</th><th>Owner</th><th>Copyright</th><th>Social Links</th><th>Actions</th></tr></thead>
+                    <tbody id="footersTableBody">
+                        @foreach (var f in Model.Footers)
+                        {<tr><td class="cell-title">@f.Name</td><td>@f.Owner</td><td class="cell-sub">@f.Sitecopyright</td><td>@if(f.FooterSocialMedias != null){foreach(var fsm in f.FooterSocialMedias){<span class="cell-badge badge-blue" style="margin-right:3px">@fsm.SocialMedia?.Name</span>}}</td><td><div class="cms-acts"><button class="cms-act edit" onclick="openFooterModal(@f.Id)"><i class="bi bi-pencil"></i></button><button class="cms-act del" onclick="deleteItem('Footer',@f.Id)"><i class="bi bi-trash3"></i></button></div></td></tr>}
+                        @if (!Model.Footers.Any()) {<tr><td colspan="5"><div class="cms-empty"><i class="bi bi-layout-text-window-reverse"></i>No footers yet.</div></td></tr>}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ SOCIAL MEDIA TAB ═══ -->
+    <div class="cms-tab-content" id="tab-social">
+        <div class="cms-section">
+            <div class="cms-sec-head">
+                <div class="cms-sec-icon" style="background:linear-gradient(135deg,var(--neon-blue),var(--neon-cyan))"><i class="bi bi-share"></i></div>
+                <div><h3>Social Media</h3><p>Social media links for footer integration</p></div>
+                <div class="sec-actions"><button class="cms-add-btn" onclick="openSocialModal()"><i class="bi bi-plus-lg"></i> Add Social Link</button></div>
+            </div>
+            <div class="cms-sec-body">
+                <table class="cms-table">
+                    <thead><tr><th>Name</th><th>URL</th><th>Actions</th></tr></thead>
+                    <tbody id="socialTableBody">
+                        @foreach (var s in Model.SocialMedias)
+                        {<tr><td class="cell-title">@s.Name</td><td class="cell-url">@s.Url</td><td><div class="cms-acts"><button class="cms-act edit" onclick="openSocialModal(@s.Id)"><i class="bi bi-pencil"></i></button><button class="cms-act del" onclick="deleteItem('SocialMedia',@s.Id)"><i class="bi bi-trash3"></i></button></div></td></tr>}
+                        @if (!Model.SocialMedias.Any()) {<tr><td colspan="3"><div class="cms-empty"><i class="bi bi-share"></i>No social links yet.</div></td></tr>}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ ADDRESS TAB ═══ -->
+    <div class="cms-tab-content" id="tab-address">
+        <div class="cms-section">
+            <div class="cms-sec-head">
+                <div class="cms-sec-icon" style="background:linear-gradient(135deg,var(--neon-pink),var(--neon-red))"><i class="bi bi-geo-alt"></i></div>
+                <div><h3>Addresses</h3><p>Organization contact information</p></div>
+                <div class="sec-actions"><button class="cms-add-btn" onclick="openAddressModal()"><i class="bi bi-plus-lg"></i> Add Address</button></div>
+            </div>
+            <div class="cms-sec-body">
+                <table class="cms-table">
+                    <thead><tr><th>Street</th><th>City</th><th>Country</th><th>Email</th><th>Mobile</th><th>CVR</th><th>Actions</th></tr></thead>
+                    <tbody id="addressTableBody">
+                        @foreach (var a in Model.Addresses)
+                        {<tr><td class="cell-title">@a.Street</td><td>@a.City</td><td>@a.Country</td><td class="cell-url">@a.Email</td><td>@a.Mobile</td><td class="cell-sub">@a.CVR</td><td><div class="cms-acts"><button class="cms-act edit" onclick="openAddressModal(@a.Id)"><i class="bi bi-pencil"></i></button><button class="cms-act del" onclick="deleteItem('Address',@a.Id)"><i class="bi bi-trash3"></i></button></div></td></tr>}
+                        @if (!Model.Addresses.Any()) {<tr><td colspan="7"><div class="cms-empty"><i class="bi bi-geo-alt"></i>No addresses yet.</div></td></tr>}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Hidden data for JS (dropdown options) -->
+<script id="bannerOptionsData" type="application/json">@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.BannerOptions))</script>
+<script id="footerOptionsData" type="application/json">@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.FooterOptions))</script>
+<script id="socialOptionsData" type="application/json">@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.SocialMediaOptions))</script>
+
+@section Scripts {
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+   var swalCms = { popup: 'swal-cms', title: 'swal-cms-title' };
+ 
+// Dropdown data from server
+var bannerOpts = JSON.parse(document.getElementById('bannerOptionsData').textContent || '[]');
+var footerOpts = JSON.parse(document.getElementById('footerOptionsData').textContent || '[]');
+var socialOpts = JSON.parse(document.getElementById('socialOptionsData').textContent || '[]');
+ 
+// URL helpers
+var cmsUrls = {
+    getPage: '@Url.Action("GetPage")', createPage: '@Url.Action("CreatePageAjax")', updatePage: '@Url.Action("UpdatePageAjax")', deletePage: '@Url.Action("DeletePageAjax")',
+    getBanner: '@Url.Action("GetBanner")', createBanner: '@Url.Action("CreateBannerAjax")', updateBanner: '@Url.Action("UpdateBannerAjax")', deleteBanner: '@Url.Action("DeleteBannerAjax")',
+    getFooter: '@Url.Action("GetFooter")', createFooter: '@Url.Action("CreateFooterAjax")', updateFooter: '@Url.Action("UpdateFooterAjax")', deleteFooter: '@Url.Action("DeleteFooterAjax")',
+    getSocial: '@Url.Action("GetSocialMedia")', createSocial: '@Url.Action("CreateSocialMediaAjax")', updateSocial: '@Url.Action("UpdateSocialMediaAjax")', deleteSocial: '@Url.Action("DeleteSocialMediaAjax")',
+    getAddress: '@Url.Action("GetAddress")', createAddress: '@Url.Action("CreateAddressAjax")', updateAddress: '@Url.Action("UpdateAddressAjax")', deleteAddress: '@Url.Action("DeleteAddressAjax")'
+};
+ 
+// ═══ TABS ═══
+document.querySelectorAll('.cms-tab').forEach(function(tab) {
+    tab.addEventListener('click', function() { switchTab(this.dataset.tab); });
+});
+ 
+function switchTab(name) {
+    document.querySelectorAll('.cms-tab').forEach(function(t) { t.classList.toggle('active', t.dataset.tab === name); });
+    document.querySelectorAll('.cms-tab-content').forEach(function(c) { c.classList.toggle('active', c.id === 'tab-' + name); });
+}
+ 
+// ═══ HELPERS ═══
+function buildSelect(opts, keyField, labelField, selectedVal) {
+    var h = '<option value="">— Select —</option>';
+    opts.forEach(function(o) { h += '<option value="' + o[keyField] + '"' + (o[keyField] == selectedVal ? ' selected' : '') + '>' + o[labelField] + '</option>'; });
+    return h;
+}
+ 
+function buildCheckboxes(opts, selectedIds) {
+    var ids = selectedIds || [];
+    var h = '<div class="cms-chk-grid">';
+    opts.forEach(function(o) { h += '<label class="cms-chk"><input type="checkbox" value="' + o.id + '"' + (ids.includes(o.id) ? ' checked' : '') + '> ' + o.name + '</label>'; });
+    h += '</div>';
+    return h;
+}
+ 
+function showSuccess(msg) {
+    Swal.fire({ title: 'Success', text: msg, icon: 'success', timer: 1800, showConfirmButton: false, customClass: swalCms });
+}
+ 
+function showError(msg) {
+    Swal.fire({ title: 'Error', text: msg, icon: 'error', customClass: swalCms });
+}
+ 
+function reloadPage() { setTimeout(function() { location.reload(); }, 300); }
+ 
+// ═══ DELETE (generic) ═══
+function deleteItem(type, id) {
+    Swal.fire({
+        title: 'Delete ' + type + '?', text: 'This cannot be undone.', icon: 'warning',
+        showCancelButton: true, confirmButtonText: 'DELETE', confirmButtonColor: '#f87171', customClass: swalCms
+    }).then(function(r) {
+        if (r.isConfirmed) {
+            var url = cmsUrls['delete' + type];
+            $.post(url, { id: id }).done(function(d) {
+                if (d.success) { showSuccess(d.message); reloadPage(); }
+                else showError(d.message);
+            });
+        }
+    });
+}
+ 
+// ═══ PAGE MODAL ═══
+function openPageModal(id) {
+    var isEdit = !!id;
+    var title = isEdit ? 'Edit Page' : 'Create New Page';
+ 
+    if (isEdit) {
+        $.get(cmsUrls.getPage, { id: id }).done(function(d) {
+            if (d.success) showPageForm(title, d.data, true);
+            else showError(d.message);
+        });
+    } else {
+        showPageForm(title, {}, false);
+    }
+}
+ 
+function showPageForm(title, data, isEdit) {
+    Swal.fire({
+        title: title, width: '560px', showCancelButton: true,
+        confirmButtonText: isEdit ? 'UPDATE' : 'CREATE', confirmButtonColor: '#818cf8', customClass: swalCms,
+        html: '<div class="cms-form-grid">' +
+            '<div class="cms-field full"><label>Title *</label><input id="sf_title" value="' + (data.title || '') + '"></div>' +
+            '<div class="cms-field"><label>Slug</label><input id="sf_slug" value="' + (data.slug || '') + '" placeholder="auto-generated if empty"></div>' +
+            '<div class="cms-field"><label>Banner</label><select id="sf_banner">' + buildSelect(bannerOpts, 'id', 'title', data.bannerId) + '</select></div>' +
+            '<div class="cms-field"><label>Footer</label><select id="sf_footer">' + buildSelect(footerOpts, 'id', 'name', data.footerId) + '</select></div>' +
+            '<div class="cms-field full"><label>Content</label><textarea id="sf_content" rows="4">' + (data.content || '') + '</textarea></div>' +
+            '</div>',
+        preConfirm: function() {
+            var t = document.getElementById('sf_title').value.trim();
+            if (!t) { Swal.showValidationMessage('Title is required'); return false; }
+            return { title: t, slug: document.getElementById('sf_slug').value, content: document.getElementById('sf_content').value, bannerId: document.getElementById('sf_banner').value || 0, footerId: document.getElementById('sf_footer').value || 0 };
+        }
+    }).then(function(r) {
+        if (r.isConfirmed) {
+            var p = r.value;
+            if (isEdit) p.id = data.id;
+            $.post(isEdit ? cmsUrls.updatePage : cmsUrls.createPage, p).done(function(d) {
+                if (d.success) { showSuccess(d.message); reloadPage(); } else showError(d.message);
+            });
+        }
+    });
+}
+ 
+// ═══ BANNER MODAL ═══
+function openBannerModal(id) {
+    var isEdit = !!id;
+    if (isEdit) {
+        $.get(cmsUrls.getBanner, { id: id }).done(function(d) {
+            if (d.success) showBannerForm(d.data, true); else showError(d.message);
+        });
+    } else showBannerForm({}, false);
+}
+ 
+function showBannerForm(data, isEdit) {
+    Swal.fire({
+        title: isEdit ? 'Edit Banner' : 'Create New Banner', width: '560px', showCancelButton: true,
+        confirmButtonText: isEdit ? 'UPDATE' : 'CREATE', confirmButtonColor: '#fbbf24', customClass: swalCms,
+        html: '<div class="cms-form-grid">' +
+            '<div class="cms-field full"><label>Title *</label><input id="sf_title" value="' + (data.title || '') + '"></div>' +
+            '<div class="cms-field full"><label>Description</label><input id="sf_desc" value="' + (data.description || '') + '"></div>' +
+            '<div class="cms-field"><label>Link URL</label><input id="sf_link" value="' + (data.linkUrl || '') + '"></div>' +
+            '<div class="cms-field"><label>Image URL</label><input id="sf_img" value="' + (data.imageUrl || '') + '"></div>' +
+            '<div class="cms-field full"><label>Content</label><textarea id="sf_content" rows="3">' + (data.content || '') + '</textarea></div>' +
+            '</div>',
+        preConfirm: function() {
+            var t = document.getElementById('sf_title').value.trim();
+            if (!t) { Swal.showValidationMessage('Title is required'); return false; }
+            return { title: t, description: document.getElementById('sf_desc').value, content: document.getElementById('sf_content').value, linkUrl: document.getElementById('sf_link').value, imageUrl: document.getElementById('sf_img').value };
+        }
+    }).then(function(r) {
+        if (r.isConfirmed) {
+            var p = r.value; if (isEdit) p.id = data.id;
+            $.post(isEdit ? cmsUrls.updateBanner : cmsUrls.createBanner, p).done(function(d) {
+                if (d.success) { showSuccess(d.message); reloadPage(); } else showError(d.message);
+            });
+        }
+    });
+}
+ 
+// ═══ FOOTER MODAL ═══
+function openFooterModal(id) {
+    var isEdit = !!id;
+    if (isEdit) {
+        $.get(cmsUrls.getFooter, { id: id }).done(function(d) {
+            if (d.success) showFooterForm(d.data, true); else showError(d.message);
+        });
+    } else showFooterForm({}, false);
+}
+ 
+function showFooterForm(data, isEdit) {
+    var smIds = data.socialMediaIds || [];
+    Swal.fire({
+        title: isEdit ? 'Edit Footer' : 'Create New Footer', width: '600px', showCancelButton: true,
+        confirmButtonText: isEdit ? 'UPDATE' : 'CREATE', confirmButtonColor: '#34d399', customClass: swalCms,
+        html: '<div class="cms-form-grid">' +
+            '<div class="cms-field"><label>Title</label><input id="sf_title" value="' + (data.title || '') + '"></div>' +
+            '<div class="cms-field"><label>Name *</label><input id="sf_name" value="' + (data.name || '') + '"></div>' +
+            '<div class="cms-field"><label>Owner</label><input id="sf_owner" value="' + (data.owner || '') + '"></div>' +
+            '<div class="cms-field"><label>Created By</label><input id="sf_created" value="' + (data.createdBy || '') + '"></div>' +
+            '<div class="cms-field"><label>Updated By</label><input id="sf_updated" value="' + (data.updatedBy || '') + '"></div>' +
+            '<div class="cms-field"><label>Image URL</label><input id="sf_img" value="' + (data.imageUlr || '') + '"></div>' +
+            '<div class="cms-field full"><label>Copyright</label><input id="sf_copy" value="' + (data.sitecopyright || '') + '"></div>' +
+            '<div class="cms-field full"><label>Content</label><textarea id="sf_content" rows="3">' + (data.content || '') + '</textarea></div>' +
+            '<div class="cms-field full"><label>Social Media Links</label>' + buildCheckboxes(socialOpts, smIds) + '</div>' +
+            '</div>',
+        preConfirm: function() {
+            var n = document.getElementById('sf_name').value.trim();
+            if (!n) { Swal.showValidationMessage('Name is required'); return false; }
+            var checked = []; document.querySelectorAll('.cms-chk-grid input:checked').forEach(function(cb) { checked.push(parseInt(cb.value)); });
+            return { title: document.getElementById('sf_title').value, name: n, owner: document.getElementById('sf_owner').value, content: document.getElementById('sf_content').value, createdBy: document.getElementById('sf_created').value, updatedBy: document.getElementById('sf_updated').value, imageUrl: document.getElementById('sf_img').value, sitecopyright: document.getElementById('sf_copy').value, socialMediaIds: checked };
+        }
+    }).then(function(r) {
+        if (r.isConfirmed) {
+            var p = r.value; if (isEdit) p.id = data.id;
+            $.post(isEdit ? cmsUrls.updateFooter : cmsUrls.createFooter, p).done(function(d) {
+                if (d.success) { showSuccess(d.message); reloadPage(); } else showError(d.message);
+            });
+        }
+    });
+}
+ 
+// ═══ SOCIAL MEDIA MODAL ═══
+function openSocialModal(id) {
+    var isEdit = !!id;
+    if (isEdit) {
+        $.get(cmsUrls.getSocial, { id: id }).done(function(d) {
+            if (d.success) showSocialForm(d.data, true); else showError(d.message);
+        });
+    } else showSocialForm({}, false);
+}
+ 
+function showSocialForm(data, isEdit) {
+    Swal.fire({
+        title: isEdit ? 'Edit Social Media' : 'Add Social Media Link', width: '480px', showCancelButton: true,
+        confirmButtonText: isEdit ? 'UPDATE' : 'CREATE', confirmButtonColor: '#60a5fa', customClass: swalCms,
+        html: '<div class="cms-form-grid single">' +
+            '<div class="cms-field"><label>Name * (e.g., Facebook, Twitter)</label><input id="sf_name" value="' + (data.name || '') + '"></div>' +
+            '<div class="cms-field"><label>URL *</label><input id="sf_url" value="' + (data.url || '') + '" placeholder="https://..."></div>' +
+            '</div>',
+        preConfirm: function() {
+            var n = document.getElementById('sf_name').value.trim();
+            if (!n) { Swal.showValidationMessage('Name is required'); return false; }
+            return { name: n, url: document.getElementById('sf_url').value };
+        }
+    }).then(function(r) {
+        if (r.isConfirmed) {
+            var p = r.value; if (isEdit) p.id = data.id;
+            $.post(isEdit ? cmsUrls.updateSocial : cmsUrls.createSocial, p).done(function(d) {
+                if (d.success) { showSuccess(d.message); reloadPage(); } else showError(d.message);
+            });
+        }
+    });
+}
+ 
+// ═══ ADDRESS MODAL ═══
+function openAddressModal(id) {
+    var isEdit = !!id;
+    if (isEdit) {
+        $.get(cmsUrls.getAddress, { id: id }).done(function(d) {
+            if (d.success) showAddressForm(d.data, true); else showError(d.message);
+        });
+    } else showAddressForm({}, false);
+}
+ 
+function showAddressForm(data, isEdit) {
+    Swal.fire({
+        title: isEdit ? 'Edit Address' : 'Add New Address', width: '560px', showCancelButton: true,
+        confirmButtonText: isEdit ? 'UPDATE' : 'CREATE', confirmButtonColor: '#f472b6', customClass: swalCms,
+        html: '<div class="cms-form-grid">' +
+            '<div class="cms-field full"><label>Street *</label><input id="sf_street" value="' + (data.street || '') + '"></div>' +
+            '<div class="cms-field"><label>City</label><input id="sf_city" value="' + (data.city || '') + '"></div>' +
+            '<div class="cms-field"><label>State</label><input id="sf_state" value="' + (data.state || '') + '"></div>' +
+            '<div class="cms-field"><label>Postal Code</label><input id="sf_postal" value="' + (data.postalCode || '') + '"></div>' +
+            '<div class="cms-field"><label>Country</label><input id="sf_country" value="' + (data.country || '') + '"></div>' +
+            '<div class="cms-field"><label>Email</label><input id="sf_email" value="' + (data.email || '') + '"></div>' +
+            '<div class="cms-field"><label>Mobile</label><input id="sf_mobile" value="' + (data.mobile || '') + '"></div>' +
+            '<div class="cms-field full"><label>CVR</label><input id="sf_cvr" value="' + (data.cvr || '') + '"></div>' +
+            '</div>',
+        preConfirm: function() {
+            var s = document.getElementById('sf_street').value.trim();
+            if (!s) { Swal.showValidationMessage('Street is required'); return false; }
+            return { street: s, city: document.getElementById('sf_city').value, state: document.getElementById('sf_state').value, postalCode: document.getElementById('sf_postal').value, country: document.getElementById('sf_country').value, email: document.getElementById('sf_email').value, mobile: document.getElementById('sf_mobile').value, cvr: document.getElementById('sf_cvr').value };
+        }
+    }).then(function(r) {
+        if (r.isConfirmed) {
+            var p = r.value; if (isEdit) p.id = data.id;
+            $.post(isEdit ? cmsUrls.updateAddress : cmsUrls.createAddress, p).done(function(d) {
+                if (d.success) { showSuccess(d.message); reloadPage(); } else showError(d.message);
+            });
+        }
+    });
+}
+</script>
+}
