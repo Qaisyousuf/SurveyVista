@@ -12,7 +12,13 @@ Brug:
     python3 hent_branche_325000.py --inkluder-bibrancher
     python3 hent_branche_325000.py --alle-statusser # frasortér IKKE ophørte
 
-Login kan overstyres med miljøvariablerne CVR_BRUGER / CVR_KODE.
+Login SKAL sættes i miljøvariablerne CVR_BRUGER og CVR_KODE:
+
+    export CVR_BRUGER=DIT_BRUGERNAVN
+    export CVR_KODE=DIN_ADGANGSKODE
+
+Der er med vilje ingen indbyggede standardværdier – credentials hører ikke
+hjemme i versionsstyret kode. (--selvtest kører uden login.)
 """
 
 import argparse
@@ -27,8 +33,6 @@ import requests
 from requests.auth import HTTPBasicAuth
 
 URL = "http://distribution.virk.dk/cvr-permanent/virksomhed/_search"
-BRUGER = os.environ.get("CVR_BRUGER", "SEOSOFT_CVR_I_SKYEN")
-KODE = os.environ.get("CVR_KODE", "bee8a3e9-1382-4376-9bd0-0b0c2d80bed6")
 BRANCHEKODE = "325000"
 SIDESTOERRELSE = 1000
 UDFIL = "cvr_branche_325000.csv"
@@ -231,6 +235,26 @@ def udtræk(hit):
 # API-kald
 # --------------------------------------------------------------------------
 
+def hent_login():
+    """
+    Læs CVR-login fra miljøet. Begge variabler er obligatoriske – der er
+    bevidst ingen fallback, så en adgangskode ikke kan ende i git.
+    """
+    bruger = (os.environ.get("CVR_BRUGER") or "").strip()
+    kode = os.environ.get("CVR_KODE") or ""
+    mangler = [navn for navn, vaerdi in (("CVR_BRUGER", bruger), ("CVR_KODE", kode))
+               if not vaerdi]
+    if mangler:
+        raise SystemExit(
+            "FEJL: manglende miljøvariabler: " + ", ".join(mangler) + "\n\n"
+            "Sæt CVR-login før kørsel, f.eks.:\n"
+            "    export CVR_BRUGER=DIT_BRUGERNAVN\n"
+            "    export CVR_KODE=DIN_ADGANGSKODE\n\n"
+            "Kør 'python3 hent_branche_325000.py --selvtest' for at teste uden login."
+        )
+    return HTTPBasicAuth(bruger, kode)
+
+
 def søgning(inkluder_bibrancher=False):
     felter = list(HOVEDBRANCHE_FELTER)
     if inkluder_bibrancher:
@@ -245,12 +269,13 @@ def søgning(inkluder_bibrancher=False):
 
 def kald(krop, forsøg=4):
     """POST mod CVR-API'et med backoff på netværks-/5xx-fejl."""
+    auth = hent_login()
     ventetid = 2
     for n in range(forsøg):
         try:
             svar = requests.post(
                 URL,
-                auth=HTTPBasicAuth(BRUGER, KODE),
+                auth=auth,
                 json=krop,
                 headers={"Content-Type": "application/json"},
                 timeout=120,
@@ -260,7 +285,7 @@ def kald(krop, forsøg=4):
             if svar.status_code in (401, 403):
                 raise SystemExit(
                     f"FEJL {svar.status_code}: afvist af CVR-API'et. "
-                    f"Tjek brugernavn/adgangskode.\n{svar.text[:500]}"
+                    f"Tjek værdierne i CVR_BRUGER / CVR_KODE.\n{svar.text[:500]}"
                 )
             if svar.status_code < 500:
                 raise SystemExit(f"FEJL {svar.status_code}: {svar.text[:800]}")
@@ -548,6 +573,9 @@ def main():
 
     if a.selvtest:
         return selvtest()
+
+    hent_login()  # fejl tidligt og tydeligt, før vi går i gang
+
     if a.probe:
         probe(a.inkluder_bibrancher)
         return 0

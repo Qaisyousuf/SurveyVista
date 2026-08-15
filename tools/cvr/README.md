@@ -4,22 +4,30 @@ Henter alle **aktive** danske virksomheder i branchekode `325000`
 ("Fremstilling af medicinske og dentale instrumenter samt udstyr") fra
 Erhvervsstyrelsens CVR-distributions-API og gemmer dem som CSV.
 
+## Login
+
+`CVR_BRUGER` og `CVR_KODE` er **obligatoriske**. Der er bevidst ingen indbyggede
+standardværdier – credentials hører ikke hjemme i versionsstyret kode. Mangler
+en af dem, stopper scriptet med det samme og fortæller hvilken.
+
+```bash
+export CVR_BRUGER=DIT_BRUGERNAVN
+export CVR_KODE=DIN_ADGANGSKODE
+```
+
+Undgå at skrive `export CVR_KODE=...` direkte i terminalen, hvis din shell
+gemmer historik – læg det i stedet i en fil uden for repoet (f.eks. `~/.cvr.env`
+med `chmod 600`) og kør `source ~/.cvr.env`.
+
 ## Kørsel
 
 ```bash
 pip install requests
 cd tools/cvr
 
-python3 hent_branche_325000.py            # hent alt -> cvr_branche_325000.csv + opsummering
-python3 hent_branche_325000.py --probe    # dump ét råt hit til raa_hit.json og vis feltstier
-python3 hent_branche_325000.py --selvtest  # test parsing/filter/CSV uden netværk
-```
-
-Login læses fra `CVR_BRUGER` / `CVR_KODE`, ellers bruges de indbyggede værdier:
-
-```bash
-export CVR_BRUGER=SEOSOFT_CVR_I_SKYEN
-export CVR_KODE=...
+python3 hent_branche_325000.py             # hent alt -> cvr_branche_325000.csv + opsummering
+python3 hent_branche_325000.py --probe     # dump ét råt hit til raa_hit.json og vis feltstier
+python3 hent_branche_325000.py --selvtest  # test parsing/filter/CSV uden netværk (kræver ikke login)
 ```
 
 ### Flag
